@@ -1,15 +1,26 @@
 import { declaration as webApiDeclaration } from "./api";
 
 declare const require: (path: string)=>any;
+declare const __dirname: string;
+
 const fs= require("fs");
 const path= require("path");
 
-const pagesHtml= {
-    "login": fs.readFileSync("./pages/login/login.html", "utf8") as string,
-    "manager": fs.readFileSync("./pages/manager/manager.html", "utf8") as string,
-    "register": fs.readFileSync("./pages/register/register.html", "utf8") as string
+const pagesHtml= { 
+    "login": "",
+    "manager": "",
+    "register": ""
 };
 
-const pathToStatic: string= path.join("./static");
+for( let pageName in pagesHtml ){
+
+    pagesHtml[pageName]= fs.readFileSync(
+        path.join(__dirname, "pages", pageName, `${pageName}.html`),
+        "utf8"
+    );
+
+}
+
+const pathToStatic: string= path.join(__dirname,"static");
 
 export { webApiDeclaration, pagesHtml, pathToStatic };
