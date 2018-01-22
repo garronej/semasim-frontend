@@ -4,8 +4,8 @@
         "target": "es3",
         "lib": [
                     "es5",
-                    "es2015",
-                    "dom"
+                    "dom",
+                    "es2015.promise"
             ],
         "declaration": true,
         "outDir": "./dist",

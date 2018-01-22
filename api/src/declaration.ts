@@ -1,4 +1,4 @@
-export const apiPath= "api";
+export const apiPath = "api";
 
 export namespace registerUser {
 
@@ -28,10 +28,9 @@ export namespace loginUser {
 
 }
 
-//TODO: implement
 export namespace logoutUser {
 
-    export const methodName= "logout-user";
+    export const methodName = "logout-user";
 
     export type Params = undefined;
 
@@ -39,17 +38,16 @@ export namespace logoutUser {
 
 }
 
-//TODO: implement
 export namespace sendRenewPasswordEmail {
 
-    export const methodName= "send-renew-password-email";
+    export const methodName = "send-renew-password-email";
 
     export type Params = {
         email: string;
     };
 
     /** true if email exist */
-    export type Response= boolean;
+    export type Response = boolean;
 
 }
 
@@ -129,9 +127,9 @@ export namespace shareSim {
 
 export namespace stopSharingSim {
 
-    export const methodName= "stop-sharing-sim";
+    export const methodName = "stop-sharing-sim";
 
-    export type Params ={
+    export type Params = {
         imsi: string;
         emails: string[];
     };
@@ -165,6 +163,26 @@ export namespace getUaConfig {
     };
 
     export type Response = string;
+
+}
+
+export namespace fetchWebUaData {
+
+    export const methodName = "fetch-web-ua-data";
+
+    export type Params = undefined;
+
+    export type Response= Types.WebUaData;
+
+}
+
+export namespace pushWebUaData {
+
+    export const methodName = "push-web-ua-data";
+
+    export type Params= Types.WebUaData;
+
+    export type Response= undefined;
 
 }
 
@@ -240,7 +258,7 @@ export namespace Types {
 
     export type Dongle = LockedDongle | ActiveDongle;
 
-    export const domain= "semasim.com";
+    export const domain = "semasim.com";
 
     //End Imported
 
@@ -288,7 +306,7 @@ export namespace Types {
             ownership: T;
         };
 
-        export type Owned= Base<SimOwnership.Owned>;
+        export type Owned = Base<SimOwnership.Owned>;
 
         export namespace Owned {
             export function match(userSim: UserSim): userSim is Owned {
@@ -296,7 +314,7 @@ export namespace Types {
             }
         }
 
-        export type Shared= Base<SimOwnership.Shared>;
+        export type Shared = Base<SimOwnership.Shared>;
 
         export namespace Shared {
 
@@ -304,7 +322,7 @@ export namespace Types {
                 return Confirmed.match(userSim) || NotConfirmed.match(userSim);
             }
 
-            export type Confirmed= Base<SimOwnership.Shared.Confirmed>;
+            export type Confirmed = Base<SimOwnership.Shared.Confirmed>;
 
             export namespace Confirmed {
                 export function match(userSim: UserSim): userSim is Confirmed {
@@ -312,17 +330,17 @@ export namespace Types {
                 }
             }
 
-            export type NotConfirmed= Base<SimOwnership.Shared.NotConfirmed>;
+            export type NotConfirmed = Base<SimOwnership.Shared.NotConfirmed>;
 
             export namespace NotConfirmed {
-                export function match( userSim: UserSim): userSim is NotConfirmed {
+                export function match(userSim: UserSim): userSim is NotConfirmed {
                     return userSim.ownership.status === "SHARED NOT CONFIRMED";
                 }
             }
 
         }
 
-        export type Usable= Base<SimOwnership.Owned | SimOwnership.Shared.Confirmed>;
+        export type Usable = Base<SimOwnership.Owned | SimOwnership.Shared.Confirmed>;
 
         export namespace Usable {
             export function match(userSim: UserSim): userSim is Usable {
@@ -366,6 +384,49 @@ export namespace Types {
         }
 
     }
+
+    export type WebUaData = {
+        [imsi: string]: WebUaData.Conversation[];
+    };
+
+    export namespace WebUaData {
+
+        export type Conversation = {
+            contactName: string | undefined;
+            contactNumber: string;
+            notifications: number;
+            messages: Conversation.Message[];
+        }
+
+        export namespace Conversation {
+
+            export type Message = Message.Incoming | Message.Outgoing;
+
+            export namespace Message {
+
+                export type Incoming = {
+                    date: Date;
+                    direction: "INCOMING";
+                    isNotification: boolean;
+                    text: string;
+                };
+
+                export type Outgoing = {
+                    date: Date;
+                    direction: "OUTGOING";
+                    sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
+                    text: string;
+                    status: "TRANSMITTED TO BACKEND" | "SENT BY DONGLE" | "RECEIVED"
+                };
+
+            }
+
+        }
+
+
+
+    }
+
 
 }
 

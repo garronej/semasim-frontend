@@ -14,9 +14,7 @@ export class SimRow {
 
     public isSelected= false;
 
-
     public unselect(){
-
         this.structure.find(".id_row").removeClass("selected");
         this.isSelected=false;
     }

@@ -1,4 +1,4 @@
-import { client as api, declaration } from "../../../api";
+import { client as api, declaration } from "../../api";
 import Types = declaration.Types;
 
 const bootbox: any = window["bootbox"];
@@ -22,8 +22,10 @@ export async function start(
         let friendlyNameBase= notConfirmedUserSim.friendlyName;
         let i= 0;
 
-        while( usableUserSims.find(
-            ({ friendlyName })=> friendlyName === notConfirmedUserSim.friendlyName) 
+        while( 
+            usableUserSims.filter(
+                ({ friendlyName }) => friendlyName === notConfirmedUserSim.friendlyName
+            ).length
         ){
             notConfirmedUserSim.friendlyName= `${friendlyNameBase} (${i++})`;
         }
@@ -37,7 +39,6 @@ export async function start(
     }
 
     return usableUserSims;
-
 
 }
 
@@ -95,16 +96,8 @@ export async function interact(
         userSim.friendlyName
     );
 
-    return {
-        "sim": userSim.sim,
-        "friendlyName": userSim.friendlyName,
-        "password": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-        "isVoiceEnabled": userSim.isVoiceEnabled,
-        "isOnline": userSim.isOnline,
-        "ownership": {
-            "status": "SHARED CONFIRMED",
-            "ownerEmail": userSim.ownership.ownerEmail
-        }
-    };
+    return (await api.getSims()).filter(
+        ({ sim })=> sim.imsi === userSim.sim.imsi 
+    ).pop()! as Types.UserSim.Shared.Confirmed;
 
 }

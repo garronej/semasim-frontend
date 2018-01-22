@@ -1,7 +1,7 @@
 import { client as api } from "../../../api";
-import * as tools from "../../../tools";
 
 const bootbox: any = window["bootbox"];
+declare const Buffer: any;
 
 export async function requestRenewPassword() {
 
@@ -49,7 +49,7 @@ export async function requestRenewPassword() {
 				window.location.href = [
 					"/register",
 					"?",
-					`email-as-hex=${tools.hexString.enc(email)}`
+					`email-as-hex=${Buffer.from(email, "utf8").toString("hex")}`
 				].join("");
 				return;
 			case "RETRY":

@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Semasim | My SIMs</title>
+    <title>Semasim | Web phone</title>
     <!-- Mobile specific metas -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1 user-scalable=no">
     <!-- Force IE9 to render in normal mode -->
@@ -111,7 +111,7 @@
                     <div class="side-nav">
                         <ul class="nav">
                             <li>
-                                <a href="/manager" class="active">
+                                <a href="/manager">
                                     <i>
                                         <svg class="custom-icon">
                                             <use xlink:href="#icon-sim_card"></use>
@@ -121,8 +121,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="/webphone">
-                                    <i class="fa fa-phone"> </i>
+                                <a href="/webphone" class="active">
+                                    <i class="fa fa-phone"></i>
                                     <span class="txt">Web phone</span>
                                 </a>
                             </li>
@@ -149,7 +149,6 @@
                             <div id="page-payload" class="panel-body">
 
                                 <!-- Here goes the page payload -->
-
 
 
                             </div>
@@ -239,7 +238,10 @@
 
     <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
 
-    <script src="/manager.js"></script>
+    <!-- jsSIP -->
+    <script src="/js/libs/jssip/jssip.js"></script>
+
+    <script src="/webphone.js"></script>
 
 </body>
 </html>

@@ -3,8 +3,8 @@
         "module": "commonjs",
         "target": "es3",
         "lib": [
-                    "es5",
                     "dom",
+                    "es5",
                     "es2015.promise"
             ],
         "declaration": true,
@@ -18,3 +18,4 @@
         "./src/**/*.ts"
     ]
 }
+

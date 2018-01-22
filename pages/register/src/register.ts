@@ -2,6 +2,7 @@ import { client as api } from "../../../api";
 import * as tools from "../../../tools";
 
 const bootbox: any = window["bootbox"];
+declare const Buffer: any;
 
 function setHandlers(){
 
@@ -73,9 +74,9 @@ function setHandlers(){
                 window.location.href= [
                     "/login",
                     "?",
-                    `email-as-hex=${tools.hexString.enc(email)}`,
+                    `email-as-hex=${ Buffer.from(email, "utf8").toString("hex") }`,
                     "&",
-                    `password-as-hex=${tools.hexString.enc(password)}`
+                    `password-as-hex=${ Buffer.from(password, "utf8").toString("hex") }`
                 ].join("");
 
                 break;
@@ -91,7 +92,7 @@ function handleQueryString(){
 
     if( emailAsHex ){
 
-        $("#email").val(tools.hexString.dec(emailAsHex));
+        $("#email").val( Buffer.from(emailAsHex, "hex").toString("uft8") );
 
     }
 

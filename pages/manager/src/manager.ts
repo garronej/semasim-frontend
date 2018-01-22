@@ -1,23 +1,37 @@
 import { client as api, declaration } from "../../../api";
 import Types = declaration.Types;
+import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 import { ButtonBar } from "./ButtonBar";
 import { SimRow } from "./SimRow";
-import * as registeringProcess from "./registeringProcess";
-import * as validateSharingRequestProcess from "./validateSharingRequestProcess";
 
+
+import * as testJsSIP from "./testJsSip";
 
 declare const require: (path: string)=> any;
 const bootbox: any = window["bootbox"];
 
-async function loadMainWidget(){
+async function loadMainWidget(
+	previousState: { selectedSim: string; areDetailsShown: boolean; } | undefined
+){
 
-	await registeringProcess.start();
+	await simRegistrationProcess.start();
 
-	let useableUserSims= await validateSharingRequestProcess.start();
+	let useableUserSims= await validateSimShareProcess.start();
 
 	if( !useableUserSims.length ){
+
+		let structure = $(require("../templates/welcome.html"));
+
+		structure.find("#jumbotron-refresh").click(
+			() => loadMainWidget(undefined)
+		);
+
+		$("#page-payload").html("").append(structure);
+
 		return;
+
 	}
+
 
 	let structure = $(require("../templates/wrapper.html"));
 
@@ -41,12 +55,12 @@ async function loadMainWidget(){
 
 			if( buttonBar.state.isSimRowSelected ){
 
-				simRows.find(
+				simRows.filter(
 					simRow_ => ( 
 						simRow_ !== simRow &&
 						simRow_.isSelected
 					)
-				)!.unselect();
+				)[0].unselect();
 
 			}
 
@@ -90,7 +104,7 @@ async function loadMainWidget(){
 	buttonBar.evtClickDelete.attach(
 		async () => {
 
-			let userSim= simRows.find(({ isSelected })=> isSelected)!.userSim;
+			let userSim= simRows.filter(({ isSelected })=> isSelected)[0].userSim;
 
 			let shouldProceed = await new Promise<boolean>(
 				resolve => bootbox.confirm({
@@ -115,7 +129,7 @@ async function loadMainWidget(){
 	buttonBar.evtClickRename.attach(
 		async ()=> {
 
-			let userSim= simRows.find(({ isSelected })=> isSelected)!.userSim;
+			let userSim= simRows.filter(({ isSelected })=> isSelected)[0].userSim;
 
 			let friendlyNameSubmitted = await new Promise<string | null>(
 				resolve => bootbox.prompt({
@@ -141,14 +155,40 @@ async function loadMainWidget(){
 
 			structure.remove();
 
-			await loadMainWidget();
+			await loadMainWidget({
+				"selectedSim": simRows.filter(
+					({ isSelected }) => isSelected
+				)[0].userSim.sim.imsi,
+				"areDetailsShown": buttonBar.state.areDetailsShown
+			});
 
 		}
 	);
 
+	if( !previousState ){
+
+		previousState= {
+			"selectedSim": useableUserSims[0].sim.imsi,
+			"areDetailsShown": false
+		};
+
+	}
+
+	simRows.filter(
+		({ userSim })=> userSim.sim.imsi === previousState!.selectedSim 
+	)[0].structure.click();
+
+	if( previousState.areDetailsShown ){
+
+		buttonBar.btnDetail.click();
+
+	}
+
 }
 
 $(document).ready(()=>{
+
+	console.log("Start...");
 
 	$("#logout").click(async ()=>{
 
@@ -158,8 +198,7 @@ $(document).ready(()=>{
 
 	});
 
-	$("#jumbotron-refresh").click(() => loadMainWidget());
 
-	loadMainWidget();
+	loadMainWidget(undefined);
 
 });

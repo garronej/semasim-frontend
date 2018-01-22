@@ -7,13 +7,15 @@
   "scripts": {
     "postinstall": "npm run fetch-web-assets && npm run build-all",
     "fetch-web-assets": "git clone https://a30f7432b117d8320cc21cc03513817c3f08d4b6:x-oauth-basic@github.com/garronej/web-assets.git static",
-    "build-all": "npm run build-api && npm run build-tools && npm run build-pages && npm run tsc",
+    "build-all": "npm run build-api && npm run build-tools && npm run build-shared && npm run build-pages && npm run tsc",
     "build-api": "cd api && npm install && npm run tsc",
     "build-tools": "cd tools && npm install && npm run tsc",
-    "build-pages": "npm run build-page-login && npm run build-page-register && npm run build-page-manager",
+    "build-shared": "cd shared && npm install && npm run tsc",
+    "build-pages": "npm run build-page-login && npm run build-page-register && npm run build-page-manager && npm run build-page-webphone",
     "build-page-login": "cd pages/login && npm install && npm run build",
     "build-page-register": "cd pages/register && npm install && npm run build",
     "build-page-manager": "cd pages/manager && npm install && npm run build",
+    "build-page-webphone": "cd pages/webphone && npm install && npm run build",
     "tsc": "./api/node_modules/typescript/bin/tsc --declaration ./index.ts"
   },
   "repository": {

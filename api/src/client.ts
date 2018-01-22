@@ -207,6 +207,34 @@ export function setSimFriendlyName(
 
 }
 
+export function fetchWebUaData(){
+
+    const methodName = declaration.fetchWebUaData.methodName;
+    type Params = declaration.fetchWebUaData.Params;
+    type Response = declaration.fetchWebUaData.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        undefined
+    );
+
+}
+
+export function pushWebUaData(
+    webUaData: declaration.Types.WebUaData
+){
+
+    const methodName = declaration.pushWebUaData.methodName;
+    type Params = declaration.pushWebUaData.Params;
+    type Response = declaration.pushWebUaData.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        webUaData
+    );
+
+}
+
 
 
 /*

@@ -9,7 +9,8 @@ const path= require("path");
 const pagesHtml= { 
     "login": "",
     "manager": "",
-    "register": ""
+    "register": "",
+    "webphone": ""
 };
 
 for( let pageName in pagesHtml ){

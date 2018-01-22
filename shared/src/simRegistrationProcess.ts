@@ -1,4 +1,4 @@
-import { client as api, declaration } from "../../../api";
+import { client as api, declaration } from "../../api";
 import Types = declaration.Types;
 
 const bootbox: any = window["bootbox"];
@@ -83,7 +83,18 @@ export async function interact(dongle: Types.Dongle) {
 
             }
 
+            let loadingDialog = bootbox.dialog({
+                "message": [
+                    '<p class="text-center">',
+                    '<i class="fa fa-spin fa-spinner"></i>',
+                    'Your sim is being unlocked please wait...</p>'
+                ].join(""),
+                "closeButton": false
+            });
+
             let unlockResult = await api.unlockSim(dongle.imei, pin);
+
+            loadingDialog.modal("hide");
 
             if (!unlockResult.wasPinValid) {
 
@@ -181,7 +192,11 @@ async function getDefaultFriendlyName() {
         userSim => Types.UserSim.Usable.match(userSim)
     );
 
-    while (usableUserSims.find(({ friendlyName }) => friendlyName === build(i))) {
+    while (
+        usableUserSims.filter(
+            ({ friendlyName }) => friendlyName === build(i)
+        ).length
+    ) {
         i++;
     }
 

@@ -3,6 +3,7 @@ import * as tools from "../../../tools";
 import { requestRenewPassword } from "./requestRenewPassword";
 
 const bootbox: any = window["bootbox"];
+declare const Buffer: any;
 
 function setHandlers(){
 
@@ -81,13 +82,13 @@ function handleQueryString() {
 	let emailAsHex = tools.getURLParameter("email-as-hex");
 
 	if (emailAsHex) {
-		$("#email").val(tools.hexString.dec(emailAsHex));
+		$("#email").val(Buffer.from(emailAsHex, "hex").toString("utf8"));
 	}
 
 	let passwordAsHex = tools.getURLParameter("password-as-hex");
 
 	if (passwordAsHex) {
-		$("#password").val(tools.hexString.dec(passwordAsHex));
+		$("#password").val(Buffer.from(passwordAsHex, "hex").toString("utf8"));
 	}
 
 	if (emailAsHex && passwordAsHex) {
