@@ -4,9 +4,6 @@ import { simRegistrationProcess, validateSimShareProcess } from "../../../shared
 import { ButtonBar } from "./ButtonBar";
 import { SimRow } from "./SimRow";
 
-
-import * as testJsSIP from "./testJsSip";
-
 declare const require: (path: string)=> any;
 const bootbox: any = window["bootbox"];
 
@@ -188,8 +185,6 @@ async function loadMainWidget(
 
 $(document).ready(()=>{
 
-	console.log("Start...");
-
 	$("#logout").click(async ()=>{
 
 		await api.logoutUser();
@@ -197,7 +192,6 @@ $(document).ready(()=>{
 		window.location.href = "/login";
 
 	});
-
 
 	loadMainWidget(undefined);
 

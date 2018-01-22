@@ -1,5 +1,6 @@
 import { client as api, declaration } from "../../api";
 import Types = declaration.Types;
+import * as tools from "../../tools";
 
 const bootbox: any = window["bootbox"];
 
@@ -7,32 +8,36 @@ const bootbox: any = window["bootbox"];
 export async function start(
 ): Promise<Types.UserSim.Usable[]> {
 
-    let userSims= await api.getSims();
+    let stopLoad= tools.loadingDialog("Looking for your SIMs please wait...");
 
-    let usableUserSims= userSims.filter(
-            userSim => Types.UserSim.Usable.match(userSim)
+    let userSims = await api.getSims();
+
+    stopLoad();
+
+    let usableUserSims = userSims.filter(
+        userSim => Types.UserSim.Usable.match(userSim)
     ) as Types.UserSim.Usable[];
 
-    let notConfirmedUserSims= userSims.filter(
-        userSim=> Types.UserSim.Shared.NotConfirmed.match(userSim)
+    let notConfirmedUserSims = userSims.filter(
+        userSim => Types.UserSim.Shared.NotConfirmed.match(userSim)
     ) as Types.UserSim.Shared.NotConfirmed[];
 
-    for( let notConfirmedUserSim of notConfirmedUserSims ){
+    for (let notConfirmedUserSim of notConfirmedUserSims) {
 
-        let friendlyNameBase= notConfirmedUserSim.friendlyName;
-        let i= 0;
+        let friendlyNameBase = notConfirmedUserSim.friendlyName;
+        let i = 0;
 
-        while( 
+        while (
             usableUserSims.filter(
                 ({ friendlyName }) => friendlyName === notConfirmedUserSim.friendlyName
             ).length
-        ){
-            notConfirmedUserSim.friendlyName= `${friendlyNameBase} (${i++})`;
+        ) {
+            notConfirmedUserSim.friendlyName = `${friendlyNameBase} (${i++})`;
         }
 
-        let confirmedUserSim= await interact(notConfirmedUserSim);
+        let confirmedUserSim = await interact(notConfirmedUserSim);
 
-        if( confirmedUserSim ){
+        if (confirmedUserSim) {
             usableUserSims.push(confirmedUserSim);
         }
 
@@ -45,13 +50,13 @@ export async function start(
 
 export async function interact(
     userSim: Types.UserSim.Shared.NotConfirmed,
-): Promise<Types.UserSim.Shared.Confirmed | undefined>{
+): Promise<Types.UserSim.Shared.Confirmed | undefined> {
 
-    let shouldProceed= await new Promise<"ACCEPT"|"REFUSE"|"LATER">(
-        resolve=> bootbox.dialog({
+    let shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
+        resolve => bootbox.dialog({
             "title": `${userSim.ownership.ownerEmail} would like to share a SIM with you, accept?`,
-            "message": userSim.ownership.sharingRequestMessage?
-                `«${userSim.ownership.sharingRequestMessage.replace(/\n/g, "<br>")}»`: "",
+            "message": userSim.ownership.sharingRequestMessage ?
+                `«${userSim.ownership.sharingRequestMessage.replace(/\n/g, "<br>")}»` : "",
             "buttons": {
                 "cancel": {
                     "label": "Refuse",
@@ -63,17 +68,22 @@ export async function interact(
                     "callback": () => resolve("ACCEPT")
                 }
             },
-			"onEscape": ()=> resolve("LATER")
+            "onEscape": () => resolve("LATER")
         })
     );
 
-    if( shouldProceed === "LATER" ){
+    if (shouldProceed === "LATER") {
         return undefined;
     }
 
-    if( shouldProceed === "REFUSE" ){
+    if (shouldProceed === "REFUSE") {
+
+        let stopLoad= tools.loadingDialog("Rejecting SIM sharing request...");
 
         await api.unregisterSim(userSim.sim.imsi);
+
+        stopLoad();
+
         return undefined;
 
     }
@@ -87,17 +97,23 @@ export async function interact(
         })
     );
 
-    if( friendlyNameSubmitted ){
-        userSim.friendlyName= friendlyNameSubmitted;
+    if (friendlyNameSubmitted) {
+        userSim.friendlyName = friendlyNameSubmitted;
     }
 
+    let stopLoad= tools.loadingDialog("Accepting SIM sharing request...");
+
     await api.setSimFriendlyName(
-        userSim.sim.imsi, 
+        userSim.sim.imsi,
         userSim.friendlyName
     );
 
-    return (await api.getSims()).filter(
-        ({ sim })=> sim.imsi === userSim.sim.imsi 
+    let confirmedSim = (await api.getSims()).filter(
+        ({ sim }) => sim.imsi === userSim.sim.imsi
     ).pop()! as Types.UserSim.Shared.Confirmed;
+
+    stopLoad();
+
+    return confirmedSim;
 
 }

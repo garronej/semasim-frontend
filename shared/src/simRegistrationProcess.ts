@@ -1,11 +1,18 @@
 import { client as api, declaration } from "../../api";
 import Types = declaration.Types;
+import * as tools from "../../tools";
 
 const bootbox: any = window["bootbox"];
 
 export async function start(): Promise<void> {
 
-    for (let dongle of await api.getUnregisteredLanDongles()) {
+    let stopLoad= tools.loadingDialog( "Looking for registerable SIM on LAN...");
+
+    let unregisteredLanDongles= await api.getUnregisteredLanDongles();
+
+    stopLoad();
+
+    for (let dongle of await unregisteredLanDongles) {
 
         await interact(dongle);
 
@@ -83,18 +90,11 @@ export async function interact(dongle: Types.Dongle) {
 
             }
 
-            let loadingDialog = bootbox.dialog({
-                "message": [
-                    '<p class="text-center">',
-                    '<i class="fa fa-spin fa-spinner"></i>',
-                    'Your sim is being unlocked please wait...</p>'
-                ].join(""),
-                "closeButton": false
-            });
+            let stopLoad= tools.loadingDialog("Your sim is being unlocked please wait...", 0);
 
             let unlockResult = await api.unlockSim(dongle.imei, pin);
 
-            loadingDialog.modal("hide");
+            stopLoad();
 
             if (!unlockResult.wasPinValid) {
 
@@ -164,7 +164,11 @@ export async function interact(dongle: Types.Dongle) {
 
     }
 
+    let stopLoad= tools.loadingDialog("Please wait...");
+
     let friendlyName = await getDefaultFriendlyName();
+
+    stopLoad();
 
     let friendlyNameSubmitted = await new Promise<string | null>(
         resolve => bootbox.prompt({
@@ -178,7 +182,12 @@ export async function interact(dongle: Types.Dongle) {
         friendlyName = friendlyNameSubmitted;
     }
 
+
+    stopLoad= tools.loadingDialog("Registering SIM...");
+
     await api.registerSim(dongle.sim.imsi, friendlyName);
+
+    stopLoad();
 
 }
 
