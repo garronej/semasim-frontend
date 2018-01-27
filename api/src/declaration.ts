@@ -189,7 +189,8 @@ export namespace pushWebUaData {
 
 export namespace Types {
 
-    //Imported
+    //START IMPORT
+
 
     export type Contact = {
         readonly index: number;
@@ -205,7 +206,10 @@ export namespace Types {
 
 
     export type SimStorage = {
-        number?: string;
+        number?: {
+            readonly asStored: string;
+            localFormat: string;
+        };
         infos: {
             contactNameMaxLength: number;
             numberMaxLength: number;
@@ -217,8 +221,12 @@ export namespace Types {
 
     export type LockedPinState = "SIM PIN" | "SIM PUK" | "SIM PIN2" | "SIM PUK2";
 
+
     export interface LockedDongle {
         imei: string;
+        manufacturer: string;
+        model: string;
+        firmwareVersion: string;
         sim: {
             iccid?: string;
             pinState: LockedPinState;
@@ -234,12 +242,22 @@ export namespace Types {
 
     }
 
+    export type SimCountry = {
+        name: string;
+        iso: string;
+        code: number;
+    };
+
     export interface ActiveDongle {
         imei: string;
+        manufacturer: string;
+        model: string;
+        firmwareVersion: string;
         isVoiceEnabled?: boolean;
         sim: {
             iccid: string;
             imsi: string;
+            country?: SimCountry;
             serviceProvider: {
                 fromImsi?: string;
                 fromNetwork?: string;
@@ -258,9 +276,9 @@ export namespace Types {
 
     export type Dongle = LockedDongle | ActiveDongle;
 
-    export const domain = "semasim.com";
+    //END IMPORT
 
-    //End Imported
+    export const domain = "semasim.com";
 
     export type SimOwnership = SimOwnership.Owned | SimOwnership.Shared;
 
@@ -301,10 +319,26 @@ export namespace Types {
             sim: ActiveDongle["sim"];
             friendlyName: string;
             password: string;
-            isVoiceEnabled: boolean | undefined;
+            dongle: Dongle;
+            gatewayLocation: GatewayLocation;
             isOnline: boolean;
             ownership: T;
         };
+
+        export type Dongle = {
+            imei: string;
+            isVoiceEnabled: boolean | undefined;
+            manufacturer: string;
+            model: string;
+            firmwareVersion: string;
+        };
+
+        export type GatewayLocation = {
+            ip: string;
+            countryIso: string | undefined;
+            subdivisions: string | undefined;
+            city: string | undefined;
+        }
 
         export type Owned = Base<SimOwnership.Owned>;
 
