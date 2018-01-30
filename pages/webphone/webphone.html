@@ -26,6 +26,26 @@
     <link href="/css/main.css" rel="stylesheet" />
     <!-- Custom stylesheets ( Put your own changes here ) -->
     <link href="/css/custom.css" rel="stylesheet" />
+
+    <!-- intlTelInput -->
+    <link rel="stylesheet" href="/plugins/ui/intl-tel-input/css/intlTelInput.css">
+    <style>
+        .iti-flag {
+            background-image: url("/plugins/ui/intl-tel-input/img/flags.png");
+        }
+
+        @media only screen and (-webkit-min-device-pixel-ratio: 2),
+        only screen and (min--moz-device-pixel-ratio: 2),
+        only screen and (-o-min-device-pixel-ratio: 2 / 1),
+        only screen and (min-device-pixel-ratio: 2),
+        only screen and (min-resolution: 192dpi),
+        only screen and (min-resolution: 2dppx) {
+            .iti-flag {
+                background-image: url("/plugins/ui/intl-tel-input/img/flags@2x.png")
+            }
+        }
+    </style>
+
     <!-- Fav and touch icons -->
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/img/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114-precomposed.png">
@@ -232,16 +252,44 @@
     <script src="/plugins/core/quicksearch/jquery.quicksearch.js"></script>
     <!-- Bootbox fast bootstrap modals -->
     <script src="/plugins/ui/bootbox/bootbox.js"></script>
+<script src="/js/jquery.dynamic.js"></script>
+<script src="/js/main.js"></script>
 
-    <script src="/js/jquery.dynamic.js"></script>
-    <script src="/js/main.js"></script>
+<!-- jsSIP -->
+<script src="/js/libs/jssip/jssip.js"></script>
 
-    <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<!-- intlTelInput -->
+<script src="/plugins/ui/intl-tel-input/js/utils.js"></script>
+<script src="/plugins/ui/intl-tel-input/js/intlTelInput.js"></script>
 
-    <!-- jsSIP -->
-    <script src="/js/libs/jssip/jssip.js"></script>
+<!-- jquery-validation -->
+<script src="/plugins/forms/validation/jquery.validate.js"></script>
+<script src="/plugins/forms/validation/additional-methods.min.js"></script>
 
-    <script src="/webphone.js"></script>
+<!-- jquery-autosize -->
+<script src="/plugins/forms/autosize/jquery.autosize.min.js"></script>
+
+<!-- title-notifier -->
+<script src="/plugins/ui/title-notifier/title_notifier.js"></script>
+<!-- ion-sound -->
+<script src="/plugins/misc/ion-sound/js/ion.sound.min.js"></script>
+
+<script>
+    ion.sound({
+        "sounds": [
+            { "name": "water_droplet" },
+            { "name": "button_tiny" }
+        ],
+        "volume": 0.5,
+        "path": "/plugins/misc/ion-sound/sounds/",
+        "preload": true
+    });
+</script>
+
+<!-- timer.jquery @ walmik/timer.jquery -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js"></script>
+
+<script src="/webphone.js"></script>
 
 </body>
 </html>

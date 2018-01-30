@@ -1,0 +1,107 @@
+<style>
+    @keyframes ring {
+        5%,
+        45% {
+            transform: translate3d(-1px, 0, 0);
+        }
+
+        10%,
+        40% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        15%,
+        25%,
+        35% {
+            transform: translate3d(-3px, 0, 0);
+        }
+
+        20%,
+        30% {
+            transform: translate3d(3px, 0, 0);
+        }
+    }
+
+    .icon-ring {
+        animation-name: ring;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+    }
+
+
+    .modal {
+        text-align: center;
+        padding: 0!important;
+    }
+
+    .modal:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-right: -4px;
+        /* Adjusts for spacing */
+    }
+
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+    }
+</style>
+
+
+<div class="id_CallWidget modal" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body p0">
+
+                <div class="panel panel-dark mb0">
+                    <!-- Start .panel -->
+                    <div class="panel-heading text-center">
+                        <h4 class="panel-title" style="float:none;margin-right:0;">
+                            <span class="id_me"></span>
+                            <i class="im-arrow-right17"></i>
+                            <i class="im-arrow-left16"></i>
+                            <span class="id_timer"></span>
+                            <span class="im-phone4 icon-ring"></span>
+                            <span class="im-spinner2 icon-spin"></span>
+                            <span class="im-phone-hang-up"></span>
+                            <span class="im-sad"></span>
+                            <i class="im-arrow-right17"></i>
+                            <i class="im-arrow-left16"></i>
+                            <span class="id_contact">
+                                <span>
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="row text-center">
+                            <span class="id_status well well-sm"></span>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="pull-left">
+                                <button class="id_ok btn btn-success ml10" type="button">
+                                    <i class="im-phone2"></i>
+                                    <span></span>
+                                </button>
+                            </div>
+                            <div class="pull-right">
+                                <button class="id_ko btn btn-danger mr10" type="button">
+                                    <i class="im-phone-hang-up"></i>
+                                    <span></span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- .panel-body-->
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,8 @@
 import { VoidSyncEvent } from "ts-events-extended";
 import { declaration } from "../../../api";
-import Types= declaration.Types;
+import Types = declaration.Types;
 
-declare const require: (path: string)=> any;
+declare const require: (path: string) => any;
 
 require("../templates/SimRow.less");
 
@@ -10,13 +10,13 @@ export class SimRow {
 
     public readonly structure: JQuery;
 
-    public evtSelected= new VoidSyncEvent();
+    public evtSelected = new VoidSyncEvent();
 
-    public isSelected= false;
+    public isSelected = false;
 
-    public unselect(){
+    public unselect() {
         this.structure.find(".id_row").removeClass("selected");
-        this.isSelected=false;
+        this.isSelected = false;
     }
 
     public setDetailsVisibility(
@@ -38,7 +38,7 @@ export class SimRow {
 
     public setVisibility(
         visibility: "SHOWN" | "HIDDEN"
-    ){
+    ) {
 
         switch (visibility) {
             case "SHOWN":
@@ -53,10 +53,11 @@ export class SimRow {
 
     private populate() {
 
-        let number = this.userSim.sim.storage.number;
-
         this.structure.find(".id_simId").text(
-            this.userSim.friendlyName + (number ? ` ( ${number} )` : "")
+            this.userSim.friendlyName + (
+                this.userSim.sim.storage.number ?
+                    ` ( ${this.userSim.sim.storage.number.localFormat} )` : ""
+            )
         );
 
         this.structure.find(".id_connectivity").text(
@@ -69,12 +70,21 @@ export class SimRow {
 
         this.structure.find(".id_ownership").text(
             (this.userSim.ownership.status === "OWNED") ?
-                "Owned" : 
+                "Owned" :
                 `owned by: ${this.userSim.ownership.ownerEmail}`
         );
 
-        this.structure.find(".id_connectivity").text(
+        this.structure.find(".id_connectivity_").text(
             this.userSim.isOnline ? "Online" : "Offline"
+        );
+
+        this.structure.find(".id_gw_location").text(
+            [
+                this.userSim.gatewayLocation.city || "",
+                this.userSim.gatewayLocation.subdivisions || "",
+                this.userSim.gatewayLocation.countryIso || "",
+                `( ${this.userSim.gatewayLocation.ip} )`
+            ].join(" ")
         );
 
         this.structure.find("id_owner").text(
@@ -82,42 +92,69 @@ export class SimRow {
                 "Me" : this.userSim.ownership.ownerEmail
         );
 
-        this.structure.find("id_number").text(
-            this.userSim.sim.storage.number ?
-                this.userSim.sim.storage.number :
-                "Unknown"
-        );
+        this.structure.find("id_number").text((() => {
 
-        this.structure.find("id_features").text(
-            (() => {
+            let n = this.userSim.sim.storage.number;
 
-                switch (this.userSim.isVoiceEnabled) {
-                    case undefined:
-                        return "Probably SMS only";
-                    case true:
-                        return "Voice calls + SMS"
-                    case false:
-                        return "SMS only";
-                }
+            if (!n) return "Unknown";
 
-            })()
-        );
+            if (n.asStored === n.localFormat) {
+                return n.localFormat;
+            } else {
+                return `${n.localFormat} ( ${n.asStored} )`;
+            }
+
+        })());
 
         this.structure.find(".id_serviceProvider").text(
             (() => {
 
+                let out: string;
+
                 if (this.userSim.sim.serviceProvider.fromImsi) {
-                    return this.userSim.sim.serviceProvider.fromImsi;
+                    out = this.userSim.sim.serviceProvider.fromImsi;
+                } else if (this.userSim.sim.serviceProvider.fromNetwork) {
+                    out = this.userSim.sim.serviceProvider.fromNetwork;
+                } else {
+                    out = "Unknown";
                 }
 
-                if (this.userSim.sim.serviceProvider.fromNetwork) {
-                    return this.userSim.sim.serviceProvider.fromNetwork;
+                if (this.userSim.sim.country) {
+                    out += `, ${this.userSim.sim.country.name}`;
                 }
 
-                return "Unknown";
+                return out;
 
             })()
         );
+
+        this.structure.find(".id_dongle_info").text((() => {
+            let d = this.userSim.dongle;
+
+            return [
+                d.manufacturer,
+                d.model,
+                `firm: ${d.firmwareVersion}`,
+                `IMEI: ${d.imei}`
+            ].join(" ");
+
+        })());
+
+        this.structure.find("id_features").text(
+            (() => {
+
+                switch (this.userSim.dongle.isVoiceEnabled) {
+                    case undefined:
+                        return "Probably SMS only ( may need to manually enable voice )";
+                    case true:
+                        return "Voice calls + SMS"
+                    case false:
+                        return "SMS only ( need to manually enable voice )";
+                }
+
+            })()
+        );
+
 
         this.structure.find(".id_imsi").text(
             this.userSim.sim.imsi

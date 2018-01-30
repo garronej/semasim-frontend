@@ -7,6 +7,9 @@ import { SimRow } from "./SimRow";
 declare const require: (path: string)=> any;
 const bootbox: any = window["bootbox"];
 
+
+console.log("Up to date!");
+
 async function loadMainWidget(
 	previousState: { selectedSim: string; areDetailsShown: boolean; } | undefined
 ){

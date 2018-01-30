@@ -319,18 +319,16 @@ export namespace Types {
             sim: ActiveDongle["sim"];
             friendlyName: string;
             password: string;
-            dongle: Dongle;
+            dongle: {
+                imei: string;
+                isVoiceEnabled?: boolean;
+                manufacturer: string;
+                model: string;
+                firmwareVersion: string;
+            };
             gatewayLocation: GatewayLocation;
             isOnline: boolean;
             ownership: T;
-        };
-
-        export type Dongle = {
-            imei: string;
-            isVoiceEnabled: boolean | undefined;
-            manufacturer: string;
-            model: string;
-            firmwareVersion: string;
         };
 
         export type GatewayLocation = {

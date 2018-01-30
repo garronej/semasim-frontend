@@ -1,5 +1,109 @@
 import { client as api, declaration } from "../../../api";
-import Types= declaration.Types;
+import Types = declaration.Types;
+
+
+export type WebUaData = {
+    instanceId: string;
+    instances: WebUaData.InstanceData[]
+};
+
+export namespace WebUaData {
+
+    export type InstanceData = {
+        userSim: Types.UserSim.Usable;
+        contacts: Contact[];
+    }
+
+    export type Contact = {
+        number: { e164: string; prettyPrint: string; },
+        name: string | undefined;
+        notificationCount: number;
+        timestamp: number;
+        messages: Message[];
+        isSelected: boolean;
+        isStoredInSim: boolean;
+    };
+
+    export type Message = Message.Incoming | Message.Outgoing;
+
+    export namespace Message {
+
+        export type Incoming = {
+            date: Date;
+            direction: "INCOMING";
+            isNotification: boolean;
+            text: string;
+        };
+
+        export type Outgoing = {
+            date: Date;
+            direction: "OUTGOING";
+            sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
+            text: string;
+            status: "TRANSMITTED TO BACKEND" | "SENT BY DONGLE" | "RECEIVED"
+        };
+
+    }
+
+
+
+
+}
+
+
+export namespace WebUaData {
+
+    export type Conversation = {
+        contactName: string | undefined;
+        contactNumber: string;
+        notifications: number;
+        messages: Conversation.Message[];
+    }
+
+    export namespace Conversation {
+
+        export type Message = Message.Incoming | Message.Outgoing;
+
+        export namespace Message {
+
+            export type Incoming = {
+                date: Date;
+                direction: "INCOMING";
+                isNotification: boolean;
+                text: string;
+            };
+
+            export type Outgoing = {
+                date: Date;
+                direction: "OUTGOING";
+                sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
+                text: string;
+                status: "TRANSMITTED TO BACKEND" | "SENT BY DONGLE" | "RECEIVED"
+            };
+
+        }
+
+    }
+
+
+
+}
+
+
+
+export type WebUaData_ = {
+    userSim: Types.UserSim.Usable;
+    instanceId: string;
+    contacts: {
+        number: string;
+        name: string | undefined;
+        isStoredInSim: boolean;
+        timestamp: number;
+        notificationsCount: number;
+
+
+    }[]
+}[];
 
 export class WebUaDataIo {
 
@@ -38,7 +142,7 @@ export class WebUaDataIo {
     public value: Types.WebUaData;
 
     public async insertConversation(
-        imsi: string, 
+        imsi: string,
         conversation: Types.WebUaData.Conversation
     ) {
 
@@ -59,7 +163,7 @@ export class WebUaDataIo {
     }
 
     public async insertMessage(
-        conversation: Types.WebUaData.Conversation, 
+        conversation: Types.WebUaData.Conversation,
         message: Types.WebUaData.Conversation.Message
     ) {
 

@@ -98,6 +98,7 @@ export class ButtonBar {
             () => this.evtClickRename.post()
         );
 
+        this.btnShare.tooltip();
         this.btnReload.tooltip();
 
         this.btnReload.click(
