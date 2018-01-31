@@ -1,3 +1,4 @@
+/*
 declare const require: any;
 let EventEmitter = require("events");
 
@@ -260,5 +261,6 @@ export namespace EventEmitter_ {
     }
 
 }
+*/
 
 

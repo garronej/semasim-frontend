@@ -1,3 +1,4 @@
+/*
 import * as pe from "./prototypeExtensions";
 import { Widget } from "./Widget";
 declare const require: any;
@@ -397,3 +398,4 @@ function isNumberFromCountry(
     return false;
 
 }
+*/

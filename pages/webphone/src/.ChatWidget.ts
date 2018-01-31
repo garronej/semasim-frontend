@@ -1,3 +1,4 @@
+/*
 declare const require: any;
 const EventEmitter = require("events");
 declare const titlenotifier: any;
@@ -321,3 +322,4 @@ Object.defineProperties(Message.prototype, {
         }
     }
 });
+*/

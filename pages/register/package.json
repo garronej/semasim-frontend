@@ -8,10 +8,11 @@
     "browserify": "node ./node_modules/browserify/bin/cmd . -o ../../static/register.js",
     "watchify": "node ./node_modules/watchify/bin/cmd . -o ../../static/register.js",
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
-    "watch": "sh ./watch.sh"
+    "watch": "node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
   },
   "dependencies": {},
   "devDependencies": {
+    "concurrently": "^3.5.1",
     "@types/bootstrap": "3.3.28",
     "@types/icheck": "^0.8.29",
     "@types/jquery": "2.0.48",

@@ -1,3 +1,4 @@
+/*
 declare const require: any;
 const transform = require("sdp-transform");
 
@@ -393,6 +394,7 @@ CallWidget.prototype.setState = function (state, message) {
 ].forEach(function each(state, index) {
     CallWidget.prototype[state] = CallWidget[state] = index;
 });
+*/
 
 
 

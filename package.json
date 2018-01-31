@@ -5,18 +5,27 @@
   "types": "./index.d.ts",
   "version": "0.1.0",
   "scripts": {
-    "postinstall": "npm run fetch-web-assets && npm run build-all",
+    "tsc": "node ./api/node_modules/typescript/bin/tsc --declaration ./index.ts",
+    "postinstall": "npm run fetch-web-assets && npm run build",
     "fetch-web-assets": "git clone https://a30f7432b117d8320cc21cc03513817c3f08d4b6:x-oauth-basic@github.com/garronej/web-assets.git static",
-    "build-all": "npm run build-api && npm run build-tools && npm run build-shared && npm run build-pages && npm run tsc",
-    "build-api": "cd api && npm install && npm run tsc",
-    "build-tools": "cd tools && npm install && npm run tsc",
-    "build-shared": "cd shared && npm install && npm run tsc",
-    "build-pages": "npm run build-page-login && npm run build-page-register && npm run build-page-manager && npm run build-page-webphone",
-    "build-page-login": "cd pages/login && npm install && npm run build",
-    "build-page-register": "cd pages/register && npm install && npm run build",
-    "build-page-manager": "cd pages/manager && npm install && npm run build",
-    "build-page-webphone": "cd pages/webphone && npm install && npm run build",
-    "tsc": "./api/node_modules/typescript/bin/tsc --declaration ./index.ts"
+    "build": "npm run b-api && npm run b-tools && npm run b-shared && npm run b-pages && npm run tsc",
+    "b-api": "cd api && npm install && npm run tsc",
+    "b-tools": "cd tools && npm install && npm run tsc",
+    "b-shared": "cd shared && npm install && npm run tsc",
+    "b-pages": "npm run b-login && npm run b-register && npm run b-manager && npm run b-webphone",
+    "b-login": "cd pages/login && npm install && npm run build",
+    "b-register": "cd pages/register && npm install && npm run build",
+    "b-manager": "cd pages/manager && npm install && npm run build",
+    "b-webphone": "cd pages/webphone && npm install && npm run build",
+    "watch": "node ./pages/login/node_modules/concurrently/src/main --kill-others \"npm run w-api\" \"npm run w-tools\" \"npm run w-shared\" \"npm run w-pages\"",
+    "w-api": "cd api && npm run tsc-w",
+    "w-tools": "cd tools && npm run tsc-w",
+    "w-shared": "cd shared && npm run tsc-w",
+    "w-pages": "node ./pages/login/node_modules/concurrently/src/main --kill-others \"npm run w-login\" \"npm run w-register\" \"npm run w-manager\" \"npm run w-webphone\"",
+    "w-login": "cd pages/login && npm run watch",
+    "w-register": "cd pages/register && npm run watch",
+    "w-manager": "cd pages/manager && npm run watch",
+    "w-webphone": "cd pages/webphone && npm run watch"
   },
   "repository": {
     "type": "git",
@@ -24,9 +33,6 @@
   },
   "author": "Joseph Garrone",
   "license": "SEE LICENSE IN LICENSE",
-  "dependencies": {
-  },
-  "devDependencies": {
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }
-

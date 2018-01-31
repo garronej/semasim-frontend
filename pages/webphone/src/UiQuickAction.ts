@@ -1,17 +1,14 @@
-//TODO: import
-declare const StaticNotificationWidget: any;
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
+import { declaration } from "../../../api";
+import Types = declaration.Types;
 
 declare const require: any;
 
 (() => {
 
-    let errorMessages = Object.keys(
-        (intlTelInputUtils as any).validationError
-    ).map(
-        value => value.toLowerCase().split("_").join(" ")
-        );
+    let errorMessages = Object.keys((intlTelInputUtils as any).validationError)
+        .map(value => value.toLowerCase().split("_").join(" "));
 
     $.validator.addMethod("validateTelInput", (value, element) =>
         $(element).intlTelInput("getValidationError") === intlTelInputUtils.validationError.IS_POSSIBLE,
@@ -29,9 +26,8 @@ const html = loadHtml(
 
 export class UiQuickAction {
 
-
-    public readonly structure= html.structure.clone();
-    private readonly templates= html.templates.clone();
+    public readonly structure = html.structure.clone();
+    private readonly templates = html.templates.clone();
 
     //TODO: type StaticNotificationWidget
     public evtStaticNotification = new SyncEvent<any>();
@@ -40,32 +36,49 @@ export class UiQuickAction {
     public evtNewContact = new SyncEvent<string>();
 
     constructor(
-        public readonly data: UiQuickAction.Data
+        public readonly userSim: Types.UserSim.Usable
     ) {
 
-        this.structure = html.structure.clone();
-        this.templates = html.templates.clone();
+        let input = this.structure.find("input.id_tel-input");
 
-        let input = this.structure.find("input.id_telInput");
+        //TODO add if bug "utilsScript": "/intl-tel-input/build/js/utils.js",
 
-        input.intlTelInput({
-            "dropdownContainer": "body",
-            //"utilsScript": "/intl-tel-input/build/js/utils.js",
-            "preferredCountries": (() => {
+        let simIso = this.userSim.sim.country ? this.userSim.sim.country.iso : undefined;
+        let gwIso = this.userSim.gatewayLocation.countryIso;
 
-                let out = [this.data.simCountry];
+        (() => {
 
-                if (this.data.locationCountry !== this.data.simCountry) {
+            let intlTelInputOptions: IntlTelInput.Options = {
+                "dropdownContainer": "body"
+            };
 
-                    out.push(this.data.locationCountry);
+            let preferredCountries: string[] = [];
 
-                }
+            if (simIso) {
 
-                return out;
+                preferredCountries.push(simIso);
 
-            })(),
-            "initialCountry": this.data.simCountry
-        });
+            }
+
+            if (gwIso && simIso !== gwIso) {
+
+                preferredCountries.push(gwIso);
+
+            }
+
+            if (preferredCountries.length) {
+                intlTelInputOptions.preferredCountries = preferredCountries;
+            }
+
+            if (simIso || gwIso) {
+                intlTelInputOptions.initialCountry = simIso || gwIso;
+            }
+
+            input.intlTelInput(intlTelInputOptions);
+
+        })();
+
+
 
         (() => {
 
@@ -73,21 +86,26 @@ export class UiQuickAction {
 
             input.on("countrychange", function calleeA(_, countryData: IntlTelInput.CountryData) {
 
-                if (countryData.iso2 === self.data.simCountry) return;
+                if (countryData.iso2 === simIso) return;
 
                 input.off("countrychange", undefined, calleeA as any);
 
-                let staticNotification = new StaticNotificationWidget({
-                    "message": "Be aware of roaming Fees!"
-                });
+                //TODO: do with StaticNotificationWidget
+                let staticNotification = {
+                    "message": [
+                        "Warning: Consult ",
+                        self.userSim.sim.serviceProvider.fromImsi || "Your operator",
+                        `'s pricing for Calls/SMS toward ${countryData.name}`
+                    ].join("")
+                };
 
                 self.evtStaticNotification.post(staticNotification);
 
                 input.on("countrychange", function calleeB(_, countryData: IntlTelInput.CountryData) {
 
-                    if (countryData.iso2 !== self.data.simCountry) return;
+                    if (countryData.iso2 !== simIso) return;
 
-                    staticNotification.close();
+                    //staticNotification.close();
 
                     input.off("countrychange", undefined, calleeB as any);
 
@@ -95,12 +113,9 @@ export class UiQuickAction {
 
                 });
 
-
             });
 
-
         })();
-
 
         input.popover({
             "html": true,
@@ -110,18 +125,17 @@ export class UiQuickAction {
             "content": () => this.templates.find("div.id_popover").html()
         });
 
-
         let validator = this.structure.find("form.id_form").validate({
             "debug": true,
             "onsubmit": false,
             "rules": {
-                "telInput": {
+                "tel-input": {
                     "validateTelInput": true
                 }
             },
             "errorPlacement": error => {
 
-                this.templates.find("div.id_popover span.id_errorMessage").html($(error).text());
+                this.templates.find("div.id_popover span.id_error-message").html($(error).text());
 
                 input.popover("show");
 
@@ -134,13 +148,21 @@ export class UiQuickAction {
 
         this.structure.find("button.id_call").on("click", () => {
 
+            console.log("number RFC: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.RFC3966));
+            console.log("number E164: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164));
+            console.log("number INTERNATIONAL: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.INTERNATIONAL));
+            console.log("number NATIONAL: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.NATIONAL));
+            console.log("number raw: ", input.intlTelInput("getNumber"));
+
             if (!validator.form()) return;
 
             this.evtVoiceCall.post(
                 input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
             );
 
-            input.intlTelInput("setCountry", this.data.simCountry);
+            if (simIso) {
+                input.intlTelInput("setCountry", simIso);
+            }
             input.intlTelInput("setNumber", "");
 
         });
@@ -153,7 +175,10 @@ export class UiQuickAction {
                 input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
             );
 
-            input.intlTelInput("setCountry", this.data.simCountry);
+
+            if (simIso) {
+                input.intlTelInput("setCountry", simIso);
+            }
             input.intlTelInput("setNumber", "");
 
         });
@@ -166,20 +191,12 @@ export class UiQuickAction {
                 input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
             );
 
-            input.intlTelInput("setCountry", this.data.simCountry);
+            if (simIso) {
+                input.intlTelInput("setCountry", simIso);
+            }
             input.intlTelInput("setNumber", "");
 
         });
 
     }
 }
-
-export namespace UiQuickAction {
-
-    export type Data = {
-        readonly simCountry: string;
-        readonly locationCountry: string;
-    };
-
-}
-

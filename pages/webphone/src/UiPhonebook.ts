@@ -1,7 +1,10 @@
+/*
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import { update } from "autosize";
+import { declaration } from "../../../api";
+import Types = declaration.Types;
 declare const require: any;
 
 const html = loadHtml(
@@ -18,7 +21,7 @@ export class UiContacts {
     public readonly evtContactSelected = new SyncEvent<Contact>();
 
     constructor(
-        public readonly data: UiPhonebook.Data
+        public readonly userSim: Types.UserSim.Usable
     ) {
 
         this.structure.find("ul").slimScroll({
@@ -395,3 +398,4 @@ function isAscendingAlphabeticalOrder(a: string, b: string): boolean {
     return vA < vB;
 
 }
+*/

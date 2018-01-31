@@ -1,5 +1,8 @@
 import { VoidSyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
+import { declaration } from "../../../api";
+import Types = declaration.Types;
+
 declare const require: any;
 
 const html = loadHtml(
@@ -9,66 +12,80 @@ const html = loadHtml(
 
 export class UiHeader {
 
-    public readonly structure= html.structure.clone();
-    private readonly templates= html.templates.clone();
+    public readonly structure = html.structure.clone();
+    private readonly templates = html.templates.clone();
 
     public evtUp = new VoidSyncEvent();
 
     constructor(
-        public readonly data: UiHeader.Data
+        public readonly userSim: Types.UserSim.Usable
     ) {
 
-        this.structure.find("a.id_number").popover({
+        this.structure.find("a.id_friendly_name").popover({
             "html": true,
             "trigger": "hover",
             "placement": "right",
             "container": "body",
             "title": "SIM cart Info",
             "content": () => this.templates.find("div.id_popover").html()
-        });
+        }).find("span").text(this.userSim.friendlyName);
 
         this.structure.find("button.id_up").on("click", () => this.evtUp.post());
 
-        this.structure.find("div.id_flag").addClass(this.data.geoInfo.country);
-        this.structure.find("span.id_geoInfo").html(`${this.data.geoInfo.subdivisions},&nbsp;`);
+        console.log(this.userSim.sim.country);
+        console.log(this.userSim.gatewayLocation);
 
-        this.templates.find("div.id_popover div.id_flag").addClass(this.data.simCountry);
-
-        this.structure.find("span.id_number").html(
-            (intlTelInputUtils as any).formatNumber(
-                this.data.number,
-                null,
-                intlTelInputUtils.numberFormat.NATIONAL
-            )
+        this.templates.find("div.id_popover div.id_flag").addClass(
+            this.userSim.sim.country ? this.userSim.sim.country.iso : ""
         );
 
-        this.templates.find("div.id_popover span.id_number").html(
-            (intlTelInputUtils as any).formatNumber(
-                this.data.number,
-                null,
-                intlTelInputUtils.numberFormat.INTERNATIONAL
-            )
+        this.templates.find("div.id_popover span.id_network").html(
+            this.userSim.sim.serviceProvider.fromImsi || 
+            this.userSim.sim.serviceProvider.fromNetwork || 
+            "Unknown"
         );
 
-        this.templates.find("div.id_popover span.id_network").html(this.data.network);
+        this.templates.find("div.id_popover span.id_number").text(() => {
+
+            if (this.userSim.sim.storage.number) {
+
+                return (intlTelInputUtils as any).formatNumber(
+                    this.userSim.sim.storage.number.asStored,
+                    this.userSim.sim.country ? this.userSim.sim.country.iso : null,
+                    intlTelInputUtils.numberFormat.NATIONAL
+                )
+
+            } else {
+
+                return "Unknown";
+
+            }
+
+        });
+
+        this.structure.find("span.id_geoInfo").html((()=>{
+
+            let loc = this.userSim.gatewayLocation;
+
+            let arr: string[] = [];
+
+            if (loc.subdivisions) {
+                arr.push(loc.subdivisions);
+            }
+
+            if (loc.city) {
+                arr.push(loc.city);
+            }
+
+            return `${arr.join(", ")}&nbsp;`;
+
+
+        })());
+
+        this.structure.find("div.id_flag").addClass(
+            this.userSim.gatewayLocation.countryIso || ""
+        );
 
     }
-
-}
-
-export namespace UiHeader {
-
-    //Sim country is a restricted types
-    export type Data = {
-        readonly number: string;
-        readonly geoInfo: GeoInfo;
-        readonly network: string;
-        readonly simCountry: string;
-    };
-
-    export type GeoInfo = {
-        readonly country: string;
-        readonly subdivisions: string;
-    };
 
 }

@@ -7,22 +7,22 @@
         width: 100%;
     }
 
-    span.id_errorMessage {
+    span.id_error-message {
         color: red;
     }
 
-    div.id_QuickActionWidget input.id_telInput {
+    div.id_UiQuickAction input.id_tel-input {
         text-align: center;
     }
 </style>
+
 
 <div class="id_UiQuickAction panel panel-dark toggle">
     <!-- Start .panel -->
     <div class="panel-heading">
         <h4 class="panel-title">
             <i class="im-arrow-right18"></i>
-            <span>Quick action
-                <span>
+            <span>Quick action </span>
         </h4>
     </div>
     <div class="panel-body">
@@ -31,26 +31,24 @@
                 <div class="row">
 
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-4 mt10">
-                        <input name="telInput" class="id_telInput" type="text" required>
+                        <input name="tel-input" class="id_tel-input" type="text" required>
                         <!--<input type="tel" class="id_input form-control" placeholder="+33636786385">-->
                     </div>
 
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-8">
                         <div class="pull-right mt10">
                             <button type="button" class="id_call btn btn-success ml10">
-                                <i class="im-phone2"></i>
-                                <span class="visible-lg-inline visible-xs-inline"> Call
-                                    <span>
+                                <i class="fa fa-phone"></i>&nbsp;
+                                <span class="visible-lg-inline visible-xs-inline">Call</span>
                             </button>
                             <button type="button" class="id_sms btn btn-success ml10">
-                                <i class="im-envelop2"></i>
-                                <span class="visible-lg-inline visible-xs-inline"> SMS
-                                    <span>
+                                <i class="fa fa-wechat"></i>&nbsp;
+                                <span class="visible-lg-inline visible-xs-inline">SMS</span>
+
                             </button>
                             <button type="button" class="id_newContact btn btn-success ml10">
-                                <i class="im-user-plus2"></i>
-                                <span class="visible-lg-inline visible-xs-inline"> New Contact
-                                    <span>
+                                <i class="fa fa-users"></i>&nbsp;
+                                <span class="visible-lg-inline visible-xs-inline">New Contact</span>
                             </button>
                         </div>
                     </div>
@@ -66,7 +64,6 @@
 <div class="templates">
 
     <div class="id_popover">
-        <span class="id_errorMessage">salut</span>
+        <span class="id_error-message">salut</span>
     </div>
-
 </div>

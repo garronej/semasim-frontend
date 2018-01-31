@@ -15,10 +15,20 @@ const pagesHtml= {
 
 for( let pageName in pagesHtml ){
 
+    /*
     pagesHtml[pageName]= fs.readFileSync(
         path.join(__dirname, "pages", pageName, `${pageName}.html`),
         "utf8"
     );
+    */
+
+    //ONLY for dev so the server does not have to be restarted
+    Object.defineProperty(pagesHtml, pageName, {
+        "get": ()=> fs.readFileSync(
+            path.join(__dirname, "pages", pageName, `${pageName}.html`),
+            "utf8"
+        )
+    });
 
 }
 
