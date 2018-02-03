@@ -1,7 +1,6 @@
 import { VoidSyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
-import { declaration } from "../../../api";
-import Types = declaration.Types;
+import { types } from "../../../api";
 
 declare const require: any;
 
@@ -18,7 +17,7 @@ export class UiHeader {
     public evtUp = new VoidSyncEvent();
 
     constructor(
-        public readonly userSim: Types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable
     ) {
 
         this.structure.find("a.id_friendly_name").popover({
@@ -26,14 +25,11 @@ export class UiHeader {
             "trigger": "hover",
             "placement": "right",
             "container": "body",
-            "title": "SIM cart Info",
+            "title": "SIM card infos",
             "content": () => this.templates.find("div.id_popover").html()
         }).find("span").text(this.userSim.friendlyName);
 
         this.structure.find("button.id_up").on("click", () => this.evtUp.post());
-
-        console.log(this.userSim.sim.country);
-        console.log(this.userSim.gatewayLocation);
 
         this.templates.find("div.id_popover div.id_flag").addClass(
             this.userSim.sim.country ? this.userSim.sim.country.iso : ""

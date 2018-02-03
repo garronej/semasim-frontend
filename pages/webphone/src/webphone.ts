@@ -1,6 +1,7 @@
-import { client as api, declaration } from "../../../api";
-import Types = declaration.Types;
+import { apiClient as api, types } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
+
+import * as wds from "./webphoneDataSync";
 import { UiWebphone } from "./UiWebphone";
 
 declare const require: (path: string) => any;
@@ -20,17 +21,19 @@ async function loadPageContent() {
 
 	}
 
+	let wdRoot= await wds.fetch(useableUserSims);
+
 	let userSim= useableUserSims.pop()!;
 
-	let uiWebphone= new UiWebphone(userSim);
+	let wdInstance= wdRoot.instances.find(({ imsi })=> imsi === userSim.sim.imsi )!;
+
+	let uiWebphone= new UiWebphone(userSim, wdInstance);
 
 	$(".page-content-inner").append(uiWebphone.structure);
 
 }
 
 $(document).ready(() => {
-
-	console.log("Start...x");
 
 	$("#logout").click(async () => {
 
@@ -43,50 +46,3 @@ $(document).ready(() => {
 	loadPageContent();
 
 });
-
-
-export namespace phoneNumber {
-
-	function format(
-		number: string,
-		numberFormat: "NATIONAL" | "INTERNATIONAL" | "E164",
-		iso?: string
-	): string {
-
-		console.log("telFormat", { number, numberFormat, iso });
-
-		let numberFormatCode = (() => {
-
-			switch (numberFormat) {
-				case "NATIONAL": return intlTelInputUtils.numberFormat.NATIONAL;
-				case "INTERNATIONAL": return intlTelInputUtils.numberFormat.INTERNATIONAL;
-				case "E164": return intlTelInputUtils.numberFormat.E164;
-			}
-
-		})();
-
-		return (intlTelInputUtils as any).formatNumber(
-			number,
-			iso || null,
-			numberFormatCode
-		)
-
-	}
-
-	export function toNational(numberE164: string){
-		return format(numberE164, "E164");
-	}
-
-	/** if already e164 identity */
-	export function toE164(numberAsStored: string, iso: string){
-
-	}
-
-	export function areSame(
-		numberE164: string,
-		numberAsStored: string
-	): string{
-		return "";
-	}
-
-}

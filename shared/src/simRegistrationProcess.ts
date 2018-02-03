@@ -1,14 +1,13 @@
-import { client as api, declaration } from "../../api";
-import Types = declaration.Types;
+import { apiClient as api, types } from "../../api";
 import * as tools from "../../tools";
 
 const bootbox: any = window["bootbox"];
 
 export async function start(): Promise<void> {
 
-    let stopLoad= tools.loadingDialog( "Looking for registerable SIM on LAN...");
+    let stopLoad = tools.loadingDialog("Looking for registerable SIM on LAN...");
 
-    let unregisteredLanDongles= await api.getUnregisteredLanDongles();
+    let unregisteredLanDongles = await api.getUnregisteredLanDongles();
 
     stopLoad();
 
@@ -20,17 +19,35 @@ export async function start(): Promise<void> {
 
 }
 
-export async function interact(dongle: Types.Dongle) {
+export async function interact(dongle: types.Dongle) {
+
+    let shouldAdd_message = (() => {
+
+        let arr = [
+            `SIM inside:`,
+            `${dongle.manufacturer} ${dongle.model}`,
+            `IMEI: ${dongle.imei}`,
+        ];
+
+        if (dongle.sim.iccid) {
+
+            arr = [
+                ...arr,
+                "",
+                "SIM ICCID (number printed on SIM): ",
+                dongle.sim.iccid
+            ];
+
+        }
+
+        return arr.join("<br>");
+
+    })();
 
     let shouldAdd = await new Promise<boolean>(
         resolve => bootbox.dialog({
             "title": "SIM ready to be registered",
-            "message": [
-                `Dongle IMEI: ${dongle.imei}`,
-                "( number printed on the 3G key )",
-                `SIM ICCID: ${dongle.sim.iccid}`,
-                "( number printed on the sim )<br>",
-            ].join("<br>"),
+            "message": `<p class="text-center">${shouldAdd_message}</p>`,
             "buttons": {
                 "cancel": {
                     "label": "Not now",
@@ -48,9 +65,9 @@ export async function interact(dongle: Types.Dongle) {
 
     if (!shouldAdd) return undefined;
 
-    if (Types.LockedDongle.match(dongle)) {
+    if (types.LockedDongle.match(dongle)) {
 
-        let unlockResultValidPin: Types.UnlockResult.ValidPin;
+        let unlockResultValidPin: types.UnlockResult.ValidPin;
 
         while (true) {
 
@@ -90,7 +107,7 @@ export async function interact(dongle: Types.Dongle) {
 
             }
 
-            let stopLoad= tools.loadingDialog("Your sim is being unlocked please wait...", 0);
+            let stopLoad = tools.loadingDialog("Your sim is being unlocked please wait...", 0);
 
             let unlockResult = await api.unlockSim(dongle.imei, pin);
 
@@ -164,7 +181,7 @@ export async function interact(dongle: Types.Dongle) {
 
     }
 
-    let stopLoad= tools.loadingDialog("Please wait...");
+    let stopLoad = tools.loadingDialog("Please wait...");
 
     let friendlyName = await getDefaultFriendlyName();
 
@@ -183,7 +200,7 @@ export async function interact(dongle: Types.Dongle) {
     }
 
 
-    stopLoad= tools.loadingDialog("Registering SIM...");
+    stopLoad = tools.loadingDialog("Registering SIM...");
 
     await api.registerSim(dongle.sim.imsi, friendlyName);
 
@@ -197,8 +214,8 @@ async function getDefaultFriendlyName() {
 
     let i = 1;
 
-    let usableUserSims = (await api.getSims()).filter(
-        userSim => Types.UserSim.Usable.match(userSim)
+    let usableUserSims = (await api.getUserSims()).filter(
+        userSim => types.UserSim.Usable.match(userSim)
     );
 
     while (

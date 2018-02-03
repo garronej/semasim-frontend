@@ -1,4 +1,6 @@
-import * as client from "./client";
-import * as declaration from "./declaration";
+import * as apiClient from "./client";
+import * as apiDeclaration from "./declaration";
+import * as JSON_CUSTOM from "./JSON_CUSTOM";
+import * as types from "./types";
 
-export { client, declaration };
+export { apiClient, apiDeclaration, JSON_CUSTOM, types };

@@ -1,26 +1,25 @@
-import { client as api, declaration } from "../../api";
-import Types = declaration.Types;
+import { apiClient as api, types } from "../../api";
 import * as tools from "../../tools";
 
 const bootbox: any = window["bootbox"];
 
 /** return need reedReload */
 export async function start(
-): Promise<Types.UserSim.Usable[]> {
+): Promise<types.UserSim.Usable[]> {
 
     let stopLoad= tools.loadingDialog("Looking for your SIMs please wait...");
 
-    let userSims = await api.getSims();
+    let userSims = await api.getUserSims();
 
     stopLoad();
 
     let usableUserSims = userSims.filter(
-        userSim => Types.UserSim.Usable.match(userSim)
-    ) as Types.UserSim.Usable[];
+        userSim => types.UserSim.Usable.match(userSim)
+    ) as types.UserSim.Usable[];
 
     let notConfirmedUserSims = userSims.filter(
-        userSim => Types.UserSim.Shared.NotConfirmed.match(userSim)
-    ) as Types.UserSim.Shared.NotConfirmed[];
+        userSim => types.UserSim.Shared.NotConfirmed.match(userSim)
+    ) as types.UserSim.Shared.NotConfirmed[];
 
     for (let notConfirmedUserSim of notConfirmedUserSims) {
 
@@ -49,8 +48,8 @@ export async function start(
 
 
 export async function interact(
-    userSim: Types.UserSim.Shared.NotConfirmed,
-): Promise<Types.UserSim.Shared.Confirmed | undefined> {
+    userSim: types.UserSim.Shared.NotConfirmed,
+): Promise<types.UserSim.Shared.Confirmed | undefined> {
 
     let shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
         resolve => bootbox.dialog({
@@ -108,9 +107,9 @@ export async function interact(
         userSim.friendlyName
     );
 
-    let confirmedSim = (await api.getSims()).filter(
+    let confirmedSim = (await api.getUserSims()).filter(
         ({ sim }) => sim.imsi === userSim.sim.imsi
-    ).pop()! as Types.UserSim.Shared.Confirmed;
+    ).pop()! as types.UserSim.Shared.Confirmed;
 
     stopLoad();
 

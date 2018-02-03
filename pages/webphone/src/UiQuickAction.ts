@@ -1,12 +1,36 @@
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
-import { declaration } from "../../../api";
-import Types = declaration.Types;
+import { types } from "../../../api";
+import { phoneNumber } from "../../../shared";
 
 declare const require: any;
 
 (() => {
 
+    $.validator.addMethod(
+        "validateTelInput",
+        (value, element) => {
+
+            try {
+
+                phoneNumber.build(
+                    value, 
+                    $(element).intlTelInput("getSelectedCountryData").iso2
+                );
+
+            } catch{
+
+                return false;
+
+            }
+
+            return true;
+        },
+        "Malformed phone number"
+    );
+
+
+    /*
     let errorMessages = Object.keys((intlTelInputUtils as any).validationError)
         .map(value => value.toLowerCase().split("_").join(" "));
 
@@ -14,6 +38,7 @@ declare const require: any;
         $(element).intlTelInput("getValidationError") === intlTelInputUtils.validationError.IS_POSSIBLE,
         ((bool, element) => errorMessages[$(element).intlTelInput("getValidationError")]) as any
     );
+    */
 
 
 })();
@@ -31,12 +56,12 @@ export class UiQuickAction {
 
     //TODO: type StaticNotificationWidget
     public evtStaticNotification = new SyncEvent<any>();
-    public evtVoiceCall = new SyncEvent<string>();
-    public evtSms = new SyncEvent<string>();
-    public evtNewContact = new SyncEvent<string>();
+    public evtVoiceCall = new SyncEvent<phoneNumber>();
+    public evtSms = new SyncEvent<phoneNumber>();
+    public evtNewContact = new SyncEvent<phoneNumber>();
 
     constructor(
-        public readonly userSim: Types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable
     ) {
 
         let input = this.structure.find("input.id_tel-input");
@@ -146,57 +171,37 @@ export class UiQuickAction {
 
         this.structure.on("mouseleave", () => input.popover("hide"));
 
-        this.structure.find("button.id_call").on("click", () => {
+        this.structure.find("button").on("click", event=> {
 
-            console.log("number RFC: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.RFC3966));
-            console.log("number E164: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164));
-            console.log("number INTERNATIONAL: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.INTERNATIONAL));
-            console.log("number NATIONAL: ", input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.NATIONAL));
-            console.log("number raw: ", input.intlTelInput("getNumber"));
+            if(!validator.form() ){
+                return;
+            }
 
-            if (!validator.form()) return;
+            let evt: SyncEvent<phoneNumber>;
 
-            this.evtVoiceCall.post(
-                input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
+            if( $(event.currentTarget).hasClass("id_call") ){
+                evt= this.evtVoiceCall;
+            }else if( $(event.currentTarget).hasClass("id_sms") ){
+                evt= this.evtSms;
+            }else if( $(event.currentTarget).hasClass("id_sms") ){
+                evt= this.evtNewContact;
+            }
+
+            evt!.post(
+                phoneNumber.build(
+                    input.val(), 
+                    input.intlTelInput("getSelectedCountryData").iso2
+                )
             );
 
             if (simIso) {
                 input.intlTelInput("setCountry", simIso);
             }
+
             input.intlTelInput("setNumber", "");
 
         });
 
-        this.structure.find("button.id_sms").on("click", () => {
-
-            if (!validator.form()) return;
-
-            this.evtSms.post(
-                input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
-            );
-
-
-            if (simIso) {
-                input.intlTelInput("setCountry", simIso);
-            }
-            input.intlTelInput("setNumber", "");
-
-        });
-
-        this.structure.find("button.id_newContact").on("click", () => {
-
-            if (!validator.form()) return;
-
-            this.evtNewContact.post(
-                input.intlTelInput("getNumber", intlTelInputUtils.numberFormat.E164)
-            );
-
-            if (simIso) {
-                input.intlTelInput("setCountry", simIso);
-            }
-            input.intlTelInput("setNumber", "");
-
-        });
 
     }
 }

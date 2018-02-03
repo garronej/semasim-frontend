@@ -1,5 +1,4 @@
-import { client as api, declaration } from "../../../api";
-import Types = declaration.Types;
+import { apiClient as api, types, apiDeclaration } from "../../../api";
 
 declare const Buffer: any;
 
@@ -12,15 +11,15 @@ export async function run() {
 
     console.log("Run test jsSIP");
 
-    let userSims = await api.getSims();
+    let userSims = await api.getUserSims();
 
     let userSim = userSims[0];
 
-    let webSocket = new JsSIP.WebSocketInterface(`wss://www.${Types.domain}`);
+    let webSocket = new JsSIP.WebSocketInterface(`wss://www.${apiDeclaration.domain}`);
 
     let email= "joseph.garrone.gj@gmail.com";
 
-    let uri= `sip:${userSim.sim.imsi}@${Types.domain}`;
+    let uri= `sip:${userSim.sim.imsi}@${apiDeclaration.domain}`;
 
     let ua = new JsSIP.UA({
         "sockets": [webSocket],

@@ -1,10 +1,10 @@
-/*
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import { update } from "autosize";
-import { declaration } from "../../../api";
-import Types = declaration.Types;
+import { types } from "../../../api";
+import * as wds from "./webphoneDataSync";
+
 declare const require: any;
 
 const html = loadHtml(
@@ -12,16 +12,19 @@ const html = loadHtml(
     "UiPhonebook"
 );
 
+import wd= types.WebphoneData;
+import { phoneNumber } from "../../../shared/dist/phoneNumber";
 
-export class UiContacts {
+export class UiPhonebook {
 
     public readonly structure= html.structure.clone();
     private readonly templates= html.templates.clone();
 
-    public readonly evtContactSelected = new SyncEvent<Contact>();
+    public readonly evtContactSelected = new SyncEvent<wd.Chat>();
 
     constructor(
-        public readonly userSim: Types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable,
+        public readonly wdInstance: wd.Instance
     ) {
 
         this.structure.find("ul").slimScroll({
@@ -32,65 +35,77 @@ export class UiContacts {
             "size": "5px"
         });
 
-        for (let contact of this.data.contacts ) {
-            this.insertUiContact(contact);
+        for( let wdChat of this.wdInstance.chats ){
+
+            this.insertUiContact(wdChat);
+
         }
 
         this.updateSearch();
 
+        setTimeout(()=>{
+
+            let wdChat= wds.getLastSeenChat(this.wdInstance);
+            
+            if( !wdChat ) return;
+
+            this.uiContacts.get(wdChat)!.evtClick.post();
+
+        }, 0);
+
     }
 
 
-    private readonly uiContacts= new Map<Contact, UiPhonebook.UiContact>();
+    private readonly uiContacts= new Map<wd.Chat, UiPhonebook.UiContact>();
 
-    private insertUiContact(contact: Contact){
+    private insertUiContact(wdChat: wd.Chat){
 
-        let uiContact = new UiPhonebook.UiContact(
-            { contact, "simCountry": this.data.simCountry }
-        );
-
-        uiContact.evtClick.attach(() => {
+        let uiContact = new UiPhonebook.UiContact(this.userSim, wdChat);
 
 
-            let currentlySelectedUiContact= this.uiContacts.find(
-                ({ isSelected }) => isSelected
+        uiContact.evtClick.attach(async () => {
+
+            let uiContactPrev= Array.from(this.uiContacts.values()).find(
+                uiContact=> uiContact.isSelected
             );
 
-            if (currentlySelectedUiContact) {
-                currentlySelectedUiContact.updateIsSelected(false);
+            if( uiContactPrev ){
+                uiContactPrev.unselect();
             }
+            
+            this.uiContacts.get(wdChat)!.setSelected();
 
-            uiContact.updateIsSelected(true);
-
-            this.evtContactSelected.post(uiContact.data.contact);
+            this.evtContactSelected.post(wdChat);
 
         });
 
-        this.uiContacts.push(uiContact);
+        this.uiContacts.set(wdChat, uiContact);
 
-        this.updateUiContactPosition(uiContact);
+        this.placeUiContact(uiContact);
 
     }
 
     private updateSearch() {
 
-        (this.structure.find("input") as any).quicksearch(this.structure.find("il li"));
+        (this.structure.find("input") as any)
+            .quicksearch(this.structure.find("il li"));
 
         this.structure.find("ul").slimScroll({ "scrollTo": "0" });
 
     }
 
 
-    private updateUiContactPosition(uiContact: UiPhonebook.UiContact) {
+    private placeUiContact(
+        uiContact: UiPhonebook.UiContact
+    ) {
+
+        let newerMessageTime= wds.getNewerMessageTime(uiContact.wdChat);
 
         let lis = this.structure.find("ul li");
 
-        let { timestamp } = uiContact.data.contact;
-        let name = uiContact.data.contact.name;
-
         for (let i = 0, len = lis.length; i < len; i++) {
 
-            let uiContact_i = this.uiContacts.find(
+            let uiContact_i = Array.from(this.uiContacts.values()).find(
                 ({ structure }) => structure.get(0) === lis.get(i)
             )!;
 
@@ -98,35 +113,41 @@ export class UiContacts {
                 continue;
             }
 
-            let timestamp_i = uiContact_i.data.contact.timestamp;
+            let newerMessageTime_i= wds.getNewerMessageTime(uiContact_i.wdChat);
 
-            if (timestamp > timestamp_i) {
+
+            if (newerMessageTime > newerMessageTime_i) {
 
                 uiContact.structure.insertBefore(uiContact_i.structure);
 
                 return;
 
-            } else if (timestamp === timestamp_i) {
+            } else if (newerMessageTime === newerMessageTime_i) {
 
-                let name_i = uiContact_i.data.contact.name;
+                let contactName= uiContact.wdChat.contactName;
+
+                let contactName_i= uiContact.wdChat.contactName;
 
                 let doInsert: boolean;
 
-                if (name === undefined && name_i === undefined) {
+                if (contactName === "" && contactName_i === "") {
 
                     doInsert = true;
 
-                } else if (name === undefined) {
+                } else if (contactName === "") {
 
                     doInsert = false;
 
-                } else if (name_i === undefined) {
+                } else if (contactName_i === "") {
 
                     doInsert = true;
 
                 } else {
 
-                    doInsert = isAscendingAlphabeticalOrder(name, name_i);
+                    doInsert = isAscendingAlphabeticalOrder(
+                        contactName, 
+                        contactName_i
+                    );
 
                 }
 
@@ -146,231 +167,168 @@ export class UiContacts {
 
     }
 
-    public newContact(
-        contactNumber: string,
-        contactName: string | undefined,
-        isStoredInSim: boolean
-    ) {
+    public async newContact(
+        contactNumber: phoneNumber,
+        contactName: string,
+        shouldStoreInSim: boolean
+    ): Promise<wd.Chat>{
 
-        let contact: Contact = {
-            "number": contactNumber,
-            "name": contactName,
-            "timestamp": 0,
-            "missedCallCount": 0,
-            "unreadMessageCount": 0,
-            isStoredInSim
-        };
 
-        //TODO: update remote
-        this.data.contacts.push(contact);
+        let wdChat= await wds.newChat(
+            this.wdInstance, 
+            contactNumber, 
+            contactName, 
+            shouldStoreInSim
+        );
 
-        this.insertUiContact(contact);
+        this.insertUiContact(wdChat);
 
         this.updateSearch();
 
-    }
-
-    //TODO: updateSearch?
-    public deleteContact(contact: Contact) {
-
-        let uiContact = this.getUiContactByNumber(contactNumber);
-
-        uiContact.structure.remove();
-
-        this.uiContacts.splice(
-            this.uiContacts.indexOf(uiContact), 1
-        );
-
-        //TODO: sync remote
-        this.data.contacts.splice(
-            this.data.contacts.indexOf(uiContact.data.contact), 1
-        );
-
-        this.updateSearch();
+        return wdChat;
 
     }
 
+    /** 
+     * triggered by: evt on text input => update last seen => call 
+     * OR
+     * new message arrive => update wdMessage => call
+     * 
+     * */
+    public refreshNotificationCount(wdChat: wd.Chat){
 
+        this.uiContacts.get(wdChat)!.refreshNotificationLabel();
+
+        this.placeUiContact( this.uiContacts.get(wdChat)!);
+
+    }
+
+    /** Will update wdChat */
+    public async updateContactName(wdChat: wd.Chat, contactName: string){
+
+        await this.uiContacts.get(wdChat)!.updateContactName(contactName);
+
+        this.placeUiContact( this.uiContacts.get(wdChat)! );
+    }
 
 }
 
 export namespace UiPhonebook {
 
-    export type Data = {
-        readonly contacts: Contact[];
-        readonly simCountry: string;
-    };
-
     export class UiContact {
 
         public readonly structure: JQuery;
 
-        public readonly formatedNumber: string;
-
+        /** only forward click event, need to be selected manually from outside */
         public evtClick = new VoidSyncEvent();
 
-        private evtUpdated = new VoidSyncEvent();
-
         constructor(
-            public readonly data: UiContact.Data
+            public readonly userSim: types.UserSim.Usable,
+            public readonly wdChat: wd.Chat,
         ) {
 
             this.structure = html.templates.find("li").clone();
 
-            this.formatedNumber = (intlTelInputUtils as any).formatNumber(
-                this.data.contact.number,
-                null,
-                isNumberFromCountry(this.data.contact.number, this.data.simCountry) ?
-                    intlTelInputUtils.numberFormat.NATIONAL :
-                    intlTelInputUtils.numberFormat.INTERNATIONAL
-            );
+            this.structure.on("click", ()=> this.evtClick.post());
 
-            this.updateName(this.data.contact.name);
+            this.updateContactName(this.wdChat.contactName);
 
+            this.structure.find("span.id_notifications").fadeOut(0);
+
+            this.refreshNotificationLabel();
 
         }
 
-        public updateLastActivity(time: number) {
+        public refreshNotificationLabel() {
 
-            if (time) {
-
-                //TODO: class should be lowercase
-                this.structure.addClass("chatData");
-
+            if( this.wdChat.messages.length ){
+                this.structure.addClass("has-messages");
+            }else{
+                this.structure.removeClass("has-messages");
             }
 
-            this.data.contact.timestamp = time;
+            let count= wds.getNotificationCount(this.wdChat);
 
-            this.evtUpdated.post();
+            let span = this.structure.find("span.id_notifications");
+            
+            span.html(`${count}`);
+            
+            if( count !== 0 ){
 
-        }
+                span.stop().fadeIn(0);
 
+            }else{
 
-        public updateUnreadMessageCount(count: number) {
-
-            console.assert(count >= 0);
-
-            if (count > 0) {
-
-                this.structure
-                    .find("span.id_unreadMessages")
-                    .html(`${count}`)
-                    .stop()
-                    .fadeIn(0)
-                    ;
-
-            } else {
-
-                this.structure
-                    .find("span.id_unreadMessages")
-                    .fadeOut(2000)
-                    ;
-
-            }
-
-            var previousCount = this.data.contact.unreadMessageCount;
-
-            this.data.contact.unreadMessageCount = count;
-
-            if (count > previousCount) {
-
-                this.updateLastActivity(Date.now());
+                span.fadeOut(2000);
 
             }
 
         }
 
+        /** updateName if different */
+        public async updateContactName(contactName: string) {
 
-        public updateName(name: string | undefined) {
+            if (this.wdChat.contactName !== contactName) {
 
-            this.structure.find("span.id_name").html(name || "");
+                await wds.updateChat(
+                    this.wdChat,
+                    { "contactName": contactName }
+                );
+
+            }
+
+            this.structure.find("span.id_name").html(contactName);
 
             let spanNumber = this.structure.find("span.id_number");
 
-            if (name) {
+            let prettyNumber = phoneNumber.prettyPrint(
+                this.wdChat.contactNumber,
+                this.userSim.sim.country ?
+                    this.userSim.sim.country.iso : undefined
+            )
+
+            if (contactName) {
 
                 spanNumber
                     .addClass("visible-lg-inline")
-                    .html(` ( ${this.formatedNumber} ) `)
+                    .html(` ( ${prettyNumber} ) `)
                     ;
 
             } else {
 
                 spanNumber
                     .removeClass("visible-lg-inline")
-                    .html(this.formatedNumber)
+                    .html(prettyNumber)
                     ;
 
             }
 
-            this.data.contact.name = name;
-
         }
 
-        public updateIsSelected(isSelected: boolean) {
-
-            if (isSelected) {
-                this.structure.addClass("selected");
-            } else {
-                this.structure.removeClass("selected");
-            }
-
-            this.__isSelected__ = isSelected;
-
+        /** update wsChat */
+        public setSelected() {
+            this.structure.addClass("selected");
         }
 
-        public get isSelected() {
-            return this.__isSelected__;
+        /** default state */
+        public unselect() {
+            this.structure.removeClass("selected");
         }
+
+        public get isSelected(): boolean {
+            return this.structure.hasClass("selected");
+        }
+
 
     }
 
-    export namespace UiContact {
-        export type Data = {
-            readonly contact: Contact;
-            readonly simCountry: string;
-        };
-    }
 
 }
 
-export type Contact = {
-    number: { e164: string; prettyPrint: string; };
-    name: string | undefined;
-    unreadMessageCount: number;
-    missedCallCount: number;
-    isStoredInSim: boolean;
-    timestamp: number;
-    isSelected: false;
-    messages: any;
-};
-
-function isNumberFromCountry(
-    numberE164: string,
-    countryIso2: string
+function isAscendingAlphabeticalOrder(
+    a: string,
+    b: string
 ): boolean {
-
-    try {
-
-        for (let countryData of $.fn.intlTelInput.getCountryData()) {
-
-            if (countryData.iso2 === countryIso2.toLowerCase()) {
-
-                return (numberE164.substring(1, countryData.dialCode.length + 1) === countryData.dialCode);
-
-            }
-
-        }
-
-    } catch (error) {
-        console.log("isNumberFromCountry error", error);
-    }
-
-    return false;
-
-}
-
-function isAscendingAlphabeticalOrder(a: string, b: string): boolean {
 
     if (!a || !b) {
         return a.length < b.length;
@@ -398,4 +356,3 @@ function isAscendingAlphabeticalOrder(a: string, b: string): boolean {
     return vA < vB;
 
 }
-*/

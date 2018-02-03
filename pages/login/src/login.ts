@@ -1,4 +1,4 @@
-import { client as api } from "../../../api";
+import { apiClient as api } from "../../../api";
 import * as tools from "../../../tools";
 import { requestRenewPassword } from "./requestRenewPassword";
 

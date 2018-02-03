@@ -1,21 +1,23 @@
-import * as declaration from "./declaration";
+import * as d from "./declaration";
+import * as types from "./types";
+import * as JSON_CUSTOM from "./JSON_CUSTOM";
 
 async function makeRequest<Params, Response>(
     methodName, params: Params
 ): Promise<Response> {
     return new Promise<Response>(
         resolve => (window["$"] as JQueryStatic).ajax({
-            "url": `/${declaration.apiPath}/${methodName}`,
+            "url": `/${d.apiPath}/${methodName}`,
             "method": "POST",
             "contentType": "application/json; charset=UTF-8",
-            "data": declaration.JSON_CUSTOM.stringify(params),
+            "data": JSON_CUSTOM.stringify(params),
             "dataType": "text",
             "statusCode": {
                 "400": () => alert("Bad request"),
                 "401": () => window.location.reload(),
                 "500": () => alert("Internal server error"),
                 "200": (data: string) =>
-                    resolve(declaration.JSON_CUSTOM.parse(data))
+                    resolve(JSON_CUSTOM.parse(data))
             }
         })
     );
@@ -26,9 +28,9 @@ export function registerUser(
     password: string
 ) {
 
-    const methodName = declaration.registerUser.methodName;
-    type Params = declaration.registerUser.Params;
-    type Response = declaration.registerUser.Response;
+    const methodName = d.registerUser.methodName;
+    type Params = d.registerUser.Params;
+    type Response = d.registerUser.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -42,9 +44,9 @@ export function loginUser(
     password: string
 ) {
 
-    const methodName = declaration.loginUser.methodName;
-    type Params = declaration.loginUser.Params;
-    type Response = declaration.loginUser.Response;
+    const methodName = d.loginUser.methodName;
+    type Params = d.loginUser.Params;
+    type Response = d.loginUser.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -55,9 +57,9 @@ export function loginUser(
 
 export function logoutUser() {
 
-    const methodName = declaration.logoutUser.methodName;
-    type Params = declaration.logoutUser.Params;
-    type Response = declaration.logoutUser.Response;
+    const methodName = d.logoutUser.methodName;
+    type Params = d.logoutUser.Params;
+    type Response = d.logoutUser.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -69,11 +71,11 @@ export function logoutUser() {
 /** Return true if email has account */
 export function sendRenewPasswordEmail(
     email: string
-){
+) {
 
-    const methodName= declaration.sendRenewPasswordEmail.methodName;
-    type Params= declaration.sendRenewPasswordEmail.Params;
-    type Response= declaration.sendRenewPasswordEmail.Response;
+    const methodName = d.sendRenewPasswordEmail.methodName;
+    type Params = d.sendRenewPasswordEmail.Params;
+    type Response = d.sendRenewPasswordEmail.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -82,11 +84,11 @@ export function sendRenewPasswordEmail(
 
 }
 
-export function getSims() {
+export function getUserSims() {
 
-    const methodName = declaration.getSims.methodName;
-    type Params = declaration.getSims.Params;
-    type Response = declaration.getSims.Response;
+    const methodName = d.getSims.methodName;
+    type Params = d.getSims.Params;
+    type Response = d.getSims.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -97,9 +99,9 @@ export function getSims() {
 
 export function getUnregisteredLanDongles() {
 
-    const methodName = declaration.getUnregisteredLanDongles.methodName;
-    type Params = declaration.getUnregisteredLanDongles.Params;
-    type Response = declaration.getUnregisteredLanDongles.Response;
+    const methodName = d.getUnregisteredLanDongles.methodName;
+    type Params = d.getUnregisteredLanDongles.Params;
+    type Response = d.getUnregisteredLanDongles.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -113,9 +115,9 @@ export function unlockSim(
     pin: string
 ) {
 
-    const methodName = declaration.unlockSim.methodName;
-    type Params = declaration.unlockSim.Params;
-    type Response = declaration.unlockSim.Response;
+    const methodName = d.unlockSim.methodName;
+    type Params = d.unlockSim.Params;
+    type Response = d.unlockSim.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -129,9 +131,9 @@ export function registerSim(
     friendlyName: string
 ) {
 
-    const methodName = declaration.registerSim.methodName;
-    type Params = declaration.registerSim.Params;
-    type Response = declaration.registerSim.Response;
+    const methodName = d.registerSim.methodName;
+    type Params = d.registerSim.Params;
+    type Response = d.registerSim.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -144,9 +146,9 @@ export function unregisterSim(
     imsi: string
 ) {
 
-    const methodName = declaration.unregisterSim.methodName;
-    type Params = declaration.unregisterSim.Params;
-    type Response = declaration.unregisterSim.Response;
+    const methodName = d.unregisterSim.methodName;
+    type Params = d.unregisterSim.Params;
+    type Response = d.unregisterSim.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -162,9 +164,9 @@ export function shareSim(
     message: string
 ) {
 
-    const methodName = declaration.shareSim.methodName;
-    type Params = declaration.shareSim.Params;
-    type Response = declaration.shareSim.Response;
+    const methodName = d.shareSim.methodName;
+    type Params = d.shareSim.Params;
+    type Response = d.shareSim.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -179,9 +181,9 @@ export function stopSharingSim(
     emails: string[]
 ) {
 
-    const methodName = declaration.stopSharingSim.methodName;
-    type Params = declaration.stopSharingSim.Params;
-    type Response = declaration.stopSharingSim.Response;
+    const methodName = d.stopSharingSim.methodName;
+    type Params = d.stopSharingSim.Params;
+    type Response = d.stopSharingSim.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -195,9 +197,9 @@ export function setSimFriendlyName(
     friendlyName: string
 ) {
 
-    const methodName = declaration.setSimFriendlyName.methodName;
-    type Params = declaration.setSimFriendlyName.Params;
-    type Response = declaration.setSimFriendlyName.Response;
+    const methodName = d.setSimFriendlyName.methodName;
+    type Params = d.setSimFriendlyName.Params;
+    type Response = d.setSimFriendlyName.Response;
 
     return makeRequest<Params, Response>(
         methodName,
@@ -207,34 +209,129 @@ export function setSimFriendlyName(
 
 }
 
-export function fetchWebUaData(){
+export namespace webphoneData {
 
-    const methodName = declaration.fetchWebUaData.methodName;
-    type Params = declaration.fetchWebUaData.Params;
-    type Response = declaration.fetchWebUaData.Response;
+    import dw = d.webphoneData;
 
-    return makeRequest<Params, Response>(
-        methodName,
-        undefined
-    );
+    export function fetch() {
+
+        const methodName = dw.fetch.methodName;
+        type Params = dw.fetch.Params;
+        type Response = dw.fetch.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            undefined
+        );
+
+
+    }
+
+    export function newInstance(imsi: string) {
+
+        const methodName = dw.newInstance.methodName;
+        type Params = dw.newInstance.Params;
+        type Response = dw.newInstance.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { imsi }
+        );
+
+    }
+
+    export function newChat(
+        instance_id: number,
+        contactNumber: string,
+        contactName: string,
+        isContactInSim: boolean
+    ) {
+
+        const methodName = dw.newChat.methodName;
+        type Params = dw.newChat.Params;
+        type Response = dw.newChat.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            {
+                instance_id,
+                contactNumber,
+                contactName,
+                isContactInSim
+            }
+        );
+
+    }
+
+    export function updateChat(
+        chat_id: number,
+        updatedFields: Partial<{
+            lastSeenTime: number;
+            contactName: string;
+            isContactInSim: boolean;
+        }>
+    ) {
+
+        const methodName = dw.updateChat.methodName;
+        type Params = dw.updateChat.Params;
+        type Response = dw.updateChat.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { chat_id, ...updatedFields }
+        );
+
+    }
+
+    export function destroyChat(
+        chat_id: number
+    ) {
+
+        const methodName = dw.destroyChat.methodName;
+        type Params = dw.destroyChat.Params;
+        type Response = dw.destroyChat.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { chat_id }
+        );
+
+    }
+
+    export function newMessage(
+        chat_id: number,
+        message: types.WebphoneData.Message
+    ) {
+
+        const methodName = dw.newMessage.methodName;
+        type Params = dw.newMessage.Params;
+        type Response = dw.newMessage.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { chat_id, message }
+        );
+
+    }
+
+    export function updateOutgoingMessageStatus(
+        message_id: number,
+        status: types.WebphoneData.Message.Outgoing["status"]
+    ) {
+
+        const methodName = dw.updateOutgoingMessageStatus.methodName;
+        type Params = dw.updateOutgoingMessageStatus.Params;
+        type Response = dw.updateOutgoingMessageStatus.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { message_id, status }
+        );
+
+
+    }
 
 }
-
-export function pushWebUaData(
-    webUaData: declaration.Types.WebUaData
-){
-
-    const methodName = declaration.pushWebUaData.methodName;
-    type Params = declaration.pushWebUaData.Params;
-    type Response = declaration.pushWebUaData.Response;
-
-    return makeRequest<Params, Response>(
-        methodName,
-        webUaData
-    );
-
-}
-
 
 
 /*

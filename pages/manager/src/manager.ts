@@ -1,14 +1,10 @@
-import { client as api, declaration } from "../../../api";
-import Types = declaration.Types;
+import { apiClient as api, types } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 import { ButtonBar } from "./ButtonBar";
 import { SimRow } from "./SimRow";
 
 declare const require: (path: string)=> any;
 const bootbox: any = window["bootbox"];
-
-
-console.log("Up to date!");
 
 async function loadMainWidget(
 	previousState: { selectedSim: string; areDetailsShown: boolean; } | undefined
@@ -66,7 +62,7 @@ async function loadMainWidget(
 
 			buttonBar.setState({
 				"isSimRowSelected": true,
-				"isSimSharable": Types.UserSim.Owned.match(userSim)
+				"isSimSharable": types.UserSim.Owned.match(userSim)
 			});
 
 		});

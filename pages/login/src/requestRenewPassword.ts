@@ -1,4 +1,4 @@
-import { client as api } from "../../../api";
+import { apiClient as api } from "../../../api";
 
 const bootbox: any = window["bootbox"];
 declare const Buffer: any;

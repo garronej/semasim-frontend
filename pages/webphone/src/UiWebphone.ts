@@ -1,10 +1,11 @@
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
-import { declaration } from "../../../api";
-import Types = declaration.Types;
+import { types } from "../../../api";
 
 import { UiQuickAction } from "./UiQuickAction";
 import { UiHeader } from "./UiHeader";
+import { UiPhonebook } from "./UiPhonebook";
+import { VoidSyncEvent } from "ts-events-extended";
 
 declare const require: any;
 
@@ -18,8 +19,11 @@ export class UiWebphone {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
+    public readonly evtUp= new VoidSyncEvent();
+
     constructor(
-        public readonly userSim: Types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable,
+        public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
         this.structure = html.structure.clone();
@@ -29,9 +33,46 @@ export class UiWebphone {
 
         this.structure.find("div.id_header").append(uiHeader.structure);
 
+        uiHeader.evtUp.attach(()=> this.evtUp.post());
+
+
+
         let uiQuickAction= new UiQuickAction(this.userSim);
 
         this.structure.find("div.id_colLeft").append(uiQuickAction.structure);
+
+        uiQuickAction.evtNewContact.attach(number => {
+            console.log("uiQuickAction evtNewContact", { number });
+        });
+
+        uiQuickAction.evtSms.attach(number=> {
+            console.log("uiQuickAction evtSms", { number });
+        });
+
+        uiQuickAction.evtVoiceCall.attach( number=> {
+            console.log("uiQuickAction evtVoiceCall", { number });
+        });
+
+        uiQuickAction.evtStaticNotification.attach( staticNotification => {
+
+            let str= JSON.stringify(staticNotification);
+
+            this.structure.find(".id_staticNotifications").html(`<h1>${str}</h1>`);
+
+        });
+
+
+
+        let uiPhonebook= new UiPhonebook(this.userSim, wdInstance);
+
+        this.structure.find("div.id_colLeft").append(uiPhonebook.structure);
+
+        uiPhonebook.evtContactSelected.attach( wdChat => {
+
+            console.log("uiPhonebook evtContactSelected", { wdChat });
+
+        });
+
 
         $('body').data('dynamic').panels();
 

@@ -1,6 +1,5 @@
 import { VoidSyncEvent } from "ts-events-extended";
-import { declaration } from "../../../api";
-import Types = declaration.Types;
+import { types } from "../../../api";
 
 declare const require: (path: string) => any;
 
@@ -179,7 +178,7 @@ export class SimRow {
     }
 
     constructor(
-        public readonly userSim: Types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable
     ) {
 
         this.structure = $(

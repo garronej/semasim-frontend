@@ -1,3 +1,6 @@
+import * as types from "./types";
+
+export const domain = "semasim.com";
 export const apiPath = "api";
 
 export namespace registerUser {
@@ -12,7 +15,6 @@ export namespace registerUser {
     export type Response = "CREATED" | "EMAIL NOT AVAILABLE";
 
 }
-
 
 export namespace loginUser {
 
@@ -51,14 +53,13 @@ export namespace sendRenewPasswordEmail {
 
 }
 
-
 export namespace getSims {
 
     export const methodName = "get-sim";
 
     export type Params = undefined;
 
-    export type Response = Types.UserSim[];
+    export type Response = types.UserSim[];
 
 }
 
@@ -68,7 +69,7 @@ export namespace getUnregisteredLanDongles {
 
     export type Params = undefined;
 
-    export type Response = Types.Dongle[];
+    export type Response = types.Dongle[];
 
 }
 
@@ -81,7 +82,7 @@ export namespace unlockSim {
         pin: string;
     };
 
-    export type Response = Types.UnlockResult;
+    export type Response = types.UnlockResult;
 
 }
 
@@ -121,7 +122,7 @@ export namespace shareSim {
         message: string;
     };
 
-    export type Response = Types.AffectedUsers;
+    export type Response = types.AffectedUsers;
 
 }
 
@@ -166,321 +167,97 @@ export namespace getUaConfig {
 
 }
 
-export namespace fetchWebUaData {
 
-    export const methodName = "fetch-web-ua-data";
+export namespace webphoneData {
 
-    export type Params = undefined;
+    export namespace fetch {
 
-    export type Response= Types.WebUaData;
+        export const methodName = "webphone-data_fetch";
 
-}
+        export type Params = undefined;
 
-export namespace pushWebUaData {
-
-    export const methodName = "push-web-ua-data";
-
-    export type Params= Types.WebUaData;
-
-    export type Response= undefined;
-
-}
-
-
-export namespace Types {
-
-    //START IMPORT
-
-
-    export type Contact = {
-        readonly index: number;
-        readonly name: {
-            readonly asStored: string;
-            full: string;
-        };
-        readonly number: {
-            readonly asStored: string;
-            localFormat: string;
-        };
-    }
-
-
-    export type SimStorage = {
-        number?: {
-            readonly asStored: string;
-            localFormat: string;
-        };
-        infos: {
-            contactNameMaxLength: number;
-            numberMaxLength: number;
-            storageLeft: number;
-        };
-        contacts: Contact[];
-        digest: string;
-    };
-
-    export type LockedPinState = "SIM PIN" | "SIM PUK" | "SIM PIN2" | "SIM PUK2";
-
-
-    export interface LockedDongle {
-        imei: string;
-        manufacturer: string;
-        model: string;
-        firmwareVersion: string;
-        sim: {
-            iccid?: string;
-            pinState: LockedPinState;
-            tryLeft: number;
-        }
-    }
-
-    export namespace LockedDongle {
-
-        export function match(dongle: Dongle): dongle is LockedDongle {
-            return (dongle.sim as LockedDongle['sim']).pinState !== undefined;
-        }
+        export type Response = types.WebphoneData;
 
     }
 
-    export type SimCountry = {
-        name: string;
-        iso: string;
-        code: number;
-    };
+    export namespace newInstance {
 
-    export interface ActiveDongle {
-        imei: string;
-        manufacturer: string;
-        model: string;
-        firmwareVersion: string;
-        isVoiceEnabled?: boolean;
-        sim: {
-            iccid: string;
-            imsi: string;
-            country?: SimCountry;
-            serviceProvider: {
-                fromImsi?: string;
-                fromNetwork?: string;
-            },
-            storage: SimStorage;
-        }
-    }
+        export const methodName = "webphone-data_new-instance"
 
-    export namespace ActiveDongle {
+        export type Params = { imsi: string; };
 
-        export function match(dongle: Dongle): dongle is ActiveDongle {
-            return !LockedDongle.match(dongle);
-        }
+        export type Response = types.WebphoneData.Instance;
 
     }
 
-    export type Dongle = LockedDongle | ActiveDongle;
+    export namespace newChat {
 
-    //END IMPORT
+        export const methodName = "webphone-data_new-chat";
 
-    export const domain = "semasim.com";
-
-    export type SimOwnership = SimOwnership.Owned | SimOwnership.Shared;
-
-    export namespace SimOwnership {
-
-        export type Owned = {
-            status: "OWNED";
-            sharedWith: {
-                confirmed: string[];
-                notConfirmed: string[];
-            };
-        };
-
-        export type Shared = Shared.Confirmed | Shared.NotConfirmed;
-
-        export namespace Shared {
-
-            export type Confirmed = {
-                status: "SHARED CONFIRMED";
-                ownerEmail: string
-            };
-
-            export type NotConfirmed = {
-                status: "SHARED NOT CONFIRMED";
-                ownerEmail: string;
-                sharingRequestMessage: string | undefined;
-            };
-
-        }
-
-    }
-
-    export type UserSim = UserSim.Base<SimOwnership>;
-
-    export namespace UserSim {
-
-        export type Base<T extends SimOwnership> = {
-            sim: ActiveDongle["sim"];
-            friendlyName: string;
-            password: string;
-            dongle: {
-                imei: string;
-                isVoiceEnabled?: boolean;
-                manufacturer: string;
-                model: string;
-                firmwareVersion: string;
-            };
-            gatewayLocation: GatewayLocation;
-            isOnline: boolean;
-            ownership: T;
-        };
-
-        export type GatewayLocation = {
-            ip: string;
-            countryIso: string | undefined;
-            subdivisions: string | undefined;
-            city: string | undefined;
-        }
-
-        export type Owned = Base<SimOwnership.Owned>;
-
-        export namespace Owned {
-            export function match(userSim: UserSim): userSim is Owned {
-                return userSim.ownership.status === "OWNED";
-            }
-        }
-
-        export type Shared = Base<SimOwnership.Shared>;
-
-        export namespace Shared {
-
-            export function match(userSim: UserSim): userSim is Shared {
-                return Confirmed.match(userSim) || NotConfirmed.match(userSim);
-            }
-
-            export type Confirmed = Base<SimOwnership.Shared.Confirmed>;
-
-            export namespace Confirmed {
-                export function match(userSim: UserSim): userSim is Confirmed {
-                    return userSim.ownership.status === "SHARED CONFIRMED";
-                }
-            }
-
-            export type NotConfirmed = Base<SimOwnership.Shared.NotConfirmed>;
-
-            export namespace NotConfirmed {
-                export function match(userSim: UserSim): userSim is NotConfirmed {
-                    return userSim.ownership.status === "SHARED NOT CONFIRMED";
-                }
-            }
-
-        }
-
-        export type Usable = Base<SimOwnership.Owned | SimOwnership.Shared.Confirmed>;
-
-        export namespace Usable {
-            export function match(userSim: UserSim): userSim is Usable {
-                return Owned.match(userSim) || Shared.Confirmed.match(userSim);
-            }
-        }
-
-    }
-
-    export type AffectedUsers = {
-        registered: string[];
-        notRegistered: string[];
-    };
-
-    export type UnlockResult = UnlockResult.WrongPin | UnlockResult.ValidPin;
-
-    export namespace UnlockResult {
-
-        export type WrongPin = {
-            wasPinValid: false;
-            pinState: Types.LockedPinState;
-            tryLeft: number;
-        };
-
-        export type ValidPin = ValidPin.Registerable | ValidPin.NotRegisterable;
-
-        export namespace ValidPin {
-
-            export type Registerable = {
-                wasPinValid: true;
-                isSimRegisterable: true;
-                dongle: Types.ActiveDongle;
-            };
-
-            export type NotRegisterable = {
-                wasPinValid: true;
-                isSimRegisterable: false;
-                simRegisteredBy: { who: "MYSELF" } | { who: "OTHER USER"; email: string; };
-            };
-
-        }
-
-    }
-
-    export type WebUaData = {
-        [imsi: string]: WebUaData.Conversation[];
-    };
-
-    export namespace WebUaData {
-
-        export type Conversation = {
-            contactName: string | undefined;
+        export type Params = {
+            instance_id: number;
             contactNumber: string;
-            notifications: number;
-            messages: Conversation.Message[];
-        }
+            contactName: string;
+            isContactInSim: boolean;
+        };
 
-        export namespace Conversation {
+        export type Response = types.WebphoneData.Chat;
 
-            export type Message = Message.Incoming | Message.Outgoing;
+    }
 
-            export namespace Message {
+    export namespace updateChat {
 
-                export type Incoming = {
-                    date: Date;
-                    direction: "INCOMING";
-                    isNotification: boolean;
-                    text: string;
-                };
+        export const methodName = "webphone-data_update-chat";
 
-                export type Outgoing = {
-                    date: Date;
-                    direction: "OUTGOING";
-                    sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
-                    text: string;
-                    status: "TRANSMITTED TO BACKEND" | "SENT BY DONGLE" | "RECEIVED"
-                };
+        export type Params = {
+            chat_id: number;
+            lastSeenTime?: number;
+            contactName?: string;
+            isContactInSim?: boolean;
+        };
 
-            }
+        export type Response = undefined;
 
-        }
+    }
 
+    export namespace destroyChat {
 
+        export const methodName = "webphone-data_destroy-chat";
+
+        export type Params = {
+            chat_id: number;
+        };
+
+        export type Response = undefined;
+
+    }
+
+    export namespace newMessage {
+
+        export const methodName = "webphone-data_new-message";
+
+        export type Params = {
+            chat_id: number;
+            message: types.WebphoneData.Message
+        };
+
+        export type Response = types.WebphoneData.Message;
+
+    }
+
+    export namespace updateOutgoingMessageStatus {
+
+        export const methodName = "webphone-data_update-outgoing-message-status";
+
+        export type Params = {
+            message_id: number;
+            status: types.WebphoneData.Message.Outgoing["status"]
+        };
+
+        export type Response = undefined;
 
     }
 
 
 }
 
-export namespace JSON_CUSTOM {
-
-    export function stringify(obj: any): string {
-
-        if (obj === undefined) {
-            return "undefined";
-        }
-
-        return JSON.stringify([obj]);
-
-    }
-
-    export function parse(str: string): any {
-
-        if (str === "undefined") {
-            return undefined;
-        }
-
-        return JSON.parse(str).pop();
-    }
-
-}
