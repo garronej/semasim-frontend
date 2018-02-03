@@ -16,16 +16,7 @@
     "b-login": "cd pages/login && npm install && npm run build",
     "b-register": "cd pages/register && npm install && npm run build",
     "b-manager": "cd pages/manager && npm install && npm run build",
-    "b-webphone": "cd pages/webphone && npm install && npm run build",
-    "watch": "node ./pages/login/node_modules/concurrently/src/main --kill-others \"npm run w-api\" \"npm run w-tools\" \"npm run w-shared\" \"npm run w-pages\"",
-    "w-api": "cd api && npm run tsc-w",
-    "w-tools": "cd tools && npm run tsc-w",
-    "w-shared": "cd shared && npm run tsc-w",
-    "w-pages": "node ./pages/login/node_modules/concurrently/src/main --kill-others \"npm run w-login\" \"npm run w-register\" \"npm run w-manager\" \"npm run w-webphone\"",
-    "w-login": "cd pages/login && npm run watch",
-    "w-register": "cd pages/register && npm run watch",
-    "w-manager": "cd pages/manager && npm run watch",
-    "w-webphone": "cd pages/webphone && npm run watch"
+    "b-webphone": "cd pages/webphone && npm install && npm run build"
   },
   "repository": {
     "type": "git",

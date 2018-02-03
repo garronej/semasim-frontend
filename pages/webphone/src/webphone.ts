@@ -23,6 +23,8 @@ async function loadPageContent() {
 
 	let wdRoot= await wds.fetch(useableUserSims);
 
+	console.log(wdRoot);
+
 	let userSim= useableUserSims.pop()!;
 
 	let wdInstance= wdRoot.instances.find(({ imsi })=> imsi === userSim.sim.imsi )!;

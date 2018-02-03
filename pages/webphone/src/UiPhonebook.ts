@@ -350,7 +350,7 @@ function isAscendingAlphabeticalOrder(
     let vB = getWeight(b);
 
     if (vA === vB) {
-        return this.compareString(a.substr(1), b.substr(1));
+        return isAscendingAlphabeticalOrder(a.substr(1), b.substr(1));
     }
 
     return vA < vB;
