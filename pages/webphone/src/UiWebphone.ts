@@ -1,4 +1,3 @@
-import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
 import { types } from "../../../api";
 
@@ -17,7 +16,6 @@ const html = loadHtml(
 export class UiWebphone {
 
     public readonly structure = html.structure.clone();
-    private readonly templates = html.templates.clone();
 
     public readonly evtUp= new VoidSyncEvent();
 
@@ -25,9 +23,6 @@ export class UiWebphone {
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
-
-        this.structure = html.structure.clone();
-        this.templates = html.templates.clone();
 
         let uiHeader= new UiHeader(this.userSim);
 

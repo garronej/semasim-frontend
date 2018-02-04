@@ -1,4 +1,4 @@
-import { apiClient as api, types, apiDeclaration } from "../../../api";
+import { apiClient as api, apiDeclaration } from "../../../api";
 
 declare const Buffer: any;
 

@@ -5,8 +5,6 @@ import { requestRenewPassword } from "./requestRenewPassword";
 const bootbox: any = window["bootbox"];
 declare const Buffer: any;
 
-console.log("upx!!");
-
 function setHandlers(){
 
 	/* Start import from theme */

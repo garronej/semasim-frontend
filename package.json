@@ -5,18 +5,30 @@
   "types": "./index.d.ts",
   "version": "0.1.0",
   "scripts": {
-    "tsc": "node ./api/node_modules/typescript/bin/tsc --declaration ./index.ts",
-    "postinstall": "npm run fetch-web-assets && npm run build",
+    "postinstall": "npm run fetch-web-assets && npm run install-all && npm run build",
     "fetch-web-assets": "git clone https://a30f7432b117d8320cc21cc03513817c3f08d4b6:x-oauth-basic@github.com/garronej/web-assets.git static",
-    "build": "npm run b-api && npm run b-tools && npm run b-shared && npm run b-pages && npm run tsc",
-    "b-api": "cd api && npm install && npm run tsc",
-    "b-tools": "cd tools && npm install && npm run tsc",
-    "b-shared": "cd shared && npm install && npm run tsc",
+
+    "tsc": "node ./api/node_modules/typescript/bin/tsc --declaration ./index.ts",
+
+    "install-all": "npm run i-tools && npm run i-api && npm run i-shared && npm run i-pages",
+    "i-tools": "cd tools && npm install",
+    "i-api": "cd api && npm install",
+    "i-shared": "cd shared && npm install",
+    "i-pages": "npm run i-login && npm run i-register && npm run i-manager && npm run i-webphone",
+    "i-login": "cd pages/login && npm install",
+    "i-register": "cd pages/register && npm install",
+    "i-manager": "cd pages/manager && npm install",
+    "i-webphone": "cd pages/webphone && npm install",
+
+    "build": "npm run b-tools && npm run b-api && npm run b-shared && npm run b-pages && npm run tsc",
+    "b-tools": "cd tools && npm run tsc",
+    "b-api": "cd api && npm run tsc",
+    "b-shared": "cd shared && npm run tsc",
     "b-pages": "npm run b-login && npm run b-register && npm run b-manager && npm run b-webphone",
-    "b-login": "cd pages/login && npm install && npm run build",
-    "b-register": "cd pages/register && npm install && npm run build",
-    "b-manager": "cd pages/manager && npm install && npm run build",
-    "b-webphone": "cd pages/webphone && npm install && npm run build"
+    "b-login": "cd pages/login && npm run build",
+    "b-register": "cd pages/register && npm run build",
+    "b-manager": "cd pages/manager && npm run build",
+    "b-webphone": "cd pages/webphone && npm run build"
   },
   "repository": {
     "type": "git",

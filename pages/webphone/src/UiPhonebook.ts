@@ -1,7 +1,6 @@
 import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
 import { VoidSyncEvent } from "ts-events-extended";
-import { update } from "autosize";
 import { types } from "../../../api";
 import * as wds from "./webphoneDataSync";
 
@@ -12,13 +11,15 @@ const html = loadHtml(
     "UiPhonebook"
 );
 
+const html_UiPhonebook_structure= html.structure;
+const html_UiContact_structure= html.templates;
+
 import wd= types.WebphoneData;
 import { phoneNumber } from "../../../shared/dist/phoneNumber";
 
 export class UiPhonebook {
 
-    public readonly structure= html.structure.clone();
-    private readonly templates= html.templates.clone();
+    public readonly structure= html_UiPhonebook_structure.clone();
 
     public readonly evtContactSelected = new SyncEvent<wd.Chat>();
 
@@ -217,7 +218,7 @@ export namespace UiPhonebook {
 
     export class UiContact {
 
-        public readonly structure: JQuery;
+        public readonly structure = html_UiContact_structure.find("li").clone();
 
         /** only forward click event, need to be selected manually from outside */
         public evtClick = new VoidSyncEvent();
@@ -227,7 +228,6 @@ export namespace UiPhonebook {
             public readonly wdChat: wd.Chat,
         ) {
 
-            this.structure = html.templates.find("li").clone();
 
             this.structure.on("click", ()=> this.evtClick.post());
 

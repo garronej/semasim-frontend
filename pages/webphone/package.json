@@ -33,7 +33,7 @@
     "browserify": "^14.4.0",
     "html2js-browserify": "^1.3.0",
     "lessify": "^1.0.1",
-    "typescript": "^2.5.3",
+    "typescript": "^2.7.1",
     "watchify": "^3.9.0"
   }
 }

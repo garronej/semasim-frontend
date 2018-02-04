@@ -105,11 +105,18 @@ export class ButtonBar {
             () => this.evtClickRefresh.post()
         );
 
-        this.state = {
-            "isSimRowSelected": false,
-            "areDetailsShown": false,
-            "isSimSharable": false
-        };
+
+        this.state = (() => {
+
+            let state: ButtonBar.State.RowNotSelected = {
+                "isSimRowSelected": false,
+                "isSimSharable": false,
+                "areDetailsShown": false
+            };
+
+            return state;
+
+        })();
 
         this.setState({});
 
@@ -120,15 +127,22 @@ export class ButtonBar {
 
 export namespace ButtonBar {
 
-    export type State =
-        {
+    export type State = State.RowSelected | State.RowNotSelected;
+
+    export namespace State {
+
+        export type RowSelected = {
             isSimRowSelected: true;
             isSimSharable: boolean;
             areDetailsShown: boolean;
-        } | {
+        };
+
+        export type RowNotSelected = {
             isSimRowSelected: false;
             isSimSharable: false;
             areDetailsShown: false;
         };
+
+    }
 
 }

@@ -1,11 +1,8 @@
-import { apiClient as api, types } from "../../../api";
+import { apiClient as api } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 
 import * as wds from "./webphoneDataSync";
 import { UiWebphone } from "./UiWebphone";
-
-declare const require: (path: string) => any;
-const bootbox: any = window["bootbox"];
 
 async function loadPageContent() {
 
