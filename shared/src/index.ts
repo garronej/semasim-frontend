@@ -5,6 +5,6 @@ import { phoneNumber } from "./phoneNumber";
 export { 
     simRegistrationProcess, 
     validateSimShareProcess, 
-    phoneNumber 
+    phoneNumber
 };
 

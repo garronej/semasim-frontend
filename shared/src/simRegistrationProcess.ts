@@ -1,21 +1,17 @@
 import { apiClient as api, types } from "../../api";
 import * as tools from "../../tools";
 
-const bootbox: any = window["bootbox"];
-
 export async function start(): Promise<void> {
 
-    let stopLoad = tools.loadingDialog("Looking for registerable SIM on LAN...");
+    tools.bootbox_custom.loading("Looking for registerable SIM on your LAN..");
 
-    let unregisteredLanDongles = await api.getUnregisteredLanDongles();
-
-    stopLoad();
-
-    for (let dongle of await unregisteredLanDongles) {
+    for (let dongle of await api.getUnregisteredLanDongles() ) {
 
         await interact(dongle);
 
     }
+
+    tools.bootbox_custom.dismissLoading();
 
 }
 
@@ -45,7 +41,7 @@ export async function interact(dongle: types.Dongle) {
     })();
 
     let shouldAdd = await new Promise<boolean>(
-        resolve => bootbox.dialog({
+        resolve => tools.bootbox_custom.dialog({
             "title": "SIM ready to be registered",
             "message": `<p class="text-center">${shouldAdd_message}</p>`,
             "buttons": {
@@ -73,7 +69,7 @@ export async function interact(dongle: types.Dongle) {
 
             if (dongle.sim.pinState !== "SIM PIN") {
 
-                bootbox.alert(`${dongle.sim.pinState} require manual unlock`);
+                tools.bootbox_custom.alert(`${dongle.sim.pinState} require manual unlock`);
 
                 return undefined;
 
@@ -82,7 +78,7 @@ export async function interact(dongle: types.Dongle) {
             let tryLeft = dongle.sim.tryLeft;
 
             let pin = await new Promise<string>(
-                resolve => bootbox.prompt({
+                resolve => tools.bootbox_custom.prompt({
                     "title": `PIN code? (${tryLeft} tries left)`,
                     "inputType": "number",
                     "callback": result => resolve(result)
@@ -94,7 +90,7 @@ export async function interact(dongle: types.Dongle) {
             if (!pin.match(/^[0-9]{4}$/)) {
 
                 let shouldContinue = await new Promise<boolean>(
-                    resolve => bootbox.confirm({
+                    resolve => tools.bootbox_custom.confirm({
                         "title": "PIN malformed!",
                         "message": "A pin code is composed of 4 digits, e.g. 0000",
                         callback: result => resolve(result)
@@ -107,11 +103,9 @@ export async function interact(dongle: types.Dongle) {
 
             }
 
-            let stopLoad = tools.loadingDialog("Your sim is being unlocked please wait...", 0);
+            tools.bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
 
             let unlockResult = await api.unlockSim(dongle.imei, pin);
-
-            stopLoad();
 
             if (!unlockResult.wasPinValid) {
 
@@ -132,14 +126,14 @@ export async function interact(dongle: types.Dongle) {
 
             if (unlockResultValidPin.simRegisteredBy.who === "MYSELF") {
 
-                bootbox.alert([
+                tools.bootbox_custom.alert([
                     "Unlock success. You already have registered this SIM,",
                     " it just needed to be unlock again"
                 ].join(""));
 
             } else {
 
-                bootbox.alert([
+                tools.bootbox_custom.alert([
                     "Unlock success, the SIM is currently registered ",
                     `by account: ${unlockResultValidPin.simRegisteredBy.email}`
                 ].join(""));
@@ -159,7 +153,7 @@ export async function interact(dongle: types.Dongle) {
         let sure = dongle.isVoiceEnabled === false;
 
         await new Promise<void>(
-            resolve => bootbox.alert(
+            resolve => tools.bootbox_custom.alert(
                 [
                     "Bad luck :(",
                     `Voice is ${sure ? "" : "( maybe )"} not enabled on the 3G Key you are using with this SIM.`,
@@ -181,14 +175,12 @@ export async function interact(dongle: types.Dongle) {
 
     }
 
-    let stopLoad = tools.loadingDialog("Please wait...");
+    tools.bootbox_custom.loading("Suggesting a suitable friendly name ...");
 
-    let friendlyName = await getDefaultFriendlyName();
-
-    stopLoad();
+    let friendlyName = await getDefaultFriendlyName(dongle.sim);
 
     let friendlyNameSubmitted = await new Promise<string | null>(
-        resolve => bootbox.prompt({
+        resolve => tools.bootbox_custom.prompt({
             "title": "Friendly name for this sim?",
             "value": friendlyName,
             "callback": result => resolve(result),
@@ -199,20 +191,31 @@ export async function interact(dongle: types.Dongle) {
         friendlyName = friendlyNameSubmitted;
     }
 
-
-    stopLoad = tools.loadingDialog("Registering SIM...");
+    tools.bootbox_custom.loading("Registering SIM...");
 
     await api.registerSim(dongle.sim.imsi, friendlyName);
 
-    stopLoad();
-
 }
 
-async function getDefaultFriendlyName() {
+async function getDefaultFriendlyName(sim: types.ActiveDongle["sim"]) {
 
-    let build = i => `SIM ${i}`;
+    let tag = sim.serviceProvider.fromImsi || sim.serviceProvider.fromNetwork || "";
 
-    let i = 1;
+    let num= sim.storage.number;
+
+    if( !tag && num && num.localFormat.length > 4 ){
+
+        let loc= num.localFormat;
+
+        tag = loc.slice(0, 2) + ".." + loc.slice(-2);
+
+    }
+
+    tag= tag || "X";
+
+    let build = (i: number) => `SIM ${tag}${i === 0 ? "" : ` ( ${i} )`}`;
+
+    let i = 0;
 
     let usableUserSims = (await api.getUserSims()).filter(
         userSim => types.UserSim.Usable.match(userSim)
@@ -220,7 +223,7 @@ async function getDefaultFriendlyName() {
 
     while (
         usableUserSims.filter(
-            ({ friendlyName }) => friendlyName === build(i)
+            ({ friendlyName, sim }) => friendlyName === build(i)
         ).length
     ) {
         i++;

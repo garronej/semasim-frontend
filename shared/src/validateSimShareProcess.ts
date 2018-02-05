@@ -1,17 +1,13 @@
 import { apiClient as api, types } from "../../api";
 import * as tools from "../../tools";
 
-const bootbox: any = window["bootbox"];
-
 /** return need reedReload */
 export async function start(
 ): Promise<types.UserSim.Usable[]> {
 
-    let stopLoad= tools.loadingDialog("Looking for your SIMs please wait...");
+    tools.bootbox_custom.loading("Retrieving your SIMs please wait...");
 
     let userSims = await api.getUserSims();
-
-    stopLoad();
 
     let usableUserSims = userSims.filter(
         userSim => types.UserSim.Usable.match(userSim)
@@ -42,17 +38,18 @@ export async function start(
 
     }
 
+    tools.bootbox_custom.dismissLoading();
+
     return usableUserSims;
 
 }
-
 
 export async function interact(
     userSim: types.UserSim.Shared.NotConfirmed,
 ): Promise<types.UserSim.Shared.Confirmed | undefined> {
 
     let shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
-        resolve => bootbox.dialog({
+        resolve => tools.bootbox_custom.dialog({
             "title": `${userSim.ownership.ownerEmail} would like to share a SIM with you, accept?`,
             "message": userSim.ownership.sharingRequestMessage ?
                 `«${userSim.ownership.sharingRequestMessage.replace(/\n/g, "<br>")}»` : "",
@@ -77,11 +74,9 @@ export async function interact(
 
     if (shouldProceed === "REFUSE") {
 
-        let stopLoad= tools.loadingDialog("Rejecting SIM sharing request...");
+        tools.bootbox_custom.loading("Rejecting SIM sharing request...");
 
         await api.unregisterSim(userSim.sim.imsi);
-
-        stopLoad();
 
         return undefined;
 
@@ -89,7 +84,7 @@ export async function interact(
 
     //TODO: max length for friendly name
     let friendlyNameSubmitted = await new Promise<string | null>(
-        resolve => bootbox.prompt({
+        resolve => tools.bootbox_custom.prompt({
             "title": "Friendly name for this sim?",
             "value": userSim.friendlyName,
             "callback": result => resolve(result),
@@ -100,7 +95,7 @@ export async function interact(
         userSim.friendlyName = friendlyNameSubmitted;
     }
 
-    let stopLoad= tools.loadingDialog("Accepting SIM sharing request...");
+    tools.bootbox_custom.loading("Accepting SIM sharing request...");
 
     await api.setSimFriendlyName(
         userSim.sim.imsi,
@@ -110,8 +105,6 @@ export async function interact(
     let confirmedSim = (await api.getUserSims()).filter(
         ({ sim }) => sim.imsi === userSim.sim.imsi
     ).pop()! as types.UserSim.Shared.Confirmed;
-
-    stopLoad();
 
     return confirmedSim;
 

@@ -3,6 +3,7 @@ import { loadHtml } from "./loadHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import { types } from "../../../api";
 import * as wds from "./webphoneDataSync";
+import { phoneNumber } from "../../../shared";
 
 declare const require: any;
 
@@ -15,7 +16,6 @@ const html_UiPhonebook_structure= html.structure;
 const html_UiContact_structure= html.templates;
 
 import wd= types.WebphoneData;
-import { phoneNumber } from "../../../shared/dist/phoneNumber";
 
 export class UiPhonebook {
 
@@ -38,7 +38,7 @@ export class UiPhonebook {
 
         for( let wdChat of this.wdInstance.chats ){
 
-            this.insertUiContact(wdChat);
+            this.addUiContact(wdChat);
 
         }
 
@@ -59,10 +59,9 @@ export class UiPhonebook {
 
     private readonly uiContacts= new Map<wd.Chat, UiPhonebook.UiContact>();
 
-    private insertUiContact(wdChat: wd.Chat){
+    private addUiContact(wdChat: wd.Chat){
 
         let uiContact = new UiPhonebook.UiContact(this.userSim, wdChat);
-
 
         uiContact.evtClick.attach(async () => {
 
@@ -89,11 +88,13 @@ export class UiPhonebook {
     private updateSearch() {
 
         (this.structure.find("input") as any)
-            .quicksearch(this.structure.find("il li"));
+            .quicksearch(this.structure.find("ul li"));
 
         this.structure.find("ul").slimScroll({ "scrollTo": "0" });
 
     }
+
+
 
 
     private placeUiContact(
@@ -116,7 +117,6 @@ export class UiPhonebook {
 
             let newerMessageTime_i= wds.getNewerMessageTime(uiContact_i.wdChat);
 
-
             if (newerMessageTime > newerMessageTime_i) {
 
                 uiContact.structure.insertBefore(uiContact_i.structure);
@@ -127,7 +127,7 @@ export class UiPhonebook {
 
                 let contactName= uiContact.wdChat.contactName;
 
-                let contactName_i= uiContact.wdChat.contactName;
+                let contactName_i= uiContact_i.wdChat.contactName;
 
                 let doInsert: boolean;
 
@@ -174,7 +174,6 @@ export class UiPhonebook {
         shouldStoreInSim: boolean
     ): Promise<wd.Chat>{
 
-
         let wdChat= await wds.newChat(
             this.wdInstance, 
             contactNumber, 
@@ -182,9 +181,13 @@ export class UiPhonebook {
             shouldStoreInSim
         );
 
-        this.insertUiContact(wdChat);
+        this.structure.find("input").val("");
+
+        this.addUiContact(wdChat);
 
         this.updateSearch();
+
+        this.uiContacts.get(wdChat)!.evtClick.post();
 
         return wdChat;
 

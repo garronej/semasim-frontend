@@ -1,12 +1,12 @@
 import { apiClient as api, types } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 import { ButtonBar } from "./ButtonBar";
+import * as tools from "../../../tools";
 import { SimRow } from "./SimRow";
 
 declare const require: (path: string)=> any;
-const bootbox: any = window["bootbox"];
 
-async function loadMainWidget(
+async function main(
 	previousState: { selectedSim: string; areDetailsShown: boolean; } | undefined
 ){
 
@@ -19,7 +19,7 @@ async function loadMainWidget(
 		let structure = $(require("../templates/welcome.html"));
 
 		structure.find("#jumbotron-refresh").click(
-			() => loadMainWidget(undefined)
+			() => main(undefined)
 		);
 
 		$("#page-payload").html("").append(structure);
@@ -27,7 +27,6 @@ async function loadMainWidget(
 		return;
 
 	}
-
 
 	let structure = $(require("../templates/wrapper.html"));
 
@@ -103,7 +102,7 @@ async function loadMainWidget(
 			let userSim= simRows.filter(({ isSelected })=> isSelected)[0].userSim;
 
 			let shouldProceed = await new Promise<boolean>(
-				resolve => bootbox.confirm({
+				resolve => tools.bootbox_custom.confirm({
 					"title": "Unregister SIM",
 					"message": `Do you really want to unregister ${userSim.friendlyName}?`,
 					callback: result => resolve(result)
@@ -128,7 +127,7 @@ async function loadMainWidget(
 			let userSim= simRows.filter(({ isSelected })=> isSelected)[0].userSim;
 
 			let friendlyNameSubmitted = await new Promise<string | null>(
-				resolve => bootbox.prompt({
+				resolve => tools.bootbox_custom.prompt({
 					"title": "Friendly name for this sim?",
 					"value": userSim.friendlyName,
 					"callback": result => resolve(result),
@@ -151,7 +150,7 @@ async function loadMainWidget(
 
 			structure.remove();
 
-			await loadMainWidget({
+			await main({
 				"selectedSim": simRows.filter(
 					({ isSelected }) => isSelected
 				)[0].userSim.sim.imsi,
@@ -192,6 +191,6 @@ $(document).ready(()=>{
 
 	});
 
-	loadMainWidget(undefined);
+	main(undefined);
 
 });

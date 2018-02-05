@@ -9,6 +9,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/bootstrap": "3.3.28",
     "@types/jquery": "2.0.48",
     "typescript": "^2.7.1"
   }

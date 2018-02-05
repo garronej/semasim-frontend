@@ -57,13 +57,21 @@ export namespace phoneNumber {
 
 	}
 
+	function isValidE164(phoneNumber: phoneNumber): boolean {
+
+          return (
+			  phoneNumber[0] === "+" &&
+			  (intlTelInputUtils as any).isValidNumber(phoneNumber)
+		  );
+
+	}
 
 	export function prettyPrint(
 		phoneNumber: phoneNumber,
 		simIso: string | undefined
 	): string {
 
-		if ( !simIso || phoneNumber[0] !== "+") {
+		if ( !simIso || !isValidE164(phoneNumber)) {
 			return phoneNumber;
 		}
 
@@ -106,7 +114,7 @@ export namespace phoneNumber {
 			return true;
 		}
 
-		if (phoneNumber[0] === "+") {
+		if ( isValidE164(phoneNumber) ) {
 
 			let pnNationalDry = (intlTelInputUtils as any).formatNumber(
 				phoneNumber,

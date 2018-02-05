@@ -6,6 +6,8 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { VoidSyncEvent } from "ts-events-extended";
 
+
+
 declare const require: any;
 
 const html = loadHtml(
@@ -62,14 +64,14 @@ export class UiWebphone {
 
         this.structure.find("div.id_colLeft").append(uiPhonebook.structure);
 
-        uiPhonebook.evtContactSelected.attach( wdChat => {
+        uiPhonebook.evtContactSelected.attach(wdChat => {
 
             console.log("uiPhonebook evtContactSelected", { wdChat });
 
         });
 
-
         $('body').data('dynamic').panels();
+
 
     }
 }
