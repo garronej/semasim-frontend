@@ -17,6 +17,7 @@
     ]
   },
   "dependencies": {
+    "moment": "^2.20.1",
     "sdp-transform": "^2.3.1",
     "ts-events-extended": "github:garronej/ts-events-extended"
   },

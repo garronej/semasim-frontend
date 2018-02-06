@@ -72,8 +72,7 @@ export function loading(
 
 }
 
-const bootbox = window["bootbox"];
-
+declare const bootbox: any;
 
 function run(method: string, args: any[], isLoading = false): JQuery {
 

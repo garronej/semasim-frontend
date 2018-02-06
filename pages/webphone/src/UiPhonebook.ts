@@ -2,8 +2,9 @@ import { SyncEvent } from "ts-events-extended";
 import { loadHtml } from "./loadHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import { types } from "../../../api";
-import * as wds from "./webphoneDataSync";
+import { read as wdr } from "./data";
 import { phoneNumber } from "../../../shared";
+import Wd = types.WebphoneData;
 
 declare const require: any;
 
@@ -12,43 +13,41 @@ const html = loadHtml(
     "UiPhonebook"
 );
 
-const html_UiPhonebook_structure= html.structure;
-const html_UiContact_structure= html.templates;
-
-import wd= types.WebphoneData;
-
 export class UiPhonebook {
 
-    public readonly structure= html_UiPhonebook_structure.clone();
+    public readonly structure = html.structure.clone();
 
-    public readonly evtContactSelected = new SyncEvent<wd.Chat>();
+    public readonly evtContactSelected = new SyncEvent<{
+        wdChatPrev: Wd.Chat | undefined;
+        wdChat: Wd.Chat;
+    }>();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance
+        public readonly wdInstance: Wd.Instance
     ) {
 
         this.structure.find("ul").slimScroll({
             "position": "right",
             "distance": '0px',
             "railVisible": true,
-            "height": '400px',
+            "height": '290px',
             "size": "5px"
         });
 
-        for( let wdChat of this.wdInstance.chats ){
+        for (let wdChat of this.wdInstance.chats) {
 
-            this.addUiContact(wdChat);
+            this.createUiContact(wdChat);
 
         }
 
         this.updateSearch();
 
-        setTimeout(()=>{
+        setTimeout(() => {
 
-            let wdChat= wds.getLastSeenChat(this.wdInstance);
-            
-            if( !wdChat ) return;
+            let wdChat = wdr.lastSeenChat(this.wdInstance);
+
+            if (!wdChat) return;
 
             this.uiContacts.get(wdChat)!.evtClick.post();
 
@@ -57,25 +56,29 @@ export class UiPhonebook {
     }
 
 
-    private readonly uiContacts= new Map<wd.Chat, UiPhonebook.UiContact>();
+    private readonly uiContacts = new Map<Wd.Chat, UiContact>();
 
-    private addUiContact(wdChat: wd.Chat){
+    private createUiContact(wdChat: Wd.Chat) {
 
-        let uiContact = new UiPhonebook.UiContact(this.userSim, wdChat);
+        let uiContact = new UiContact(this.userSim, wdChat);
 
-        uiContact.evtClick.attach(async () => {
+        uiContact.evtClick.attach(() => {
 
-            let uiContactPrev= Array.from(this.uiContacts.values()).find(
-                uiContact=> uiContact.isSelected
-            );
+            let uiContactPrev = Array.from(this.uiContacts.values())
+                .find(({ isSelected }) => isSelected);
 
-            if( uiContactPrev ){
+            let wdChatPrev: Wd.Chat | undefined;
+
+            if (uiContactPrev) {
                 uiContactPrev.unselect();
+                wdChatPrev = uiContactPrev.wdChat;
+            } else {
+                wdChatPrev = undefined;
             }
-            
+
             this.uiContacts.get(wdChat)!.setSelected();
 
-            this.evtContactSelected.post(wdChat);
+            this.evtContactSelected.post({ wdChatPrev, wdChat });
 
         });
 
@@ -94,28 +97,29 @@ export class UiPhonebook {
 
     }
 
-
-
-
     private placeUiContact(
-        uiContact: UiPhonebook.UiContact
+        uiContact: UiContact
     ) {
-
-        let newerMessageTime= wds.getNewerMessageTime(uiContact.wdChat);
 
         let lis = this.structure.find("ul li");
 
-        for (let i = 0, len = lis.length; i < len; i++) {
+        let uiContactsArr = Array.from(this.uiContacts.values());
 
-            let uiContact_i = Array.from(this.uiContacts.values()).find(
-                ({ structure }) => structure.get(0) === lis.get(i)
-            )!;
+        let getUiContact_i = i => uiContactsArr.find(
+            ({ structure }) => structure.get(0) === lis.get(i)
+        )!;
+
+        let newerMessageTime = wdr.newerMessageTime(uiContact.wdChat);
+
+        for (let i = 0; i < lis.length; i++) {
+
+            let uiContact_i = getUiContact_i(i);
 
             if (uiContact_i === uiContact) {
                 continue;
             }
 
-            let newerMessageTime_i= wds.getNewerMessageTime(uiContact_i.wdChat);
+            let newerMessageTime_i = wdr.newerMessageTime(uiContact_i.wdChat);
 
             if (newerMessageTime > newerMessageTime_i) {
 
@@ -125,9 +129,9 @@ export class UiPhonebook {
 
             } else if (newerMessageTime === newerMessageTime_i) {
 
-                let contactName= uiContact.wdChat.contactName;
+                let contactName = uiContact.wdChat.contactName;
 
-                let contactName_i= uiContact_i.wdChat.contactName;
+                let contactName_i = uiContact_i.wdChat.contactName;
 
                 let doInsert: boolean;
 
@@ -146,7 +150,7 @@ export class UiPhonebook {
                 } else {
 
                     doInsert = isAscendingAlphabeticalOrder(
-                        contactName, 
+                        contactName,
                         contactName_i
                     );
 
@@ -168,28 +172,18 @@ export class UiPhonebook {
 
     }
 
-    public async newContact(
-        contactNumber: phoneNumber,
-        contactName: string,
-        shouldStoreInSim: boolean
-    ): Promise<wd.Chat>{
-
-        let wdChat= await wds.newChat(
-            this.wdInstance, 
-            contactNumber, 
-            contactName, 
-            shouldStoreInSim
-        );
+    /** To create ui contact after init */
+    public insertContact(
+        wdChat: Wd.Chat
+    ): void {
 
         this.structure.find("input").val("");
 
-        this.addUiContact(wdChat);
+        this.createUiContact(wdChat);
 
         this.updateSearch();
 
-        this.uiContacts.get(wdChat)!.evtClick.post();
-
-        return wdChat;
+        //this.uiContacts.get(wdChat)!.evtClick.post();
 
     }
 
@@ -199,134 +193,123 @@ export class UiPhonebook {
      * new message arrive => update wdMessage => call
      * 
      * */
-    public refreshNotificationCount(wdChat: wd.Chat){
+    public notifyContactChanged(wdChat: Wd.Chat) {
 
-        this.uiContacts.get(wdChat)!.refreshNotificationLabel();
+        let uiContact = this.uiContacts.get(wdChat)!;
 
-        this.placeUiContact( this.uiContacts.get(wdChat)!);
+        uiContact.refreshNotificationLabel();
+        uiContact.updateContactName();
+
+        this.placeUiContact(uiContact);
 
     }
 
-    /** Will update wdChat */
-    public async updateContactName(wdChat: wd.Chat, contactName: string){
-
-        await this.uiContacts.get(wdChat)!.updateContactName(contactName);
-
-        this.placeUiContact( this.uiContacts.get(wdChat)! );
-    }
-
-}
-
-export namespace UiPhonebook {
-
-    export class UiContact {
-
-        public readonly structure = html_UiContact_structure.find("li").clone();
-
-        /** only forward click event, need to be selected manually from outside */
-        public evtClick = new VoidSyncEvent();
-
-        constructor(
-            public readonly userSim: types.UserSim.Usable,
-            public readonly wdChat: wd.Chat,
-        ) {
-
-
-            this.structure.on("click", ()=> this.evtClick.post());
-
-            this.updateContactName(this.wdChat.contactName);
-
-            this.structure.find("span.id_notifications").fadeOut(0);
-
-            this.refreshNotificationLabel();
-
-        }
-
-        public refreshNotificationLabel() {
-
-            if( this.wdChat.messages.length ){
-                this.structure.addClass("has-messages");
-            }else{
-                this.structure.removeClass("has-messages");
-            }
-
-            let count= wds.getNotificationCount(this.wdChat);
-
-            let span = this.structure.find("span.id_notifications");
-            
-            span.html(`${count}`);
-            
-            if( count !== 0 ){
-
-                span.stop().fadeIn(0);
-
-            }else{
-
-                span.fadeOut(2000);
-
-            }
-
-        }
-
-        /** updateName if different */
-        public async updateContactName(contactName: string) {
-
-            if (this.wdChat.contactName !== contactName) {
-
-                await wds.updateChat(
-                    this.wdChat,
-                    { "contactName": contactName }
-                );
-
-            }
-
-            this.structure.find("span.id_name").html(contactName);
-
-            let spanNumber = this.structure.find("span.id_number");
-
-            let prettyNumber = phoneNumber.prettyPrint(
-                this.wdChat.contactNumber,
-                this.userSim.sim.country ?
-                    this.userSim.sim.country.iso : undefined
-            )
-
-            if (contactName) {
-
-                spanNumber
-                    .addClass("visible-lg-inline")
-                    .html(` ( ${prettyNumber} ) `)
-                    ;
-
-            } else {
-
-                spanNumber
-                    .removeClass("visible-lg-inline")
-                    .html(prettyNumber)
-                    ;
-
-            }
-
-        }
-
-        /** update wsChat */
-        public setSelected() {
-            this.structure.addClass("selected");
-        }
-
-        /** default state */
-        public unselect() {
-            this.structure.removeClass("selected");
-        }
-
-        public get isSelected(): boolean {
-            return this.structure.hasClass("selected");
-        }
-
-
+    public triggerContactClick(wdChat: Wd.Chat){
+        this.uiContacts.get(wdChat)!.evtClick.post();
     }
 
 
 }
+
+class UiContact {
+
+    public readonly structure = html.templates.find("li").clone();
+
+    /** only forward click event, need to be selected manually from outside */
+    public evtClick = new VoidSyncEvent();
+
+    constructor(
+        public readonly userSim: types.UserSim.Usable,
+        public readonly wdChat: Wd.Chat
+    ) {
+
+        this.structure.on("click", () => this.evtClick.post());
+
+        this.updateContactName();
+
+        this.structure.find("span.id_notifications").fadeOut(0);
+
+        this.refreshNotificationLabel();
+
+    }
+
+    //TODO: optimization
+    public refreshNotificationLabel() {
+
+        if (this.wdChat.messages.length) {
+            this.structure.addClass("has-messages");
+        } else {
+            this.structure.removeClass("has-messages");
+        }
+
+        let count = wdr.notificationCount(this.wdChat);
+
+        let span = this.structure.find("span.id_notifications");
+
+        span.html(`${count}`);
+
+        if (count !== 0) {
+
+            span.stop().fadeIn(0);
+
+        } else {
+
+            span.fadeOut(2000);
+
+        }
+
+    }
+
+    //TODO: optimization
+    /** updateName if different */
+    public updateContactName() {
+
+        this.structure.find("span.id_name").html(this.wdChat.contactName);
+
+        let spanNumber = this.structure.find("span.id_number");
+
+        let prettyNumber = phoneNumber.prettyPrint(
+            this.wdChat.contactNumber,
+            this.userSim.sim.country ?
+                this.userSim.sim.country.iso : undefined
+        );
+
+        if (this.wdChat.contactName) {
+
+            spanNumber
+                .addClass("visible-lg-inline")
+                .html(` ( ${prettyNumber} ) `)
+                ;
+
+        } else {
+
+            spanNumber
+                .removeClass("visible-lg-inline")
+                .html(prettyNumber)
+                ;
+
+        }
+
+    }
+
+    /** update wsChat */
+    public setSelected() {
+        this.structure.addClass("selected");
+    }
+
+    /** default state */
+    public unselect() {
+        this.structure.removeClass("selected");
+    }
+
+    public get isSelected(): boolean {
+        return this.structure.hasClass("selected");
+    }
+
+
+}
+
+
 
 function isAscendingAlphabeticalOrder(
     a: string,

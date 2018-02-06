@@ -2,7 +2,8 @@ import { apiClient as api } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 import * as tools from "../../../tools";
 
-import * as wds from "./webphoneDataSync";
+
+import * as d from "./data";
 import { UiWebphone } from "./UiWebphone";
 
 async function loadPageContent() {
@@ -21,11 +22,9 @@ async function loadPageContent() {
 
     tools.bootbox_custom.loading("Initialization...");
 
-	let wdRoot= await wds.fetch(useableUserSims);
+	let wdRoot= await d.io.fetch(useableUserSims);
 
 	tools.bootbox_custom.dismissLoading();
-
-	console.log(wdRoot);
 
 	let userSim= useableUserSims.pop()!;
 
@@ -35,10 +34,15 @@ async function loadPageContent() {
 
 	$(".page-content-inner").append(uiWebphone.structure);
 
+	/*
+	(()=>{
 
-	//TODO
-	//let footer= $("#footer").detach();
-	//footer.insertAfter($("#wrapper"));
+		let footer = $("#footer").detach();
+
+		setTimeout(()=> footer.insertAfter($("#wrapper")), 0);
+
+	})();
+	*/
 
 	$("#footer").hide();
 
