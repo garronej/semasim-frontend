@@ -2,6 +2,8 @@ import { apiClient as api } from "../../../api";
 import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
 import * as tools from "../../../tools";
 
+import { Ua } from "./Ua";
+
 
 import * as d from "./data";
 import { UiWebphone } from "./UiWebphone";
@@ -24,9 +26,13 @@ async function loadPageContent() {
 
 	let wdRoot= await d.io.fetch(useableUserSims);
 
+	Ua.instanceId= wdRoot.uaInstanceId;
+	Ua.email= wdRoot.email;
+
 	tools.bootbox_custom.dismissLoading();
 
 	let userSim= useableUserSims.pop()!;
+
 
 	let wdInstance= wdRoot.instances.find(({ imsi })=> imsi === userSim.sim.imsi )!;
 

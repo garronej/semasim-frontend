@@ -225,6 +225,7 @@ export namespace UnlockResult {
 
 export type WebphoneData = {
     uaInstanceId: string;
+    email: string;
     instances: WebphoneData.Instance[]
 };
 

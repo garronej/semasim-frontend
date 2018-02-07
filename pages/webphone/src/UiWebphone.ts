@@ -11,6 +11,8 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 
+import { Ua } from "./Ua";
+
 declare const require: any;
 
 const html = loadHtml(
@@ -29,11 +31,14 @@ export class UiWebphone {
     private readonly uiPhonebook!: UiPhonebook;
     private readonly uiConversations = new Map<Wd.Chat, UiConversation>();
 
-
     constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
+
+        let ua= new Ua(this.userSim);
+
+        ua.evtNewMessage.attach(({ number, text })=> console.log({ number, text }));
 
         this.initUiHeader();
         this.initUiQuickAction();

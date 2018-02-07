@@ -8,7 +8,7 @@
     "browserify": "node ./node_modules/browserify/bin/cmd . -o ../../static/webphone.js",
     "watchify": "node ./node_modules/watchify/bin/cmd . -o ../../static/webphone.js",
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
-    "watch": "node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
+    "watch": "npm run build && node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
   },
   "browserify": {
     "transform": [
