@@ -1,6 +1,10 @@
 import * as d from "./declaration";
 import * as types from "./types";
-import * as JSON_CUSTOM from "./JSON_CUSTOM";
+import * as ttJC from "transfer-tools/dist/lib/JSON_CUSTOM";
+//@ts-ignore: Import Dongle.Usable
+import * as dcTypes from "../node_modules/chan-dongle-extended-client/dist/lib/types";
+
+const JSON_CUSTOM= ttJC.get();
 
 async function makeRequest<Params, Response>(
     methodName, params: Params
@@ -315,20 +319,35 @@ export namespace webphoneData {
 
     }
 
-    export function updateOutgoingMessageStatus(
+    export function updateOutgoingMessageStatusToSendReportReceived(
         message_id: number,
-        status: types.WebphoneData.Message.Outgoing["status"]
+        dongleSendTime: number | null
     ) {
 
-        const methodName = dw.updateOutgoingMessageStatus.methodName;
-        type Params = dw.updateOutgoingMessageStatus.Params;
-        type Response = dw.updateOutgoingMessageStatus.Response;
+        const methodName = dw.updateOutgoingMessageStatusToSendReportReceived.methodName;
+        type Params = dw.updateOutgoingMessageStatusToSendReportReceived.Params;
+        type Response = dw.updateOutgoingMessageStatusToSendReportReceived.Response;
 
         return makeRequest<Params, Response>(
             methodName,
-            { message_id, status }
+            { message_id, dongleSendTime }
         );
 
+    }
+
+    export function updateOutgoingMessageStatusToStatusReportReceived(
+        message_id: number,
+        deliveredTime: number | null
+    ) {
+
+        const methodName = dw.updateOutgoingMessageStatusToStatusReportReceived.methodName;
+        type Params = dw.updateOutgoingMessageStatusToStatusReportReceived.Params;
+        type Response = dw.updateOutgoingMessageStatusToStatusReportReceived.Response;
+
+        return makeRequest<Params, Response>(
+            methodName,
+            { message_id, deliveredTime }
+        );
 
     }
 

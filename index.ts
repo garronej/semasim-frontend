@@ -1,7 +1,6 @@
 import { 
     apiDeclaration as webApiDeclaration, 
-    types,
-    JSON_CUSTOM
+    types
 } from "./api";
 
 declare const require: (path: string)=>any;
@@ -41,7 +40,6 @@ const pathToStatic: string= path.join(__dirname,"static");
 export { 
     webApiDeclaration, 
     types, 
-    JSON_CUSTOM,
     pagesHtml, 
     pathToStatic 
 };

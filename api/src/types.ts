@@ -1,89 +1,4 @@
-
-//START IMPORT
-
-export type Contact = {
-    readonly index: number;
-    readonly name: {
-        readonly asStored: string;
-        full: string;
-    };
-    readonly number: {
-        readonly asStored: string;
-        localFormat: string;
-    };
-}
-
-export type SimStorage = {
-    number?: {
-        readonly asStored: string;
-        localFormat: string;
-    };
-    infos: {
-        contactNameMaxLength: number;
-        numberMaxLength: number;
-        storageLeft: number;
-    };
-    contacts: Contact[];
-    digest: string;
-};
-
-export type LockedPinState = "SIM PIN" | "SIM PUK" | "SIM PIN2" | "SIM PUK2";
-
-export interface LockedDongle {
-    imei: string;
-    manufacturer: string;
-    model: string;
-    firmwareVersion: string;
-    sim: {
-        iccid?: string;
-        pinState: LockedPinState;
-        tryLeft: number;
-    }
-}
-
-export namespace LockedDongle {
-
-    export function match(dongle: Dongle): dongle is LockedDongle {
-        return (dongle.sim as LockedDongle['sim']).pinState !== undefined;
-    }
-
-}
-
-export type SimCountry = {
-    name: string;
-    iso: string;
-    code: number;
-};
-
-export interface ActiveDongle {
-    imei: string;
-    manufacturer: string;
-    model: string;
-    firmwareVersion: string;
-    isVoiceEnabled?: boolean;
-    sim: {
-        iccid: string;
-        imsi: string;
-        country?: SimCountry;
-        serviceProvider: {
-            fromImsi?: string;
-            fromNetwork?: string;
-        },
-        storage: SimStorage;
-    }
-}
-
-export namespace ActiveDongle {
-
-    export function match(dongle: Dongle): dongle is ActiveDongle {
-        return !LockedDongle.match(dongle);
-    }
-
-}
-
-export type Dongle = LockedDongle | ActiveDongle;
-
-//END IMPORT
+import * as dcTypes from "../node_modules/chan-dongle-extended-client/dist/lib/types";
 
 export type SimOwnership = SimOwnership.Owned | SimOwnership.Shared;
 
@@ -121,7 +36,7 @@ export type UserSim = UserSim.Base<SimOwnership>;
 export namespace UserSim {
 
     export type Base<T extends SimOwnership> = {
-        sim: ActiveDongle["sim"];
+        sim: dcTypes.Sim;
         friendlyName: string;
         password: string;
         dongle: {
@@ -198,7 +113,7 @@ export namespace UnlockResult {
 
     export type WrongPin = {
         wasPinValid: false;
-        pinState: LockedPinState;
+        pinState: dcTypes.Dongle.Locked.PinState;
         tryLeft: number;
     };
 
@@ -209,7 +124,7 @@ export namespace UnlockResult {
         export type Registerable = {
             wasPinValid: true;
             isSimRegisterable: true;
-            dongle: ActiveDongle;
+            dongle: dcTypes.Dongle.Usable;
         };
 
         export type NotRegisterable = {
@@ -257,17 +172,55 @@ export namespace WebphoneData {
             text: string;
         };
 
-        export type Incoming = Base & {
-            direction: "INCOMING";
-            isNotification: boolean;
-        };
+        export type Incoming = Incoming.Text | Incoming.Notification;
 
+        export namespace Incoming {
 
-        export type Outgoing = Base & {
-            direction: "OUTGOING";
-            sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
-            status: "TRANSMITTED TO GATEWAY" | "SENT BY DONGLE" | "RECEIVED"
-        };
+            export type Base = Message.Base & {
+                direction: "INCOMING";
+                isNotification: boolean;
+            };
+
+            export type Text= Base & {
+                isNotification: false;
+            };
+
+            export type Notification= Base & {
+                isNotification: true;
+            };
+
+        }
+
+        export type Outgoing =
+            Outgoing.TransmittedToGateway |
+            Outgoing.SendReportReceived |
+            Outgoing.StatusReportReceived;
+
+        export namespace Outgoing {
+
+            export type Base = Message.Base & {
+                direction: "OUTGOING";
+                sentBy: { who: "MYSELF"; } | { who: "OTHER"; email: string; }
+                status: "TRANSMITTED TO GATEWAY" | "SEND REPORT RECEIVED" | "STATUS REPORT RECEIVED";
+            };
+
+            export type TransmittedToGateway = Base & {
+                status: "TRANSMITTED TO GATEWAY";
+            };
+
+            export type SendReportReceived = Base & {
+                status: "SEND REPORT RECEIVED";
+                dongleSendTime: number | null;
+            };
+
+            export type StatusReportReceived = Base & {
+                status: "STATUS REPORT RECEIVED";
+                dongleSendTime: number;
+                deliveredTime: number | null;
+            };
+
+        }
+
 
     }
 

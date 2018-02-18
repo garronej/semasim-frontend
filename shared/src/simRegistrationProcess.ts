@@ -1,4 +1,5 @@
 import { apiClient as api, types } from "../../api";
+import * as dcTypes from "../node_modules/chan-dongle-extended-client/dist/lib/types";
 import * as tools from "../../tools";
 
 export async function start(): Promise<void> {
@@ -15,7 +16,7 @@ export async function start(): Promise<void> {
 
 }
 
-export async function interact(dongle: types.Dongle) {
+export async function interact(dongle: dcTypes.Dongle) {
 
     let shouldAdd_message = (() => {
 
@@ -61,7 +62,7 @@ export async function interact(dongle: types.Dongle) {
 
     if (!shouldAdd) return undefined;
 
-    if (types.LockedDongle.match(dongle)) {
+    if (dcTypes.Dongle.Locked.match(dongle)) {
 
         let unlockResultValidPin: types.UnlockResult.ValidPin;
 
@@ -197,7 +198,7 @@ export async function interact(dongle: types.Dongle) {
 
 }
 
-async function getDefaultFriendlyName(sim: types.ActiveDongle["sim"]) {
+async function getDefaultFriendlyName(sim: dcTypes.Sim) {
 
     let tag = sim.serviceProvider.fromImsi || sim.serviceProvider.fromNetwork || "";
 

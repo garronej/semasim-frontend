@@ -11,6 +11,8 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 
+import { phoneNumber } from "../../../shared";
+
 import { Ua } from "./Ua";
 
 declare const require: any;
@@ -19,6 +21,8 @@ const html = loadHtml(
     require("../templates/UiWebphone.html"),
     "UiWebphone"
 );
+
+console.log("up!xxx");
 
 export class UiWebphone {
 
@@ -31,14 +35,114 @@ export class UiWebphone {
     private readonly uiPhonebook!: UiPhonebook;
     private readonly uiConversations = new Map<Wd.Chat, UiConversation>();
 
+    private readonly ua: Ua;
+
     constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
-        let ua= new Ua(this.userSim);
+        this.ua = new Ua(this.userSim);
 
-        ua.evtNewMessage.attach(({ number, text })=> console.log({ number, text }));
+        this.ua.evtIncomingMessage.attach(
+            async ({ fromNumber, bundledData, text }) => {
+
+                let wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
+
+                let wdMessage: Wd.Message;
+
+                if (bundledData.type === "MESSAGE") {
+
+                    let wdMessageIncoming = await wd.io.newMessage<Wd.Message.Incoming>(wdChat, {
+                        "id_": NaN,
+                        "direction": "INCOMING",
+                        "isNotification": false,
+                        text,
+                        "time": bundledData.pduDate.getTime()
+                    });
+
+                    wdMessage = wdMessageIncoming;
+
+                } else if (bundledData.type === "SEND REPORT") {
+
+                    //TODO: optimise find
+                    let wdMessageOutgoing = wdChat
+                        .messages
+                        .find(
+                            ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+                        )! as Wd.Message.Outgoing.TransmittedToGateway
+                        ;
+
+
+                    await wd.io.updateOutgoingMessageStatusToSendReportReceived(
+                        wdMessageOutgoing,
+                        bundledData.sendDate ? bundledData.sendDate.getTime() : null
+                    );
+
+                    wdMessage = wdMessageOutgoing;
+
+
+                } else if (bundledData.type === "STATUS REPORT") {
+
+                    if (bundledData.messageTowardGsm.uaSim.ua.instance === `"<urn:${Ua.instanceId}>"`) {
+
+                        //TODO: optimise find
+                        let wdMessageOutgoing = wdChat
+                            .messages
+                            .find(
+                                ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+                            )! as Wd.Message.Outgoing.SendReportReceived
+                            ;
+
+                        await wd.io.updateOutgoingMessageStatusToStatusReportReceived(
+                            wdMessageOutgoing,
+                            bundledData.statusReport.isDelivered ? bundledData.statusReport.dischargeDate.getTime() : null
+                        );
+
+                        wdMessage = wdMessageOutgoing;
+
+
+                    } else {
+
+                        let wdMessageOutgoing = await wd.io.newMessage<Wd.Message.Outgoing.StatusReportReceived>(
+                            wdChat,
+                            {
+                                "id_": NaN,
+                                "time": bundledData.messageTowardGsm.date.getTime(),
+                                "direction": "OUTGOING",
+                                "text": bundledData.messageTowardGsm.text,
+                                "sentBy": ((): Wd.Message.Outgoing["sentBy"] => {
+                                    if (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) {
+                                        return { "who": "MYSELF" };
+                                    } else {
+                                        return { "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail };
+                                    }
+                                })(),
+                                "status": "STATUS REPORT RECEIVED",
+                                "dongleSendTime": bundledData.messageTowardGsm.date.getTime(), //FAKE
+                                "deliveredTime": bundledData.statusReport.isDelivered ? bundledData.statusReport.dischargeDate.getTime() : null
+                            }
+                        );
+
+                        wdMessage = wdMessageOutgoing;
+
+                    }
+
+
+                } else {
+
+                    console.log("TODO", { bundledData });
+
+                    return;
+
+                }
+
+                this.uiConversations.get(wdChat)!.newMessage(wdMessage);
+
+
+
+            }
+        );
 
         this.initUiHeader();
         this.initUiQuickAction();
@@ -87,14 +191,25 @@ export class UiWebphone {
         uiConversation.evtSendText.attach(
             async text => {
 
-                //TODO: actualy send the text!
-                await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
+                let exactSendDate: Date;
+
+                try {
+
+                    exactSendDate = await this.ua.sendMessage(wdChat.contactNumber, text);
+
+                } catch (error) {
+
+                    alert(error.message);
+
+                    return;
+
+                }
 
                 let wdMessageOutgoing = await wd.io.newMessage<Wd.Message.Outgoing>(
                     wdChat,
                     {
                         "id_": NaN,
-                        "time": Date.now(),
+                        "time": exactSendDate.getTime(),
                         "direction": "OUTGOING",
                         text,
                         "sentBy": { "who": "MYSELF" },
@@ -136,32 +251,7 @@ export class UiWebphone {
         this.uiQuickAction.evtSms.attach(
             async number => {
 
-                let wdChat = this.wdInstance.chats.find(
-                    ({ contactNumber }) => contactNumber === number
-                );
-
-                if (wdChat) {
-
-                    this.uiPhonebook.triggerContactClick(wdChat);
-
-                } else {
-
-                    //TODO: this.uiNewContact.evt.post(...
-
-                    wdChat = await wd.io.newChat(
-                        this.wdInstance,
-                        number,
-                        "",
-                        false
-                    );
-
-                    this.uiPhonebook.insertContact(wdChat);
-
-                    this.initUiConversation(wdChat);
-
-                    $('body').data('dynamic').panels();
-
-                }
+                let wdChat = await this.getOrCreateChatByPhoneNumber(number);
 
                 this.uiPhonebook.triggerContactClick(wdChat);
 
@@ -191,6 +281,35 @@ export class UiWebphone {
 
             }
         );
+
+    }
+
+    private async getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<Wd.Chat> {
+
+        let wdChat = this.wdInstance.chats.find(
+            ({ contactNumber }) => contactNumber === number
+        );
+
+        if (!wdChat) {
+
+            //TODO: this.uiNewContact.evt.post(...
+
+            wdChat = await wd.io.newChat(
+                this.wdInstance,
+                number,
+                "",
+                false
+            );
+
+            this.uiPhonebook.insertContact(wdChat);
+
+            this.initUiConversation(wdChat);
+
+            $('body').data('dynamic').panels();
+
+        }
+
+        return wdChat;
 
     }
 

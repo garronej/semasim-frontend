@@ -151,21 +151,75 @@ export class UiConversation {
 
     private readonly uiBubbles = new Map<Wd.Message, UiBubble>();
 
+    /** Place uiBubble in the structure, assume all bubbles already sorted */
+    private placeUiBubble(uiBubble: UiBubble){
+
+        let lis = this.ul.find("li");
+
+        let getUiBubble_i: (i: number) => UiBubble = (() => {
+
+            let uiBubbleArr = Array.from(this.uiBubbles.values());
+
+            return i => uiBubbleArr.find(
+                ({ structure }) => structure.get(0) === lis.get(i)
+            )!;
+
+        })();
+
+        for (let i = lis.length - 1; i >= 0; i--) {
+
+            let uiBubble_i = getUiBubble_i(i);
+
+            if (uiBubble.time >= uiBubble_i.time) {
+
+                uiBubble.structure.insertAfter(uiBubble_i.structure);
+
+                return;
+
+            }
+
+        }
+
+        this.ul.prepend(uiBubble.structure);
+
+    }
+
+    /** new Message or update existing one */
     public newMessage(wdMessage: Wd.Message) {
+
+        if (this.uiBubbles.has(wdMessage)) {
+
+            this.uiBubbles.get(wdMessage)!.structure.remove();
+
+            this.uiBubbles.delete(wdMessage);
+
+        }
 
         let uiBubble: UiBubble;
 
         if (wdMessage.direction === "INCOMING") {
 
-            let uiBubbleIncoming = new UiBubbleIncoming(
-                wdMessage, this.wdChat, this.userSim
-            );
+            if (wdMessage.isNotification) {
 
-            uiBubble = uiBubbleIncoming;
+                let uiBubbleIncomingNotification = new UiBubble.IncomingNotification(
+                    wdMessage, this.wdChat, this.userSim
+                );
+
+                uiBubble = uiBubbleIncomingNotification;
+
+            } else {
+
+                let uiBubbleIncomingText = new UiBubble.IncomingText(
+                    wdMessage, this.wdChat, this.userSim
+                );
+
+                uiBubble = uiBubbleIncomingText;
+
+            }
 
         } else {
 
-            let uiBubbleOutgoing = new UiBubbleOutgoing(wdMessage);
+            let uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
 
             uiBubble = uiBubbleOutgoing;
 
@@ -173,34 +227,7 @@ export class UiConversation {
 
         this.uiBubbles.set(wdMessage, uiBubble);
 
-
-        let uiBubble_i: UiBubble | undefined = undefined;
-
-        for (let i = this.wdChat.messages.length - 1; i >= 0; i--) {
-
-            if (this.wdChat.messages[i] === wdMessage) {
-
-                let wdMessage_i = this.wdChat.messages[i + 1];
-
-                if (wdMessage_i) {
-                    uiBubble_i = this.uiBubbles.get(wdMessage_i)!;
-                }
-
-                break;
-
-            }
-
-        }
-
-        if (uiBubble_i) {
-
-            uiBubble.structure.insertBefore(uiBubble_i.structure);
-
-        } else {
-
-            this.ul.append(uiBubble.structure);
-
-        }
+        this.placeUiBubble(uiBubble);
 
         if (this.ul.is(":visible")) {
 
@@ -220,84 +247,124 @@ class UiBubble {
 
     public readonly structure = html.templates.find("li").clone();
 
+    public readonly time: number;
+
     constructor(
-        public readonly wdMessage: Wd.Message.Base
+        public readonly wdMessage: Wd.Message
     ) {
 
+        this.time = (() => {
+
+            let wdMessage = this.wdMessage;
+
+            let time: number | null = null;
+
+            if (wdMessage.direction === "OUTGOING") {
+                switch (wdMessage.status) {
+                    case "STATUS REPORT RECEIVED":
+                        time = wdMessage.deliveredTime || wdMessage.dongleSendTime;
+                        break;
+                    case "SEND REPORT RECEIVED":
+                        time = wdMessage.dongleSendTime;
+                        break;
+                }
+            }
+
+            return time || wdMessage.time;
+
+        })();
 
         this.structure.find("p.id_content")
             .html(wdMessage.text.split("\n").join("<br>"));
 
         this.structure.find("span.id_date")
-            .html(moment.unix(wdMessage.time).format("Do MMMM H:mm"));
-
-
+            .html(moment.unix(~~(this.time / 1000)).format("Do MMMM H:mm"));
 
     }
 }
 
-//TODO: notification
-class UiBubbleIncoming extends UiBubble {
+namespace UiBubble {
 
-    constructor(
-        public readonly wdMessage: Wd.Message.Incoming,
-        public readonly wdChat: Wd.Chat,
-        public readonly userSim: types.UserSim.Usable
-    ) {
+    //TODO: notification
+    export class IncomingText extends UiBubble {
 
-        super(wdMessage);
+        constructor(
+            public readonly wdMessage: Wd.Message.Incoming.Text,
+            public readonly wdChat: Wd.Chat,
+            public readonly userSim: types.UserSim.Usable
+        ) {
 
-        this.structure.find("div.message").addClass("in");
+            super(wdMessage);
 
-        this.structure.find("p.id_emitter").html(
-            (() => {
+            this.structure.find("div.message").addClass("in");
 
-                if (this.wdChat.contactName) {
+            this.structure.find("p.id_emitter").html(
+                (() => {
 
-                    return this.wdChat.contactName;
+                    if (this.wdChat.contactName) {
 
-                } else {
+                        return this.wdChat.contactName;
 
-                    return phoneNumber.prettyPrint(
-                        this.wdChat.contactNumber,
-                        this.userSim.sim.country ?
-                            this.userSim.sim.country.iso : undefined
-                    );
+                    } else {
 
-                }
+                        return phoneNumber.prettyPrint(
+                            this.wdChat.contactNumber,
+                            this.userSim.sim.country ?
+                                this.userSim.sim.country.iso : undefined
+                        );
 
-            })()
-        );
+                    }
 
+                })()
+            );
 
-
-    }
-
-}
-
-class UiBubbleOutgoing extends UiBubble {
-
-    constructor(
-        public readonly wdMessage: Wd.Message.Outgoing
-    ) {
-
-        super(wdMessage);
-
-        this.structure.find("div.message")
-            .addClass("out")
-            .find("p.id_emitter")
-            .html(
-                (this.wdMessage.sentBy.who === "MYSELF") ?
-                    "Me" : this.wdMessage.sentBy.email
-            )
-            ;
-
-        this.updateStatus();
+        }
 
     }
 
-    public updateStatus() {
-        console.log(`TODO: change to ${this.wdMessage.status}`);
+    export class IncomingNotification extends UiBubble {
+
+        constructor(
+            public readonly wdMessage: Wd.Message.Incoming.Notification,
+            public readonly wdChat: Wd.Chat,
+            public readonly userSim: types.UserSim.Usable
+        ) {
+
+            super(wdMessage);
+
+            console.log("todo");
+
+        }
+
+    }
+
+    export class Outgoing extends UiBubble {
+
+        constructor(
+            public readonly wdMessage: Wd.Message.Outgoing
+        ) {
+
+            super(wdMessage);
+
+            this.structure.find("div.message")
+                .addClass("out")
+                .find("p.id_emitter")
+                .html(
+                    (this.wdMessage.sentBy.who === "MYSELF") ?
+                        "Me" : this.wdMessage.sentBy.email
+                )
+                ;
+
+
+            //TODO: 
+            this.structure.find("p.id_content")
+                .html(wdMessage.text.split("\n").join("<br>") + ` ${this.wdMessage.status}`);
+
+
+
+        }
+
+
     }
 
 }

@@ -1,4 +1,5 @@
 import * as types from "./types";
+import * as dcTypes from "../node_modules/chan-dongle-extended-client/dist/lib/types";
 
 export const domain = "semasim.com";
 export const apiPath = "api";
@@ -69,7 +70,7 @@ export namespace getUnregisteredLanDongles {
 
     export type Params = undefined;
 
-    export type Response = types.Dongle[];
+    export type Response = dcTypes.Dongle[];
 
 }
 
@@ -245,19 +246,31 @@ export namespace webphoneData {
 
     }
 
-    export namespace updateOutgoingMessageStatus {
+    export namespace updateOutgoingMessageStatusToSendReportReceived {
 
-        export const methodName = "webphone-data_update-outgoing-message-status";
+        export const methodName = "webphone-data_update-outgoing-message-status-to-send-report-received";
 
         export type Params = {
             message_id: number;
-            status: types.WebphoneData.Message.Outgoing["status"]
+            dongleSendTime: number | null;
         };
 
         export type Response = undefined;
 
     }
 
+    export namespace updateOutgoingMessageStatusToStatusReportReceived {
+
+        export const methodName = "webphone-data_update-outgoing-message-status-to-status-report-received";
+
+        export type Params = {
+            message_id: number;
+            deliveredTime: number | null;
+        };
+
+        export type Response = undefined;
+
+    }
 
 }
 

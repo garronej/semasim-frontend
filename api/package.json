@@ -1,13 +1,16 @@
 {
   "name": "api",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chan-dongle-extended-client": "git+https://206e4c24cb9a1e4a8d42b7ac86e4a026b02cee42:x-oauth-basic@github.com/garronej/chan-dongle-extended-client.git",
+    "transfer-tools": "garronej/transfer-tools"
+  },
   "devDependencies": {
     "@types/jquery": "2.0.48",
     "typescript": "^2.7.1"

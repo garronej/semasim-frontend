@@ -137,19 +137,42 @@ export namespace io {
 
     }
 
-    export async function updateOutgoingMessageStatus(
-        message: Wd.Message.Outgoing,
-        status: Wd.Message.Outgoing["status"]
-    ): Promise<void> {
+export async function updateOutgoingMessageStatusToSendReportReceived(
+    message: Wd.Message.Outgoing.TransmittedToGateway, 
+    dongleSendTime: number | null 
+): Promise<void> {
 
-        await api.webphoneData.updateOutgoingMessageStatus(
+        await api.webphoneData.updateOutgoingMessageStatusToSendReportReceived(
             message.id_,
-            status
+            dongleSendTime
         );
 
-        message.status = status;
 
-    }
+        let updatedMessage: Wd.Message.Outgoing.SendReportReceived= message as any;
+
+        updatedMessage.status= "SEND REPORT RECEIVED";
+        updatedMessage.dongleSendTime= dongleSendTime;
+
+}
+
+export async function updateOutgoingMessageStatusToStatusReportReceived(
+    message: Wd.Message.Outgoing.SendReportReceived, 
+    deliveredTime: number | null 
+): Promise<void> {
+
+        await api.webphoneData.updateOutgoingMessageStatusToStatusReportReceived(
+            message.id_,
+            deliveredTime
+        );
+
+        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived= message as any;
+
+        updatedMessage.status= "STATUS REPORT RECEIVED";
+        updatedMessage.deliveredTime= deliveredTime;
+
+}
+    
+
 
 
 }
