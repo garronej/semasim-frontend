@@ -17,12 +17,11 @@ import { Ua } from "./Ua";
 
 declare const require: any;
 
+
 const html = loadHtml(
     require("../templates/UiWebphone.html"),
     "UiWebphone"
 );
-
-console.log("up!xxx");
 
 export class UiWebphone {
 
@@ -52,6 +51,7 @@ export class UiWebphone {
                 let wdMessage: Wd.Message;
 
                 if (bundledData.type === "MESSAGE") {
+
 
                     let wdMessageIncoming = await wd.io.newMessage<Wd.Message.Incoming>(wdChat, {
                         "id_": NaN,
@@ -139,7 +139,7 @@ export class UiWebphone {
 
                 this.uiConversations.get(wdChat)!.newMessage(wdMessage);
 
-
+                this.uiPhonebook.notifyContactChanged(wdChat);
 
             }
         );

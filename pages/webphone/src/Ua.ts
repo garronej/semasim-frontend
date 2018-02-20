@@ -44,7 +44,7 @@ export class Ua {
 
                     let str= Buffer.from(ev.data).toString("utf8");
 
-                    console.log(str);
+                    //console.log(str);
 
                     this.ondata(str);
 
@@ -66,7 +66,8 @@ export class Ua {
                 uri,
                 `base64_email=${Buffer.from(Ua.email, "utf8").toString("base64")}`
             ].join(";"),
-            "connection_recovery_min_interval": 120
+            "connection_recovery_min_interval": 120,
+            "register_expires": 86400
         });
 
         this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));

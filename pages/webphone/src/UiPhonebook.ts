@@ -227,7 +227,7 @@ class UiContact {
 
         this.updateContactName();
 
-        this.structure.find("span.id_notifications").fadeOut(0);
+        this.structure.find("span.id_notifications").hide();
 
         this.refreshNotificationLabel();
 

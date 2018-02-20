@@ -6,9 +6,9 @@ import { VoidSyncEvent, SyncEvent } from "ts-events-extended";
 import Wd= types.WebphoneData;
 import * as moment from "moment";
 
+declare const ion: any;
 declare const require: any;
 //declare const titlenotifier: any;
-//declare const ion: any;
 
 const html = loadHtml(
     require("../templates/UiConversation.html"),
@@ -88,7 +88,7 @@ export class UiConversation {
 
         for (let wdMessage of this.wdChat.messages) {
 
-            this.newMessage(wdMessage);
+            this.newMessage(wdMessage, "MUTE");
 
         }
 
@@ -120,11 +120,9 @@ export class UiConversation {
 
     }
 
-    /*
-    public get isSelected(): boolean {
+    private get isSelected(): boolean {
         return this.structure.is(":visible");
     }
-    */
 
     public notifyContactNameUpdated() {
 
@@ -185,7 +183,7 @@ export class UiConversation {
     }
 
     /** new Message or update existing one */
-    public newMessage(wdMessage: Wd.Message) {
+    public newMessage(wdMessage: Wd.Message, mute: "MUTE" | undefined= undefined) {
 
         if (this.uiBubbles.has(wdMessage)) {
 
@@ -209,11 +207,16 @@ export class UiConversation {
 
             } else {
 
+                if( !mute ){
+                    ion.sound.play(this.isSelected?"water_droplet":"button_tiny");
+                }
+
                 let uiBubbleIncomingText = new UiBubble.IncomingText(
                     wdMessage, this.wdChat, this.userSim
                 );
 
                 uiBubble = uiBubbleIncomingText;
+
 
             }
 
@@ -229,11 +232,14 @@ export class UiConversation {
 
         this.placeUiBubble(uiBubble);
 
-        if (this.ul.is(":visible")) {
+        if (this.isSelected) {
 
             this.ul.slimScroll({
                 "scrollTo": this.ul.prop("scrollHeight")
             });
+
+        } else {
+
 
         }
 
