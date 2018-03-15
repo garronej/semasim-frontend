@@ -49,7 +49,7 @@ export class UiHeader {
                     this.userSim.sim.storage.number.asStored,
                     this.userSim.sim.country ? this.userSim.sim.country.iso : null,
                     intlTelInputUtils.numberFormat.NATIONAL
-                )
+                );
 
             } else {
 

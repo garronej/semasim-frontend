@@ -26,8 +26,7 @@ async function loadPageContent() {
 
 	let wdRoot= await d.io.fetch(useableUserSims);
 
-	Ua.instanceId= wdRoot.uaInstanceId;
-	Ua.email= wdRoot.email;
+	Ua.init(wdRoot.email, wdRoot.uaInstanceId);
 
 	tools.bootbox_custom.dismissLoading();
 

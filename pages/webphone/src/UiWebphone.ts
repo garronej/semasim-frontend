@@ -17,7 +17,6 @@ import { Ua } from "./Ua";
 
 declare const require: any;
 
-
 const html = loadHtml(
     require("../templates/UiWebphone.html"),
     "UiWebphone"
@@ -43,6 +42,18 @@ export class UiWebphone {
 
         this.ua = new Ua(this.userSim);
 
+        this.ua.evtRegistrationStateChanged.attach(isRegistered => {
+
+            console.log("Registered!");
+
+            for (let uiConversation of this.uiConversations.values()) {
+
+                uiConversation.setReadonly(!isRegistered);
+
+            }
+
+        });
+
         this.ua.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, text }) => {
 
@@ -51,7 +62,6 @@ export class UiWebphone {
                 let wdMessage: Wd.Message;
 
                 if (bundledData.type === "MESSAGE") {
-
 
                     let wdMessageIncoming = await wd.io.newMessage<Wd.Message.Incoming>(wdChat, {
                         "id_": NaN,
@@ -65,14 +75,31 @@ export class UiWebphone {
 
                 } else if (bundledData.type === "SEND REPORT") {
 
-                    //TODO: optimise find
-                    let wdMessageOutgoing = wdChat
-                        .messages
-                        .find(
-                            ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
-                        )! as Wd.Message.Outgoing.TransmittedToGateway
-                        ;
+                    let wdMessageOutgoing: Wd.Message.Outgoing.TransmittedToGateway | undefined = undefined;
 
+                    while (true) {
+
+                        //TODO: optimise find
+                        wdMessageOutgoing = wdChat
+                            .messages
+                            .find(
+                                ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+                            ) as (Wd.Message.Outgoing.TransmittedToGateway | undefined)
+                            ;
+
+                        if (!wdMessageOutgoing) {
+
+                            alert("aie aie aie!");
+
+                            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
+
+                            continue;
+
+                        } 
+
+                        break;
+
+                    }
 
                     await wd.io.updateOutgoingMessageStatusToSendReportReceived(
                         wdMessageOutgoing,
@@ -86,17 +113,37 @@ export class UiWebphone {
 
                     if (bundledData.messageTowardGsm.uaSim.ua.instance === `"<urn:${Ua.instanceId}>"`) {
 
-                        //TODO: optimise find
-                        let wdMessageOutgoing = wdChat
-                            .messages
-                            .find(
-                                ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
-                            )! as Wd.Message.Outgoing.SendReportReceived
-                            ;
+                        let wdMessageOutgoing: Wd.Message.Outgoing.SendReportReceived | undefined = undefined;
+
+                        while (true) {
+
+                            //TODO: optimise find
+                            wdMessageOutgoing = wdChat
+                                .messages
+                                .find(
+                                    ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+                                ) as (Wd.Message.Outgoing.SendReportReceived | undefined)
+                                ;
+                            
+                            if( !wdMessageOutgoing ){
+
+                                alert("aie aie aie 2!");
+
+                                await new Promise<void>(resolve=> setTimeout(()=> resolve(), 500));
+
+                                continue;
+
+                            }
+
+                            break;
+
+                        }
+
 
                         await wd.io.updateOutgoingMessageStatusToStatusReportReceived(
                             wdMessageOutgoing,
-                            bundledData.statusReport.isDelivered ? bundledData.statusReport.dischargeDate.getTime() : null
+                            bundledData.statusReport.isDelivered ?
+                                bundledData.statusReport.dischargeDate.getTime() : null
                         );
 
                         wdMessage = wdMessageOutgoing;
@@ -120,7 +167,8 @@ export class UiWebphone {
                                 })(),
                                 "status": "STATUS REPORT RECEIVED",
                                 "dongleSendTime": bundledData.messageTowardGsm.date.getTime(), //FAKE
-                                "deliveredTime": bundledData.statusReport.isDelivered ? bundledData.statusReport.dischargeDate.getTime() : null
+                                "deliveredTime": bundledData.statusReport.isDelivered ?
+                                    bundledData.statusReport.dischargeDate.getTime() : null
                             }
                         );
 

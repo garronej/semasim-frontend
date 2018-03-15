@@ -1,15 +1,115 @@
-/*
+
+import { VoidSyncEvent } from "ts-events-extended";
+
+import { types } from "../../../api";
+
+import { loadHtml } from "./loadHtml";
+import * as wd from "./data";
+import Wd = types.WebphoneData;
+
+import { UiQuickAction } from "./UiQuickAction";
+import { UiHeader } from "./UiHeader";
+import { UiPhonebook } from "./UiPhonebook";
+import { UiConversation } from "./UiConversation";
+
+import { phoneNumber } from "../../../shared";
+
+import { Ua } from "./Ua";
+
 declare const require: any;
-const transform = require("sdp-transform");
+//const transform = require("sdp-transform");
 
-import * as pe from "./prototypeExtensions";
-import { Widget } from "./Widget";
-
-pe.Function_.extendsClass(CallWidget, Widget);
-
-CallWidget["loadTemplate"](
-    require("../templates/CallWidget.html")
+const html = loadHtml(
+    require("../templates/UiVoiceCall.html"),
+    "UiVoiceCall"
 );
+
+export class UiVoiceCall {
+
+    private readonly structure = html.structure.clone();
+
+    constructor(
+        public readonly userSim: types.UserSim.Usable
+    ) {
+
+        this.structure.modal({
+            "keyboard": false,
+            "show": false,
+            "backdrop": "static"
+        });
+
+        this.structure.find("span.id_me").html((()=>{
+
+            let out= userSim.friendlyName;
+
+            if (this.userSim.sim.storage.number) {
+
+                out+= " ( " + (intlTelInputUtils as any).formatNumber(
+                    this.userSim.sim.storage.number.asStored,
+                    this.userSim.sim.country ? this.userSim.sim.country.iso : null,
+                    intlTelInputUtils.numberFormat.NATIONAL
+                ) + " ) ";
+
+            }
+
+            return out;
+
+        })());
+
+
+
+
+
+        /*
+    "number": {
+        "set": function (number) {
+
+            this.structure.find("span.id_me").html("Me ( " + number + " ) ");
+
+            this.__number__ = number;
+
+        },
+        "get": function () {
+            return this.__number__;
+        }
+    },
+    */
+
+        /*
+        let iceServers = [
+            {
+                "url": "stun:" + "ice.semasim.com" + ":53"
+            },
+            {
+                "urls": [
+                    "turn:" + "ice.semasim.com" + ":53?transport=udp",
+                    "turn:" + "ice.semasim.com" + ":443?transport=tcp",
+                    "turns:" + "ice.semasim.com" + ":443?transport=tcp"
+                ],
+                "username": params.username,
+                "credential": params.credential,
+                "credentialType": "password"
+            }
+        ];
+        */
+
+        let iceServers = [
+            {
+                //"url": "stun:semasim.com"
+                "url": "stun1.l.google.com:19302"
+            }
+        ];
+
+
+    }
+
+    public onOutgoingCall( wdChat: Wd.Chat, session) {
+
+
+
+    }
+
+}
 
 export function CallWidget(params) {
 
@@ -186,97 +286,6 @@ CallWidget.prototype.incomingCall = function (contact, session) {
 }
 
 
-function onSdp(data) {
-
-    var sdp = transform.parse(data.sdp);
-
-    //console.info(sdp);
-
-    var candidates = sdp.media[0].candidates;
-
-    sdp.media[0].candidates = [];
-
-    if (candidates === undefined) {
-        console.info("candidates undefined!");
-    }
-
-    for (let candidate of candidates) {
-
-        if (candidate.transport.match(/^tcp$/i)) {
-
-            continue;
-
-        }
-
-
-        if (data.originator === "remote") {
-
-            if (candidate.type === "host") {
-
-                if (candidate.ip === sdp.connection.ip) {
-
-                    //continue;
-
-                } else {
-
-                    //continue;
-
-                }
-
-
-            }
-
-            if (candidate.type === "srflx") {
-
-                continue;
-
-            }
-
-
-        }
-
-
-        if (data.originator === "local") {
-
-            if (candidate.type === "host") {
-
-                //continue;
-
-            }
-
-
-            if (candidate.type === "srflx") {
-
-                continue;
-
-            }
-
-
-            if (candidate.type === "relay") {
-
-                //continue;
-
-            }
-
-
-        }
-
-
-
-        sdp.media[0].candidates.push(candidate);
-
-
-
-    }
-
-
-    console.info("sdp", data.originator, JSON.stringify(sdp.media[0].candidates, null, "\t"));
-
-
-    data.sdp = transform.write(sdp);
-
-
-}
 
 
 Object.defineProperties(CallWidget.prototype, {
@@ -394,7 +403,6 @@ CallWidget.prototype.setState = function (state, message) {
 ].forEach(function each(state, index) {
     CallWidget.prototype[state] = CallWidget[state] = index;
 });
-*/
 
 
 

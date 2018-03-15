@@ -15,7 +15,8 @@ declare const require: any;
 
                 phoneNumber.build(
                     value, 
-                    $(element).intlTelInput("getSelectedCountryData").iso2
+                    $(element).intlTelInput("getSelectedCountryData").iso2,
+                    "MUST BE DIALABLE"
                 );
 
             } catch{

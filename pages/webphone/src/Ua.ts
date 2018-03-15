@@ -1,11 +1,12 @@
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent} from "ts-events-extended";
 import { phoneNumber } from "../../../shared";
 import { types, apiDeclaration } from "../../../api";
-import { 
-    types as gwTypes, 
-    extractBundledDataFromHeaders, 
-    smuggleBundledDataInHeaders 
+import {
+    types as gwTypes,
+    extractBundledDataFromHeaders,
+    smuggleBundledDataInHeaders
 } from "./semasim-gateway";
+import { AppSocket } from "./AppSocket";
 
 declare const Buffer: any;
 declare const JsSIP: any;
@@ -15,17 +16,34 @@ JsSIP.debug.disable("JsSIP:*");
 
 export class Ua {
 
-    /** Must be set manually before instantiation */
-    public static instanceId: string;
     public static email: string;
+    public static instanceId: string;
+    private static appSocket: AppSocket;
 
-    private static webSocket: object | undefined = undefined;
+    /** Must be called in webphone.ts */
+    public static init(email: string, instanceId: string) {
 
-    public readonly evtIncomingMessage= new SyncEvent<{ 
-        fromNumber: phoneNumber; 
-        bundledData: gwTypes.BundledData.ServerToClient; 
-        text: string; 
+        this.email = email;
+        this.instanceId = instanceId;
+        
+        this.appSocket= new AppSocket();
+
+        this.appSocket.connect();
+
+        this.appSocket.evtConnected.attach(()=> console.log("appSocket connected"));
+        this.appSocket.evtDisconnected.attach(()=> console.log("appSocket disconnected"));
+        //this.appSocket.evtRawSipPacket.attach(({ data })=> console.log(data));
+
+    }
+
+    public readonly evtIncomingMessage = new SyncEvent<{
+        fromNumber: phoneNumber;
+        bundledData: gwTypes.BundledData.ServerToClient;
+        text: string;
     }>();
+
+    /** isRegistered */
+    public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
 
     private readonly jsSipUa: any;
 
@@ -33,57 +51,29 @@ export class Ua {
         public readonly userSim: types.UserSim.Usable,
     ) {
 
-        if (!Ua.webSocket) {
-
-            Ua.webSocket = new JsSIP.WebSocketInterface(
-                `wss://www.${apiDeclaration.domain}`
-            ) as object;
-
-            Object.defineProperty(Ua.webSocket, "_onMessage", {
-                "value": function _onMessage(ev: MessageEvent) {
-
-                    let str= Buffer.from(ev.data).toString("utf8");
-
-                    //console.log(str);
-
-                    this.ondata(str);
-
-                }
-            });
-
-
-        }
-
         let uri = `sip:${this.userSim.sim.imsi}@${apiDeclaration.domain}`;
 
         this.jsSipUa = new JsSIP.UA({
-            "sockets": [Ua.webSocket],
+            "sockets": Ua.appSocket.makeProxy(this.userSim.sim.imsi),
             uri,
             "password": this.userSim.password,
             "instance_id": Ua.instanceId,
-            "register": true,
+            "register": false,
             "contact_uri": [
                 uri,
                 `base64_email=${Buffer.from(Ua.email, "utf8").toString("base64")}`
             ].join(";"),
-            "connection_recovery_min_interval": 120,
+            "connection_recovery_min_interval": 86400,
+            "connection_recovery_max_interval": 86400,
             "register_expires": 86400
         });
 
-        this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));
-        this.jsSipUa.on("connected", ({ socket }) => console.log("connected"));
-        this.jsSipUa.on("disconnected", () => console.log("disconnected"));
-        this.jsSipUa.on("registered", ({ response }) => console.log("registered", { response }));
-        this.jsSipUa.on("unregistered", ({ response, cause }) => console.log("unregistered", { response, cause }));
-        this.jsSipUa.on("registrationFailed", ({ response, cause }) => console.log("registrationFailed", { response, cause }));
-        this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
-
-        this.jsSipUa.on("newRTCSession", ({ originator, session, request }) =>
-            console.log("newRTCSession", { originator, session, request })
+        this.jsSipUa.on("registered", ({ response }) => 
+            this.evtRegistrationStateChanged.post(true)
         );
 
-        this.jsSipUa.on("newMessage", ({ originator, message, request }) =>
-            console.log("newMessage", { originator, message, request })
+        this.jsSipUa.on("unregistered", ({ response, cause }) => 
+            this.evtRegistrationStateChanged.post(false)
         );
 
         this.jsSipUa.on("newMessage", ({ originator, message, request }) => {
@@ -111,15 +101,36 @@ export class Ua {
 
         });
 
-
         this.jsSipUa.start();
+
+        (async ()=>{
+
+            if( !Ua.appSocket.isConnected() ){
+                await Ua.appSocket.evtConnected.waitFor()
+            }
+
+            this.jsSipUa.register();
+
+        })();
+
+        this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));
+        this.jsSipUa.on("connected", ({ socket }) => console.log("connected"));
+        this.jsSipUa.on("disconnected", () => console.log("disconnected"));
+        this.jsSipUa.on("registrationFailed", ({ response, cause }) => console.log("registrationFailed", { response, cause }));
+        this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
+        this.jsSipUa.on("newRTCSession", ({ originator, session, request }) =>
+            console.log("newRTCSession", { originator, session, request })
+        );
 
     }
 
     /** return exactSendDate */
-    public async sendMessage(number: phoneNumber, text: string): Promise<Date> {
+    public async sendMessage(
+        number: phoneNumber, 
+        text: string
+    ): Promise<Date> {
 
-        let exactSendDate= new Date();
+        let exactSendDate = new Date();
 
         let extraHeaders = (() => {
 

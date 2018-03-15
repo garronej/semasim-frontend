@@ -17,6 +17,12 @@ const html = loadHtml(
 
 require("../templates/UiConversation.less");
 
+declare const Buffer: any;
+
+
+//const checkMark= "\u221a";
+const checkMark= Buffer.from("e29c93", "hex").toString("utf8");
+
 export class UiConversation {
 
     public readonly structure = html.structure.clone();
@@ -30,6 +36,32 @@ export class UiConversation {
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
     private readonly ul = this.structure.find("ul");
+    private readonly btnUpdateContact= this.structure.find("button.id_updateContact");
+    private readonly btnCall= this.structure.find("button.id_call");
+
+    public setReadonly(isReadonly: boolean){
+
+        if( isReadonly ){
+
+            this.textarea.attr("disabled", true as any);
+            this.aSend.hide();
+            this.btnUpdateContact.prop("disabled", true);
+            this.btnCall.prop("disabled", true);
+
+        }else{
+
+            if( !phoneNumber.isDialable(this.wdChat.contactNumber) ){
+                return;
+            }
+
+            this.textarea.removeAttr("disabled");
+            this.aSend.show();
+            this.btnUpdateContact.prop("disabled", false);
+            this.btnCall.prop("disabled", false);
+
+        }
+
+    }
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
@@ -37,11 +69,12 @@ export class UiConversation {
     ) {
 
         this.notifyContactNameUpdated();
+        this.setReadonly(true);
 
-        this.structure.find("button.id_updateContact")
+        this.btnUpdateContact
             .on("click", () => this.evtUpdateContact.post());
 
-        this.structure.find("button.id_call")
+        this.btnCall
             .on("click", () => this.evtVoiceCall.post());
 
 
@@ -280,6 +313,7 @@ class UiBubble {
 
         })();
 
+
         this.structure.find("p.id_content")
             .html(wdMessage.text.split("\n").join("<br>"));
 
@@ -361,12 +395,19 @@ namespace UiBubble {
                 )
                 ;
 
+            this.structure.find("span.id_check").text((() => {
 
-            //TODO: 
+                switch (wdMessage.status) {
+                    case "SEND REPORT RECEIVED": return checkMark;
+                    case "STATUS REPORT RECEIVED": return `${checkMark}${checkMark}`;
+                    case "TRANSMITTED TO GATEWAY":
+                    default: return "";
+                }
+
+            })());
+
             this.structure.find("p.id_content")
-                .html(wdMessage.text.split("\n").join("<br>") + ` ${this.wdMessage.status}`);
-
-
+                .html(wdMessage.text.split("\n").join("<br>"));
 
         }
 

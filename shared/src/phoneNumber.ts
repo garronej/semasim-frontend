@@ -1,12 +1,40 @@
-/** E164 number if FIXED LINE or MOBILE or RAW with only [*#+0-9] */
 export type phoneNumber = string;
 
 export namespace phoneNumber {
 
-	/** Throw error if malformed */
+	/**
+	 * This function will try to convert a raw string as a E164 formated phone number.
+	 * 
+	 * If the rawInput is already a E164 it will remain untouched regardless of the iso
+	 * ex: +33636786385, it => +33636786385
+	 * 
+	 * In case the number can not be converted to E164:
+	 * -If the number contain any character that is not a digit or ( ) [space] - # * +
+	 * then the number will be considered not dialable and remain untouched.
+	 * e.g: SFR => SFR | Error
+	 * 
+	 * -If the number contain only digits ( ) [space] - # * or +
+	 * then ( ) [space] and - will be removed.
+	 * e.g: +00 (111) 222-333 => +00111222333
+	 * (if after the number is "" we return rawInput and it's not dialable )
+	 * e.g: ()()-=> ()()- | Error
+	 * e.g: [""] => | Error
+	 * 
+	 * @param rawInput raw string provided as phone number by Dongle or intlInput
+	 * @param iso 
+	 * country of the number ( lowercase ) e.g: fr, it... 
+	 * - If we use intlInput the iso is provided.
+	 * - If it's a incoming SMS/Call from Dongle the iso to provide is the one of the SIM
+	 * as we will ether have an E164 formated number not affected by the iso
+	 * or if we have a locally formated number it's formated it mean that the number is from the same 
+	 * country of the sim card.
+	 * @param mustBeDialable: throw if the number is not dialable.
+	 * 
+	 */
 	export function build(
 		rawInput: string, 
-		iso: string | undefined
+		iso: string | undefined,
+		mustBeDialable: "MUST BE DIALABLE" | undefined = undefined
 	): phoneNumber {
 
 		let shouldFormatToE164: boolean = (() => {
@@ -40,38 +68,79 @@ export namespace phoneNumber {
 
 		} else {
 
+			/** If any char other than *+# () and number is present => match  */
 			if (rawInput.match(/[^*+#\ \-\(\)0-9]/)) {
-				throw new Error("Malformed");
+
+				if( mustBeDialable ){
+					throw new Error("unauthorized char, not dialable");
+				}
+
+				return rawInput;
+
+			} else {
+
+				/** 0 (111) 222-333 => 0111222333 */
+				let phoneNumber = rawInput.replace(/[\ \-\(\)]/g, "");
+
+				if (!phoneNumber.length) {
+
+					if (mustBeDialable) {
+						throw new Error("void, not dialable");
+					}
+
+					return rawInput;
+
+				}
+
+				return phoneNumber;
+
 			}
-
-			let phoneNumber= rawInput.replace(/[\ \-\(\)]/g, "");
-
-			if( !phoneNumber.length ){
-				throw new Error("Void Phone Number");
-			}
-
-			return phoneNumber;
-
 
 		}
 
 	}
 
-	function isValidE164(phoneNumber: phoneNumber): boolean {
+	/** let us test if we should allow the number to be dialed */
+	export function isDialable(phoneNumber: phoneNumber): boolean {
 
-          return (
-			  phoneNumber[0] === "+" &&
-			  (intlTelInputUtils as any).isValidNumber(phoneNumber)
-		  );
+		try {
+
+			build(phoneNumber, undefined, "MUST BE DIALABLE");
+
+		} catch{
+
+			return false;
+
+		}
+
+		return true;
 
 	}
 
+	function isValidE164(phoneNumber: phoneNumber): boolean {
+
+		return (
+			phoneNumber[0] === "+" &&
+			(intlTelInputUtils as any).isValidNumber(phoneNumber)
+		);
+
+	}
+
+	/**
+	 * Pretty print the phone number in national format if
+	 * it is a number from the SIM country,
+	 * in international format if it's from an other country
+	 * or do nothing if it's not dialable.
+	 * 
+	 * @param phoneNumber 
+	 * @param simIso 
+	 */
 	export function prettyPrint(
 		phoneNumber: phoneNumber,
 		simIso: string | undefined
 	): string {
 
-		if ( !simIso || !isValidE164(phoneNumber)) {
+		if (!simIso || !isValidE164(phoneNumber)) {
 			return phoneNumber;
 		}
 
@@ -108,13 +177,17 @@ export namespace phoneNumber {
 		rawInput: string
 	): boolean {
 
+		if (phoneNumber === rawInput) {
+			return true;
+		}
+
 		let rawInputDry = rawInput.replace(/[^*#+0-9]/g, "");
 
 		if (rawInputDry === phoneNumber) {
 			return true;
 		}
 
-		if ( isValidE164(phoneNumber) ) {
+		if (isValidE164(phoneNumber)) {
 
 			let pnNationalDry = (intlTelInputUtils as any).formatNumber(
 				phoneNumber,
@@ -122,7 +195,7 @@ export namespace phoneNumber {
 				intlTelInputUtils.numberFormat.NATIONAL
 			).replace(/[^*#+0-9]/g, "");
 
-			if( rawInputDry === pnNationalDry ){
+			if (rawInputDry === pnNationalDry) {
 				return true;
 			}
 
