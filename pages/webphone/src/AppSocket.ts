@@ -22,18 +22,19 @@ export class AppSocket {
                 "_onMessage": {
                     "value": (ev: MessageEvent) => {
 
-                        let str = Buffer.from(ev.data).toString("utf8");
+                        let sipPacketAsString = Buffer.from(ev.data).toString("utf8");
 
-                        //response=> imsi in from
-                        //request=> imsi in to
+                        let imsi = sipPacketAsString.match(
+                            !!sipPacketAsString.match(/^SIP/) ?
+                                /\r\nFrom:[^:]+:([0-9]{15})@/ :
+                                /\r\nTo:[^:]+:([0-9]{15})@/
+                        )[1]!
 
-                        console.log(
-                            window["JsSIP.Parser"].parseMessage(str, {})
-                        );
+                        //console.log( window["JsSIP.Parser"].parseMessage(str, {}));
 
-                        console.log(str);
+                        console.log(sipPacketAsString);
 
-                        this.evtRawSipPacket.post({ "data": str, "imsi": "" });
+                        this.evtRawSipPacket.post({ "data": sipPacketAsString, imsi });
 
                     }
                 },
@@ -82,10 +83,6 @@ export class AppSocket {
     }
 
     public makeProxy(imsi: string) {
-
-        //TODO: remove:
-
-        imsi = "";
 
         let proxy = Object.defineProperties(
             {
