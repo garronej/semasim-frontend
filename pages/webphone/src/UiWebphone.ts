@@ -10,6 +10,7 @@ import { UiQuickAction } from "./UiQuickAction";
 import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
+import { UiVoiceCall } from "./UiVoiceCall";
 
 import { phoneNumber } from "../../../shared";
 
@@ -40,11 +41,48 @@ export class UiWebphone {
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
+        (async ()=>{
+
+            let uiVoiceCall = new UiVoiceCall(userSim);
+
+            let wdChat= wdInstance.chats[0];
+
+            //@ts-ignore
+            let { onTerminated, prUserFeedback }= uiVoiceCall.openIncoming(wdChat);
+
+            let userFeedback= await prUserFeedback;
+
+            if( userFeedback.status === "ANSWERED" ){
+
+                let { onEstablished }= userFeedback;
+
+                await new Promise(resolve=> setTimeout(resolve, 3000));
+
+                onEstablished().then(()=> {
+
+                    console.log("HANGUP");
+
+                });
+
+
+            }else if( userFeedback.status === "REJECTED"){
+
+                console.log("REJECTED");
+
+            }
+
+        })();
+
+
+        
+
+
+
+
+
         this.ua = new Ua(this.userSim);
 
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
-
-            console.log("Registered!");
 
             for (let uiConversation of this.uiConversations.values()) {
 

@@ -1,4 +1,12 @@
 <style>
+
+    .panel-title {
+        float: none;
+        text-align: center;
+        margin-right: 0px !important;
+        font-size: 14px !important;
+    }
+
     @keyframes ring {
         5%,
         45% {
@@ -50,7 +58,6 @@
     }
 </style>
 
-
 <div class="id_UiVoiceCall modal" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -59,27 +66,24 @@
                 <div class="panel panel-dark mb0">
                     <!-- Start .panel -->
                     <div class="panel-heading text-center">
-                        <h4 class="panel-title" style="float:none;margin-right:0;">
+                        <h4 class="panel-title">
                             <span class="id_me"></span>
-                            <i class="im-arrow-right17"></i>
-                            <i class="im-arrow-left16"></i>
+                            <i class="sel_arrow-right l-arrows-right"></i>
+                            <i class="sel_arrow-left l-arrows-left"></i>
                             <span class="id_timer"></span>
-                            <span class="im-phone4 icon-ring"></span>
-                            <span class="im-spinner2 icon-spin"></span>
-                            <span class="im-phone-hang-up"></span>
-                            <span class="im-sad"></span>
-                            <i class="im-arrow-right17"></i>
-                            <i class="im-arrow-left16"></i>
-                            <span class="id_contact">
-                                <span>
+                            <span class="id_icon-ring fa fa-phone icon-ring"></span>
+                            <span class="id_icon-spin fa fa-spinner icon-spin"></span>
+                            <span class="id_icon-hangup glyphicon glyphicon-phone-alt"></span>
+                            <span class="id_icon-failure fa fa-times-circle"></span>
+                            <i class="sel_arrow-right l-arrows-right"></i>
+                            <i class="sel_arrow-left l-arrows-left"></i>
+                            <span class="id_contact"> <span>
                         </h4>
                     </div>
                     <div class="panel-body">
 
                         <div class="row text-center">
                             <span class="id_status well well-sm"></span>
-
-
                         </div>
                         <div class="row">
                             <div class="pull-left">
@@ -90,7 +94,7 @@
                             </div>
                             <div class="pull-right">
                                 <button class="id_ko btn btn-danger mr10" type="button">
-                                    <i class="im-phone-hang-up"></i>
+                                    <i class="glyphicon glyphicon-phone-alt"></i>
                                     <span></span>
                                 </button>
                             </div>
