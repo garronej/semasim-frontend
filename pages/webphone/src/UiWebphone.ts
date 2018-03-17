@@ -41,40 +41,81 @@ export class UiWebphone {
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
-        (async ()=>{
+        (async () => {
+
 
             let uiVoiceCall = new UiVoiceCall(userSim);
 
-            let wdChat= wdInstance.chats[0];
+            let wdChat = wdInstance.chats[0];
 
-            //@ts-ignore
-            let { onTerminated, prUserFeedback }= uiVoiceCall.openIncoming(wdChat);
+            let { onTerminated, prUserInput } = uiVoiceCall.onIncoming(wdChat);
 
-            let userFeedback= await prUserFeedback;
+            onTerminated;
 
-            if( userFeedback.status === "ANSWERED" ){
+            let userInput = await prUserInput;
 
-                let { onEstablished }= userFeedback;
+            if (userInput.userAction === "ANSWER") {
 
-                await new Promise(resolve=> setTimeout(resolve, 3000));
+                let { onEstablished } = userInput;
 
-                onEstablished().then(()=> {
+                await (async () => {
 
-                    console.log("HANGUP");
+                    await new Promise(resolve => setTimeout(resolve, 3000));
 
-                });
+                    let { prUserInput } = onEstablished();
 
+                    let userInput = await prUserInput;
 
-            }else if( userFeedback.status === "REJECTED"){
+                    console.log(userInput.userAction);
 
-                console.log("REJECTED");
+                })();
+
+            } else if (userInput.userAction === "REJECT") {
+
+                console.log(userInput.userAction);
 
             }
+
+        });
+
+        (async ()=> {
+
+            console.log("new new version");
+
+            let uiVoiceCall = new UiVoiceCall(userSim);
+
+            let wdChat = wdInstance.chats[0];
+
+            let { onTerminated, onRingback, prUserInput } = uiVoiceCall.onOutgoing(wdChat);
+
+            onTerminated;
+
+            prUserInput.then(({userAction})=> console.log(userAction) );
+
+            await new Promise(resolve=> setTimeout(resolve, 3000));
+
+            await (async ()=>{
+
+                let { prUserInput, onEstablished } = onRingback();
+
+                prUserInput.then(({ userAction }) => console.log(userAction));
+
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                await (async ()=> {
+
+                    let { prUserInput } = onEstablished();
+
+                    prUserInput.then(({ userAction }) => console.log(userAction));
+
+
+                })();
+            })();
 
         })();
 
 
-        
+
 
 
 
@@ -133,7 +174,7 @@ export class UiWebphone {
 
                             continue;
 
-                        } 
+                        }
 
                         break;
 
@@ -162,12 +203,12 @@ export class UiWebphone {
                                     ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
                                 ) as (Wd.Message.Outgoing.SendReportReceived | undefined)
                                 ;
-                            
-                            if( !wdMessageOutgoing ){
+
+                            if (!wdMessageOutgoing) {
 
                                 alert("aie aie aie 2!");
 
-                                await new Promise<void>(resolve=> setTimeout(()=> resolve(), 500));
+                                await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
 
                                 continue;
 

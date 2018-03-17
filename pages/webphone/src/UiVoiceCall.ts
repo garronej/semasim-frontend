@@ -1,4 +1,4 @@
-import { VoidSyncEvent, SyncEvent } from "ts-events-extended";
+import { SyncEvent } from "ts-events-extended";
 
 import { types } from "../../../api";
 
@@ -23,11 +23,10 @@ export class UiVoiceCall {
 
     private readonly countryIso: string | undefined;
 
-    private readonly evtBtnOk= new VoidSyncEvent();
-    private readonly evtBtnKo= new VoidSyncEvent();
+    private readonly evtBtnClick= new SyncEvent<"GREEN" | "RED">();
 
-    private readonly btnOk= this.structure.find(".id_ok");
-    private readonly btnKo= this.structure.find(".id_ko");
+    private readonly btnGreen= this.structure.find(".id_btn-green");
+    private readonly btnRed= this.structure.find(".id_btn-red");
 
     constructor(
         private readonly userSim: types.UserSim.Usable
@@ -60,8 +59,9 @@ export class UiVoiceCall {
 
         })());
 
-        this.btnOk.on("click", ()=> this.evtBtnOk.post());
-        this.btnKo.on("click", () => this.evtBtnKo.post());
+
+        this.btnGreen.on("click", ()=> this.evtBtnClick.post("GREEN"));
+        this.btnRed.on("click", () => this.evtBtnClick.post("RED"));
 
     }
 
@@ -82,86 +82,139 @@ export class UiVoiceCall {
 
     }
 
-    public openIncoming(wdChat: Wd.Chat): {
+    private setArrows(direction: "INCOMING" | "OUTGOING"): void {
+
+        this.structure.find("[class^='sel_arrow-']").addClass("hide");
+
+        this.structure
+            .find(`.sel_arrow-${(direction === "INCOMING") ? "left" : "right"}`)
+            .removeClass("hide")
+            ;
+
+    }
+
+    public onIncoming(wdChat: Wd.Chat): {
         onTerminated(message: string): void;
-        prUserFeedback: Promise<UiVoiceCall.OpenIncoming.UserFeedback>;
+        prUserInput: Promise<{
+            userAction: "ANSWER";
+            onEstablished(): {
+                prUserInput: Promise<{ userAction: "HANGUP" }>
+            }
+        } | {
+            userAction: "REJECT";
+        }>;
     } {
 
         this.setContact(wdChat);
 
-        console.log("updated<3");
+        this.setArrows("INCOMING");
 
-        this.structure.find("[class^='sel_arrow-']").addClass("hide");
-        //this.structure.find("i[class^='sel_arrow-']").addClass("hide");
-        this.structure.find(".sel_arrow-left").removeClass("hide");
         this.setState("RINGING", "Incoming call");
 
-        let evtTerminated = new SyncEvent<string>();
-
-        evtTerminated.attachOnce(
-            message => {
-
-                this.evtBtnOk.detach();
-                this.evtBtnKo.detach();
-
-                this.setState("TERMINATED", message)
-            }
-        );
-
         return {
-            "onTerminated": message => evtTerminated.post(message),
-            "prUserFeedback": new Promise(
-                resolve => {
+            "onTerminated": message => this.setState("TERMINATED", message),
+            "prUserInput": new Promise(resolve => this.evtBtnClick.attachOnce(btnId => {
 
-                    this.evtBtnOk.attachOnce(() => {
+                if (btnId === "RED") {
 
-                        this.setState("LOADING", "Connecting...");
+                    this.setState("TERMINATED", "You rejected the call");
 
-                        this.evtBtnKo.detach();
+                    resolve({ "userAction": "REJECT" });
 
-                        resolve({
-                            "status": "ANSWERED",
-                            "onEstablished": () => {
+                } else {
 
-                                this.setState("ESTABLISHED", "in call");
+                    this.setState("LOADING", "Connecting...");
 
-                                return new Promise(
-                                    resolve => this.evtBtnKo.attachOnce(() => {
+                    resolve({
+                        "userAction": "ANSWER",
+                        "onEstablished": () => {
 
-                                        this.setState("TERMINATED", "you hanged up");
+                            this.setState("ESTABLISHED", "in call");
 
-                                        resolve("HANGUP");
+                            return {
+                                "prUserInput": new Promise(resolve => this.evtBtnClick.attachOnce(() => {
 
-                                    })
-                                );
+                                    this.setState("TERMINATED", "You hanged up");
 
+                                    resolve({ "userAction": "HANGUP" });
 
-                            }
-                        })
+                                }))
+                            };
 
-                    });
-
-                    this.evtBtnKo.attachOnce(() => {
-
-                        this.evtBtnOk.detach();
-
-                        this.setState("TERMINATED", "you rejected the call");
-
-                        resolve({ "status": "REJECTED" });
-
+                        }
                     });
 
                 }
-            )
-        }
+
+            }))
+        };
 
     }
 
-    public openOutgoing(wdChat: Wd.Chat): void {
+
+    public onOutgoing(wdChat: Wd.Chat): {
+        onTerminated(message: string): void;
+        onRingback(): {
+            onEstablished(): {
+                prUserInput: Promise<{ userAction: "HANGUP"; }>
+            }
+            prUserInput: Promise<{ userAction: "HANGUP"; }>;
+        };
+        prUserInput: Promise<{ userAction: "CANCEL"; }>;
+    } {
 
         this.setContact(wdChat);
 
-        //TODO
+        this.setArrows("OUTGOING");
+
+        this.setState("LOADING", "Loading...");
+
+        return {
+            "onTerminated": message => this.setState("TERMINATED", message),
+            "onRingback": () => {
+
+                this.setState("RINGBACK", "Remote is ringing");
+
+                return {
+                    "onEstablished": () => {
+
+                        this.setState("ESTABLISHED", "In call");
+
+                        return {
+                            "prUserInput": new Promise(resolve =>
+                                this.evtBtnClick.attachOnce(() => {
+
+                                    this.setState("TERMINATED", "You hanged up");
+
+                                    resolve({ "userAction": "HANGUP" });
+
+                                })
+                            )
+                        };
+
+                    },
+                    "prUserInput": new Promise(
+                        resolve => this.evtBtnClick.attachOnce(() => {
+
+                            this.setState("TERMINATED", "You hanged up before remote answered");
+
+                            resolve({ "userAction": "HANGUP" });
+
+                        })
+                    )
+                };
+
+            },
+            "prUserInput": new Promise(
+                resolve => this.evtBtnClick.attachOnce(() => {
+
+                    this.setState("TERMINATED", "You canceled the call before remote was ringing");
+
+                    resolve({ "userAction": "CANCEL" });
+
+                })
+            )
+        };
 
     }
 
@@ -170,8 +223,9 @@ export class UiVoiceCall {
         message: string
     ): void {
 
+        this.evtBtnClick.detach();
+
         this.structure.find("[class^='id_icon-']").addClass("hide");
-        //this.structure.find("span[class^='sel_icon-']").addClass("hide");
 
         let spanTimer = this.structure.find("span.id_timer");
 
@@ -180,30 +234,27 @@ export class UiVoiceCall {
             spanTimer.text("");
         }
 
-        this.btnOk.addClass("hide");
-        this.btnKo.addClass("hide");
+        this.btnGreen.addClass("hide");
+        this.btnRed.addClass("hide");
 
         this.structure.modal("show");
 
         switch (state) {
             case "RINGING":
-                this.btnOk.removeClass("hide").html("Answer");
-                this.btnKo.removeClass("hide").html("Reject");
+                this.btnGreen.removeClass("hide").html("Answer");
+                this.btnRed.removeClass("hide").html("Reject");
                 this.structure.find(".id_icon-ring").removeClass("hide");
                 break;
             case "RINGBACK":
                 this.structure.find(".id_icon-ring").removeClass("hide");
-                this.btnKo.removeClass("hide").html("Hangup");
+                this.btnRed.removeClass("hide").html("Hangup");
                 break;
             case "ESTABLISHED":
-                this.btnKo.removeClass("hide").html("Hangup");
+                this.btnRed.removeClass("hide").html("Hangup");
                 spanTimer["timer"]("start");
                 break;
-            case "ERROR":
-                this.structure.find(".id_icon-failure").removeClass("hide");
-                break;
             case "LOADING":
-                this.btnKo.removeClass("hide").html("Cancel");
+                this.btnRed.removeClass("hide").html("Cancel");
                 this.structure.find(".id_icon-spin").removeClass("hide");
                 break;
             case "TERMINATED":
@@ -222,33 +273,6 @@ export class UiVoiceCall {
 
 export namespace UiVoiceCall {
 
-    export type State =
-        "RINGING" | "RINGBACK" | "ESTABLISHED" |
-        "ERROR" | "LOADING" | "TERMINATED"
-        ;
-
-    export namespace OpenIncoming {
-
-        export type UserFeedback =
-            UserFeedback.Answered |
-            UserFeedback.Rejected
-            ;
-
-        export namespace UserFeedback {
-
-            export type Answered = {
-                status: "ANSWERED";
-                onEstablished(): Promise<"HANGUP">;
-            }
-
-            export type Rejected = {
-                status: "REJECTED";
-            }
-
-
-        }
-
-
-    }
+    export type State = "RINGING" | "RINGBACK" | "ESTABLISHED" | "LOADING" | "TERMINATED";
 
 }
