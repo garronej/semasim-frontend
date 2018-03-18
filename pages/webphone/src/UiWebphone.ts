@@ -78,7 +78,7 @@ export class UiWebphone {
 
         });
 
-        (async ()=> {
+        (async () => {
 
             console.log("new new version");
 
@@ -90,11 +90,11 @@ export class UiWebphone {
 
             onTerminated;
 
-            prUserInput.then(({userAction})=> console.log(userAction) );
+            prUserInput.then(({ userAction }) => console.log(userAction));
 
-            await new Promise(resolve=> setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
 
-            await (async ()=>{
+            await (async () => {
 
                 let { prUserInput, onEstablished } = onRingback();
 
@@ -102,7 +102,7 @@ export class UiWebphone {
 
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
-                await (async ()=> {
+                await (async () => {
 
                     let { prUserInput } = onEstablished();
 
@@ -112,7 +112,8 @@ export class UiWebphone {
                 })();
             })();
 
-        })();
+        });
+
 
 
 
@@ -125,6 +126,21 @@ export class UiWebphone {
 
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
 
+            (() => {
+
+                if (isRegistered) {
+
+                    console.log("first test call <3");
+
+                    let wdChat = wdInstance.chats[0];
+
+                    this.ua.placeOutgoingCall(wdChat.contactNumber);
+
+                }
+
+            })();
+
+
             for (let uiConversation of this.uiConversations.values()) {
 
                 uiConversation.setReadonly(!isRegistered);
@@ -132,6 +148,11 @@ export class UiWebphone {
             }
 
         });
+
+
+
+
+
 
         this.ua.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, text }) => {
