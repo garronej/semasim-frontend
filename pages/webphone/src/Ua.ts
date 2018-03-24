@@ -4,17 +4,15 @@ import { types, apiDeclaration } from "../../../api";
 import {
     types as gwTypes,
     extractBundledDataFromHeaders,
-    smuggleBundledDataInHeaders
+    smuggleBundledDataInHeaders,
+    urlSafeB64
 } from "./semasim-gateway";
 import { AppSocket } from "./AppSocket";
 
-declare const Buffer: any;
 declare const JsSIP: any;
 
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-
-
 
 export class Ua {
 
@@ -61,10 +59,7 @@ export class Ua {
             "password": this.userSim.password,
             "instance_id": Ua.instanceId,
             "register": false,
-            "contact_uri": [
-                uri,
-                `base64_email=${Buffer.from(Ua.email, "utf8").toString("base64")}`
-            ].join(";"),
+            "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}`,
             "connection_recovery_min_interval": 86400,
             "connection_recovery_max_interval": 86400,
             "register_expires": 86400
