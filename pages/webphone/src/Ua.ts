@@ -51,11 +51,12 @@ export class Ua {
         public readonly userSim: types.UserSim.Usable,
     ) {
 
-        let uri = `sip:${this.userSim.sim.imsi}@${apiDeclaration.domain}`;
+        let uri = `sip:${this.userSim.sim.imsi}-webRTC@${apiDeclaration.domain}`;
 
         this.jsSipUa = new JsSIP.UA({
             "sockets": Ua.appSocket.makeProxy(this.userSim.sim.imsi),
             uri,
+            "authorization_user": this.userSim.sim.imsi,
             "password": this.userSim.password,
             "instance_id": Ua.instanceId,
             "register": false,

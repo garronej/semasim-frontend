@@ -138,7 +138,7 @@ export class UiWebphone {
 
                 }
 
-            });
+            })();
 
 
             for (let uiConversation of this.uiConversations.values()) {

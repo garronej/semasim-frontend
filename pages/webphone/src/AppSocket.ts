@@ -26,8 +26,8 @@ export class AppSocket {
 
                         let imsi = sipPacketAsString.match(
                             !!sipPacketAsString.match(/^SIP/) ?
-                                /\r\nFrom:[^:]+:([0-9]{15})@/ :
-                                /\r\nTo:[^:]+:([0-9]{15})@/
+                                /\r\nFrom:[^:]+:([0-9]{15})/ :
+                                /\r\nTo:[^:]+:([0-9]{15})/
                         )[1]!
 
                         //console.log( window["JsSIP.Parser"].parseMessage(str, {}));
