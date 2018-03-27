@@ -7,6 +7,7 @@ import { loadHtml } from "./loadHtml";
 import Wd = types.WebphoneData;
 
 import { phoneNumber } from "../../../shared";
+import { Ua } from "./Ua";
 
 
 declare const require: any;
@@ -23,14 +24,18 @@ export class UiVoiceCall {
 
     private readonly countryIso: string | undefined;
 
-    private readonly evtBtnClick= new SyncEvent<"GREEN" | "RED">();
-
     private readonly btnGreen= this.structure.find(".id_btn-green");
     private readonly btnRed= this.structure.find(".id_btn-red");
+
+    private readonly evtBtnClick= new SyncEvent<"GREEN" | "RED">();
+
+    private readonly evtNumpadDtmf= new SyncEvent<{ signal: Ua.DtmFSignal; duration: number }>();
 
     constructor(
         private readonly userSim: types.UserSim.Usable
     ) {
+
+
 
         this.countryIso= userSim.sim.country?
             userSim.sim.country.iso : undefined;
@@ -41,6 +46,7 @@ export class UiVoiceCall {
             "backdrop": "static"
         });
 
+        /*
         this.structure.find("span.id_me").html((()=>{
 
             let out= userSim.friendlyName;
@@ -58,10 +64,51 @@ export class UiVoiceCall {
             return out;
 
         })());
+        */
 
+        this.structure.find("span.id_me").html(userSim.friendlyName);
 
-        this.btnGreen.on("click", ()=> this.evtBtnClick.post("GREEN"));
+        this.structure.find("span.id_me_under").html(
+            !!this.userSim.sim.storage.number ?
+                (intlTelInputUtils as any).formatNumber(
+                    this.userSim.sim.storage.number.asStored,
+                    this.countryIso || null,
+                    intlTelInputUtils.numberFormat.NATIONAL
+                ) : ""
+        );
+
+        this.btnGreen.on("click", () => this.evtBtnClick.post("GREEN"));
         this.btnRed.on("click", () => this.evtBtnClick.post("RED"));
+
+        let mouseDownStart: { [signal: string]: number }= {};
+
+        for (let i = 0; i <= 11; i++) {
+
+            let signal: Ua.DtmFSignal = (i <= 9) ? `${i}` : (i === 10) ? "*" : "#" as any;
+
+            this.structure.find(
+                "button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal))
+            )
+                .on("mousedown", () => mouseDownStart[signal] = Date.now())
+                .on("click", () => {
+
+                    let duration= Date.now() - mouseDownStart[signal];
+
+                    if( duration < 250 ){
+                        duration = 250;
+                    }
+
+                    let e = {
+                        signal,
+                        duration
+                    };
+
+                    this.evtNumpadDtmf.post(e);
+                }
+                )
+                ;
+
+        }
 
     }
 
@@ -72,12 +119,21 @@ export class UiVoiceCall {
             this.countryIso
         );
 
+        /*
         this.structure.find("span.id_contact")
             .html(
                 !!wdChat.contactName ?
                     `${wdChat.contactName} ( ${prettyNumber} )` :
-                prettyNumber
-        );
+                    prettyNumber
+            );
+        */
+
+
+        this.structure.find("span.id_contact")
+            .html(wdChat.contactName ? wdChat.contactName : "");
+
+        this.structure.find("span.id_contact_under")
+            .html(prettyNumber);
 
 
     }
@@ -93,13 +149,36 @@ export class UiVoiceCall {
 
     }
 
+    private onEstablished(): {
+        evtUserInput: SyncEvent<UiVoiceCall.InCallUserAction>
+    } {
+
+        this.setState("ESTABLISHED", "In call");
+
+        let evtUserInput = new SyncEvent<UiVoiceCall.InCallUserAction>();
+
+        this.evtNumpadDtmf.attach(
+            ({ signal, duration }) =>
+                evtUserInput.post({ "userAction": "DTMF", signal, duration })
+        );
+
+        this.evtBtnClick.attachOnce(() => {
+
+            this.setState("TERMINATED", "You hanged up");
+
+            evtUserInput.post({ "userAction": "HANGUP" });
+
+        });
+
+        return { evtUserInput };
+
+    }
+
     public onIncoming(wdChat: Wd.Chat): {
         onTerminated(message: string): void;
         prUserInput: Promise<{
             userAction: "ANSWER";
-            onEstablished(): {
-                prUserInput: Promise<{ userAction: "HANGUP" }>
-            }
+            onEstablished: typeof UiVoiceCall.prototype.onEstablished;
         } | {
             userAction: "REJECT";
         }>;
@@ -127,21 +206,7 @@ export class UiVoiceCall {
 
                     resolve({
                         "userAction": "ANSWER",
-                        "onEstablished": () => {
-
-                            this.setState("ESTABLISHED", "in call");
-
-                            return {
-                                "prUserInput": new Promise(resolve => this.evtBtnClick.attachOnce(() => {
-
-                                    this.setState("TERMINATED", "You hanged up");
-
-                                    resolve({ "userAction": "HANGUP" });
-
-                                }))
-                            };
-
-                        }
+                        "onEstablished": () => this.onEstablished()
                     });
 
                 }
@@ -152,12 +217,11 @@ export class UiVoiceCall {
     }
 
 
+
     public onOutgoing(wdChat: Wd.Chat): {
         onTerminated(message: string): void;
         onRingback(): {
-            onEstablished(): {
-                prUserInput: Promise<{ userAction: "HANGUP"; }>
-            }
+            onEstablished: typeof UiVoiceCall.prototype.onEstablished,
             prUserInput: Promise<{ userAction: "HANGUP"; }>;
         };
         prUserInput: Promise<{ userAction: "CANCEL"; }>;
@@ -176,23 +240,7 @@ export class UiVoiceCall {
                 this.setState("RINGBACK", "Remote is ringing");
 
                 return {
-                    "onEstablished": () => {
-
-                        this.setState("ESTABLISHED", "In call");
-
-                        return {
-                            "prUserInput": new Promise(resolve =>
-                                this.evtBtnClick.attachOnce(() => {
-
-                                    this.setState("TERMINATED", "You hanged up");
-
-                                    resolve({ "userAction": "HANGUP" });
-
-                                })
-                            )
-                        };
-
-                    },
+                    "onEstablished": () => this.onEstablished(),
                     "prUserInput": new Promise(
                         resolve => this.evtBtnClick.attachOnce(() => {
 
@@ -225,6 +273,10 @@ export class UiVoiceCall {
 
         this.evtBtnClick.detach();
 
+        let keyPad = this.structure.find(".id_numpad");
+
+        keyPad.hide();
+
         this.structure.find("[class^='id_icon-']").addClass("hide");
 
         let spanTimer = this.structure.find("span.id_timer");
@@ -233,6 +285,8 @@ export class UiVoiceCall {
             spanTimer["timer"]("remove");
             spanTimer.text("");
         }
+
+        this.evtNumpadDtmf.detach();
 
         this.btnGreen.addClass("hide");
         this.btnRed.addClass("hide");
@@ -250,6 +304,7 @@ export class UiVoiceCall {
                 this.btnRed.removeClass("hide").html("Hangup");
                 break;
             case "ESTABLISHED":
+                keyPad.show();
                 this.btnRed.removeClass("hide").html("Hangup");
                 spanTimer["timer"]("start");
                 break;
@@ -274,5 +329,23 @@ export class UiVoiceCall {
 export namespace UiVoiceCall {
 
     export type State = "RINGING" | "RINGBACK" | "ESTABLISHED" | "LOADING" | "TERMINATED";
+
+    export type InCallUserAction =
+        InCallUserAction.Dtmf |
+        InCallUserAction.Hangup;
+
+    export namespace InCallUserAction {
+
+        export type Dtmf = {
+            userAction: "DTMF";
+            signal: Ua.DtmFSignal;
+            duration: number;
+        };
+
+        export type Hangup = {
+            userAction: "HANGUP";
+        };
+
+    }
 
 }

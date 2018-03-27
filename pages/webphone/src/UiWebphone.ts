@@ -33,6 +33,7 @@ export class UiWebphone {
     private readonly uiQuickAction!: UiQuickAction;
     private readonly uiPhonebook!: UiPhonebook;
     private readonly uiConversations = new Map<Wd.Chat, UiConversation>();
+    private readonly uiVoiceCall: UiVoiceCall;
 
     private readonly ua: Ua;
 
@@ -41,90 +42,40 @@ export class UiWebphone {
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
-        (async () => {
-
-
-            let uiVoiceCall = new UiVoiceCall(userSim);
-
-            let wdChat = wdInstance.chats[0];
-
-            let { onTerminated, prUserInput } = uiVoiceCall.onIncoming(wdChat);
-
-            onTerminated;
-
-            let userInput = await prUserInput;
-
-            if (userInput.userAction === "ANSWER") {
-
-                let { onEstablished } = userInput;
-
-                await (async () => {
-
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-
-                    let { prUserInput } = onEstablished();
-
-                    let userInput = await prUserInput;
-
-                    console.log(userInput.userAction);
-
-                })();
-
-            } else if (userInput.userAction === "REJECT") {
-
-                console.log(userInput.userAction);
-
-            }
-
-        });
-
-        (async () => {
-
-            console.log("new new version");
-
-            let uiVoiceCall = new UiVoiceCall(userSim);
-
-            let wdChat = wdInstance.chats[0];
-
-            let { onTerminated, onRingback, prUserInput } = uiVoiceCall.onOutgoing(wdChat);
-
-            onTerminated;
-
-            prUserInput.then(({ userAction }) => console.log(userAction));
-
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            await (async () => {
-
-                let { prUserInput, onEstablished } = onRingback();
-
-                prUserInput.then(({ userAction }) => console.log(userAction));
-
-                await new Promise(resolve => setTimeout(resolve, 3000));
-
-                await (async () => {
-
-                    let { prUserInput } = onEstablished();
-
-                    prUserInput.then(({ userAction }) => console.log(userAction));
-
-
-                })();
-            })();
-
-        });
-
-
-
-
-
-
-
-
+        this.uiVoiceCall= new UiVoiceCall(userSim);
 
         this.ua = new Ua(this.userSim);
 
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
+
+            /*
+            (async ()=>{
+
+                if( isRegistered ){
+
+                    console.log("first test call <3");
+
+                    let wdChat = wdInstance.chats[0];
+
+                    let { onRingback, onTerminated }= this.uiVoiceCall.onOutgoing(wdChat);
+
+                    await new Promise(resolve=> setTimeout(()=> resolve(), 9000));
+
+                    let { onEstablished }= onRingback();
+
+                    await new Promise(resolve=> setTimeout(()=> resolve(), 9000));
+
+                    onEstablished();
+
+                    await new Promise(resolve=> setTimeout(()=> resolve(), 9000));
+
+                    onTerminated("fin");
+
+
+                }
+
+            });
+            */
 
             (() => {
 
@@ -134,12 +85,51 @@ export class UiWebphone {
 
                     let wdChat = wdInstance.chats[0];
 
-                    this.ua.placeOutgoingCall(wdChat.contactNumber);
+                    //this.ua.placeOutgoingCall(wdChat.contactNumber);
+                    //this.ua.placeOutgoingCall("0448788803");
+                    //this.ua.placeOutgoingCall("0671124615");
+                    //this.ua.placeOutgoingCall("666");
+
+                    //wdChat.contactName= "Repondeur";
+                    //wdChat.contactNumber= "666";
+
+                    let { 
+                        terminate, prTerminated, prNextState 
+                    }= this.ua.placeOutgoingCall( wdChat.contactNumber);
+
+                    let { onTerminated, onRingback }= this.uiVoiceCall.onOutgoing(wdChat);
+
+                    prTerminated.then(()=> onTerminated("foo bar"));
+
+                    prNextState.then(({ prNextState })=> {
+
+                        let { onEstablished, prUserInput } =onRingback();
+
+                        prUserInput.then(()=> terminate());
+
+                        prNextState.then(({ sendDtmf })=> {
+
+                            let { evtUserInput }= onEstablished();
+
+                            evtUserInput.attach(
+                                (eventData): eventData is UiVoiceCall.InCallUserAction.Dtmf=>
+                                eventData.userAction === "DTMF",
+                                ({ signal, duration })=> sendDtmf(signal, duration)
+                            );
+
+                            evtUserInput.attachOnce(
+                                ({ userAction })=> userAction === "HANGUP", 
+                                ()=> terminate()
+                            );
+
+
+                        });
+
+                    });
 
                 }
 
             })();
-
 
             for (let uiConversation of this.uiConversations.values()) {
 
@@ -148,11 +138,6 @@ export class UiWebphone {
             }
 
         });
-
-
-
-
-
 
         this.ua.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, text }) => {

@@ -1,4 +1,4 @@
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { phoneNumber } from "../../../shared";
 import { types, apiDeclaration } from "../../../api";
 import {
@@ -46,6 +46,8 @@ export class Ua {
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
 
     private readonly jsSipUa: any;
+
+    private evtGsmRinging = new VoidSyncEvent();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
@@ -95,6 +97,14 @@ export class Ua {
                 this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
             );
 
+            if (bundledData.type === "TARGET GSM RINGING") {
+
+                this.evtGsmRinging.post();
+
+                return;
+
+            }
+
             this.evtIncomingMessage.post({ fromNumber, bundledData, "text": request.body });
 
         });
@@ -122,7 +132,7 @@ export class Ua {
 
     }
 
-    /** return exactSendDate */
+    /** return exactSendDate to match with sendReport and statusReport */
     public async sendMessage(
         number: phoneNumber,
         text: string
@@ -175,23 +185,27 @@ export class Ua {
 
     public placeOutgoingCall(number: phoneNumber): {
         terminate(): void;
-        prError: Promise<Error>,
-        pr: Promise<{
-            state: "RINGBACK"
-            pr: Promise<{
-                state: "ESTABLISHED" | "REMOTE REJECT"
-                pr: Promise<{
-                    state: "REMOTE HANGUP"
-                }>
+        prTerminated: Promise<void>;
+        prNextState: Promise<{
+            state: "RINGBACK";
+            prNextState: Promise<{
+                state: "ESTABLISHED";
+                sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
             }>
         }>
     } {
 
-        console.log("========================================================!!!avec ice");
-
-        let pcConfig: RTCConfiguration= {
-            "iceServers": [ { "urls": [ "stun:stun1.l.google.com:19302" ] } ]
+        let pcConfig: RTCConfiguration = {
+            "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
         };
+
+        let evtEstablished = new VoidSyncEvent();
+
+        let evtFailedOrEnded = new VoidSyncEvent();
+
+        let evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+
+        let terminate: (() => void) | undefined = undefined;
 
         this.jsSipUa.call(
             `sip:${number}@${apiDeclaration.domain}`,
@@ -201,25 +215,34 @@ export class Ua {
                 "eventHandlers": {
                     "connecting": function () {
 
+                        terminate = () => this.terminate();
+
+                        evtDtmf.attach(({ signal, duration }) =>
+                            this.sendDTMF(signal, { duration })
+                            //this.sendDTMF(signal, { "duration": 50 })
+                        );
+
                         let rtcPeerConnection: RTCPeerConnection = this.connection;
 
                         rtcPeerConnection.onaddstream = ({ stream }) => {
 
-                            let audioElem= $("<audio>", { "autoplay": "" });
+                            console.log("rtcPeerConnection onaddstream");
 
-                            audioElem.get(0)["srcObject"]= stream;
+                            let audioElem = $("<audio>", { "autoplay": "" });
+
+                            audioElem.get(0)["srcObject"] = stream;
+
 
                         };
-
 
                     },
                     "peerconnection": () => console.log("peerconnection"),
                     "sending": () => console.log("sending"),
                     "progress": () => console.log("progress"),
                     "accepted": () => console.log("accepted"),
-                    "confirmed": () => console.log("confirmed"),
-                    "ended": () => console.log("ended"),
-                    "failed": () => console.log("failed"),
+                    "confirmed": () => evtEstablished.post(),
+                    "ended": function () { console.log("ended", arguments); evtFailedOrEnded.post(); },
+                    "failed": function () { console.log("failed", arguments); },
                     "newDTMF": () => console.log("newDTMF"),
                     "newInfo": () => console.log("newInfo"),
                     "hold": () => console.log("hold"),
@@ -240,100 +263,67 @@ export class Ua {
             }
         );
 
+        return {
+            "prNextState": new Promise(async resolve => {
 
-        return null as any;
+                await Promise.race([
+                    this.evtGsmRinging.waitFor(),
+                    evtEstablished.waitFor()
+                ]);
+
+                resolve({
+                    "state": "RINGBACK",
+                    "prNextState": new Promise(
+                        async resolve => {
+
+                            if (!evtEstablished.postCount) {
+                                await evtEstablished.waitFor();
+                            }
+
+                            resolve({
+                                "state": "ESTABLISHED",
+                                "sendDtmf": (signal, duration) =>
+                                    evtDtmf.post({ signal, duration })
+                            });
+
+                        }
+                    )
+                });
+
+            }),
+            "prTerminated": new Promise(async resolve => {
+
+                await evtFailedOrEnded.waitFor();
+
+                console.log("terminated");
+
+                resolve();
+
+            }),
+            "terminate": () => {
+
+                console.log("terminate requested");
+
+                if (terminate) {
+                    terminate();
+                }
+
+                //TODO end the call
+
+            }
+
+        };
 
     }
 
 
 }
 
+export namespace Ua {
+
+    export type DtmFSignal= 
+    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+
+}
 
 
-/*
-
-this.structure.find("button.id_ko").one("click", function () {
-
-    try {
-        session.terminate();
-
-    } catch (error) {
-
-        console.info("on a eut une erreur onTerminate", error.message);
-
-    }
-
-
-});
-
-
-
-
-
-widget.userAgent.on("newRTCSession", function (data) {
-
-    console.log("newRtcSession");
-
-
-
-    data.session.once("ended", function () {
-
-        window.free = true;
-
-    });
-
-
-    if (data.originator === "remote") {
-
-        console.log("number", data.request.from.uri.user);
-
-        var number = intlTelInputUtils.formatNumber(
-            data.request.from.uri.user,
-            widget.headerWidget.simCountry,
-            intlTelInputUtils.numberFormat.E164
-        );
-
-        console.log("number after", number);
-
-
-        let contact = widget.contactWidget.contacts[number] || { "number": number };
-
-        widget.callWidget.incomingCall(contact, data.session);
-
-    } else {
-
-
-        let number = data.request.headers.To[0].match(/<sip:(.*)@d.+\.semasim\.vpn>$/)[1];
-
-        let contact = widget.contactWidget.contacts[number];
-
-        widget.callWidget.outgoingCall(contact, data.session);
-
-
-    }
-
-    session.on("addstream", function (data) {
-
-        $("<audio>", { "autoplay": "", "src": window.URL.createObjectURL(data.stream) });
-
-    }).on("failed", function (data) {
-
-        widget.setState(CallWidget.TERMINATED, data.originator + " " + data.cause);
-
-    }).on("iceconnectionstatechange", function (data) {
-
-        //console.info("iceconnectionstatechange", data.state );
-
-        if (data.state !== "connected") return;
-
-        setTimeout(function () { widget.setState(CallWidget.RINGBACK, "remote ringing"); }, 3000);
-
-        this.once("ended", function (data) {
-
-            widget.setState(CallWidget.TERMINATED, data.originator + " " + data.cause);
-
-        });
-
-
-    })
-    */

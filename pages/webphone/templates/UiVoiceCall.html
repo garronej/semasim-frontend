@@ -56,6 +56,19 @@
         text-align: left;
         vertical-align: middle;
     }
+
+    .id_numpad {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .id_numpad .btn {
+    margin-bottom: 10px !important;
+    margin-right: 5px !important;
+    }
+
+
+
 </style>
 
 <div class="id_UiVoiceCall modal" role="dialog">
@@ -65,6 +78,7 @@
 
                 <div class="panel panel-dark mb0">
                     <!-- Start .panel -->
+                        <!--
                     <div class="panel-heading text-center">
                         <h4 class="panel-title">
                             <span class="id_me"></span>
@@ -80,11 +94,69 @@
                             <span class="id_contact"> <span>
                         </h4>
                     </div>
+                    
+                    -->
+                    <div class="panel-heading pt10">
+                        <div class="row">
+                            <div class="col-sm-4 text-center">
+                                    <p><span class="id_me"></span></p>
+                                    <p><span class="id_me_under"></span></p>
+                            </div>
+                            <div class="col-sm-1 mt10">
+                                <i class="sel_arrow-right l-arrows-right"></i>
+                                <i class="sel_arrow-left l-arrows-left"></i>
+                            </div>
+                            <div class="col-sm-2 text-center mt10">
+                                <span class="id_timer"></span>
+                                <span class="id_icon-ring fa fa-phone icon-ring"></span>
+                                <span class="id_icon-spin fa fa-spinner icon-spin"></span>
+                                <span class="id_icon-hangup glyphicon glyphicon-phone-alt"></span>
+                            </div>
+                            <div class="col-sm-1 mt10">
+                                <i class="sel_arrow-right l-arrows-right"></i>
+                                <i class="sel_arrow-left l-arrows-left"></i>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                    <p><span class="id_contact"> <span></p>
+                                    <p><span class="id_contact_under"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="panel-body">
 
-                        <div class="row text-center">
+                        <div class="text-center">
                             <span class="id_status well well-sm"></span>
                         </div>
+
+                        <div class="row id_numpad">
+
+                            <div class="col-sm-12">
+                                <button type="button" class="id_key1 btn btn-success">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key2 btn btn-success">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key3 btn btn-success">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="button" class="id_key4 btn btn-success">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key5 btn btn-success">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key6 btn btn-success">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="button" class="id_key7 btn btn-success">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key8 btn btn-success">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key9 btn btn-success">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="button" class="id_keyAst btn btn-default">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_key0 btn btn-success">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>
+                                <button type="button" class="id_keySharp btn btn-default">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+
+                        </div>
+
                         <div class="row">
                             <div class="pull-left">
                                 <button class="id_btn-green btn btn-success ml10" type="button">
