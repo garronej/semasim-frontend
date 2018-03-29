@@ -47,7 +47,7 @@ export class Ua {
 
     private readonly jsSipUa: any;
 
-    private evtGsmRinging = new VoidSyncEvent();
+    private evtRingback = new SyncEvent<string>();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
@@ -97,9 +97,9 @@ export class Ua {
                 this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
             );
 
-            if (bundledData.type === "TARGET GSM RINGING") {
+            if (bundledData.type === "RINGBACK") {
 
-                this.evtGsmRinging.post();
+                this.evtRingback.post(bundledData.callId);
 
                 return;
 
@@ -130,6 +130,10 @@ export class Ua {
             console.log("newRTCSession", { originator, session, request })
         );
 
+    }
+
+    public get isRegistered(): boolean {
+        return this.jsSipUa.isRegistered();
     }
 
     /** return exactSendDate to match with sendReport and statusReport */
@@ -182,6 +186,9 @@ export class Ua {
 
     }
 
+    private readonly pcConfig: RTCConfiguration = {
+        "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
+    };
 
     public placeOutgoingCall(number: phoneNumber): {
         terminate(): void;
@@ -195,70 +202,56 @@ export class Ua {
         }>
     } {
 
-        let pcConfig: RTCConfiguration = {
-            "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
-        };
-
         let evtEstablished = new VoidSyncEvent();
-
-        let evtFailedOrEnded = new VoidSyncEvent();
-
+        let evtTerminated = new VoidSyncEvent();
         let evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
-
-        let terminate: (() => void) | undefined = undefined;
+        let evtRequestTerminate = new VoidSyncEvent();
+        let evtRingback = new VoidSyncEvent();
 
         this.jsSipUa.call(
             `sip:${number}@${apiDeclaration.domain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
-                pcConfig,
+                "pcConfig": this.pcConfig,
                 "eventHandlers": {
                     "connecting": function () {
 
-                        terminate = () => this.terminate();
+                        let jsSipRtcSession = this;
 
-                        evtDtmf.attach(({ signal, duration }) =>
-                            this.sendDTMF(signal, { duration })
-                            //this.sendDTMF(signal, { "duration": 50 })
+                        if (!!evtRequestTerminate.postCount) {
+
+                            jsSipRtcSession.terminate();
+
+                            return;
+
+                        }
+
+                        evtRequestTerminate.attachOnce(
+                            () => jsSipRtcSession.terminate()
                         );
 
-                        let rtcPeerConnection: RTCPeerConnection = this.connection;
+                        evtDtmf.attach(({ signal, duration }) =>
+                            jsSipRtcSession.sendDTMF(signal, { duration })
+                        );
+
+                        let rtcPeerConnection: RTCPeerConnection = jsSipRtcSession.connection;
 
                         rtcPeerConnection.onaddstream = ({ stream }) => {
-
-                            console.log("rtcPeerConnection onaddstream");
 
                             let audioElem = $("<audio>", { "autoplay": "" });
 
                             audioElem.get(0)["srcObject"] = stream;
 
-
                         };
 
                     },
-                    "peerconnection": () => console.log("peerconnection"),
-                    "sending": () => console.log("sending"),
-                    "progress": () => console.log("progress"),
-                    "accepted": () => console.log("accepted"),
                     "confirmed": () => evtEstablished.post(),
-                    "ended": function () { console.log("ended", arguments); evtFailedOrEnded.post(); },
-                    "failed": function () { console.log("failed", arguments); },
-                    "newDTMF": () => console.log("newDTMF"),
-                    "newInfo": () => console.log("newInfo"),
-                    "hold": () => console.log("hold"),
-                    "unhold": () => console.log("unhold"),
-                    "muted": () => console.log("muted"),
-                    "unmuted": () => console.log("unmuted"),
-                    "reinvite": () => console.log("reinvite"),
-                    "update": () => console.log("update"),
-                    "refer": () => console.log("refer"),
-                    "replaces": () => console.log("replaces"),
-                    "sdp": () => console.log("sdp"),
-                    "getusermediafailed": () => console.log("getusermediafailed"),
-                    "peerconnection:createofferfailed": () => console.log("peerconnection:createofferfailed"),
-                    "peerconnection:createanswerfailed": () => console.log("peerconnection:createanswerfailed"),
-                    "peerconnection:setlocaldescriptionfailed": () => console.log("peerconnection:setlocaldescriptionfailed"),
-                    "peerconnection:setremotedescriptionfailed": () => console.log("peerconnection:setremotedescriptionfailed")
+                    "ended": () => evtTerminated.post(),
+                    "sending": ({ request }) =>
+                        this.evtRingback.waitFor(callId => callId === request.call_id, 30000)
+                            .then(() => evtRingback.post())
+                            .catch(() => { })
+
                 }
             }
         );
@@ -267,51 +260,33 @@ export class Ua {
             "prNextState": new Promise(async resolve => {
 
                 await Promise.race([
-                    this.evtGsmRinging.waitFor(),
+                    evtRingback.waitFor(),
                     evtEstablished.waitFor()
                 ]);
 
                 resolve({
                     "state": "RINGBACK",
-                    "prNextState": new Promise(
-                        async resolve => {
+                    "prNextState": new Promise(async resolve => {
 
-                            if (!evtEstablished.postCount) {
-                                await evtEstablished.waitFor();
-                            }
-
-                            resolve({
-                                "state": "ESTABLISHED",
-                                "sendDtmf": (signal, duration) =>
-                                    evtDtmf.post({ signal, duration })
-                            });
-
+                        if (!evtEstablished.postCount) {
+                            await evtEstablished.waitFor();
                         }
-                    )
+
+                        resolve({
+                            "state": "ESTABLISHED",
+                            "sendDtmf": (signal, duration) =>
+                                evtDtmf.post({ signal, duration })
+                        });
+
+                    })
                 });
 
             }),
-            "prTerminated": new Promise(async resolve => {
-
-                await evtFailedOrEnded.waitFor();
-
-                console.log("terminated");
-
-                resolve();
-
-            }),
-            "terminate": () => {
-
-                console.log("terminate requested");
-
-                if (terminate) {
-                    terminate();
-                }
-
-                //TODO end the call
-
-            }
-
+            "prTerminated": Promise.race([
+                evtRequestTerminate.waitFor(),
+                evtTerminated.waitFor()
+            ]),
+            "terminate": () => evtRequestTerminate.post()
         };
 
     }
@@ -321,8 +296,8 @@ export class Ua {
 
 export namespace Ua {
 
-    export type DtmFSignal= 
-    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+    export type DtmFSignal =
+        "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 
 }
 

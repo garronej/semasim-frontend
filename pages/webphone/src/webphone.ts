@@ -6,7 +6,7 @@ import { Ua } from "./Ua";
 
 
 import * as d from "./data";
-import { UiWebphone } from "./UiWebphone";
+import { UiWebphoneController } from "./UiWebphoneController";
 
 async function loadPageContent() {
 
@@ -35,7 +35,7 @@ async function loadPageContent() {
 
 	let wdInstance= wdRoot.instances.find(({ imsi })=> imsi === userSim.sim.imsi )!;
 
-	let uiWebphone= new UiWebphone(userSim, wdInstance);
+	let uiWebphone= new UiWebphoneController(userSim, wdInstance);
 
 	$(".page-content-inner").append(uiWebphone.structure);
 

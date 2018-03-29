@@ -35,8 +35,6 @@ export class UiVoiceCall {
         private readonly userSim: types.UserSim.Usable
     ) {
 
-
-
         this.countryIso= userSim.sim.country?
             userSim.sim.country.iso : undefined;
 
@@ -46,25 +44,6 @@ export class UiVoiceCall {
             "backdrop": "static"
         });
 
-        /*
-        this.structure.find("span.id_me").html((()=>{
-
-            let out= userSim.friendlyName;
-
-            if (this.userSim.sim.storage.number) {
-
-                out+= " ( " + (intlTelInputUtils as any).formatNumber(
-                    this.userSim.sim.storage.number.asStored,
-                    this.countryIso || null,
-                    intlTelInputUtils.numberFormat.NATIONAL
-                ) + " ) ";
-
-            }
-
-            return out;
-
-        })());
-        */
 
         this.structure.find("span.id_me").html(userSim.friendlyName);
 
@@ -118,15 +97,6 @@ export class UiVoiceCall {
             wdChat.contactNumber,
             this.countryIso
         );
-
-        /*
-        this.structure.find("span.id_contact")
-            .html(
-                !!wdChat.contactName ?
-                    `${wdChat.contactName} ( ${prettyNumber} )` :
-                    prettyNumber
-            );
-        */
 
 
         this.structure.find("span.id_contact")
@@ -264,12 +234,21 @@ export class UiVoiceCall {
             )
         };
 
+
     }
+
+    private state: UiVoiceCall.State= "TERMINATED";
 
     private setState(
         state: UiVoiceCall.State,
         message: string
     ): void {
+
+        if( state === this.state ){
+            return;
+        }
+
+        this.state= state;
 
         this.evtBtnClick.detach();
 

@@ -32,7 +32,7 @@ export class AppSocket {
 
                         //console.log( window["JsSIP.Parser"].parseMessage(str, {}));
 
-                        console.log(sipPacketAsString);
+                        //console.log(sipPacketAsString);
 
                         this.evtRawSipPacket.post({ "data": sipPacketAsString, imsi });
 
@@ -69,7 +69,7 @@ export class AppSocket {
 
     public send(data: string): boolean {
 
-        console.log(data);
+        //console.log(data);
 
         return this.jsSipWebsocket.send(data);
     }
