@@ -14,6 +14,10 @@ declare const JsSIP: any;
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 
+const pcConfig: RTCConfiguration = {
+    "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
+};
+
 export class Ua {
 
     public static email: string;
@@ -36,17 +40,15 @@ export class Ua {
 
     }
 
-    public readonly evtIncomingMessage = new SyncEvent<{
-        fromNumber: phoneNumber;
-        bundledData: gwTypes.BundledData.ServerToClient;
-        text: string;
-    }>();
 
-    /** isRegistered */
+    /** post isRegistered */
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
 
-    private readonly jsSipUa: any;
+    public get isRegistered(): boolean {
+        return this.jsSipUa.isRegistered();
+    }
 
+    private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
 
     constructor(
@@ -76,36 +78,19 @@ export class Ua {
             this.evtRegistrationStateChanged.post(false)
         );
 
-        this.jsSipUa.on("newMessage", ({ originator, message, request }) => {
+        this.jsSipUa.on("newMessage", ({ originator, request }) => {
 
-            if (originator !== "remote") return;
-
-            let bundledData = extractBundledDataFromHeaders((() => {
-
-                let out = {};
-
-                for (let key in request.headers) {
-                    out[key] = request.headers[key][0].raw;
-                }
-
-                return out;
-
-            })()) as gwTypes.BundledData.ServerToClient;
-
-            let fromNumber = phoneNumber.build(
-                request.from.uri.user,
-                this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
-            );
-
-            if (bundledData.type === "RINGBACK") {
-
-                this.evtRingback.post(bundledData.callId);
-
-                return;
-
+            if (originator === "remote") {
+                this.onMessage(request);
             }
 
-            this.evtIncomingMessage.post({ fromNumber, bundledData, "text": request.body });
+        });
+
+        this.jsSipUa.on("newRTCSession", ({ originator, session, request }) => {
+
+            if (originator === "remote") {
+                this.onIncomingCall(session, request);
+            }
 
         });
 
@@ -121,19 +106,50 @@ export class Ua {
 
         })();
 
+        /*
         this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));
         this.jsSipUa.on("connected", ({ socket }) => console.log("connected"));
         this.jsSipUa.on("disconnected", () => console.log("disconnected"));
         this.jsSipUa.on("registrationFailed", ({ response, cause }) => console.log("registrationFailed", { response, cause }));
         this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
-        this.jsSipUa.on("newRTCSession", ({ originator, session, request }) =>
-            console.log("newRTCSession", { originator, session, request })
-        );
+        */
 
     }
 
-    public get isRegistered(): boolean {
-        return this.jsSipUa.isRegistered();
+    public readonly evtIncomingMessage = new SyncEvent<{
+        fromNumber: phoneNumber;
+        bundledData: gwTypes.BundledData.ServerToClient;
+        text: string;
+    }>();
+
+    private onMessage(request): void {
+
+        let bundledData = extractBundledDataFromHeaders((() => {
+
+            let out = {};
+
+            for (let key in request.headers) {
+                out[key] = request.headers[key][0].raw;
+            }
+
+            return out;
+
+        })()) as gwTypes.BundledData.ServerToClient;
+
+        let fromNumber = this.toPhoneNumber(request.from.uri.user);
+
+        if (bundledData.type === "RINGBACK") {
+
+            this.evtRingback.post(bundledData.callId);
+
+            return;
+
+        }
+
+        this.evtIncomingMessage.post({
+            fromNumber, bundledData, "text": request.body
+        });
+
     }
 
     /** return exactSendDate to match with sendReport and statusReport */
@@ -186,9 +202,72 @@ export class Ua {
 
     }
 
-    private readonly pcConfig: RTCConfiguration = {
-        "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
-    };
+    public readonly evtIncomingCall = new SyncEvent<{
+        fromNumber: phoneNumber;
+        terminate(): void;
+        prTerminated: Promise<void>;
+        onAccepted(): Promise<{
+            state: "ESTABLISHED";
+            sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+        }>
+    }>();
+
+
+    private onIncomingCall(jsSipRtcSession, request): void {
+
+        let evtRequestTerminate = new VoidSyncEvent();
+        let evtAccepted = new VoidSyncEvent();
+        let evtTerminated = new VoidSyncEvent();
+        let evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+        let evtEstablished= new VoidSyncEvent();
+
+        evtRequestTerminate.attachOnce( () => jsSipRtcSession.terminate());
+
+        evtDtmf.attach(({ signal, duration }) =>
+            jsSipRtcSession.sendDTMF(signal, { duration })
+        );
+
+        evtAccepted.attachOnce(() => {
+
+            jsSipRtcSession.answer({
+                "mediaConstraints": { "audio": true, "video": false },
+                pcConfig
+            });
+
+            (jsSipRtcSession.connection as RTCPeerConnection).onaddstream =
+                ({ stream }) => playAudioStream(stream!);
+
+        });
+
+        jsSipRtcSession.once("confirmed", () => evtEstablished.post());
+
+        jsSipRtcSession.once("ended", () => evtTerminated.post());
+
+        jsSipRtcSession.once("failed", () => evtTerminated.post());
+
+        this.evtIncomingCall.post({
+            "fromNumber": this.toPhoneNumber(request.from.uri.user),
+            "terminate": () => evtRequestTerminate.post(),
+            "prTerminated": Promise.race([
+                evtRequestTerminate.waitFor(),
+                evtTerminated.waitFor()
+            ]),
+            "onAccepted": async () => {
+
+                evtAccepted.post();
+
+                await evtEstablished.waitFor();
+
+                return {
+                    "state": "ESTABLISHED",
+                    "sendDtmf": 
+                        (signal, duration) => evtDtmf.post({ signal, duration })
+                };
+
+            }
+        });
+
+    }
 
     public placeOutgoingCall(number: phoneNumber): {
         terminate(): void;
@@ -212,7 +291,7 @@ export class Ua {
             `sip:${number}@${apiDeclaration.domain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": this.pcConfig,
+                pcConfig,
                 "eventHandlers": {
                     "connecting": function () {
 
@@ -234,15 +313,8 @@ export class Ua {
                             jsSipRtcSession.sendDTMF(signal, { duration })
                         );
 
-                        let rtcPeerConnection: RTCPeerConnection = jsSipRtcSession.connection;
-
-                        rtcPeerConnection.onaddstream = ({ stream }) => {
-
-                            let audioElem = $("<audio>", { "autoplay": "" });
-
-                            audioElem.get(0)["srcObject"] = stream;
-
-                        };
+                        (jsSipRtcSession.connection as RTCPeerConnection).onaddstream =
+                            ({ stream }) => playAudioStream(stream!);
 
                     },
                     "confirmed": () => evtEstablished.post(),
@@ -291,6 +363,15 @@ export class Ua {
 
     }
 
+    /** convert raw number in phoneNumber */
+    private toPhoneNumber(number: string): phoneNumber {
+        return phoneNumber.build(
+            number,
+            this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
+        );
+    }
+
+
 
 }
 
@@ -298,6 +379,18 @@ export namespace Ua {
 
     export type DtmFSignal =
         "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+
+}
+
+function playAudioStream(stream: MediaStream) {
+
+    /*
+    let audioElem = $("<audio>", { "autoplay": "" });
+
+    audioElem.get(0)["srcObject"] = stream;
+    */
+
+    $("<audio>", { "autoplay": "" }).get(0)["srcObject"] = stream;
 
 }
 

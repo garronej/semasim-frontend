@@ -97,7 +97,8 @@ export class UiWebphoneController {
                 })();
 
                 if (!wdMessage) {
-                    console.log("TODO", { bundledData });
+                    console.log("TODO implement bundle data type", JSON.stringify({ bundledData }, null, 2));
+                    return;
                 }
 
                 this.uiConversations.get(wdChat)!.newMessage(wdMessage);
@@ -107,13 +108,15 @@ export class UiWebphoneController {
             }
         );
 
+        this.handleIncomingCalls();
+
     }
 
     private initUiConversation(wdChat: Wd.Chat) {
 
         let uiConversation = new UiConversation(this.userSim, wdChat);
 
-        if( this.ua.isRegistered ){
+        if (this.ua.isRegistered) {
             uiConversation.setReadonly(false);
         }
 
@@ -168,22 +171,22 @@ export class UiWebphoneController {
         this.structure
             .find("div.id_colLeft")
             .append(this.uiQuickAction.structure);
-        
-        const onEvt= async (type: "SMS" | "CALL", number: phoneNumber)=> {
+
+        const onEvt = async (type: "SMS" | "CALL", number: phoneNumber) => {
 
             let wdChat = await this.getOrCreateChatByPhoneNumber(number);
 
             this.uiPhonebook.triggerContactClick(wdChat);
 
-            if( type === "CALL" ){
+            if (type === "CALL") {
                 this.placeOutgoingCall(wdChat);
             }
 
         };
 
-        this.uiQuickAction.evtSms.attach(number=> onEvt("SMS", number));
+        this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
 
-        this.uiQuickAction.evtVoiceCall.attach( number=> onEvt("CALL", number));
+        this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
 
     }
 
@@ -413,6 +416,61 @@ export class UiWebphoneController {
 
         });
 
+    }
+
+    private handleIncomingCalls(): void {
+
+        this.ua.evtIncomingCall.attach(
+            async ({ fromNumber, terminate, prTerminated, onAccepted }) => {
+
+                let wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
+
+                this.uiPhonebook.triggerContactClick(wdChat);
+
+                let { onTerminated, prUserInput } = this.uiVoiceCall.onIncoming(wdChat);
+
+                prTerminated.then(() => onTerminated("Call ended"));
+
+                prUserInput.then(ua => {
+
+                    if (ua.userAction === "REJECT") {
+
+                        terminate();
+
+                    }
+
+                });
+
+                prUserInput.then(ua => {
+
+                    if (ua.userAction === "ANSWER") {
+
+                        let { onEstablished } = ua;
+
+                        onAccepted().then(({ sendDtmf }) => {
+
+                            let { evtUserInput } = onEstablished();
+
+                            evtUserInput.attach(
+                                (eventData): eventData is UiVoiceCall.InCallUserAction.Dtmf =>
+                                    eventData.userAction === "DTMF",
+                                ({ signal, duration }) => sendDtmf(signal, duration)
+                            );
+
+                            evtUserInput.attachOnce(
+                                ({ userAction }) => userAction === "HANGUP",
+                                () => terminate()
+                            );
+
+                        });
+
+                    }
+
+                });
+
+
+            }
+        );
     }
 
 }

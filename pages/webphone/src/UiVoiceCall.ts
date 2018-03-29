@@ -10,6 +10,7 @@ import { phoneNumber } from "../../../shared";
 import { Ua } from "./Ua";
 
 
+declare const ion: any;
 declare const require: any;
 //const transform = require("sdp-transform");
 
@@ -272,8 +273,11 @@ export class UiVoiceCall {
 
         this.structure.modal("show");
 
+        ion.sound.stop("semasim_ringtone");
+
         switch (state) {
             case "RINGING":
+                ion.sound.play("semasim_ringtone", { "loop": true });
                 this.btnGreen.removeClass("hide").html("Answer");
                 this.btnRed.removeClass("hide").html("Reject");
                 this.structure.find(".id_icon-ring").removeClass("hide");
