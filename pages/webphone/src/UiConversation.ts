@@ -22,6 +22,7 @@ declare const Buffer: any;
 
 //const checkMark= "\u221a";
 const checkMark= Buffer.from("e29c93", "hex").toString("utf8");
+const crossMark= Buffer.from("e29d8c", "hex").toString("utf8");
 
 export class UiConversation {
 
@@ -398,7 +399,7 @@ namespace UiBubble {
             this.structure.find("span.id_check").text((() => {
 
                 switch (wdMessage.status) {
-                    case "SEND REPORT RECEIVED": return checkMark;
+                    case "SEND REPORT RECEIVED": return !!wdMessage.dongleSendTime?checkMark:crossMark;
                     case "STATUS REPORT RECEIVED": return `${checkMark}${checkMark}`;
                     case "TRANSMITTED TO GATEWAY":
                     default: return "";
