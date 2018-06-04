@@ -16,7 +16,7 @@ export async function start(): Promise<void> {
 
 }
 
-export async function interact(dongle: dcTypes.Dongle) {
+async function interact(dongle: dcTypes.Dongle) {
 
     let shouldAdd_message = (() => {
 
@@ -60,7 +60,9 @@ export async function interact(dongle: dcTypes.Dongle) {
         })
     );
 
-    if (!shouldAdd) return undefined;
+    if (!shouldAdd){ 
+        return undefined;
+    }
 
     if (dcTypes.Dongle.Locked.match(dongle)) {
 
@@ -86,7 +88,9 @@ export async function interact(dongle: dcTypes.Dongle) {
                 })
             );
 
-            if (pin === null) return undefined;
+            if (pin === null){ 
+                return undefined;
+            }
 
             if (!pin.match(/^[0-9]{4}$/)) {
 
@@ -164,7 +168,7 @@ export async function interact(dongle: dcTypes.Dongle) {
                     "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
                     "once your manage to get your dongle detected by the software go to",
                     "unlocking -> Activate Voice",
-                    "They will make you pay 4€ to process...",
+                    "They will charge you 4€ for it...",
                     "We are currently trying to implement this ourself so you dont have to pay",
                     "for that but so far this is the only option.",
                     "",
@@ -204,11 +208,9 @@ async function getDefaultFriendlyName(sim: dcTypes.Sim) {
 
     let num= sim.storage.number;
 
-    if( !tag && num && num.localFormat.length > 4 ){
+    if( !tag && num && num.length > 6 ){
 
-        let loc= num.localFormat;
-
-        tag = loc.slice(0, 2) + ".." + loc.slice(-2);
+        tag = num.slice(0, 4) + ".." + num.slice(-2);
 
     }
 

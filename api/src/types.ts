@@ -49,6 +49,14 @@ export namespace UserSim {
         gatewayLocation: GatewayLocation;
         isOnline: boolean;
         ownership: T;
+        phonebook: Contact[];
+    };
+
+    export type Contact = {
+        mem_index?: number;
+        name: string;
+        number_raw: string;
+        number_local_format: string;
     };
 
     export type GatewayLocation = {
@@ -56,7 +64,7 @@ export namespace UserSim {
         countryIso: string | undefined;
         subdivisions: string | undefined;
         city: string | undefined;
-    }
+    };
 
     export type Owned = Base<SimOwnership.Owned>;
 
@@ -156,7 +164,7 @@ export namespace WebphoneData {
         id_: number;
         contactNumber: string;
         contactName: string;
-        isContactInSim: boolean;
+        contactIndexInSim: number | null;
         messages: Message[];
         lastSeenTime: number;
     };

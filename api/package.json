@@ -8,7 +8,7 @@
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json"
   },
   "dependencies": {
-    "chan-dongle-extended-client": "git+https://206e4c24cb9a1e4a8d42b7ac86e4a026b02cee42:x-oauth-basic@github.com/garronej/chan-dongle-extended-client.git",
+    "chan-dongle-extended-client": "garronej/chan-dongle-extended-client",
     "transfer-tools": "garronej/transfer-tools"
   },
   "devDependencies": {

@@ -54,8 +54,8 @@ export class SimRow {
 
         this.structure.find(".id_simId").text(
             this.userSim.friendlyName + (
-                this.userSim.sim.storage.number ?
-                    ` ( ${this.userSim.sim.storage.number.localFormat} )` : ""
+                !!this.userSim.sim.storage.number ?
+                    ` ( ${this.userSim.sim.storage.number} )` : ""
             )
         );
 
@@ -86,22 +86,16 @@ export class SimRow {
             ].join(" ")
         );
 
-        this.structure.find("id_owner").text(
+        this.structure.find(".id_owner").text(
             (this.userSim.ownership.status === "OWNED") ?
                 "Me" : this.userSim.ownership.ownerEmail
         );
 
-        this.structure.find("id_number").text((() => {
+        this.structure.find(".id_number").text((() => {
 
             let n = this.userSim.sim.storage.number;
 
-            if (!n) return "Unknown";
-
-            if (n.asStored === n.localFormat) {
-                return n.localFormat;
-            } else {
-                return `${n.localFormat} ( ${n.asStored} )`;
-            }
+            return n || "Unknown";
 
         })());
 
@@ -139,7 +133,7 @@ export class SimRow {
 
         })());
 
-        this.structure.find("id_features").text(
+        this.structure.find(".id_features").text(
             (() => {
 
                 switch (this.userSim.dongle.isVoiceEnabled) {

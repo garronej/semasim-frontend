@@ -48,10 +48,11 @@ export class UiVoiceCall {
 
         this.structure.find("span.id_me").html(userSim.friendlyName);
 
+        //FIXME: this is redundant.
         this.structure.find("span.id_me_under").html(
             !!this.userSim.sim.storage.number ?
                 (intlTelInputUtils as any).formatNumber(
-                    this.userSim.sim.storage.number.asStored,
+                    this.userSim.sim.storage.number,
                     this.countryIso || null,
                     intlTelInputUtils.numberFormat.NATIONAL
                 ) : ""

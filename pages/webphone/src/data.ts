@@ -2,6 +2,7 @@ import { apiClient as api, types } from "../../../api";
 import { phoneNumber } from "../../../shared";
 import Wd= types.WebphoneData;
 
+//TODO: add wd prefix everywhere for the sake of consistency.
 export namespace io {
 
     //TODO: sort chat by last seen message time
@@ -27,28 +28,61 @@ export namespace io {
 
             }
 
-            for (let simContact of userSim.sim.storage.contacts) {
+            for (let chat of instance.chats) {
 
-                if (!instance.chats.find(
-                    ({ contactNumber }) => phoneNumber.areSame(
-                        contactNumber, simContact.number.asStored
+                const isInPhonebook = !!userSim.phonebook.find(
+                    ({ number_raw }) => phoneNumber.areSame(
+                        chat.contactNumber, number_raw
                     )
-                )) {
+                );
 
-                    instance.chats.push(
-                        await api.webphoneData.newChat(
-                            instance.id_,
-                            phoneNumber.build(
-                                simContact.number.asStored,
-                                userSim.sim.country ? userSim.sim.country.iso : undefined
-                            ),
-                            simContact.name.full,
-                            true
-                        )
-                    );
+                if (!isInPhonebook) {
+
+                    await updateChat(chat, {
+                        "contactName": "",
+                        "contactIndexInSim": undefined
+                    });
 
                 }
 
+            }
+
+            for (let contact of userSim.phonebook) {
+
+                const chat = instance.chats.find(
+                    ({ contactNumber }) => phoneNumber.areSame(
+                        contactNumber, contact.number_raw
+                    )
+                );
+
+                if (!!chat) {
+
+                    const contactName = (contact.name !== chat.contactName)?contact.name:undefined;
+
+                    const contactIndexInSim= (contact.mem_index !== chat.contactIndexInSim)?(contact.mem_index || null):undefined;
+
+                    if (
+                        contactName !== undefined || 
+                        contactIndexInSim !== undefined
+                    ) {
+
+                        await updateChat(chat, { contactName, contactIndexInSim });
+
+                    }
+
+                } else {
+
+                    await newChat(
+                        instance,
+                        phoneNumber.build(
+                            contact.number_raw,
+                            userSim.sim.country ? userSim.sim.country.iso : undefined
+                        ),
+                        contact.name,
+                        contact.mem_index || null
+                    );
+
+                }
 
             }
 
@@ -62,19 +96,14 @@ export namespace io {
         instance: Wd.Instance,
         contactNumber: phoneNumber,
         contactName: string,
-        shouldStoreInSim: boolean
+        contactIndexInSim: number | null
     ): Promise<Wd.Chat> {
 
-        if (shouldStoreInSim) {
-            //create contact on sim first
-            throw new Error("TODO, not implemented");
-        }
-
-        let chat = await api.webphoneData.newChat(
+        const chat = await api.webphoneData.newChat(
             instance.id_,
             contactNumber,
             contactName,
-            shouldStoreInSim
+            contactIndexInSim
         );
 
         instance.chats.push(chat);
@@ -110,7 +139,7 @@ export namespace io {
     }
 
     export namespace updateChat {
-        export type Fields = Partial<{ lastSeenTime: number; contactName: string; isContactInSim: boolean; }>;
+        export type Fields = Partial<{ lastSeenTime: number; contactName: string; contactIndexInSim: number | null; }>;
     }
 
     export async function newMessage<T extends Wd.Message>(
@@ -137,10 +166,10 @@ export namespace io {
 
     }
 
-export async function updateOutgoingMessageStatusToSendReportReceived(
-    message: Wd.Message.Outgoing.TransmittedToGateway, 
-    dongleSendTime: number | null 
-): Promise<void> {
+    export async function updateOutgoingMessageStatusToSendReportReceived(
+        message: Wd.Message.Outgoing.TransmittedToGateway,
+        dongleSendTime: number | null
+    ): Promise<void> {
 
         await api.webphoneData.updateOutgoingMessageStatusToSendReportReceived(
             message.id_,
@@ -148,30 +177,30 @@ export async function updateOutgoingMessageStatusToSendReportReceived(
         );
 
 
-        let updatedMessage: Wd.Message.Outgoing.SendReportReceived= message as any;
+        let updatedMessage: Wd.Message.Outgoing.SendReportReceived = message as any;
 
-        updatedMessage.status= "SEND REPORT RECEIVED";
-        updatedMessage.dongleSendTime= dongleSendTime;
+        updatedMessage.status = "SEND REPORT RECEIVED";
+        updatedMessage.dongleSendTime = dongleSendTime;
 
-}
+    }
 
-export async function updateOutgoingMessageStatusToStatusReportReceived(
-    message: Wd.Message.Outgoing.SendReportReceived, 
-    deliveredTime: number | null 
-): Promise<void> {
+    export async function updateOutgoingMessageStatusToStatusReportReceived(
+        message: Wd.Message.Outgoing.SendReportReceived,
+        deliveredTime: number | null
+    ): Promise<void> {
 
         await api.webphoneData.updateOutgoingMessageStatusToStatusReportReceived(
             message.id_,
             deliveredTime
         );
 
-        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived= message as any;
+        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived = message as any;
 
-        updatedMessage.status= "STATUS REPORT RECEIVED";
-        updatedMessage.deliveredTime= deliveredTime;
+        updatedMessage.status = "STATUS REPORT RECEIVED";
+        updatedMessage.deliveredTime = deliveredTime;
 
-}
-    
+    }
+
 
 
 

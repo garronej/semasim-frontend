@@ -43,10 +43,10 @@ export class UiHeader {
 
         this.templates.find("div.id_popover span.id_number").text(() => {
 
-            if (this.userSim.sim.storage.number) {
+            if (!!this.userSim.sim.storage.number) {
 
                 return (intlTelInputUtils as any).formatNumber(
-                    this.userSim.sim.storage.number.asStored,
+                    this.userSim.sim.storage.number,
                     this.userSim.sim.country ? this.userSim.sim.country.iso : null,
                     intlTelInputUtils.numberFormat.NATIONAL
                 );

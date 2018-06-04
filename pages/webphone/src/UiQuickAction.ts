@@ -104,8 +104,6 @@ export class UiQuickAction {
 
         })();
 
-
-
         (() => {
 
             let self = this;
@@ -184,7 +182,7 @@ export class UiQuickAction {
                 evt= this.evtVoiceCall;
             }else if( $(event.currentTarget).hasClass("id_sms") ){
                 evt= this.evtSms;
-            }else if( $(event.currentTarget).hasClass("id_sms") ){
+            }else if( $(event.currentTarget).hasClass("id_contact") ){
                 evt= this.evtNewContact;
             }
 

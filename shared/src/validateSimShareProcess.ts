@@ -44,7 +44,7 @@ export async function start(
 
 }
 
-export async function interact(
+async function interact(
     userSim: types.UserSim.Shared.NotConfirmed,
 ): Promise<types.UserSim.Shared.Confirmed | undefined> {
 

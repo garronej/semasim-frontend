@@ -1,7 +1,5 @@
 import { VoidSyncEvent } from "ts-events-extended";
 
-import { types } from "../../../api";
-
 import { loadHtml } from "./loadHtml";
 import * as wd from "./data";
 import Wd = types.WebphoneData;
@@ -19,6 +17,9 @@ import { UiVoiceCall } from "./UiVoiceCall";
 import { phoneNumber } from "../../../shared";
 
 import { Ua } from "./Ua";
+
+import * as tools from "../../../tools";
+import { types, apiClient as api } from "../../../api";
 
 declare const require: any;
 
@@ -147,6 +148,57 @@ export class UiWebphoneController {
             () => this.placeOutgoingCall(wdChat)
         );
 
+        uiConversation.evtUpdateContact.attach(async () => {
+
+            const name = await new Promise<string | null>(
+                resolve => tools.bootbox_custom.prompt({
+                    "title": `Contact name for ${wdChat.contactNumber}`,
+                    "value": wdChat.contactName || "",
+                    "callback": result => resolve(result),
+                })
+            );
+
+            if (!name) {
+                return undefined;
+            }
+
+            tools.bootbox_custom.loading("Creating contact");
+
+            if (
+                wdChat.contactIndexInSim === null &&
+                wdChat.contactName === ""
+            ) {
+
+                const { mem_index } = await api.createContact(
+                    this.userSim.sim.imsi,
+                    name,
+                    wdChat.contactNumber
+                );
+
+                await wd.io.updateChat(wdChat, 
+                    { "contactIndexInSim": mem_index, "contactName": name }
+                );
+
+            } else {
+
+                await api.updateContactName(
+                    this.userSim.sim.imsi,
+                    (wdChat.contactIndexInSim !== null) ?
+                        ({ "mem_index": wdChat.contactIndexInSim }) :
+                        ({ "number": wdChat.contactNumber }),
+                    name
+                );
+
+                await wd.io.updateChat(wdChat, { "contactName": name });
+
+            }
+
+            tools.bootbox_custom.dismissLoading();
+
+            uiConversation.notifyContactNameUpdated();
+
+        });
+
     }
 
     private initUiHeader() {
@@ -172,14 +224,16 @@ export class UiWebphoneController {
             .find("div.id_colLeft")
             .append(this.uiQuickAction.structure);
 
-        const onEvt = async (type: "SMS" | "CALL", number: phoneNumber) => {
+        const onEvt = async (action: "SMS" | "CALL" | "CONTACT", number: phoneNumber) => {
 
-            let wdChat = await this.getOrCreateChatByPhoneNumber(number);
+            const wdChat = await this.getOrCreateChatByPhoneNumber(number);
 
             this.uiPhonebook.triggerContactClick(wdChat);
 
-            if (type === "CALL") {
-                this.placeOutgoingCall(wdChat);
+            switch (action) {
+                case "CALL": this.placeOutgoingCall(wdChat); break;
+                case "CONTACT": this.uiConversations.get(wdChat)!.evtUpdateContact.post(); break;
+                default:
             }
 
         };
@@ -187,6 +241,8 @@ export class UiWebphoneController {
         this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
 
         this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
+
+        this.uiQuickAction.evtNewContact.attach(number => onEvt("CONTACT", number));
 
     }
 
@@ -225,7 +281,7 @@ export class UiWebphoneController {
             //TODO: this.uiNewContact.evt.post(...
 
             wdChat = await wd.io.newChat(
-                this.wdInstance, number, "", false
+                this.wdInstance, number, "", null
             );
 
             this.uiPhonebook.insertContact(wdChat);

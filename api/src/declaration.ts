@@ -168,6 +168,48 @@ export namespace getUaConfig {
 
 }
 
+export namespace createContact {
+
+    export const methodName= "create-contact";
+
+    /** number expect a formated phone number */
+    export type Params = { 
+        imsi: string; 
+        name: string; 
+        number: string; 
+    };
+
+    export type Response = { mem_index: number | null; };
+
+}
+
+export namespace updateContactName {
+
+    export const methodName= "update-contact-name";
+
+    export type Params = {
+        imsi: string;
+        contactRef: { mem_index: number; } | { number: string; };
+        newName: string;
+    };
+
+    export type Response= undefined;
+
+}
+
+export namespace deleteContact {
+
+    export const methodName= "delete-contact";
+
+    export type Params = {
+        imsi: string;
+        contactRef: { mem_index: number; } | { number: string; }
+    };
+
+    export type Response= undefined;
+
+}
+
 
 export namespace webphoneData {
 
@@ -199,7 +241,7 @@ export namespace webphoneData {
             instance_id: number;
             contactNumber: string;
             contactName: string;
-            isContactInSim: boolean;
+            contactIndexInSim: number | null;
         };
 
         export type Response = types.WebphoneData.Chat;
@@ -214,7 +256,7 @@ export namespace webphoneData {
             chat_id: number;
             lastSeenTime?: number;
             contactName?: string;
-            isContactInSim?: boolean;
+            contactIndexInSim?: number | null;
         };
 
         export type Response = undefined;

@@ -210,6 +210,56 @@ export function setSimFriendlyName(
         { imsi, friendlyName }
     );
 
+}
+
+export function createContact(
+    imsi: string,
+    name: string,
+    phoneNumber: string
+){
+
+    const methodName = d.createContact.methodName;
+    type Params = d.createContact.Params;
+    type Response = d.createContact.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        { imsi, name, "number": phoneNumber }
+    );
+
+}
+
+export function updateContactName(
+    imsi: string,
+    contactRef: { mem_index: number; } | { number: string; },
+    newName: string
+){
+
+    const methodName = d.updateContactName.methodName;
+    type Params = d.updateContactName.Params;
+    type Response = d.updateContactName.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        { imsi, contactRef, newName }
+    );
+
+}
+
+//TODO: implement in UI.
+export function deleteContact(
+    imsi: string,
+    contactRef: { mem_index: number; } | { number: string; }
+){
+
+    const methodName = d.deleteContact.methodName;
+    type Params = d.deleteContact.Params;
+    type Response = d.deleteContact.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        { imsi, contactRef }
+    );
 
 }
 
@@ -248,8 +298,10 @@ export namespace webphoneData {
         instance_id: number,
         contactNumber: string,
         contactName: string,
-        isContactInSim: boolean
+        contactIndexInSim: number | null
     ) {
+
+        console.log({ instance_id, contactNumber, contactName, contactIndexInSim });
 
         const methodName = dw.newChat.methodName;
         type Params = dw.newChat.Params;
@@ -261,7 +313,7 @@ export namespace webphoneData {
                 instance_id,
                 contactNumber,
                 contactName,
-                isContactInSim
+                contactIndexInSim
             }
         );
 
@@ -272,7 +324,7 @@ export namespace webphoneData {
         updatedFields: Partial<{
             lastSeenTime: number;
             contactName: string;
-            isContactInSim: boolean;
+            contactIndexInSim: number | null;
         }>
     ) {
 
