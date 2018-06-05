@@ -63,6 +63,8 @@ export class UiWebphoneController {
 
         }
 
+        setTimeout(()=> this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
+
         $('body').data('dynamic').panels();
 
     }
@@ -195,7 +197,47 @@ export class UiWebphoneController {
 
             tools.bootbox_custom.dismissLoading();
 
+            this.uiPhonebook.notifyContactChanged(wdChat);
             uiConversation.notifyContactNameUpdated();
+
+        });
+
+        uiConversation.evtDelete.attach(async () => {
+
+            const shouldProceed = await new Promise<boolean>(
+                resolve => tools.bootbox_custom.confirm({
+                    "title": "Delete chat",
+                    "message": "Delete contact and conversation ?",
+                    callback: result => resolve(result)
+                })
+            );
+
+            if( !shouldProceed ){
+                return;
+            }
+
+            tools.bootbox_custom.loading("Deleting contact and conversation");
+
+            if (
+                wdChat.contactIndexInSim !== null ||
+                wdChat.contactName !== ""
+            ) {
+
+                await api.deleteContact(
+                    this.userSim.sim.imsi,
+                    (wdChat.contactIndexInSim !== null) ?
+                        ({ "mem_index": wdChat.contactIndexInSim }) :
+                        ({ "number": wdChat.contactNumber })
+                );
+
+            }
+
+            await wd.io.deleteChat(this.wdInstance, wdChat);
+
+            tools.bootbox_custom.dismissLoading();
+
+            //TODO do without reloading.
+            window.location.reload();
 
         });
 

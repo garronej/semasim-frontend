@@ -31,6 +31,7 @@ export class UiConversation {
     public readonly evtUpdateContact = new VoidSyncEvent();
     public readonly evtVoiceCall = new VoidSyncEvent();
     public readonly evtSendText = new SyncEvent<string>();
+    public readonly evtDelete = new VoidSyncEvent();
 
     public readonly evtChecked = new VoidSyncEvent();
 
@@ -39,6 +40,7 @@ export class UiConversation {
     private readonly ul = this.structure.find("ul");
     private readonly btnUpdateContact= this.structure.find("button.id_updateContact");
     private readonly btnCall= this.structure.find("button.id_call");
+    private readonly btnDelete = this.structure.find("button.id_delete");
 
     public setReadonly(isReadonly: boolean){
 
@@ -48,6 +50,7 @@ export class UiConversation {
             this.aSend.hide();
             this.btnUpdateContact.prop("disabled", true);
             this.btnCall.prop("disabled", true);
+            this.btnDelete.prop("disabled", true);
 
         }else{
 
@@ -59,6 +62,7 @@ export class UiConversation {
             this.aSend.show();
             this.btnUpdateContact.prop("disabled", false);
             this.btnCall.prop("disabled", false);
+            this.btnDelete.prop("disabled", false);
 
         }
 
@@ -77,6 +81,9 @@ export class UiConversation {
 
         this.btnCall
             .on("click", () => this.evtVoiceCall.post());
+
+        this.btnDelete
+            .on("click", ()=> this.evtDelete.post());
 
 
         this.aSend.on("click", () => {

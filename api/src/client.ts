@@ -301,8 +301,6 @@ export namespace webphoneData {
         contactIndexInSim: number | null
     ) {
 
-        console.log({ instance_id, contactNumber, contactName, contactIndexInSim });
-
         const methodName = dw.newChat.methodName;
         type Params = dw.newChat.Params;
         type Response = dw.newChat.Response;

@@ -43,6 +43,7 @@ export class UiPhonebook {
 
         this.updateSearch();
 
+        /*
         setTimeout(() => {
 
             let wdChat = wdr.lastSeenChat(this.wdInstance);
@@ -52,6 +53,17 @@ export class UiPhonebook {
             this.uiContacts.get(wdChat)!.evtClick.post();
 
         }, 0);
+        */
+
+    }
+
+    public triggerClickOnLastSeenChat() {
+
+        let wdChat = wdr.lastSeenChat(this.wdInstance);
+
+        if (!wdChat) return;
+
+        this.uiContacts.get(wdChat)!.evtClick.post();
 
     }
 
@@ -204,7 +216,7 @@ export class UiPhonebook {
 
     }
 
-    public triggerContactClick(wdChat: Wd.Chat){
+    public triggerContactClick(wdChat: Wd.Chat) {
         this.uiContacts.get(wdChat)!.evtClick.post();
     }
 

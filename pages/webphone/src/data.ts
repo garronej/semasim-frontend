@@ -2,21 +2,17 @@ import { apiClient as api, types } from "../../../api";
 import { phoneNumber } from "../../../shared";
 import Wd= types.WebphoneData;
 
-//TODO: add wd prefix everywhere for the sake of consistency.
 export namespace io {
 
-    //TODO: sort chat by last seen message time
     export async function fetch(
         usableSims: types.UserSim.Usable[]
     ): Promise<Wd> {
 
-        let webphoneData = await api.webphoneData.fetch();
+        console.log("fetch is called");
 
-        let newUserSims = usableSims.filter(
-            ({ sim }) => !webphoneData.instances.find(({ imsi }) => imsi === sim.imsi)
-        );
+        const webphoneData = await api.webphoneData.fetch();
 
-        for (let userSim of newUserSims) {
+        for (let userSim of usableSims) {
 
             let instance = webphoneData.instances.find(({ imsi }) => imsi === userSim.sim.imsi);
 
@@ -40,7 +36,7 @@ export namespace io {
 
                     await updateChat(chat, {
                         "contactName": "",
-                        "contactIndexInSim": undefined
+                        "contactIndexInSim": null
                     });
 
                 }
@@ -93,46 +89,46 @@ export namespace io {
     }
 
     export async function newChat(
-        instance: Wd.Instance,
+        wdInstance: Wd.Instance,
         contactNumber: phoneNumber,
         contactName: string,
         contactIndexInSim: number | null
     ): Promise<Wd.Chat> {
 
-        const chat = await api.webphoneData.newChat(
-            instance.id_,
+        const wdChat = await api.webphoneData.newChat(
+            wdInstance.id_,
             contactNumber,
             contactName,
             contactIndexInSim
         );
 
-        instance.chats.push(chat);
+        wdInstance.chats.push(wdChat);
 
-        return chat;
+        return wdChat;
 
     }
 
     export async function deleteChat(
-        instance: Wd.Instance,
-        chat: Wd.Chat
+        wdInstance: Wd.Instance,
+        wdChat: Wd.Chat
     ): Promise<void> {
 
-        await api.webphoneData.destroyChat(chat.id_);
+        await api.webphoneData.destroyChat(wdChat.id_);
 
-        instance.chats.splice(instance.chats.indexOf(chat)!, 1);
+        wdInstance.chats.splice(wdInstance.chats.indexOf(wdChat)!, 1);
 
     }
 
     export async function updateChat(
-        chat: Wd.Chat,
+        wdChat: Wd.Chat,
         fields: updateChat.Fields
     ): Promise<void> {
 
-        await api.webphoneData.updateChat(chat.id_, fields);
+        await api.webphoneData.updateChat(wdChat.id_, fields);
 
         for (let key in fields) {
 
-            chat[key] = fields[key];
+            wdChat[key] = fields[key];
 
         }
 
@@ -143,41 +139,41 @@ export namespace io {
     }
 
     export async function newMessage<T extends Wd.Message>(
-        chat: Wd.Chat,
-        message: T
+        wdChat: Wd.Chat,
+        wdMessage: T
     ): Promise<T> {
 
-        message = await api.webphoneData.newMessage(chat.id_, message);
+        wdMessage = await api.webphoneData.newMessage(wdChat.id_, wdMessage);
 
         let i_ = -1;
 
-        for (let i = chat.messages.length - 1; i >= 0; i--) {
+        for (let i = wdChat.messages.length - 1; i >= 0; i--) {
 
-            if (message.time >= chat.messages[i].time) {
+            if (wdMessage.time >= wdChat.messages[i].time) {
                 i_ = i;
                 break;
             }
 
         }
 
-        chat.messages.splice(i_ + 1, 0, message);
+        wdChat.messages.splice(i_ + 1, 0, wdMessage);
 
-        return message;
+        return wdMessage;
 
     }
 
     export async function updateOutgoingMessageStatusToSendReportReceived(
-        message: Wd.Message.Outgoing.TransmittedToGateway,
+        wdMessage: Wd.Message.Outgoing.TransmittedToGateway,
         dongleSendTime: number | null
     ): Promise<void> {
 
         await api.webphoneData.updateOutgoingMessageStatusToSendReportReceived(
-            message.id_,
+            wdMessage.id_,
             dongleSendTime
         );
 
 
-        let updatedMessage: Wd.Message.Outgoing.SendReportReceived = message as any;
+        let updatedMessage: Wd.Message.Outgoing.SendReportReceived = wdMessage as any;
 
         updatedMessage.status = "SEND REPORT RECEIVED";
         updatedMessage.dongleSendTime = dongleSendTime;
@@ -185,37 +181,34 @@ export namespace io {
     }
 
     export async function updateOutgoingMessageStatusToStatusReportReceived(
-        message: Wd.Message.Outgoing.SendReportReceived,
+        wdMessage: Wd.Message.Outgoing.SendReportReceived,
         deliveredTime: number | null
     ): Promise<void> {
 
         await api.webphoneData.updateOutgoingMessageStatusToStatusReportReceived(
-            message.id_,
+            wdMessage.id_,
             deliveredTime
         );
 
-        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived = message as any;
+        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived = wdMessage as any;
 
         updatedMessage.status = "STATUS REPORT RECEIVED";
         updatedMessage.deliveredTime = deliveredTime;
 
     }
 
-
-
-
 }
 
 export namespace read {
 
     export function lastSeenChat(
-        instance: Wd.Instance
+        wdInstance: Wd.Instance
     ): Wd.Chat | null {
 
         let maxLastSeenTime: number = 0;
         let selectedChat: Wd.Chat | null = null;
 
-        for (let chat of instance.chats) {
+        for (let chat of wdInstance.chats) {
 
             if (chat.lastSeenTime > maxLastSeenTime) {
                 maxLastSeenTime = chat.lastSeenTime;
@@ -229,24 +222,24 @@ export namespace read {
     }
 
 
-    export function newerMessageTime(chat: Wd.Chat): number {
+    export function newerMessageTime(wdChat: Wd.Chat): number {
 
-        if (!chat.messages.length) {
+        if (!wdChat.messages.length) {
             return 0;
         } else {
-            return chat.messages[chat.messages.length - 1].time;
+            return wdChat.messages[wdChat.messages.length - 1].time;
         }
 
     }
 
-    export function notificationCount(chat: Wd.Chat): number {
+    export function notificationCount(wdChat: Wd.Chat): number {
 
         let notificationCount = 0;
 
-        let i = chat.messages.length - 1;
-        while (chat.messages[i] && chat.messages[i].time > chat.lastSeenTime) {
+        let i = wdChat.messages.length - 1;
+        while (wdChat.messages[i] && wdChat.messages[i].time > wdChat.lastSeenTime) {
 
-            let message = chat.messages[i];
+            let message = wdChat.messages[i];
 
             if (!(
                 message.direction === "OUTGOING" &&
@@ -261,6 +254,5 @@ export namespace read {
         return notificationCount;
 
     }
-
 
 }
