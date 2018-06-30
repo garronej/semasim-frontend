@@ -154,20 +154,6 @@ export namespace setSimFriendlyName {
 
 }
 
-export namespace getUaConfig {
-
-    //TODO: change after client updated
-    export const methodName = "get-user-linphone-config";
-
-    export type Params = {
-        email_as_hex: string;
-        password_as_hex: string;
-    };
-
-    export type Response = string;
-
-}
-
 export namespace createContact {
 
     export const methodName= "create-contact";

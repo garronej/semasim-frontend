@@ -35,13 +35,13 @@ export class UiWebphoneController {
 
     public readonly evtUp = new VoidSyncEvent();
 
-    private readonly uiHeader!: UiHeader;
-    private readonly uiQuickAction!: UiQuickAction;
-    private readonly uiPhonebook!: UiPhonebook;
-    private readonly uiConversations = new Map<Wd.Chat, UiConversation>();
-    private readonly uiVoiceCall: UiVoiceCall;
+    private readonly ua: Ua;
 
-    private readonly ua!: Ua;
+    private readonly uiVoiceCall: UiVoiceCall;
+    private readonly uiHeader: UiHeader;
+    private readonly uiQuickAction: UiQuickAction;
+    private readonly uiPhonebook: UiPhonebook;
+    private readonly uiConversations = new Map<Wd.Chat, UiConversation>();
 
 
     constructor(
@@ -51,10 +51,20 @@ export class UiWebphoneController {
 
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
+        this.ua = new Ua(userSim);
+
+        this.uiHeader = new UiHeader(userSim);
+
+        this.uiQuickAction = new UiQuickAction(userSim);
+
+        this.uiPhonebook = new UiPhonebook(userSim, wdInstance);
+
         this.initUa();
 
         this.initUiHeader();
+
         this.initUiQuickAction();
+
         this.initUiPhonebook();
 
         for (let wdChat of this.wdInstance.chats) {
@@ -63,15 +73,13 @@ export class UiWebphoneController {
 
         }
 
-        setTimeout(()=> this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
+        setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
 
         $('body').data('dynamic').panels();
 
     }
 
     private initUa() {
-
-        this.ua! = new Ua(this.userSim);
 
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
 
@@ -115,9 +123,73 @@ export class UiWebphoneController {
 
     }
 
+    private initUiHeader() {
+
+        this.structure
+            .find("div.id_header")
+            .append(this.uiHeader.structure)
+            ;
+
+        this.uiHeader.evtUp.attach(
+            () => this.evtUp.post()
+        );
+
+    }
+
+    private initUiQuickAction() {
+
+
+        this.structure
+            .find("div.id_colLeft")
+            .append(this.uiQuickAction.structure);
+
+        const onEvt = async (action: "SMS" | "CALL" | "CONTACT", number: phoneNumber) => {
+
+            const wdChat = await this.getOrCreateChatByPhoneNumber(number);
+
+            this.uiPhonebook.triggerContactClick(wdChat);
+
+            switch (action) {
+                case "CALL": this.placeOutgoingCall(wdChat); break;
+                case "CONTACT": this.uiConversations.get(wdChat)!.evtUpdateContact.post(); break;
+                default:
+            }
+
+        };
+
+        this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
+
+        this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
+
+        this.uiQuickAction.evtNewContact.attach(number => onEvt("CONTACT", number));
+
+    }
+
+    private initUiPhonebook() {
+
+        this.structure
+            .find("div.id_colLeft")
+            .append(this.uiPhonebook.structure);
+
+        this.uiPhonebook.evtContactSelected.attach(
+            ({ wdChatPrev, wdChat }) => {
+
+                if (wdChatPrev) {
+
+                    this.uiConversations.get(wdChatPrev)!.unselect();
+
+                }
+
+                this.uiConversations.get(wdChat)!.setSelected();
+
+            }
+        );
+
+    }
+
     private initUiConversation(wdChat: Wd.Chat) {
 
-        let uiConversation = new UiConversation(this.userSim, wdChat);
+        const uiConversation = new UiConversation(this.userSim, wdChat);
 
         if (this.ua.isRegistered) {
             uiConversation.setReadonly(false);
@@ -177,7 +249,7 @@ export class UiWebphoneController {
                     wdChat.contactNumber
                 );
 
-                await wd.io.updateChat(wdChat, 
+                await wd.io.updateChat(wdChat,
                     { "contactIndexInSim": mem_index, "contactName": name }
                 );
 
@@ -212,7 +284,7 @@ export class UiWebphoneController {
                 })
             );
 
-            if( !shouldProceed ){
+            if (!shouldProceed) {
                 return;
             }
 
@@ -240,75 +312,6 @@ export class UiWebphoneController {
             window.location.reload();
 
         });
-
-    }
-
-    private initUiHeader() {
-
-        this.uiHeader! = new UiHeader(this.userSim);
-
-        this.structure
-            .find("div.id_header")
-            .append(this.uiHeader.structure)
-            ;
-
-        this.uiHeader.evtUp.attach(
-            () => this.evtUp.post()
-        );
-
-    }
-
-    private initUiQuickAction() {
-
-        this.uiQuickAction! = new UiQuickAction(this.userSim);
-
-        this.structure
-            .find("div.id_colLeft")
-            .append(this.uiQuickAction.structure);
-
-        const onEvt = async (action: "SMS" | "CALL" | "CONTACT", number: phoneNumber) => {
-
-            const wdChat = await this.getOrCreateChatByPhoneNumber(number);
-
-            this.uiPhonebook.triggerContactClick(wdChat);
-
-            switch (action) {
-                case "CALL": this.placeOutgoingCall(wdChat); break;
-                case "CONTACT": this.uiConversations.get(wdChat)!.evtUpdateContact.post(); break;
-                default:
-            }
-
-        };
-
-        this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
-
-        this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
-
-        this.uiQuickAction.evtNewContact.attach(number => onEvt("CONTACT", number));
-
-    }
-
-    private initUiPhonebook() {
-
-        this.uiPhonebook! = new UiPhonebook(this.userSim, this.wdInstance);
-
-        this.structure
-            .find("div.id_colLeft")
-            .append(this.uiPhonebook.structure);
-
-        this.uiPhonebook.evtContactSelected.attach(
-            ({ wdChatPrev, wdChat }) => {
-
-                if (wdChatPrev) {
-
-                    this.uiConversations.get(wdChatPrev)!.unselect();
-
-                }
-
-                this.uiConversations.get(wdChat)!.setSelected();
-
-            }
-        );
 
     }
 
@@ -479,10 +482,10 @@ export class UiWebphoneController {
 
     private placeOutgoingCall(wdChat: Wd.Chat): void {
 
-        let { terminate, prTerminated, prNextState } =
+        const { terminate, prTerminated, prNextState } =
             this.ua.placeOutgoingCall(wdChat.contactNumber);
 
-        let { onTerminated, onRingback, prUserInput } =
+        const { onTerminated, onRingback, prUserInput } =
             this.uiVoiceCall.onOutgoing(wdChat);
 
         prTerminated.then(() => onTerminated("Call terminated"));
@@ -521,11 +524,11 @@ export class UiWebphoneController {
         this.ua.evtIncomingCall.attach(
             async ({ fromNumber, terminate, prTerminated, onAccepted }) => {
 
-                let wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
+                const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
                 this.uiPhonebook.triggerContactClick(wdChat);
 
-                let { onTerminated, prUserInput } = this.uiVoiceCall.onIncoming(wdChat);
+                const { onTerminated, prUserInput } = this.uiVoiceCall.onIncoming(wdChat);
 
                 prTerminated.then(() => onTerminated("Call ended"));
 
@@ -543,7 +546,7 @@ export class UiWebphoneController {
 
                     if (ua.userAction === "ANSWER") {
 
-                        let { onEstablished } = ua;
+                        const { onEstablished } = ua;
 
                         onAccepted().then(({ sendDtmf }) => {
 
