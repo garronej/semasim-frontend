@@ -17,7 +17,6 @@
     "i-register": "cd pages/register && npm install",
     "i-manager": "cd pages/manager && npm install",
     "i-webphone": "cd pages/webphone && npm install",
-
     "build": "npm run b-tools && npm run b-api && npm run b-shared && npm run b-pages && npm run tsc",
     "b-tools": "cd tools && npm run tsc",
     "b-api": "cd api && npm run tsc",
