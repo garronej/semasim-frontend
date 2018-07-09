@@ -138,11 +138,11 @@ export class SimRow {
 
                 switch (this.userSim.dongle.isVoiceEnabled) {
                     case undefined:
-                        return "Probably SMS only ( may need to manually enable voice )";
+                        return "SMS: yes,  Voice call: not sure, try and see ( may need to manually enable voice on 3G dongle )";
                     case true:
-                        return "Voice calls + SMS"
+                        return "SMS: yes, Voice call: yes"
                     case false:
-                        return "SMS only ( need to manually enable voice )";
+                        return "SMS: yes, Voice call: no ( need to manually enable voice on 3G dongle )";
                 }
 
             })()

@@ -160,7 +160,7 @@ async function interact(dongle: dcTypes.Dongle) {
         await new Promise<void>(
             resolve => tools.bootbox_custom.alert(
                 [
-                    "Bad luck :(",
+                    "Warning:",
                     `Voice is ${sure ? "" : "( maybe )"} not enabled on the 3G Key you are using with this SIM.`,
                     `As as a result you ${sure ? "will" : "may"} not be able to place phones calls ${sure ? "(try and see for yourself)" : ""}.`,
                     "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
