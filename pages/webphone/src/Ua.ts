@@ -118,7 +118,7 @@ export class Ua {
 
     public readonly evtIncomingMessage = new SyncEvent<{
         fromNumber: phoneNumber;
-        bundledData: gwTypes.BundledData.ServerToClient;
+        bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
         text: string;
     }>();
 

@@ -35,57 +35,72 @@ div.id_UiConversation {
                 list-style: none;
 
                 li { 
+
                         margin-bottom: 5px;
                         margin-top: 5px;
 
                         div.message {
 
                                 border-radius: 4px; 
-                                background-color: #ecf0f1; 
                                 padding: 5px 10px; 
                                 border: 1px solid #ecf0f1; 
                                 position: relative;
 
+                                &.notification {
 
+                                        background-color: #ecefde; 
+                                        text-align: center;
+                                        font-style: italic;
+                                        margin-left: 80px; 
+                                        margin-right: 80px;
+
+                                }
+
+                                &.in, &.out {
+
+                                        background-color: #ecf0f1; 
+
+                                        &:after, &:before { 
+                                                top: 20px; 
+                                                border: solid transparent; 
+                                                content: ''; 
+                                                position: absolute; 
+                                        }
+
+                                        &:after { 
+                                                border-width: 8px; 
+                                                margin-top: -8px; 
+                                        }
+
+                                }
 
                                 &.in {
+
                                         margin-left: 7px; 
                                         margin-right: 60px;
+
+                                        &:after, &:before {
+                                                right: 100%; 
+                                        }
+
+                                        &:after {
+                                                border-right-color: #ecf0f1; 
+                                        }
+
                                 }
 
                                 &.out {
+
                                         margin-left: 60px; 
                                         margin-right: 7px;
 
-                                }
-
-                                &:after, 
-                                &:before { 
-                                        right: 100%; 
-                                        top: 20px; 
-                                        border: solid transparent; 
-                                        content: ''; 
-                                        position: absolute; 
-                                }
-
-                                &:after { 
-                                        border-right-color: #ecf0f1; 
-                                        border-width: 8px; 
-                                        margin-top: -8px; 
-                                }
-
-                                &.out {
-
-                                        &:after,
-                                        &:before {
+                                        &:after, &:before {
                                                 left: 100%; 
                                         }
 
                                         &:after {
                                                 border-left-color: #ecf0f1; 
-                                                border-right-color: transparent; 
                                         }
-
 
                                 }
 

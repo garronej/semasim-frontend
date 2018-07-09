@@ -21,8 +21,8 @@ declare const Buffer: any;
 
 
 //const checkMark= "\u221a";
-const checkMark= Buffer.from("e29c93", "hex").toString("utf8");
-const crossMark= Buffer.from("e29d8c", "hex").toString("utf8");
+const checkMark: string= Buffer.from("e29c93", "hex").toString("utf8");
+const crossMark: string= Buffer.from("e29d8c", "hex").toString("utf8");
 
 export class UiConversation {
 
@@ -240,7 +240,7 @@ export class UiConversation {
 
             if (wdMessage.isNotification) {
 
-                let uiBubbleIncomingNotification = new UiBubble.IncomingNotification(
+                const uiBubbleIncomingNotification = new UiBubble.IncomingNotification(
                     wdMessage, this.wdChat, this.userSim
                 );
 
@@ -252,7 +252,7 @@ export class UiConversation {
                     ion.sound.play(this.isSelected?"water_droplet":"button_tiny");
                 }
 
-                let uiBubbleIncomingText = new UiBubble.IncomingText(
+                const uiBubbleIncomingText = new UiBubble.IncomingText(
                     wdMessage, this.wdChat, this.userSim
                 );
 
@@ -263,7 +263,7 @@ export class UiConversation {
 
         } else {
 
-            let uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
+            const uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
 
             uiBubble = uiBubbleOutgoing;
 
@@ -380,7 +380,7 @@ namespace UiBubble {
 
             super(wdMessage);
 
-            console.log("todo");
+            this.structure.find("div.message").addClass("notification");
 
         }
 
@@ -403,19 +403,22 @@ namespace UiBubble {
                 )
                 ;
 
+
             this.structure.find("span.id_check").text((() => {
 
                 switch (wdMessage.status) {
                     case "SEND REPORT RECEIVED": return !!wdMessage.dongleSendTime?checkMark:crossMark;
                     case "STATUS REPORT RECEIVED": return `${checkMark}${checkMark}`;
-                    case "TRANSMITTED TO GATEWAY":
-                    default: return "";
+                    case "TRANSMITTED TO GATEWAY": return "";
                 }
 
             })());
 
+            /*
+            TODO: remove as soon as we see it's ok
             this.structure.find("p.id_content")
                 .html(wdMessage.text.split("\n").join("<br>"));
+            */
 
         }
 

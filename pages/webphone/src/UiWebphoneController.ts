@@ -94,23 +94,29 @@ export class UiWebphoneController {
         this.ua.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, text }) => {
 
-                let wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
+                const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
-                let wdMessage: Wd.Message = await (() => {
+                const wdMessage: Exclude<Wd.Message, Wd.Message.Outgoing.TransmittedToGateway> = await (() => {
 
                     switch (bundledData.type) {
                         case "MESSAGE": return this.onIncomingMessage_Message(wdChat, bundledData, text);
                         case "SEND REPORT": return this.onIncomingMessage_SendReport(wdChat, bundledData);
                         case "STATUS REPORT": return this.onIncomingMessage_StatusReport(wdChat, bundledData);
-                        default: return null as any;
+                        default: return wd.io.newMessage<Wd.Message.Incoming.Notification>(wdChat, {
+                            "id_": NaN,
+                            "direction": "INCOMING",
+                            "isNotification": true,
+                            "text": (() => {
+                                switch (bundledData.type) {
+                                    case "MISSED CALL": return "Missed call";
+                                    case "CALL ANSWERED BY": return `${bundledData.ua.userEmail} answered the call ( ${bundledData.ua.platform} )`;
+                                }
+                            })(),
+                            "time": bundledData.date.getTime()
+                        });
                     }
 
                 })();
-
-                if (!wdMessage) {
-                    console.log("TODO implement bundle data type", JSON.stringify({ bundledData }, null, 2));
-                    return;
-                }
 
                 this.uiConversations.get(wdChat)!.newMessage(wdMessage);
 
@@ -359,7 +365,7 @@ export class UiWebphoneController {
 
         }
 
-        let wdMessageOutgoing = await wd.io.newMessage<Wd.Message.Outgoing.TransmittedToGateway>(
+        const wdMessageOutgoing = await wd.io.newMessage<Wd.Message.Outgoing.TransmittedToGateway>(
             uiConversation.wdChat,
             {
                 "id_": NaN,
@@ -402,7 +408,7 @@ export class UiWebphoneController {
                 //TODO: optimise find
                 out = wdChat.messages.find(({ time }) => time === bundledData.messageTowardGsm.date.getTime());
                 if (!out) {
-                    alert("aie aie aie!");
+                    console.log("(TODO remove) delayed...");
                     await new Promise(resolve => setTimeout(resolve, 500));
                     continue;
                 }
@@ -427,7 +433,7 @@ export class UiWebphoneController {
 
         if (bundledData.messageTowardGsm.uaSim.ua.instance === `"<urn:${Ua.instanceId}>"`) {
 
-            let wdMessage: Wd.Message.Outgoing.SendReportReceived = await (async () => {
+            const wdMessage: Wd.Message.Outgoing.SendReportReceived = await (async () => {
                 let out;
                 while (true) {
                     //TODO: optimise find
@@ -435,7 +441,7 @@ export class UiWebphoneController {
                         ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
                     );
                     if (!out) {
-                        alert("aie aie aie 2!");
+                        console.log("(TODO remove) delayed...");
                         await new Promise(resolve => setTimeout(resolve, 500));
                         continue;
                     }
