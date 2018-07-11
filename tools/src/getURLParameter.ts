@@ -1,13 +1,13 @@
 
 export function getURLParameter(sParam: string): string | undefined {
 
-    let sPageURL = window.location.search.substring(1);
+    const sPageURL = window.location.search.substring(1);
 
-    let sURLVariables = sPageURL.split("&");
+    const sURLVariables = sPageURL.split("&");
 
-	for (var i = 0; i < sURLVariables.length; i++) {
+	for (let i = 0; i < sURLVariables.length; i++) {
 
-		let sParameterName = sURLVariables[i].split("=");
+		const sParameterName = sURLVariables[i].split("=");
 
 		if (sParameterName[0] == sParam) {
 

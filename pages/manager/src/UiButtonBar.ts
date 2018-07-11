@@ -1,10 +1,16 @@
 import { VoidSyncEvent } from "ts-events-extended";
+import * as tools from "../../../tools";
 
 declare const require: (path: string) => any;
 
-export class ButtonBar {
+const html = tools.loadUiClassHtml(
+    require("../templates/UiButtonBar.html"),
+    "UiButtonBar"
+);
 
-    public readonly structure: JQuery;
+export class UiButtonBar {
+
+    public readonly structure = html.structure.clone();
 
     public evtClickBack = new VoidSyncEvent();
     public evtClickDetail = new VoidSyncEvent();
@@ -14,18 +20,18 @@ export class ButtonBar {
     public evtClickRename = new VoidSyncEvent();
     public evtClickRefresh = new VoidSyncEvent();
 
-    private readonly buttons: JQuery;
+    private readonly buttons = this.structure.find("button");
 
-    public readonly btnDetail: JQuery;
-    private readonly btnBack: JQuery;
-    private readonly btnDelete: JQuery;
-    private readonly btnShare: JQuery;
-    private readonly btnRename: JQuery;
-    private readonly btnReload: JQuery;
+    public readonly btnDetail = $(this.buttons.get(0));
+    private readonly btnBack = $(this.buttons.get(1));
+    private readonly btnDelete = $(this.buttons.get(2));
+    private readonly btnShare = $(this.buttons.get(3));
+    private readonly btnRename = $(this.buttons.get(4));
+    private readonly btnReload = $(this.buttons.get(5));
 
-    public state: ButtonBar.State;
+    public state: UiButtonBar.State;
 
-    public setState(state: Partial<ButtonBar.State>) {
+    public setState(state: Partial<UiButtonBar.State>) {
 
         for (let key in state) {
             this.state[key] = state[key];
@@ -39,7 +45,7 @@ export class ButtonBar {
 
             this.buttons.each(i => {
 
-                let button = $(this.buttons[i]);
+                const button = $(this.buttons[i]);
 
                 if (button.get(0) !== this.btnReload.get(0)) {
                     button.addClass("disabled");
@@ -63,52 +69,31 @@ export class ButtonBar {
 
     constructor() {
 
-        this.structure = $(
-            require("../templates/ButtonBar.html")
-        );
+        this.btnDetail.click(() => {
+            this.setState({ "areDetailsShown": true });
+            this.evtClickDetail.post();
+        });
 
-        this.buttons = this.structure.find("button");
+        this.btnBack.click(() => {
+            this.setState({ "areDetailsShown": false });
+            this.evtClickBack.post()
+        });
 
-        this.btnDetail = $(this.buttons.get(0));
-        this.btnBack = $(this.buttons.get(1));
-        this.btnDelete = $(this.buttons.get(2));
-        this.btnShare = $(this.buttons.get(3));
-        this.btnRename = $(this.buttons.get(4));
-        this.btnReload = $(this.buttons.get(5));
+        this.btnDelete.click(() => this.evtClickDelete.post());
 
-        this.btnDetail.click(
-            () => {
-                this.setState({ "areDetailsShown": true });
-                this.evtClickDetail.post();
-            }
-        );
-
-        this.btnBack.click(
-            () => {
-                this.setState({ "areDetailsShown": false });
-                this.evtClickBack.post()
-            }
-        );
-
-        this.btnDelete.click(
-            () => this.evtClickDelete.post()
-        );
-
-        this.btnRename.click(
-            () => this.evtClickRename.post()
-        );
+        this.btnRename.click(() => this.evtClickRename.post());
 
         this.btnShare.tooltip();
+
+        this.btnShare.click(() => this.evtClickShare.post());
+
         this.btnReload.tooltip();
 
-        this.btnReload.click(
-            () => this.evtClickRefresh.post()
-        );
-
+        this.btnReload.click(() => this.evtClickRefresh.post());
 
         this.state = (() => {
 
-            let state: ButtonBar.State.RowNotSelected = {
+            const state: UiButtonBar.State.RowNotSelected = {
                 "isSimRowSelected": false,
                 "isSimSharable": false,
                 "areDetailsShown": false
@@ -125,7 +110,7 @@ export class ButtonBar {
 }
 
 
-export namespace ButtonBar {
+export namespace UiButtonBar {
 
     export type State = State.RowSelected | State.RowNotSelected;
 

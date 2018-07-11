@@ -45,7 +45,7 @@ export function loading(
 
     let modal: JQuery | undefined = undefined;
 
-    let timer = setTimeout(
+    const timer = setTimeout(
         () => {
 
             let options = {

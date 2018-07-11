@@ -1,13 +1,19 @@
 import { VoidSyncEvent } from "ts-events-extended";
 import { types } from "../../../api";
+import * as tools from "../../../tools";
 
 declare const require: (path: string) => any;
 
-require("../templates/SimRow.less");
+const html = tools.loadUiClassHtml(
+    require("../templates/UiSimRow.html"),
+    "UiSimRow"
+);
 
-export class SimRow {
+require("../templates/UiSimRow.less");
 
-    public readonly structure: JQuery;
+export class UiSimRow {
+
+    public readonly structure = html.structure.clone();
 
     public evtSelected = new VoidSyncEvent();
 
@@ -18,34 +24,22 @@ export class SimRow {
         this.isSelected = false;
     }
 
-    public setDetailsVisibility(
-        visibility: "SHOWN" | "HIDDEN"
-    ) {
+    public setDetailsVisibility(visibility: "SHOWN" | "HIDDEN") {
 
-        let details = this.structure.find(".id_details");
+        const details = this.structure.find(".id_details");
 
         switch (visibility) {
-            case "SHOWN":
-                details.show();
-                break;
-            case "HIDDEN":
-                details.hide();
-                break;
+            case "SHOWN": details.show(); break;
+            case "HIDDEN": details.hide(); break;
         }
 
     }
 
-    public setVisibility(
-        visibility: "SHOWN" | "HIDDEN"
-    ) {
+    public setVisibility(visibility: "SHOWN" | "HIDDEN") {
 
         switch (visibility) {
-            case "SHOWN":
-                this.structure.show();
-                break;
-            case "HIDDEN":
-                this.structure.hide();
-                break;
+            case "SHOWN": this.structure.show(); break;
+            case "HIDDEN": this.structure.hide(); break;
         }
 
     }
@@ -122,7 +116,8 @@ export class SimRow {
         );
 
         this.structure.find(".id_dongle_info").text((() => {
-            let d = this.userSim.dongle;
+
+            const d = this.userSim.dongle;
 
             return [
                 d.manufacturer,
@@ -171,25 +166,21 @@ export class SimRow {
 
     }
 
-    constructor(
-        public readonly userSim: types.UserSim.Usable
-    ) {
+    constructor(public readonly userSim: types.UserSim.Usable) {
 
-        this.structure = $(
-            require("../templates/SimRow.html")
-        );
+        this.structure.click(() => {
 
-        this.structure.click(
-            () => {
+            if (!this.isSelected) {
 
-                if (!this.isSelected) {
-                    this.isSelected = true;
-                    this.structure.find(".id_row").addClass("selected");
-                    this.evtSelected.post();
-                }
+                this.isSelected = true;
+
+                this.structure.find(".id_row").addClass("selected");
+
+                this.evtSelected.post();
 
             }
-        );
+
+        });
 
         this.setDetailsVisibility("HIDDEN");
 

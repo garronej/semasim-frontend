@@ -1,6 +1,5 @@
 {
   "name": "frontend-tools",
-  "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -11,6 +10,6 @@
   "devDependencies": {
     "@types/bootstrap": "3.3.28",
     "@types/jquery": "2.0.48",
-    "typescript": "^2.7.1"
+    "typescript": "^2.9.2"
   }
 }
