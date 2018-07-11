@@ -1,10 +1,10 @@
 import { VoidSyncEvent } from "ts-events-extended";
-import { loadHtml } from "./loadHtml";
+import * as tools from "../../../tools";
 import { types } from "../../../api";
 
 declare const require: any;
 
-const html = loadHtml(
+const html = tools.loadUiClassHtml(
     require("../templates/UiHeader.html"),
     "UiHeader"
 );

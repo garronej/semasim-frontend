@@ -2,7 +2,7 @@ import { SyncEvent } from "ts-events-extended";
 
 import { types } from "../../../api";
 
-import { loadHtml } from "./loadHtml";
+import * as tools from "../../../tools";
 //import * as wd from "./data";
 import Wd = types.WebphoneData;
 
@@ -14,7 +14,7 @@ declare const ion: any;
 declare const require: any;
 //const transform = require("sdp-transform");
 
-const html = loadHtml(
+const html = tools.loadUiClassHtml(
     require("../templates/UiVoiceCall.html"),
     "UiVoiceCall"
 );

@@ -1,6 +1,6 @@
 import { VoidSyncEvent } from "ts-events-extended";
 
-import { loadHtml } from "./loadHtml";
+import * as tools from "../../../tools";
 import * as wd from "./data";
 import Wd = types.WebphoneData;
 
@@ -18,12 +18,11 @@ import { phoneNumber } from "../../../shared";
 
 import { Ua } from "./Ua";
 
-import * as tools from "../../../tools";
 import { types, apiClient as api } from "../../../api";
 
 declare const require: any;
 
-const html = loadHtml(
+const html = tools.loadUiClassHtml(
     require("../templates/UiWebphoneController.html"),
     "UiWebphoneController"
 );

@@ -1,4 +1,4 @@
-import { loadHtml } from "./loadHtml";
+import * as tools from "../../../tools";
 import { types } from "../../../api";
 import { phoneNumber } from "../../../shared";
 //import { read as wdr } from "./data";
@@ -10,7 +10,7 @@ declare const ion: any;
 declare const require: any;
 //declare const titlenotifier: any;
 
-const html = loadHtml(
+const html = tools.loadUiClassHtml(
     require("../templates/UiConversation.html"),
     "UiConversation"
 );

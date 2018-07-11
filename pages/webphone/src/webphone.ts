@@ -8,51 +8,6 @@ import { Ua } from "./Ua";
 import * as d from "./data";
 import { UiWebphoneController } from "./UiWebphoneController";
 
-async function loadPageContent() {
-
-	await simRegistrationProcess.start();
-
-	let useableUserSims = await validateSimShareProcess.start();
-
-	if (!useableUserSims.length) {
-
-		window.location.href = "/manager";
-
-		return;
-
-	}
-
-    tools.bootbox_custom.loading("Initialization...");
-
-	let wdRoot= await d.io.fetch(useableUserSims);
-
-	Ua.init(wdRoot.email, wdRoot.uaInstanceId);
-
-	tools.bootbox_custom.dismissLoading();
-
-	let userSim= useableUserSims.pop()!;
-
-
-	let wdInstance= wdRoot.instances.find(({ imsi })=> imsi === userSim.sim.imsi )!;
-
-	let uiWebphone= new UiWebphoneController(userSim, wdInstance);
-
-	$(".page-content-inner").append(uiWebphone.structure);
-
-	/*
-	(()=>{
-
-		let footer = $("#footer").detach();
-
-		setTimeout(()=> footer.insertAfter($("#wrapper")), 0);
-
-	})();
-	*/
-
-	$("#footer").hide();
-
-}
-
 $(document).ready(() => {
 
 	$("#logout").click(async () => {
@@ -63,6 +18,42 @@ $(document).ready(() => {
 
 	});
 
-	loadPageContent();
+	(async function main() {
+
+		await simRegistrationProcess.start();
+
+		let useableUserSims = await validateSimShareProcess.start();
+
+		if (!useableUserSims.length) {
+
+			window.location.href = "/manager";
+
+			return;
+
+		}
+
+		tools.bootbox_custom.loading("Initialization...");
+
+		const wdRoot = await d.io.fetch(useableUserSims);
+
+		tools.bootbox_custom.dismissLoading();
+
+		Ua.init(wdRoot.email, wdRoot.uaInstanceId);
+
+		for( const userSim of useableUserSims ){
+
+			const wdInstance = wdRoot.instances.find(({ imsi }) => imsi === userSim.sim.imsi)!;
+
+			const uiWebphone = new UiWebphoneController(userSim, wdInstance);
+
+			$(".page-content-inner").append(uiWebphone.structure);
+
+		}
+
+		$("#footer").hide();
+
+
+	})();
+
 
 });

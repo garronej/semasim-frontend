@@ -1,5 +1,5 @@
 import { SyncEvent } from "ts-events-extended";
-import { loadHtml } from "./loadHtml";
+import * as tools from "../../../tools";
 import { VoidSyncEvent } from "ts-events-extended";
 import { types } from "../../../api";
 import { read as wdr } from "./data";
@@ -8,7 +8,7 @@ import Wd = types.WebphoneData;
 
 declare const require: any;
 
-const html = loadHtml(
+const html = tools.loadUiClassHtml(
     require("../templates/UiPhonebook.html"),
     "UiPhonebook"
 );
