@@ -40,7 +40,7 @@ export class UiController {
 
         }
 
-        if (!previousState) {
+        if (!previousState || useableUserSims.map(({ sim })=> sim.imsi).indexOf( previousState.selectedSim ) < 0 ) {
 
             previousState = {
                 "selectedSim": useableUserSims[0].sim.imsi,
