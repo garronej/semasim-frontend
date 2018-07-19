@@ -19,7 +19,8 @@
   "dependencies": {
     "moment": "^2.20.1",
     "sdp-transform": "^2.3.1",
-    "ts-events-extended": "github:garronej/ts-events-extended"
+    "ts-events-extended": "github:garronej/ts-events-extended",
+    "run-exclusive": "github:garronej/run-exclusive"
   },
   "devDependencies": {
     "concurrently": "^3.5.1",

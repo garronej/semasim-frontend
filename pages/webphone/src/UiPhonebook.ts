@@ -43,25 +43,15 @@ export class UiPhonebook {
 
         this.updateSearch();
 
-        /*
-        setTimeout(() => {
-
-            let wdChat = wdr.lastSeenChat(this.wdInstance);
-
-            if (!wdChat) return;
-
-            this.uiContacts.get(wdChat)!.evtClick.post();
-
-        }, 0);
-        */
-
     }
 
     public triggerClickOnLastSeenChat() {
 
-        let wdChat = wdr.lastSeenChat(this.wdInstance);
+        const wdChat = wdr.lastSeenChat(this.wdInstance);
 
-        if (!wdChat) return;
+        if (!wdChat) {
+            return;
+        }
 
         this.uiContacts.get(wdChat)!.evtClick.post();
 
@@ -203,22 +193,36 @@ export class UiPhonebook {
      * triggered by: evt on text input => update last seen => call 
      * OR
      * new message arrive => update wdMessage => call
-     * 
+     * OR
+     * contact name changed
+     * OR
+     * contact deleted
      * */
     public notifyContactChanged(wdChat: Wd.Chat) {
 
-        let uiContact = this.uiContacts.get(wdChat)!;
+        const uiContact = this.uiContacts.get(wdChat)!;
 
-        uiContact.refreshNotificationLabel();
-        uiContact.updateContactName();
+        if (this.wdInstance.chats.indexOf(wdChat) < 0) {
 
-        this.placeUiContact(uiContact);
+            uiContact.structure.detach();
+            this.uiContacts.delete(wdChat);
+
+        } else {
+
+            uiContact.refreshNotificationLabel();
+            uiContact.updateContactName();
+
+            this.placeUiContact(uiContact);
+
+        }
 
     }
 
     public triggerContactClick(wdChat: Wd.Chat) {
         this.uiContacts.get(wdChat)!.evtClick.post();
     }
+
+
 
 
 }

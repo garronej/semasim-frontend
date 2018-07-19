@@ -8,6 +8,7 @@ import {
     urlSafeB64
 } from "./semasim-gateway";
 import { AppSocket } from "./AppSocket";
+import * as runExclusive from "run-exclusive";
 
 declare const JsSIP: any;
 
@@ -50,15 +51,23 @@ export class Ua {
 
     private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
+    private setMessageOkDelay: ReturnType<typeof Ua.appSocket.makeProxy>["setMessageOkDelay"];
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
     ) {
 
-        let uri = `sip:${this.userSim.sim.imsi}-webRTC@${apiDeclaration.domain}`;
+        const uri = `sip:${this.userSim.sim.imsi}-webRTC@${apiDeclaration.domain}`;
+
+        const { 
+            proxy: appSocketProxy, 
+            setMessageOkDelay 
+        } = Ua.appSocket.makeProxy(this.userSim.sim.imsi)
+
+        this.setMessageOkDelay= setMessageOkDelay;
 
         this.jsSipUa = new JsSIP.UA({
-            "sockets": Ua.appSocket.makeProxy(this.userSim.sim.imsi),
+            "sockets": appSocketProxy,
             uri,
             "authorization_user": this.userSim.sim.imsi,
             "password": this.userSim.password,
@@ -120,15 +129,16 @@ export class Ua {
         fromNumber: phoneNumber;
         bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
         text: string;
+        onProcessed: ()=> void;
     }>();
 
     private onMessage(request): void {
 
-        let bundledData = extractBundledDataFromHeaders((() => {
+        const bundledData = extractBundledDataFromHeaders((() => {
 
-            let out = {};
+            const out = {};
 
-            for (let key in request.headers) {
+            for (const key in request.headers) {
                 out[key] = request.headers[key][0].raw;
             }
 
@@ -136,7 +146,7 @@ export class Ua {
 
         })()) as gwTypes.BundledData.ServerToClient;
 
-        let fromNumber = this.toPhoneNumber(request.from.uri.user);
+        const fromNumber = this.toPhoneNumber(request.from.uri.user);
 
         if (bundledData.type === "RINGBACK") {
 
@@ -146,25 +156,44 @@ export class Ua {
 
         }
 
-        this.evtIncomingMessage.post({
-            fromNumber, bundledData, "text": request.body
+        const pr = this.postEvtIncomingMessage({
+            fromNumber,
+            bundledData,
+            "text": request.body,
         });
+
+        this.setMessageOkDelay(request, pr);
 
     }
 
-    /** return exactSendDate to match with sendReport and statusReport */
-    public async sendMessage(
+    private postEvtIncomingMessage = runExclusive.buildMethod(
+        (evtData: Pick<SyncEvent.Type<typeof Ua.prototype.evtIncomingMessage>, "fromNumber" | "bundledData" | "text">) => {
+
+            let onProcessed: () => void;
+
+            const pr = new Promise<void>(resolve => onProcessed = resolve);
+
+            this.evtIncomingMessage.post({
+                ...evtData,
+                "onProcessed": onProcessed!
+            });
+
+            return pr;
+
+        }
+    );
+
+    public sendMessage(
         number: phoneNumber,
-        text: string
-    ): Promise<Date> {
+        text: string,
+        exactSendDate: Date
+    ): Promise<void> {
 
-        let exactSendDate = new Date();
+        const extraHeaders = (() => {
 
-        let extraHeaders = (() => {
+            const headers = smuggleBundledDataInHeaders((() => {
 
-            let headers = smuggleBundledDataInHeaders((() => {
-
-                let bundledData: gwTypes.BundledData.ClientToServer.Message = {
+                const bundledData: gwTypes.BundledData.ClientToServer.Message = {
                     "type": "MESSAGE",
                     exactSendDate
                 };
@@ -173,9 +202,9 @@ export class Ua {
 
             })());
 
-            let out: string[] = [];
+            const out: string[] = [];
 
-            for (let key in headers) {
+            for (const key in headers) {
 
                 out.push(`${key}: ${headers[key]}`);
 
@@ -185,7 +214,7 @@ export class Ua {
 
         })();
 
-        return new Promise<Date>(
+        return new Promise<void>(
             (resolve, reject) => this.jsSipUa.sendMessage(
                 `sip:${number}@${apiDeclaration.domain}`,
                 text,
@@ -193,7 +222,7 @@ export class Ua {
                     "contentType": "text/plain; charset=UTF-8",
                     extraHeaders,
                     "eventHandlers": {
-                        "succeeded": () => resolve(exactSendDate),
+                        "succeeded": () => resolve(),
                         "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
                     }
                 }
@@ -201,6 +230,9 @@ export class Ua {
         );
 
     }
+
+    /** return exactSendDate to match with sendReport and statusReport */
+
 
     public readonly evtIncomingCall = new SyncEvent<{
         fromNumber: phoneNumber;
@@ -215,13 +247,13 @@ export class Ua {
 
     private onIncomingCall(jsSipRtcSession, request): void {
 
-        let evtRequestTerminate = new VoidSyncEvent();
-        let evtAccepted = new VoidSyncEvent();
-        let evtTerminated = new VoidSyncEvent();
-        let evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
-        let evtEstablished= new VoidSyncEvent();
+        const evtRequestTerminate = new VoidSyncEvent();
+        const evtAccepted = new VoidSyncEvent();
+        const evtTerminated = new VoidSyncEvent();
+        const evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+        const evtEstablished = new VoidSyncEvent();
 
-        evtRequestTerminate.attachOnce( () => jsSipRtcSession.terminate());
+        evtRequestTerminate.attachOnce(() => jsSipRtcSession.terminate());
 
         evtDtmf.attach(({ signal, duration }) =>
             jsSipRtcSession.sendDTMF(signal, { duration })
@@ -260,7 +292,7 @@ export class Ua {
 
                 return {
                     "state": "ESTABLISHED",
-                    "sendDtmf": 
+                    "sendDtmf":
                         (signal, duration) => evtDtmf.post({ signal, duration })
                 };
 
@@ -281,11 +313,11 @@ export class Ua {
         }>
     } {
 
-        let evtEstablished = new VoidSyncEvent();
-        let evtTerminated = new VoidSyncEvent();
-        let evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
-        let evtRequestTerminate = new VoidSyncEvent();
-        let evtRingback = new VoidSyncEvent();
+        const evtEstablished = new VoidSyncEvent();
+        const evtTerminated = new VoidSyncEvent();
+        const evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+        const evtRequestTerminate = new VoidSyncEvent();
+        const evtRingback = new VoidSyncEvent();
 
         this.jsSipUa.call(
             `sip:${number}@${apiDeclaration.domain}`,
@@ -295,7 +327,7 @@ export class Ua {
                 "eventHandlers": {
                     "connecting": function () {
 
-                        let jsSipRtcSession = this;
+                        const jsSipRtcSession = this;
 
                         if (!!evtRequestTerminate.postCount) {
 

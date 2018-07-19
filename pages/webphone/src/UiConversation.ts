@@ -193,9 +193,9 @@ export class UiConversation {
     /** Place uiBubble in the structure, assume all bubbles already sorted */
     private placeUiBubble(uiBubble: UiBubble){
 
-        let lis = this.ul.find("li");
+        const lis = this.ul.find("li");
 
-        let getUiBubble_i: (i: number) => UiBubble = (() => {
+        const getUiBubble_i: (i: number) => UiBubble = (() => {
 
             let uiBubbleArr = Array.from(this.uiBubbles.values());
 
@@ -302,8 +302,6 @@ class UiBubble {
 
         this.time = (() => {
 
-            let wdMessage = this.wdMessage;
-
             let time: number | null = null;
 
             if (wdMessage.direction === "OUTGOING") {
@@ -312,7 +310,10 @@ class UiBubble {
                         time = wdMessage.deliveredTime || wdMessage.dongleSendTime;
                         break;
                     case "SEND REPORT RECEIVED":
-                        time = wdMessage.dongleSendTime;
+                        time = wdMessage.dongleSendTime || wdMessage.time;
+                        break;
+                    case "TRANSMITTED TO GATEWAY":
+                        time = wdMessage.time + 3600 * 1000;
                         break;
                 }
             }
@@ -414,11 +415,6 @@ namespace UiBubble {
 
             })());
 
-            /*
-            TODO: remove as soon as we see it's ok
-            this.structure.find("p.id_content")
-                .html(wdMessage.text.split("\n").join("<br>"));
-            */
 
         }
 

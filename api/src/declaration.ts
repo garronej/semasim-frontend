@@ -270,7 +270,7 @@ export namespace webphoneData {
             message: types.WebphoneData.Message
         };
 
-        export type Response = types.WebphoneData.Message;
+        export type Response = number;
 
     }
 

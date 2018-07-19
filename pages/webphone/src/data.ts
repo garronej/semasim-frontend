@@ -8,8 +8,6 @@ export namespace io {
         usableSims: types.UserSim.Usable[]
     ): Promise<Wd> {
 
-        console.log("fetch is called");
-
         const webphoneData = await api.webphoneData.fetch();
 
         for (let userSim of usableSims) {
@@ -138,34 +136,98 @@ export namespace io {
         export type Fields = Partial<{ lastSeenTime: number; contactName: string; contactIndexInSim: number | null; }>;
     }
 
-    export async function newMessage<T extends Wd.Message>(
+    /** 
+     * Require wdMessage.id_ set to NaN
+     * When resolve id_ is set and wdMessage inserted in wdChat.message
+     * at a position determined by wdMessage.time
+     * 
+     * Resolve with "SKIPPED" if it was an INCOMING message 
+     * or StatusReportReceived sent by other
+     * and it was already recorded. ( case when GW did not received
+     * the SIP OK but the query was done on remote DB. )
+     *
+     */
+    export async function newMessage(
         wdChat: Wd.Chat,
-        wdMessage: T
-    ): Promise<T> {
+        wdMessage: Wd.Message
+    ): Promise<undefined | "SKIPPED"> {
 
-        wdMessage = await api.webphoneData.newMessage(wdChat.id_, wdMessage);
+        //NEED check only if direction INCOMING hard
 
         let i_ = -1;
 
         for (let i = wdChat.messages.length - 1; i >= 0; i--) {
 
-            if (wdMessage.time >= wdChat.messages[i].time) {
+            const wdMessage_i = wdChat.messages[i];
+
+            const diff = wdMessage.time - wdMessage_i.time;
+
+            if (
+                diff === 0 && (
+                    wdMessage.direction === "INCOMING" &&
+                    wdMessage_i.direction === wdMessage.direction &&
+                    wdMessage_i.isNotification === wdMessage.isNotification &&
+                    wdMessage_i.text === wdMessage.text
+                ) || (
+                    wdMessage.direction === "OUTGOING" &&
+                    wdMessage.status === "STATUS REPORT RECEIVED" &&
+                    wdMessage.sentBy.who === "OTHER" &&
+                    wdMessage_i.direction === wdMessage.direction &&
+                    wdMessage_i.status === wdMessage.status &&
+                    wdMessage_i.sentBy.who === wdMessage.sentBy.who &&
+                    wdMessage_i.sentBy["email"] === wdMessage.sentBy["email"] &&
+                    wdMessage_i.text === wdMessage.text
+                )
+            ) {
+
+                console.log("Message already in record, SKIPPING", wdMessage);
+
+                return "SKIPPED";
+
+            }
+
+            if (diff >= 0) {
+
                 i_ = i;
                 break;
+
             }
+
 
         }
 
+        wdMessage.id_ = await api.webphoneData.newMessage(wdChat.id_, wdMessage);
+
         wdChat.messages.splice(i_ + 1, 0, wdMessage);
 
-        return wdMessage;
+        return undefined;
 
     }
 
+    /** 
+     * 
+     * When resolve wdMessage is Wd.Message.Outgoing.SendReportReceived 
+     * 
+     * Resolve with "SKIPPED" we already received the send report
+     * 
+     * */
     export async function updateOutgoingMessageStatusToSendReportReceived(
         wdMessage: Wd.Message.Outgoing.TransmittedToGateway,
         dongleSendTime: number | null
-    ): Promise<void> {
+    ): Promise<undefined | "SKIPPED"> {
+
+        const castedMessage: Wd.Message.Outgoing.SendReportReceived = wdMessage as any;
+
+        if (
+            castedMessage.status === "SEND REPORT RECEIVED" &&
+            castedMessage.dongleSendTime === dongleSendTime
+        ) {
+
+            console.log("Send report already received, SKIPPING", wdMessage);
+
+            return "SKIPPED";
+
+        }
 
         await api.webphoneData.updateOutgoingMessageStatusToSendReportReceived(
             wdMessage.id_,
@@ -173,27 +235,49 @@ export namespace io {
         );
 
 
-        let updatedMessage: Wd.Message.Outgoing.SendReportReceived = wdMessage as any;
+        castedMessage.status = "SEND REPORT RECEIVED";
+        castedMessage.dongleSendTime = dongleSendTime;
 
-        updatedMessage.status = "SEND REPORT RECEIVED";
-        updatedMessage.dongleSendTime = dongleSendTime;
+        return undefined;
 
     }
 
+    /** 
+     * 
+     * When resolve wdMessage is Wd.Message.Outgoing.StatusReportReceived
+     * 
+     * Resolve with "SKIPPED" we already received the status report.
+     * 
+     * */
     export async function updateOutgoingMessageStatusToStatusReportReceived(
         wdMessage: Wd.Message.Outgoing.SendReportReceived,
         deliveredTime: number | null
-    ): Promise<void> {
+    ): Promise<undefined | "SKIPPED"> {
+
+        //Need check easy
+
+        const castedMessage: Wd.Message.Outgoing.StatusReportReceived = wdMessage as any;
+
+        if (
+            castedMessage.status === "STATUS REPORT RECEIVED" &&
+            castedMessage.deliveredTime === deliveredTime
+        ) {
+
+            console.log("Status report already received skipping", wdMessage);
+
+            return "SKIPPED";
+
+        }
 
         await api.webphoneData.updateOutgoingMessageStatusToStatusReportReceived(
             wdMessage.id_,
             deliveredTime
         );
 
-        let updatedMessage: Wd.Message.Outgoing.StatusReportReceived = wdMessage as any;
+        castedMessage.status = "STATUS REPORT RECEIVED";
+        castedMessage.deliveredTime = deliveredTime;
 
-        updatedMessage.status = "STATUS REPORT RECEIVED";
-        updatedMessage.deliveredTime = deliveredTime;
+        return undefined;
 
     }
 

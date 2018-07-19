@@ -48,6 +48,7 @@ export class UiWebphoneController {
         public readonly wdInstance: types.WebphoneData.Instance
     ) {
 
+
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
         this.ua = new Ua(userSim);
@@ -66,7 +67,7 @@ export class UiWebphoneController {
 
         this.initUiPhonebook();
 
-        for (let wdChat of this.wdInstance.chats) {
+        for (const wdChat of this.wdInstance.chats) {
 
             this.initUiConversation(wdChat);
 
@@ -75,6 +76,7 @@ export class UiWebphoneController {
         setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
 
         $('body').data('dynamic').panels();
+
 
     }
 
@@ -91,35 +93,31 @@ export class UiWebphoneController {
         });
 
         this.ua.evtIncomingMessage.attach(
-            async ({ fromNumber, bundledData, text }) => {
+            async ({ fromNumber, bundledData, text, onProcessed }) => {
 
                 const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
-                const wdMessage: Exclude<Wd.Message, Wd.Message.Outgoing.TransmittedToGateway> = await (() => {
+                const wdMessage: Exclude<Wd.Message, Wd.Message.Outgoing.TransmittedToGateway> | "SKIPPED" = await (() => {
 
                     switch (bundledData.type) {
                         case "MESSAGE": return this.onIncomingMessage_Message(wdChat, bundledData, text);
                         case "SEND REPORT": return this.onIncomingMessage_SendReport(wdChat, bundledData);
                         case "STATUS REPORT": return this.onIncomingMessage_StatusReport(wdChat, bundledData);
-                        default: return wd.io.newMessage<Wd.Message.Incoming.Notification>(wdChat, {
-                            "id_": NaN,
-                            "direction": "INCOMING",
-                            "isNotification": true,
-                            "text": (() => {
-                                switch (bundledData.type) {
-                                    case "MISSED CALL": return "Missed call";
-                                    case "CALL ANSWERED BY": return `${bundledData.ua.userEmail} answered the call ( ${bundledData.ua.platform} )`;
-                                }
-                            })(),
-                            "time": bundledData.date.getTime()
-                        });
+                        default: return this.onIncomingMessage_Notification(wdChat, bundledData, text);
                     }
 
                 })();
 
-                this.uiConversations.get(wdChat)!.newMessage(wdMessage);
+                onProcessed();
 
-                this.uiPhonebook.notifyContactChanged(wdChat);
+                if (wdMessage !== "SKIPPED") {
+
+                    this.uiConversations.get(wdChat)!.newMessage(wdMessage);
+
+                    this.uiPhonebook.notifyContactChanged(wdChat);
+
+                }
+
 
             }
         );
@@ -142,7 +140,6 @@ export class UiWebphoneController {
     }
 
     private initUiQuickAction() {
-
 
         this.structure
             .find("div.id_colLeft")
@@ -241,7 +238,7 @@ export class UiWebphoneController {
                 return undefined;
             }
 
-            tools.bootbox_custom.loading("Creating contact");
+            tools.bootbox_custom.loading("Create or update contact");
 
             if (
                 wdChat.contactIndexInSim === null &&
@@ -313,8 +310,15 @@ export class UiWebphoneController {
 
             tools.bootbox_custom.dismissLoading();
 
-            //TODO do without reloading.
-            window.location.reload();
+            this.uiPhonebook.notifyContactChanged(wdChat);
+
+            uiConversation.structure.detach();
+
+            this.uiConversations.delete(wdChat);
+
+            this.uiPhonebook.triggerClickOnLastSeenChat();
+
+            //window.location.reload();
 
         });
 
@@ -348,78 +352,112 @@ export class UiWebphoneController {
 
     private async sendText(uiConversation: UiConversation, text: string) {
 
-        let exactSendDate: Date;
+        const exactSendDate= new Date();
 
-        try {
+        //TODO: Change transmitted to gateway as it's not semantically correct
+        const wdMessageOutgoing: Wd.Message.Outgoing.TransmittedToGateway = {
+            "id_": NaN,
+            "time": exactSendDate.getTime(),
+            "direction": "OUTGOING",
+            text,
+            "sentBy": { "who": "MYSELF" },
+            "status": "TRANSMITTED TO GATEWAY"
+        };
 
-            exactSendDate = await this.ua.sendMessage(
-                uiConversation.wdChat.contactNumber, text
-            );
-
-        } catch (error) {
-
-            alert(error.message);
-
-            return;
-
-        }
-
-        const wdMessageOutgoing = await wd.io.newMessage<Wd.Message.Outgoing.TransmittedToGateway>(
+        await wd.io.newMessage(
             uiConversation.wdChat,
-            {
-                "id_": NaN,
-                "time": exactSendDate.getTime(),
-                "direction": "OUTGOING",
-                text,
-                "sentBy": { "who": "MYSELF" },
-                "status": "TRANSMITTED TO GATEWAY"
-            }
+            wdMessageOutgoing
         );
 
         uiConversation.newMessage(wdMessageOutgoing);
 
+        try {
+
+            await this.ua.sendMessage(uiConversation.wdChat.contactNumber, text, exactSendDate);
+
+        }catch(error){
+
+            console.log("Maybe the message was not successfully transmitted to the gateway", error);
+
+        }
+
+
     }
 
-    private onIncomingMessage_Message(
+    private async onIncomingMessage_Notification(
+        wdChat: Wd.Chat,
+        bundledData: gwTypes.BundledData.ServerToClient.CallAnsweredBy |
+            gwTypes.BundledData.ServerToClient.MissedCall,
+        text: string
+    ): Promise<Wd.Message.Incoming.Notification | "SKIPPED"> {
+
+        const wdMessage: Wd.Message.Incoming.Notification = {
+            "id_": NaN,
+            "direction": "INCOMING",
+            "isNotification": true,
+            text,
+            "time": bundledData.date.getTime()
+        };
+
+        const isSkipped = await wd.io.newMessage(wdChat, wdMessage);
+
+        if (!!isSkipped) {
+            return "SKIPPED";
+        }
+
+        return wdMessage;
+
+    }
+
+    private async onIncomingMessage_Message(
         wdChat: Wd.Chat,
         bundledData: gwTypes.BundledData.ServerToClient.Message,
         text: string
-    ): Promise<Wd.Message.Incoming.Text> {
+    ): Promise<Wd.Message.Incoming.Text | "SKIPPED"> {
 
-        return wd.io.newMessage<Wd.Message.Incoming.Text>(wdChat, {
+        const wdMessage: Wd.Message.Incoming.Text = {
             "id_": NaN,
             "direction": "INCOMING",
             "isNotification": false,
             text,
             "time": bundledData.pduDate.getTime()
-        });
+        };
+
+        const isSkipped = await wd.io.newMessage(wdChat, wdMessage);
+
+        if (!!isSkipped) {
+            return "SKIPPED";
+        }
+
+        return wdMessage;
 
     }
 
     private async onIncomingMessage_SendReport(
         wdChat: Wd.Chat,
         bundledData: gwTypes.BundledData.ServerToClient.SendReport,
-    ): Promise<Wd.Message.Outgoing.SendReportReceived> {
+    ): Promise<Wd.Message.Outgoing.SendReportReceived | "SKIPPED"> {
 
-        let wdMessage: Wd.Message.Outgoing.TransmittedToGateway = await (async () => {
-            let out;
-            while (true) {
-                //TODO: optimise find
-                out = wdChat.messages.find(({ time }) => time === bundledData.messageTowardGsm.date.getTime());
-                if (!out) {
-                    console.log("(TODO remove) delayed...");
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    continue;
-                }
-                break;
-            }
-            return out;
-        })();
+        const wdMessage: Wd.Message.Outgoing.TransmittedToGateway = wdChat.messages.find(
+            ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+        ) as any;
 
-        await wd.io.updateOutgoingMessageStatusToSendReportReceived(
+        if (!wdMessage) {
+
+            console.log("Received a Send report for a MESSAGE that we do not have in record, ok only if chat deleted");
+
+            return "SKIPPED";
+
+        }
+
+        const isSkipped = await wd.io.updateOutgoingMessageStatusToSendReportReceived(
             wdMessage,
             bundledData.sendDate ? bundledData.sendDate.getTime() : null
         );
+
+        if (!!isSkipped) {
+            return "SKIPPED";
+        }
 
         return wdMessage as Wd.Message.Outgoing.SendReportReceived;
 
@@ -428,58 +466,67 @@ export class UiWebphoneController {
     private async onIncomingMessage_StatusReport(
         wdChat: Wd.Chat,
         bundledData: gwTypes.BundledData.ServerToClient.StatusReport
-    ): Promise<Wd.Message.Outgoing.StatusReportReceived> {
+    ): Promise<Wd.Message.Outgoing.StatusReportReceived | "SKIPPED"> {
 
         if (bundledData.messageTowardGsm.uaSim.ua.instance === `"<urn:${Ua.instanceId}>"`) {
 
-            const wdMessage: Wd.Message.Outgoing.SendReportReceived = await (async () => {
-                let out;
-                while (true) {
-                    //TODO: optimise find
-                    out = wdChat.messages.find(
-                        ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
-                    );
-                    if (!out) {
-                        console.log("(TODO remove) delayed...");
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        continue;
-                    }
-                    break;
-                }
-                return out;
-            })();
+            const wdMessage: Wd.Message.Outgoing.SendReportReceived = wdChat.messages.find(
+                ({ time }) => time === bundledData.messageTowardGsm.date.getTime()
+            ) as any;
 
-            await wd.io.updateOutgoingMessageStatusToStatusReportReceived(
+            if (!wdMessage || wdMessage.dongleSendTime === undefined ) {
+
+                console.log([
+                    "Received a Status report for a MESSAGE that we do not have in",
+                    "record or we do not have received send report, ok only if chat deleted"
+                ].join(" "));
+
+                return "SKIPPED";
+
+            }
+
+            const isSkipped = await wd.io.updateOutgoingMessageStatusToStatusReportReceived(
                 wdMessage,
                 bundledData.statusReport.isDelivered ?
                     bundledData.statusReport.dischargeDate.getTime() : null
             );
 
-            return wdMessage as any as Wd.Message.Outgoing.StatusReportReceived;
+            if (!!isSkipped) {
+                return "SKIPPED";
+            }
 
+            return wdMessage as any as Wd.Message.Outgoing.StatusReportReceived;
 
         } else {
 
-            return wd.io.newMessage<Wd.Message.Outgoing.StatusReportReceived>(
+            const wdMessage: Wd.Message.Outgoing.StatusReportReceived = {
+                "id_": NaN,
+                "time": bundledData.messageTowardGsm.date.getTime(),
+                "direction": "OUTGOING",
+                "text": bundledData.messageTowardGsm.text,
+                "sentBy": ((): Wd.Message.Outgoing["sentBy"] => {
+                    if (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) {
+                        return { "who": "MYSELF" };
+                    } else {
+                        return { "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail };
+                    }
+                })(),
+                "status": "STATUS REPORT RECEIVED",
+                "dongleSendTime": bundledData.messageTowardGsm.date.getTime(), //FAKE
+                "deliveredTime": bundledData.statusReport.isDelivered ?
+                    bundledData.statusReport.dischargeDate.getTime() : null
+            };
+
+            const isSkipped = await wd.io.newMessage(
                 wdChat,
-                {
-                    "id_": NaN,
-                    "time": bundledData.messageTowardGsm.date.getTime(),
-                    "direction": "OUTGOING",
-                    "text": bundledData.messageTowardGsm.text,
-                    "sentBy": ((): Wd.Message.Outgoing["sentBy"] => {
-                        if (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) {
-                            return { "who": "MYSELF" };
-                        } else {
-                            return { "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail };
-                        }
-                    })(),
-                    "status": "STATUS REPORT RECEIVED",
-                    "dongleSendTime": bundledData.messageTowardGsm.date.getTime(), //FAKE
-                    "deliveredTime": bundledData.statusReport.isDelivered ?
-                        bundledData.statusReport.dischargeDate.getTime() : null
-                }
+                wdMessage
             );
+
+            if (!!isSkipped) {
+                return "SKIPPED";
+            }
+
+            return wdMessage;
 
         }
 

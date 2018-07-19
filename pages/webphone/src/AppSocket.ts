@@ -1,8 +1,10 @@
-import { SyncEvent, VoidSyncEvent} from "ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { apiDeclaration } from "../../../api";
 
 declare const Buffer: any;
 declare const JsSIP: any;
+
+
 
 export class AppSocket {
 
@@ -22,9 +24,9 @@ export class AppSocket {
                 "_onMessage": {
                     "value": (ev: MessageEvent) => {
 
-                        let sipPacketAsString = Buffer.from(ev.data).toString("utf8");
+                        const sipPacketAsString = Buffer.from(ev.data).toString("utf8");
 
-                        let imsi = sipPacketAsString.match(
+                        const imsi = sipPacketAsString.match(
                             !!sipPacketAsString.match(/^SIP/) ?
                                 /\r\nFrom:[^:]+:([0-9]{15})/ :
                                 /\r\nTo:[^:]+:([0-9]{15})/
@@ -68,9 +70,6 @@ export class AppSocket {
     }
 
     public send(data: string): boolean {
-
-        //console.log(data);
-
         return this.jsSipWebsocket.send(data);
     }
 
@@ -82,9 +81,14 @@ export class AppSocket {
         return this.jsSipWebsocket.disconnect();
     }
 
-    public makeProxy(imsi: string) {
+    public makeProxy(imsi: string): {
+        proxy: any;
+        setMessageOkDelay: (request: any, pr: Promise<void>) => void;
+    } {
 
-        let proxy = Object.defineProperties(
+        const messageOkDelays = new Map<string, Promise<void>>();
+
+        const proxy = Object.defineProperties(
             {
                 "connect": async () => {
 
@@ -94,7 +98,36 @@ export class AppSocket {
 
                 },
                 "disconnect": () => { throw new Error("JsSip should never ask to disconnect") },
-                "send": data => this.send(data)
+                "send": data => {
+
+                    const call_id = getMessageOkCallId(data);
+
+                    if (!call_id) {
+
+                        return this.send(data);
+
+                    } else {
+
+                        const pr = messageOkDelays.get(call_id);
+
+                        if (!pr) {
+
+                            return this.send(data);
+
+                        } else {
+
+                            pr.then(() => this.send(data));
+
+                            messageOkDelays.delete(call_id);
+
+                            return true;
+
+                        }
+
+
+                    }
+
+                }
             }, {
                 "via_transport": {
                     "get": () => this.via_transport
@@ -126,8 +159,52 @@ export class AppSocket {
             })
         );
 
-        return proxy;
+        return {
+            proxy,
+            "setMessageOkDelay": (request, pr) => messageOkDelays.set(
+                request.getHeader("Call-ID"),
+                pr
+            )
+        };
 
     }
+
+}
+
+
+
+/**
+ * Return the call id of a SIP response OK to a MESSAGE 
+ * sip request or return undefined if not applicable.
+ */
+function getMessageOkCallId(rawMessage: string): string | undefined {
+
+    const split = rawMessage.split("\r\n");
+
+    if (split.length === 0) {
+        return undefined;
+    }
+
+    if (!split.shift()!.match(/^SIP\/2\.0\s+200\s+OK\s*$/)) {
+        return undefined;
+    }
+
+    if (!split.find(line => !!line.match(/^CSeq:\s*[0-9]+\s+MESSAGE\s*$/))) {
+        return undefined;
+    }
+
+    for (const line of split) {
+
+        const match = line.match(/^Call-ID:\s*(.*)$/);
+
+        if (!!match) {
+
+            return match[1];
+
+        }
+
+    }
+
+    return undefined;
 
 }

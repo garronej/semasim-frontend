@@ -352,11 +352,11 @@ export namespace webphoneData {
 
     }
 
-    /** message require id_ set to NaN */
-    export function newMessage<T extends types.WebphoneData.Message>(
+    /** message require id_ set to NaN return id_ */
+    export function newMessage(
         chat_id: number,
-        message: T
-    ): Promise<T> {
+        message: types.WebphoneData.Message
+    ): Promise<number> {
 
         const methodName = dw.newMessage.methodName;
         type Params = dw.newMessage.Params;
@@ -365,7 +365,7 @@ export namespace webphoneData {
         return makeRequest<Params, Response>(
             methodName,
             { chat_id, message }
-        ) as Promise<T>;
+        );
 
     }
 
