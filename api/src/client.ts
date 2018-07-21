@@ -17,11 +17,10 @@ async function makeRequest<Params, Response>(
             "data": JSON_CUSTOM.stringify(params),
             "dataType": "text",
             "statusCode": {
-                "400": () => alert("Bad request"),
+                "400": () => alert("Bad request ( bug in the client )"),
                 "401": () => window.location.reload(),
                 "500": () => alert("Internal server error"),
-                "200": (data: string) =>
-                    resolve(JSON_CUSTOM.parse(data))
+                "200": (data: string) => resolve(JSON_CUSTOM.parse(data))
             }
         })
     );
@@ -126,6 +125,21 @@ export function unlockSim(
     return makeRequest<Params, Response>(
         methodName,
         { imei, pin }
+    );
+
+}
+
+export function rebootDongle(
+    imsi: string
+){
+
+    const methodName = d.rebootDongle.methodName;
+    type Params = d.rebootDongle.Params;
+    type Response = d.rebootDongle.Response;
+
+    return makeRequest<Params, Response>(
+        methodName,
+        { imsi }
     );
 
 }

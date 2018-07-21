@@ -12,13 +12,14 @@ export class UiButtonBar {
 
     public readonly structure = html.structure.clone();
 
-    public evtClickBack = new VoidSyncEvent();
-    public evtClickDetail = new VoidSyncEvent();
-    public evtClickDelete = new VoidSyncEvent();
-    public evtClickShare = new VoidSyncEvent();
-    public evtClickPhonebook = new VoidSyncEvent();
-    public evtClickRename = new VoidSyncEvent();
-    public evtClickRefresh = new VoidSyncEvent();
+    public readonly evtClickBack = new VoidSyncEvent();
+    public readonly evtClickDetail = new VoidSyncEvent();
+    public readonly evtClickDelete = new VoidSyncEvent();
+    public readonly evtClickShare = new VoidSyncEvent();
+    public readonly evtClickPhonebook = new VoidSyncEvent();
+    public readonly evtClickRename = new VoidSyncEvent();
+    public readonly evtClickReboot = new VoidSyncEvent();
+    public readonly evtClickRefresh = new VoidSyncEvent();
 
     private readonly buttons = this.structure.find("button");
 
@@ -27,7 +28,8 @@ export class UiButtonBar {
     private readonly btnDelete = $(this.buttons.get(2));
     private readonly btnShare = $(this.buttons.get(3));
     private readonly btnRename = $(this.buttons.get(4));
-    private readonly btnReload = $(this.buttons.get(5));
+    private readonly btnReboot = $(this.buttons.get(5));
+    private readonly btnReload = $(this.buttons.get(6));
 
     public state: UiButtonBar.State;
 
@@ -64,6 +66,11 @@ export class UiButtonBar {
             this.btnShare.addClass("disabled");
         }
 
+        if(!this.state.isSimOnline){
+            this.btnReboot.addClass("disable");
+        }
+
+
 
     }
 
@@ -81,14 +88,15 @@ export class UiButtonBar {
 
         this.btnDelete.click(() => this.evtClickDelete.post());
 
-        this.btnRename.click(() => this.evtClickRename.post());
-
         this.btnShare.tooltip();
-
         this.btnShare.click(() => this.evtClickShare.post());
 
-        this.btnReload.tooltip();
+        this.btnRename.click(() => this.evtClickRename.post());
 
+        this.btnReboot.tooltip();
+        this.btnReboot.click(()=> this.evtClickReboot.post());
+
+        this.btnReload.tooltip();
         this.btnReload.click(() => this.evtClickRefresh.post());
 
         this.state = (() => {
@@ -96,6 +104,7 @@ export class UiButtonBar {
             const state: UiButtonBar.State.RowNotSelected = {
                 "isSimRowSelected": false,
                 "isSimSharable": false,
+                "isSimOnline": false,
                 "areDetailsShown": false
             };
 
@@ -119,12 +128,14 @@ export namespace UiButtonBar {
         export type RowSelected = {
             isSimRowSelected: true;
             isSimSharable: boolean;
+            isSimOnline: boolean;
             areDetailsShown: boolean;
         };
 
         export type RowNotSelected = {
             isSimRowSelected: false;
             isSimSharable: false;
+            isSimOnline: false;
             areDetailsShown: false;
         };
 

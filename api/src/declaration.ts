@@ -87,6 +87,18 @@ export namespace unlockSim {
 
 }
 
+export namespace rebootDongle {
+
+    export const methodName = "reboot-dongle";
+
+    export type Params ={
+        imsi: string;
+    };
+
+    export type Response= undefined;
+
+}
+
 
 export namespace registerSim {
 

@@ -17,9 +17,9 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtRefresh= new SyncEvent<UiController.State>();
+    public readonly evtRefresh = new SyncEvent<UiController.State>();
 
-    private readonly uiButtonBar= new UiButtonBar();
+    private readonly uiButtonBar = new UiButtonBar();
 
     private readonly uiShareSim = new UiShareSim();
 
@@ -40,7 +40,7 @@ export class UiController {
 
         }
 
-        if (!previousState || useableUserSims.map(({ sim })=> sim.imsi).indexOf( previousState.selectedSim ) < 0 ) {
+        if (!previousState || useableUserSims.map(({ sim }) => sim.imsi).indexOf(previousState.selectedSim) < 0) {
 
             previousState = {
                 "selectedSim": useableUserSims[0].sim.imsi,
@@ -126,11 +126,11 @@ export class UiController {
 
         this.uiButtonBar.evtClickShare.attach(async () => {
 
-            const imsi= this.getSelectedUiSimRow().userSim.sim.imsi;
+            const imsi = this.getSelectedUiSimRow().userSim.sim.imsi;
 
-            const userSim= (await api.getUserSims())
-            .filter( ({ sim })=> sim.imsi === imsi )[0] as types.UserSim.Owned
-            ;
+            const userSim = (await api.getUserSims())
+                .filter(({ sim }) => sim.imsi === imsi)[0] as types.UserSim.Owned
+                ;
 
             this.uiShareSim.open(userSim);
 
@@ -155,6 +155,39 @@ export class UiController {
                 this.uiButtonBar.evtClickRefresh.post();
 
             }
+
+        });
+
+        this.uiButtonBar.evtClickReboot.attach(async () => {
+
+            const { userSim } = this.getSelectedUiSimRow();
+
+            const shouldProceed = await new Promise<boolean>(
+                resolve => tools.bootbox_custom.confirm({
+                    "title": "Reboot GSM Dongle",
+                    "message": `Do you really want to reboot Dongle ${userSim.dongle.manufacturer} ${userSim.dongle.model}?`,
+                    callback: result => resolve(result)
+                })
+            );
+
+            if (!shouldProceed) {
+                return;
+            }
+
+            tools.bootbox_custom.loading("Sending reboot command to dongle");
+
+            await api.rebootDongle(userSim.sim.imsi);
+
+            tools.bootbox_custom.dismissLoading();
+
+            await new Promise<void>(
+                resolve => tools.bootbox_custom.alert(
+                    "Restart command issued successfully, the SIM should be back online within 30 seconds",
+                    () => resolve()
+                )
+            );
+
+            this.uiButtonBar.evtClickRefresh.post();
 
         });
 
@@ -188,17 +221,17 @@ export class UiController {
 
                 await api.stopSharingSim(userSim.sim.imsi, emails);
 
-                for( const email of emails ){
+                for (const email of emails) {
 
-                    for( const arr of [ 
-                        userSim.ownership.sharedWith.confirmed, 
+                    for (const arr of [
+                        userSim.ownership.sharedWith.confirmed,
                         userSim.ownership.sharedWith.notConfirmed
-                    ]){
+                    ]) {
 
-                        const index= arr.indexOf(email);
+                        const index = arr.indexOf(email);
 
-                        if( index > -1 ){
-                            arr.splice(index,1);
+                        if (index > -1) {
+                            arr.splice(index, 1);
                         }
 
 
@@ -232,7 +265,8 @@ export class UiController {
 
             this.uiButtonBar.setState({
                 "isSimRowSelected": true,
-                "isSimSharable": types.UserSim.Owned.match(userSim)
+                "isSimSharable": types.UserSim.Owned.match(userSim),
+                "isSimOnline": userSim.isOnline
             });
 
         });
