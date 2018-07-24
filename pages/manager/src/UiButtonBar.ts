@@ -67,10 +67,8 @@ export class UiButtonBar {
         }
 
         if(!this.state.isSimOnline){
-            this.btnReboot.addClass("disable");
+            this.btnReboot.addClass("disabled");
         }
-
-
 
     }
 
