@@ -1,5 +1,11 @@
 export type phoneNumber = string;
 
+/**
+ * Assert intlTelInput loaded: :
+    <!-- intlTelInput -->
+    <script src="/plugins/ui/intl-tel-input/js/utils.js"></script>
+    <script src="/plugins/ui/intl-tel-input/js/intlTelInput.js"></script>
+ */
 export namespace phoneNumber {
 
 	/**
@@ -37,7 +43,7 @@ export namespace phoneNumber {
 		mustBeDialable: "MUST BE DIALABLE" | undefined = undefined
 	): phoneNumber {
 
-		let shouldFormatToE164: boolean = (() => {
+		const shouldFormatToE164: boolean = (() => {
 
 			if( !iso ){ 
 				return false;
@@ -181,7 +187,7 @@ export namespace phoneNumber {
 			return true;
 		}
 
-		let rawInputDry = rawInput.replace(/[^*#+0-9]/g, "");
+		const rawInputDry = rawInput.replace(/[^*#+0-9]/g, "");
 
 		if (rawInputDry === phoneNumber) {
 			return true;

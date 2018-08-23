@@ -38,6 +38,4 @@ jspm_packages
 
 .vscode
 dist
-index.d.ts
-index.js
-static
+/static

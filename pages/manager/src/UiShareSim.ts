@@ -1,10 +1,11 @@
-import { types } from "../../../api";
+import * as types from "../../../shared/dist/lib/types";
 import { SyncEvent } from "ts-events-extended";
-import * as tools from "../../../tools";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 
 declare const require: any;
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiShareSim.html"),
     "UiShareSim"
 );
@@ -83,7 +84,7 @@ export class UiShareSim {
 
             await this.hide();
 
-            tools.bootbox_custom.loading("Revoking some user's SIM access");
+            bootbox_custom.loading("Revoking some user's SIM access");
 
             await new Promise(resolve =>
                 this.evtStopSharing.post({
@@ -93,7 +94,7 @@ export class UiShareSim {
                 })
             );
 
-            tools.bootbox_custom.dismissLoading();
+            bootbox_custom.dismissLoading();
 
             this.open(this.currentUserSim!);
 
@@ -105,7 +106,7 @@ export class UiShareSim {
 
             await this.hide();
 
-            tools.bootbox_custom.loading("Granting sim access to some users");
+            bootbox_custom.loading("Granting sim access to some users");
 
             await new Promise(resolve =>
                 this.evtShare.post({
@@ -116,7 +117,7 @@ export class UiShareSim {
                 })
             );
 
-            tools.bootbox_custom.dismissLoading();
+            bootbox_custom.dismissLoading();
 
             this.open(this.currentUserSim!);
 
@@ -201,7 +202,7 @@ export class UiShareSim {
 
             const appendRow = (email: string, isConfirmed: boolean) => {
 
-                const divRow = html.templates.find(".id_row").clone()
+                const divRow = html.templates.find(".id_row").clone();
 
                 divRow.find(".id_email").text(email);
 

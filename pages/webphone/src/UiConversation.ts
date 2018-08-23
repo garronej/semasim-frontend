@@ -1,16 +1,16 @@
-import * as tools from "../../../tools";
-import { types } from "../../../api";
-import { phoneNumber } from "../../../shared";
-//import { read as wdr } from "./data";
+
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
 import { VoidSyncEvent, SyncEvent } from "ts-events-extended";
-import Wd= types.WebphoneData;
+import * as types from "../../../shared/dist/lib/types";
+import wd = types.webphoneData;
 import * as moment from "moment";
 
 declare const ion: any;
 declare const require: any;
 //declare const titlenotifier: any;
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiConversation.html"),
     "UiConversation"
 );
@@ -21,8 +21,8 @@ declare const Buffer: any;
 
 
 //const checkMark= "\u221a";
-const checkMark: string= Buffer.from("e29c93", "hex").toString("utf8");
-const crossMark: string= Buffer.from("e29d8c", "hex").toString("utf8");
+const checkMark: string = Buffer.from("e29c93", "hex").toString("utf8");
+const crossMark: string = Buffer.from("e29d8c", "hex").toString("utf8");
 
 export class UiConversation {
 
@@ -38,13 +38,13 @@ export class UiConversation {
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
     private readonly ul = this.structure.find("ul");
-    private readonly btnUpdateContact= this.structure.find("button.id_updateContact");
-    private readonly btnCall= this.structure.find("button.id_call");
+    private readonly btnUpdateContact = this.structure.find("button.id_updateContact");
+    private readonly btnCall = this.structure.find("button.id_call");
     private readonly btnDelete = this.structure.find("button.id_delete");
 
-    public setReadonly(isReadonly: boolean){
+    public setReadonly(isReadonly: boolean) {
 
-        if( isReadonly ){
+        if (isReadonly) {
 
             this.textarea.attr("disabled", true as any);
             this.aSend.hide();
@@ -52,9 +52,9 @@ export class UiConversation {
             this.btnCall.prop("disabled", true);
             this.btnDelete.prop("disabled", true);
 
-        }else{
+        } else {
 
-            if( !phoneNumber.isDialable(this.wdChat.contactNumber) ){
+            if (!phoneNumber.isDialable(this.wdChat.contactNumber)) {
                 return;
             }
 
@@ -70,7 +70,7 @@ export class UiConversation {
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdChat: types.WebphoneData.Chat
+        public readonly wdChat: wd.Chat
     ) {
 
         this.notifyContactNameUpdated();
@@ -83,14 +83,14 @@ export class UiConversation {
             .on("click", () => this.evtVoiceCall.post());
 
         this.btnDelete
-            .on("click", ()=> this.evtDelete.post());
+            .on("click", () => this.evtDelete.post());
 
 
         this.aSend.on("click", () => {
 
             let text = this.textarea.val();
 
-            if (!text || text.match(/^\ +$/) ) {
+            if (!text || text.match(/^\ +$/)) {
                 return;
             }
 
@@ -188,28 +188,38 @@ export class UiConversation {
 
     }
 
-    private readonly uiBubbles = new Map<Wd.Message, UiBubble>();
+    /** indexed but wd.Message.id_ */
+    private readonly uiBubbles = new Map<number, UiBubble>();
 
     /** Place uiBubble in the structure, assume all bubbles already sorted */
-    private placeUiBubble(uiBubble: UiBubble){
+    private placeUiBubble(uiBubble: UiBubble) {
+
+        const getUiBubbleFromStructure = (li_elem: HTMLElement): UiBubble => {
+
+            for (let uiBubble of this.uiBubbles.values()) {
+
+                if (uiBubble.structure.get(0) === li_elem) {
+
+                    return uiBubble;
+
+                }
+
+            }
+
+            throw new Error("uiBubble not found");
+
+
+        };
 
         const lis = this.ul.find("li");
 
-        const getUiBubble_i: (i: number) => UiBubble = (() => {
-
-            let uiBubbleArr = Array.from(this.uiBubbles.values());
-
-            return i => uiBubbleArr.find(
-                ({ structure }) => structure.get(0) === lis.get(i)
-            )!;
-
-        })();
-
         for (let i = lis.length - 1; i >= 0; i--) {
 
-            let uiBubble_i = getUiBubble_i(i);
+            const uiBubble_i = getUiBubbleFromStructure(lis.get(i));
 
-            if (uiBubble.time >= uiBubble_i.time) {
+            if (wd.compareMessage(uiBubble.wdMessage, uiBubble_i.wdMessage) >= 0) {
+
+                //Message is more recent than current
 
                 uiBubble.structure.insertAfter(uiBubble_i.structure);
 
@@ -224,13 +234,13 @@ export class UiConversation {
     }
 
     /** new Message or update existing one */
-    public newMessage(wdMessage: Wd.Message, mute: "MUTE" | undefined= undefined) {
+    public newMessage(wdMessage: wd.Message, mute: "MUTE" | undefined = undefined) {
 
-        if (this.uiBubbles.has(wdMessage)) {
+        if (this.uiBubbles.has(wdMessage.id_)) {
 
-            this.uiBubbles.get(wdMessage)!.structure.remove();
+            this.uiBubbles.get(wdMessage.id_)!.structure.remove();
 
-            this.uiBubbles.delete(wdMessage);
+            this.uiBubbles.delete(wdMessage.id_);
 
         }
 
@@ -248,8 +258,8 @@ export class UiConversation {
 
             } else {
 
-                if( !mute ){
-                    ion.sound.play(this.isSelected?"water_droplet":"button_tiny");
+                if (!mute) {
+                    ion.sound.play(this.isSelected ? "water_droplet" : "button_tiny");
                 }
 
                 const uiBubbleIncomingText = new UiBubble.IncomingText(
@@ -269,7 +279,7 @@ export class UiConversation {
 
         }
 
-        this.uiBubbles.set(wdMessage, uiBubble);
+        this.uiBubbles.set(wdMessage.id_, uiBubble);
 
         this.placeUiBubble(uiBubble);
 
@@ -278,9 +288,6 @@ export class UiConversation {
             this.ul.slimScroll({
                 "scrollTo": this.ul.prop("scrollHeight")
             });
-
-        } else {
-
 
         }
 
@@ -294,52 +301,26 @@ class UiBubble {
 
     public readonly structure = html.templates.find("li").clone();
 
-    public readonly time: number;
-
     constructor(
-        public readonly wdMessage: Wd.Message
+        public readonly wdMessage: wd.Message
     ) {
-
-        this.time = (() => {
-
-            let time: number | null = null;
-
-            if (wdMessage.direction === "OUTGOING") {
-                switch (wdMessage.status) {
-                    case "STATUS REPORT RECEIVED":
-                        time = wdMessage.deliveredTime || wdMessage.dongleSendTime;
-                        break;
-                    case "SEND REPORT RECEIVED":
-                        time = wdMessage.dongleSendTime || wdMessage.time;
-                        break;
-                    case "TRANSMITTED TO GATEWAY":
-                        time = wdMessage.time + 3600 * 1000;
-                        break;
-                }
-            }
-
-            return time || wdMessage.time;
-
-        })();
-
 
         this.structure.find("p.id_content")
             .html(wdMessage.text.split("\n").join("<br>"));
 
         this.structure.find("span.id_date")
-            .html(moment.unix(~~(this.time / 1000)).format("Do MMMM H:mm"));
+            .html(moment.unix(~~(wdMessage.time / 1000)).format("Do MMMM H:mm"));
 
     }
 }
 
 namespace UiBubble {
 
-    //TODO: notification
     export class IncomingText extends UiBubble {
 
         constructor(
-            public readonly wdMessage: Wd.Message.Incoming.Text,
-            public readonly wdChat: Wd.Chat,
+            public readonly wdMessage: wd.Message.Incoming.Text,
+            public readonly wdChat: wd.Chat,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -374,8 +355,8 @@ namespace UiBubble {
     export class IncomingNotification extends UiBubble {
 
         constructor(
-            public readonly wdMessage: Wd.Message.Incoming.Notification,
-            public readonly wdChat: Wd.Chat,
+            public readonly wdMessage: wd.Message.Incoming.Notification,
+            public readonly wdChat: wd.Chat,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -390,17 +371,20 @@ namespace UiBubble {
     export class Outgoing extends UiBubble {
 
         constructor(
-            public readonly wdMessage: Wd.Message.Outgoing
+            public readonly wdMessage: wd.Message.Outgoing
         ) {
 
             super(wdMessage);
+
 
             this.structure.find("div.message")
                 .addClass("out")
                 .find("p.id_emitter")
                 .html(
-                    (this.wdMessage.sentBy.who === "MYSELF") ?
-                        "Me" : this.wdMessage.sentBy.email
+                    (
+                        wdMessage.status === "STATUS REPORT RECEIVED" &&
+                        wdMessage.sentBy.who === "OTHER"
+                    ) ? wdMessage.sentBy.email : "You"
                 )
                 ;
 
@@ -408,16 +392,15 @@ namespace UiBubble {
             this.structure.find("span.id_check").text((() => {
 
                 switch (wdMessage.status) {
-                    case "SEND REPORT RECEIVED": return !!wdMessage.dongleSendTime?checkMark:crossMark;
+                    case "SEND REPORT RECEIVED": return !!wdMessage.isSentSuccessfully ? checkMark : crossMark;
                     case "STATUS REPORT RECEIVED": return `${checkMark}${checkMark}`;
-                    case "TRANSMITTED TO GATEWAY": return "";
+                    case "PENDING": return "";
                 }
 
             })());
 
 
         }
-
 
     }
 

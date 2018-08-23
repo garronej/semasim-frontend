@@ -1,4 +1,4 @@
-import { apiClient as api } from "../../../api";
+import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 
 const bootbox: any = window["bootbox"];
 declare const Buffer: any;
@@ -14,9 +14,11 @@ export async function requestRenewPassword() {
 		})
 	);
 
-	if (!email) return;
+	if (!email){ 
+		return;
+	}
 
-	let isSuccess = await api.sendRenewPasswordEmail(email);
+	const isSuccess = await webApiCaller.sendRenewPasswordEmail(email);
 
 	if (isSuccess) {
 

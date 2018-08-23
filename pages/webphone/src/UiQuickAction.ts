@@ -1,7 +1,7 @@
 import { SyncEvent } from "ts-events-extended";
-import * as tools from "../../../tools";
-import { types } from "../../../api";
-import { phoneNumber } from "../../../shared";
+import * as types from "../../../shared/dist/lib/types";
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
 
 declare const require: any;
 
@@ -45,7 +45,7 @@ declare const require: any;
 })();
 
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiQuickAction.html"),
     "UiQuickAction"
 );

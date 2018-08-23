@@ -1,7 +1,7 @@
-import { apiClient as api } from "../../../api";
-import * as tools from "../../../tools";
+import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
-const bootbox: any = window["bootbox"];
 declare const Buffer: any;
 
 function setHandlers(){
@@ -58,12 +58,12 @@ function setHandlers(){
         let email= $("#email").val();
         let password= $("#password").val();
 
-        let regStatus= await api.registerUser( email, password );
+        let regStatus= await webApiCaller.registerUser( email, password );
 
         switch( regStatus ){
             case "EMAIL NOT AVAILABLE":
 
-                bootbox.alert(`Semasim account for ${email} has already been created`);
+                bootbox_custom.alert(`Semasim account for ${email} has already been created`);
 
                 $("#email").val("");
 
@@ -88,7 +88,7 @@ function setHandlers(){
 
 function handleQueryString(){
 
-    let emailAsHex= tools.getURLParameter("email-as-hex");
+    let emailAsHex= getURLParameter("email-as-hex");
 
     if( emailAsHex ){
 

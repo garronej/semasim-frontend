@@ -1,8 +1,8 @@
-import { apiClient as api } from "../../../api";
-import * as tools from "../../../tools";
+import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { requestRenewPassword } from "./requestRenewPassword";
 
-const bootbox: any = window["bootbox"];
 declare const Buffer: any;
 
 function setHandlers(){
@@ -53,14 +53,14 @@ function setHandlers(){
 
         if (!$(this).valid()) return;
 
-        let isSuccess= await api.loginUser(
+        const isSuccess= await webApiCaller.loginUser(
             $("#email").val(),
             $("#password").val()
         );
 
         if( !isSuccess ){
 			$("#password").val("");
-            bootbox.alert("Authentication failed, please retry");
+            bootbox_custom.alert("Authentication failed, please retry");
         }else{
 			window.location.href = "/";
         }
@@ -79,15 +79,16 @@ function setHandlers(){
 
 function handleQueryString() {
 
-	let emailAsHex = tools.getURLParameter("email-as-hex");
 
-	if (emailAsHex) {
+	const emailAsHex = getURLParameter("email-as-hex");
+
+	if (!!emailAsHex) {
 		$("#email").val(Buffer.from(emailAsHex, "hex").toString("utf8"));
 	}
 
-	let passwordAsHex = tools.getURLParameter("password-as-hex");
+	const passwordAsHex = getURLParameter("password-as-hex");
 
-	if (passwordAsHex) {
+	if (!!passwordAsHex) {
 		$("#password").val(Buffer.from(passwordAsHex, "hex").toString("utf8"));
 	}
 

@@ -1,20 +1,15 @@
 import { SyncEvent } from "ts-events-extended";
-
-import { types } from "../../../api";
-
-import * as tools from "../../../tools";
-//import * as wd from "./data";
-import Wd = types.WebphoneData;
-
-import { phoneNumber } from "../../../shared";
+import * as types from "../../../shared/dist/lib/types";
+import wd = types.webphoneData;
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
 import { Ua } from "./Ua";
 
 
 declare const ion: any;
 declare const require: any;
-//const transform = require("sdp-transform");
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiVoiceCall.html"),
     "UiVoiceCall"
 );
@@ -93,7 +88,7 @@ export class UiVoiceCall {
 
     }
 
-    private setContact(wdChat: Wd.Chat): void {
+    private setContact(wdChat: wd.Chat): void {
 
         let prettyNumber = phoneNumber.prettyPrint(
             wdChat.contactNumber,
@@ -146,7 +141,7 @@ export class UiVoiceCall {
 
     }
 
-    public onIncoming(wdChat: Wd.Chat): {
+    public onIncoming(wdChat: wd.Chat): {
         onTerminated(message: string): void;
         prUserInput: Promise<{
             userAction: "ANSWER";
@@ -190,7 +185,7 @@ export class UiVoiceCall {
 
 
 
-    public onOutgoing(wdChat: Wd.Chat): {
+    public onOutgoing(wdChat: wd.Chat): {
         onTerminated(message: string): void;
         onRingback(): {
             onEstablished: typeof UiVoiceCall.prototype.onEstablished,

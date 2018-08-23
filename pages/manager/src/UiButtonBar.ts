@@ -1,9 +1,9 @@
-import { VoidSyncEvent } from "ts-events-extended";
-import * as tools from "../../../tools";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 
 declare const require: (path: string) => any;
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiButtonBar.html"),
     "UiButtonBar"
 );
@@ -12,14 +12,14 @@ export class UiButtonBar {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtClickBack = new VoidSyncEvent();
-    public readonly evtClickDetail = new VoidSyncEvent();
+
+    /** true if detail was clicked */
+    public readonly evtToggleDetailVisibility = new SyncEvent<boolean>();
+
     public readonly evtClickDelete = new VoidSyncEvent();
     public readonly evtClickShare = new VoidSyncEvent();
-    public readonly evtClickPhonebook = new VoidSyncEvent();
     public readonly evtClickRename = new VoidSyncEvent();
     public readonly evtClickReboot = new VoidSyncEvent();
-    public readonly evtClickRefresh = new VoidSyncEvent();
 
     private readonly buttons = this.structure.find("button");
 
@@ -29,7 +29,6 @@ export class UiButtonBar {
     private readonly btnShare = $(this.buttons.get(3));
     private readonly btnRename = $(this.buttons.get(4));
     private readonly btnReboot = $(this.buttons.get(5));
-    private readonly btnReload = $(this.buttons.get(6));
 
     public state: UiButtonBar.State;
 
@@ -46,12 +45,7 @@ export class UiButtonBar {
         if (!this.state.isSimRowSelected) {
 
             this.buttons.each(i => {
-
-                const button = $(this.buttons[i]);
-
-                if (button.get(0) !== this.btnReload.get(0)) {
-                    button.addClass("disabled");
-                }
+                $(this.buttons[i]).addClass("disabled");
             });
 
         }
@@ -76,12 +70,12 @@ export class UiButtonBar {
 
         this.btnDetail.click(() => {
             this.setState({ "areDetailsShown": true });
-            this.evtClickDetail.post();
+            this.evtToggleDetailVisibility.post(true);
         });
 
         this.btnBack.click(() => {
             this.setState({ "areDetailsShown": false });
-            this.evtClickBack.post()
+            this.evtToggleDetailVisibility.post(false);
         });
 
         this.btnDelete.click(() => this.evtClickDelete.post());
@@ -93,9 +87,6 @@ export class UiButtonBar {
 
         this.btnReboot.tooltip();
         this.btnReboot.click(()=> this.evtClickReboot.post());
-
-        this.btnReload.tooltip();
-        this.btnReload.click(() => this.evtClickRefresh.post());
 
         this.state = (() => {
 

@@ -1,4 +1,5 @@
 
+/** Assert jQuery is loaded on the page. */
 export function loadUiClassHtml(
     html: string,
     widgetClassName: string

@@ -1,16 +1,21 @@
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import { phoneNumber } from "../../../shared";
-import { types, apiDeclaration } from "../../../api";
+import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
+import * as types from "../../../shared/dist/lib/types";
 import {
     types as gwTypes,
     extractBundledDataFromHeaders,
     smuggleBundledDataInHeaders,
-    urlSafeB64
-} from "./semasim-gateway";
-import { AppSocket } from "./AppSocket";
+    urlSafeB64,
+    readImsi
+} from "../../../shared/dist/semasim-gateway";
+import * as sipLibrary from "ts-sip";
 import * as runExclusive from "run-exclusive";
+import * as store from "../../../shared/dist/lib/backendClientSideSocket/store";
+import { url as webSocketUrl } from "../../../shared/dist/lib/backendClientSideSocket/launch";
+import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
 
 declare const JsSIP: any;
+declare const Buffer: any;
 
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
@@ -23,24 +28,16 @@ export class Ua {
 
     public static email: string;
     public static instanceId: string;
-    private static appSocket: AppSocket;
 
     /** Must be called in webphone.ts */
-    public static init(email: string, instanceId: string) {
+    public static async init(): Promise<void>{
 
-        this.email = email;
-        this.instanceId = instanceId;
+        const { email , uaInstanceId }= await remoteApiCaller.getUaInstanceIdAndEmail();
 
-        this.appSocket = new AppSocket();
-
-        this.appSocket.connect();
-
-        this.appSocket.evtConnected.attach(() => console.log("appSocket connected"));
-        this.appSocket.evtDisconnected.attach(() => console.log("appSocket disconnected"));
-        //this.appSocket.evtRawSipPacket.attach(({ data })=> console.log(data));
+        this.email= email;
+        this.instanceId= uaInstanceId;
 
     }
-
 
     /** post isRegistered */
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
@@ -51,25 +48,23 @@ export class Ua {
 
     private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
-    private setMessageOkDelay: ReturnType<typeof Ua.appSocket.makeProxy>["setMessageOkDelay"];
+
+    private readonly jsSipSocket: JsSipSocket;
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
     ) {
 
-        const uri = `sip:${this.userSim.sim.imsi}-webRTC@${apiDeclaration.domain}`;
+        const { imsi } = userSim.sim;
 
-        const { 
-            proxy: appSocketProxy, 
-            setMessageOkDelay 
-        } = Ua.appSocket.makeProxy(this.userSim.sim.imsi)
+        const uri = `sip:${imsi}-webRTC@semasim.com`;
 
-        this.setMessageOkDelay= setMessageOkDelay;
+        this.jsSipSocket= new JsSipSocket(imsi, uri);
 
         this.jsSipUa = new JsSIP.UA({
-            "sockets": appSocketProxy,
+            "sockets": this.jsSipSocket,
             uri,
-            "authorization_user": this.userSim.sim.imsi,
+            "authorization_user": imsi,
             "password": this.userSim.password,
             "instance_id": Ua.instanceId,
             "register": false,
@@ -105,15 +100,6 @@ export class Ua {
 
         this.jsSipUa.start();
 
-        (async () => {
-
-            if (!Ua.appSocket.isConnected()) {
-                await Ua.appSocket.evtConnected.waitFor()
-            }
-
-            this.jsSipUa.register();
-
-        })();
 
         /*
         this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));
@@ -123,6 +109,16 @@ export class Ua {
         this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
         */
 
+    }
+
+    //TODO: Test!
+    public register(){
+        this.jsSipUa.register();
+    }
+
+    //TODO; Test!
+    public unregister(){
+        this.jsSipUa.unregister();
     }
 
     public readonly evtIncomingMessage = new SyncEvent<{
@@ -162,7 +158,7 @@ export class Ua {
             "text": request.body,
         });
 
-        this.setMessageOkDelay(request, pr);
+        this.jsSipSocket.setMessageOkDelay(request, pr);
 
     }
 
@@ -216,7 +212,7 @@ export class Ua {
 
         return new Promise<void>(
             (resolve, reject) => this.jsSipUa.sendMessage(
-                `sip:${number}@${apiDeclaration.domain}`,
+                `sip:${number}@semasim.com`,
                 text,
                 {
                     "contentType": "text/plain; charset=UTF-8",
@@ -266,8 +262,8 @@ export class Ua {
                 pcConfig
             });
 
-            (jsSipRtcSession.connection as RTCPeerConnection).onaddstream =
-                ({ stream }) => playAudioStream(stream!);
+            (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
+                ({ streams: [ stream ] }) => playAudioStream(stream);
 
         });
 
@@ -320,7 +316,7 @@ export class Ua {
         const evtRingback = new VoidSyncEvent();
 
         this.jsSipUa.call(
-            `sip:${number}@${apiDeclaration.domain}`,
+            `sip:${number}@semasim.com`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 pcConfig,
@@ -345,8 +341,9 @@ export class Ua {
                             jsSipRtcSession.sendDTMF(signal, { duration })
                         );
 
-                        (jsSipRtcSession.connection as RTCPeerConnection).onaddstream =
-                            ({ stream }) => playAudioStream(stream!);
+
+                        (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
+                            ({ streams: [ stream ] }) => playAudioStream(stream);
 
                     },
                     "confirmed": () => evtEstablished.post(),
@@ -416,13 +413,161 @@ export namespace Ua {
 
 function playAudioStream(stream: MediaStream) {
 
-    /*
-    let audioElem = $("<audio>", { "autoplay": "" });
-
-    audioElem.get(0)["srcObject"] = stream;
-    */
-
     $("<audio>", { "autoplay": "" }).get(0)["srcObject"] = stream;
+
+}
+
+
+/** The socket interface that jsSIP UA take as constructor parameter  */
+interface IjsSipSocket {
+
+    via_transport: string;
+    url: string; /* "wss://www.semasim.com" */
+    sip_uri: string; /* `sip:${imsi}-webRTC@semasim.com` */
+
+    connect(): void;
+    disconnect(): void;
+    send(data: string): boolean;
+
+    onconnect(): void;
+    ondisconnect(error: boolean, code?: number, reason?: string): void;
+    ondata(data: string): boolean;
+
+}
+
+class JsSipSocket implements IjsSipSocket {
+
+    
+    public readonly via_transport: sipLibrary.TransportProtocol= "WSS";
+
+    public readonly url: string = webSocketUrl;
+
+    constructor( 
+        imsi: string,
+        public readonly sip_uri: string
+    ){
+
+        (async ()=>{
+
+            const onBackedSocketConnect= (backendSocket: sipLibrary.Socket) => {
+
+                const onSipPacket= (sipPacket: sipLibrary.Packet)=> {
+
+                    if( readImsi(sipPacket) !== imsi ){
+                        return;
+                    }
+
+                    this.ondata(
+                        sipLibrary.toData(sipPacket).toString("utf8")
+                    );
+
+                }
+
+                backendSocket.evtRequest.attach(onSipPacket);
+                backendSocket.evtResponse.attach(onSipPacket);
+
+            };
+
+            store.evtNewBackendConnection.attach(backendSocket=> 
+                onBackedSocketConnect(backendSocket)
+            );
+
+            const backendSocket = store.get();
+
+            if( !(backendSocket instanceof Promise) ){
+
+                onBackedSocketConnect(backendSocket);
+
+            }
+
+
+        })();
+
+    }
+
+    public connect(): void {
+        this.onconnect();
+    }
+
+    public disconnect(): void {
+        throw new Error("JsSip should not call disconnect");
+    }
+
+    private messageOkDelays= new Map<string, Promise<void>>();
+
+    /**
+     * To call when receiving as SIP MESSAGE 
+     * to prevent directly sending the 200 OK 
+     * response immediately but rather wait
+     * until some action have been completed.
+     * 
+     * @param request the request prop of the 
+     * eventData emitted by JsSIP UA for the 
+     * "newMessage" event. ( when originator === remote )
+     * @param pr The response to the SIP MESSAGE
+     * will not be sent until this promise resolve.
+     */
+    public setMessageOkDelay(request: any, pr: Promise<void>): void{
+        this.messageOkDelays.set(
+            request.getHeader("Call-ID"),
+            pr
+        );
+    }
+
+
+    public send(data: string): true {
+
+        (async ()=>{
+
+            const sipPacket= sipLibrary.parse(Buffer.from(data, "utf8"));
+
+            if( !sipLibrary.matchRequest(sipPacket)){
+
+                const sipResponse: sipLibrary.Response= sipPacket;
+
+                if( sipResponse.headers.cseq.method === "MESSAGE"){
+
+                    const callId: string= sipResponse.headers["call-id"];
+
+                    const pr= this.messageOkDelays.get(callId);
+
+                    if( !!pr ){
+
+                        await pr;
+
+                        this.messageOkDelays.delete(callId);
+
+                    }
+                    
+                }
+
+            }
+
+            const backendSocket= await store.get();
+
+            backendSocket.write(
+                sipLibrary.parse(
+                    Buffer.from(data, "utf8")
+                )
+            );
+
+        })();
+        
+        return true;
+
+    }
+
+    public onconnect(): void {
+        throw new Error("Missing impl");
+    }
+
+    public ondisconnect(error: boolean, code?: number, reason?: string): void {
+        throw new Error("Missing impl");
+    }
+
+    public ondata(data: string): boolean {
+        throw new Error("Missing impl");
+    }
 
 }
 

@@ -1,10 +1,11 @@
 import { VoidSyncEvent } from "ts-events-extended";
-import * as tools from "../../../tools";
-import { types } from "../../../api";
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+
+import * as types from "../../../shared/dist/lib/types";
 
 declare const require: any;
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiHeader.html"),
     "UiHeader"
 );
@@ -15,6 +16,11 @@ export class UiHeader {
     private readonly templates = html.templates.clone();
 
     public evtUp = new VoidSyncEvent();
+
+    /** to call when userSim has changed */
+    public update(){
+        //TODO
+    }
 
     constructor(
         public readonly userSim: types.UserSim.Usable

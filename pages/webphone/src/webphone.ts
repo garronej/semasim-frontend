@@ -1,59 +1,62 @@
-import { apiClient as api } from "../../../api";
-import { simRegistrationProcess, validateSimShareProcess } from "../../../shared";
-import * as tools from "../../../tools";
 
 import { Ua } from "./Ua";
-
-
-import * as d from "./data";
 import { UiWebphoneController } from "./UiWebphoneController";
+import { launch as backendSocket_launch } from "../../../shared/dist/lib/backendClientSideSocket/launch";
+import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
+import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as types from "../../../shared/dist/lib/types";
 
-$(document).ready(() => {
+//TODO: implement evtUp
+
+$(document).ready(async () => {
 
 	$("#logout").click(async () => {
 
-		await api.logoutUser();
+		await webApiCaller.logoutUser();
 
 		window.location.href = "/login";
 
 	});
 
-	(async function main() {
+	backendSocket_launch();
 
-		await simRegistrationProcess.start();
+	bootbox_custom.loading("Initialization...");
 
-		let useableUserSims = await validateSimShareProcess.start();
+	await Ua.init();
 
-		if (!useableUserSims.length) {
+	const userSims = await remoteApiCaller.getUsableUserSims();
 
-			window.location.href = "/manager";
+	if (userSims.length === 0) {
 
-			return;
+		window.location.href = "/manager";
 
-		}
+	}
 
-		tools.bootbox_custom.loading("Initialization...");
+	const addWebphone = async (userSim: types.UserSim.Usable) => {
 
-		const wdRoot = await d.io.fetch(useableUserSims);
+		const uiWebphoneController = await UiWebphoneController.create(userSim)
 
-		tools.bootbox_custom.dismissLoading();
+		$(".page-content-inner").append(uiWebphoneController.structure);
 
-		Ua.init(wdRoot.email, wdRoot.uaInstanceId);
+	};
 
-		for( const userSim of useableUserSims ){
+	const tasks: Promise<void>[] = [];
 
-			const wdInstance = wdRoot.instances.find(({ imsi }) => imsi === userSim.sim.imsi)!;
+	for (const userSim of userSims) {
 
-			const uiWebphone = new UiWebphoneController(userSim, wdInstance);
+		tasks[tasks.length] = addWebphone(userSim);
 
-			$(".page-content-inner").append(uiWebphone.structure);
+	}
 
-		}
+	await Promise.all(tasks);
 
-		$("#footer").hide();
+	bootbox_custom.dismissLoading();
 
+	$("#footer").hide();
 
-	})();
+	remoteApiCaller.evtUsableSim.attach(userSim => addWebphone(userSim));
+
 
 
 });

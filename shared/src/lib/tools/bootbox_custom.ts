@@ -1,4 +1,8 @@
 
+//TODO: Assert bootstrap and bootbox loaded on the page.
+
+declare const bootbox: any;
+
 type currentLoading = {
     stop: () => void;
     message: string;
@@ -72,7 +76,6 @@ export function loading(
 
 }
 
-declare const bootbox: any;
 
 function run(method: string, args: any[], isLoading = false): JQuery {
 

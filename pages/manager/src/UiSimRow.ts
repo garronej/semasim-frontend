@@ -1,10 +1,11 @@
 import { VoidSyncEvent } from "ts-events-extended";
-import { types } from "../../../api";
-import * as tools from "../../../tools";
+import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import * as types from "../../../shared/dist/lib/types";
+
 
 declare const require: (path: string) => any;
 
-const html = tools.loadUiClassHtml(
+const html = loadUiClassHtml(
     require("../templates/UiSimRow.html"),
     "UiSimRow"
 );
@@ -20,8 +21,11 @@ export class UiSimRow {
     public isSelected = false;
 
     public unselect() {
+
         this.structure.find(".id_row").removeClass("selected");
+
         this.isSelected = false;
+
     }
 
     public setDetailsVisibility(visibility: "SHOWN" | "HIDDEN") {
@@ -44,7 +48,9 @@ export class UiSimRow {
 
     }
 
-    private populate() {
+
+    /** To call when userSim has changed */
+    public populate() {
 
         this.structure.find(".id_simId").text(
             this.userSim.friendlyName + (
@@ -62,7 +68,7 @@ export class UiSimRow {
         }
 
         this.structure.find(".id_ownership").text(
-            (this.userSim.ownership.status === "OWNED") ?
+            this.userSim.ownership.status === "OWNED" ?
                 "Owned" :
                 `owned by: ${this.userSim.ownership.ownerEmail}`
         );
@@ -81,7 +87,7 @@ export class UiSimRow {
         );
 
         this.structure.find(".id_owner").text(
-            (this.userSim.ownership.status === "OWNED") ?
+            this.userSim.ownership.status === "OWNED" ?
                 "Me" : this.userSim.ownership.ownerEmail
         );
 
@@ -127,6 +133,7 @@ export class UiSimRow {
             ].join(" ");
 
         })());
+
 
         this.structure.find(".id_features").text(
             (() => {
