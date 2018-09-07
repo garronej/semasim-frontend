@@ -1,4 +1,4 @@
-import { launch as backendSocket_launch } from "../../../shared/dist/lib/backendClientSideSocket/launch";
+import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
 
@@ -12,7 +12,7 @@ $(document).ready(async () => {
 
     });
 
-    backendSocket_launch();
+    connection.connect();
 
     const uiController = new UiController();
 

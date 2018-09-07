@@ -1,5 +1,6 @@
 
-import * as types  from "../lib/types";
+import * as types  from "../lib/types"
+import { types as dcTypes } from "chan-dongle-extended-client";
 import wd = types.webphoneData;
 
 export namespace getUsableUserSims {
@@ -21,17 +22,17 @@ export namespace unlockSim {
         pin: string;
     };
 
-    export type Response= types.unlockSim_Response;
-
+    export type Response = dcTypes.UnlockResult | undefined;
 
 }
 
 export namespace registerSim {
 
-    export const methodName = "register-sim";
+    export const methodName = "registerSim";
 
     export type Params = {
         imsi: string;
+        imei: string; //Using both imei and imsi to improve security.
         friendlyName: string;
     };
 
@@ -41,7 +42,7 @@ export namespace registerSim {
 
 export namespace unregisterSim {
 
-    export const methodName = "unregister-sim";
+    export const methodName = "unregisterSim";
 
     export type Params = {
         imsi: string;
@@ -55,9 +56,7 @@ export namespace rebootDongle {
 
     export const methodName = "rebootDongle";
 
-    export type Params = {
-        imsi: string;
-    };
+    export type Params = { imsi: string; };
 
     export type Response = undefined;
 
@@ -143,12 +142,13 @@ export namespace createContact {
         number: string;
     };
 
+    //TODO: changed, update on server
     export type Response = {
         mem_index: number;
         number_local_format: string;
         name_as_stored_in_sim: string;
+        new_digest: string;
     } | {
-        mem_index: null;
         number_local_format: string;
     };
 
@@ -171,8 +171,10 @@ export namespace updateContactName {
             newName: string;
         };
 
+        //TODO: updated, change on server
         export type Response = {
             name_as_stored_in_sim: string;
+            new_digest: string;
         };
 
     }
@@ -200,7 +202,8 @@ export namespace deleteContact {
         contactRef: { mem_index: number; } | { number: string; }
     };
 
-    export type Response = undefined;
+    //TODO: Change on server
+    export type Response = { new_digest?: string; };
 
 }
 
@@ -226,10 +229,9 @@ export namespace getOrCreateInstance {
 
     export type Params = { imsi: string; };
 
-    /** If not create return array */
     export type Response = {
         instance_id: number;
-        chats?: wd.Chat[];
+        chats: wd.Chat[];
     };
 
 }

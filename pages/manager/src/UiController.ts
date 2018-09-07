@@ -1,7 +1,7 @@
 
 import * as types from "../../../shared/dist/lib/types";
-import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
-import * as localApiHandler from "../../../shared/dist/lib/backendClientSideSocket/localApiHandlers";
+import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";
@@ -14,8 +14,6 @@ const html = loadUiClassHtml(
     require("../templates/UiController.html"),
     "UiController"
 );
-
-//TODO: implement realtime infos about sharing request acceptance and other user stop sharing sim. 
 
 export class UiController {
 
@@ -78,7 +76,7 @@ export class UiController {
 
         });
 
-        localApiHandler.evtSimIsOnlineStatusChange.attach(
+        localApiHandlers.evtSimIsOnlineStatusChange.attach(
             _userSim => _userSim === userSim,
             ()=> {
 
@@ -94,7 +92,7 @@ export class UiController {
         );
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
-        for (const evt of [localApiHandler.evtContactCreatedOrUpdated, localApiHandler.evtContactDeleted]) {
+        for (const evt of [localApiHandlers.evtContactCreatedOrUpdated, localApiHandlers.evtContactDeleted]) {
 
             evt.attach(
                 ({ userSim: _userSim, contact }) => _userSim === userSim && contact.mem_index !== undefined,
@@ -168,6 +166,9 @@ export class UiController {
             userSim => this.addUserSim(userSim)
         );
 
+        localApiHandlers.evtSimPermissionLost.attach(
+            userSim => this.removeUserSim(userSim)
+        );
 
     }
 

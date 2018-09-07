@@ -10,9 +10,8 @@ import {
 } from "../../../shared/dist/semasim-gateway";
 import * as sipLibrary from "ts-sip";
 import * as runExclusive from "run-exclusive";
-import * as store from "../../../shared/dist/lib/backendClientSideSocket/store";
-import { url as webSocketUrl } from "../../../shared/dist/lib/backendClientSideSocket/launch";
-import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
+import * as connection from "../../../shared/dist/lib/toBackend/connection";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 
 declare const JsSIP: any;
 declare const Buffer: any;
@@ -440,7 +439,7 @@ class JsSipSocket implements IjsSipSocket {
     
     public readonly via_transport: sipLibrary.TransportProtocol= "WSS";
 
-    public readonly url: string = webSocketUrl;
+    public readonly url: string = connection.url;
 
     constructor( 
         imsi: string,
@@ -468,15 +467,13 @@ class JsSipSocket implements IjsSipSocket {
 
             };
 
-            store.evtNewBackendConnection.attach(backendSocket=> 
-                onBackedSocketConnect(backendSocket)
-            );
+            connection.evtConnect.attach(socket => onBackedSocketConnect(socket));
 
-            const backendSocket = store.get();
+            const socket = connection.get();
 
-            if( !(backendSocket instanceof Promise) ){
+            if( !(socket instanceof Promise) ){
 
-                onBackedSocketConnect(backendSocket);
+                onBackedSocketConnect(socket);
 
             }
 
@@ -543,9 +540,9 @@ class JsSipSocket implements IjsSipSocket {
 
             }
 
-            const backendSocket= await store.get();
+            const socket= await connection.get();
 
-            backendSocket.write(
+            socket.write(
                 sipLibrary.parse(
                     Buffer.from(data, "utf8")
                 )

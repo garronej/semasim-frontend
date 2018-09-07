@@ -6,7 +6,6 @@
   },
   "dependencies": {
     "chan-dongle-extended-client": "garronej/chan-dongle-extended-client",
-    "run-exclusive": "github:garronej/run-exclusive",
     "transfer-tools": "garronej/transfer-tools",
     "ts-events-extended": "github:garronej/ts-events-extended",
     "ts-sip": "github:garronej/ts-sip"
@@ -15,6 +14,6 @@
     "@types/intl-tel-input": "0.0.8",
     "@types/jquery": "2.0.48",
     "@types/bootstrap": "3.3.28",
-    "typescript": "^3.0.1"
+    "typescript": "^3.0.3"
   }
 }

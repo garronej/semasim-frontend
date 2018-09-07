@@ -1,8 +1,8 @@
 
 import { Ua } from "./Ua";
 import { UiWebphoneController } from "./UiWebphoneController";
-import { launch as backendSocket_launch } from "../../../shared/dist/lib/backendClientSideSocket/launch";
-import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
+import * as connection from "../../../shared/dist/lib/toBackend/connection";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as types from "../../../shared/dist/lib/types";
@@ -19,7 +19,7 @@ $(document).ready(async () => {
 
 	});
 
-	backendSocket_launch();
+	connection.connect();
 
 	bootbox_custom.loading("Initialization...");
 
@@ -56,7 +56,5 @@ $(document).ready(async () => {
 	$("#footer").hide();
 
 	remoteApiCaller.evtUsableSim.attach(userSim => addWebphone(userSim));
-
-
 
 });

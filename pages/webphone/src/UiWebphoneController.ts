@@ -8,10 +8,10 @@ import { Ua } from "./Ua";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
-import * as remoteApiCaller from "../../../shared/dist/lib/backendClientSideSocket/remoteApiCaller";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import * as localApiHandlers from "../../../shared/dist/lib/backendClientSideSocket/localApiHandlers";
 
 declare const require: any;
 
@@ -36,6 +36,17 @@ export class UiWebphoneController {
 
     public static async create(userSim: types.UserSim.Usable): Promise<UiWebphoneController> {
 
+        localApiHandlers.evtSimPermissionLost.attachOnce(
+            userSim_ => userSim_ === userSim,
+            () => {
+
+                //TODO: Implement behavior on permission lost.
+
+                location.reload();
+
+            }
+        );
+
         return new this(
             userSim,
             await remoteApiCaller.getOrCreateWdInstance(userSim)
@@ -43,12 +54,10 @@ export class UiWebphoneController {
 
     }
 
-
     private constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: wd.Instance
     ) {
-
 
         this.ua = new Ua(userSim);
 
@@ -79,8 +88,6 @@ export class UiWebphoneController {
         $("body").data("dynamic").panels();
 
         setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
-
-
 
     }
 
@@ -175,13 +182,13 @@ export class UiWebphoneController {
 
                 if (!this.userSim.isOnline) {
 
-                    if( this.ua.isRegistered ){
+                    if (this.ua.isRegistered) {
 
                         this.ua.unregister();
 
                     }
 
-                }else{
+                } else {
 
                     //TODO: reload ui header.
                     this.ua.register();
@@ -346,7 +353,7 @@ export class UiWebphoneController {
             }
         );
 
-        if( this.userSim.isOnline ){
+        if (this.userSim.isOnline) {
 
             this.ua.register();
 

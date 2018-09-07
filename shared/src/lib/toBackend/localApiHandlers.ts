@@ -1,5 +1,5 @@
 
-import * as apiDeclaration from "../../sip_api_declarations/backendClientSideSocket";
+import * as apiDeclaration from "../../sip_api_declarations/uaToBackend";
 import * as sipLibrary from "ts-sip";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../types";
@@ -13,7 +13,7 @@ export const handlers: sipLibrary.api.Server.Handlers = {};
 
 export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
-(() => {
+{
 
     const methodName = apiDeclaration.notifySimOffline.methodName;
     type Params = apiDeclaration.notifySimOffline.Params;
@@ -29,6 +29,9 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
             evtSimIsOnlineStatusChange.post(userSim);
 
+            //TODO: Improve
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -36,9 +39,9 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
     handlers[methodName] = handler;
 
-})();
+}
 
-(() => {
+{
 
     const methodName = apiDeclaration.notifySimOnline.methodName;
     type Params = apiDeclaration.notifySimOnline.Params;
@@ -81,6 +84,8 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
             evtSimIsOnlineStatusChange.post(userSim);
 
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -88,7 +93,7 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
     handlers[methodName] = handler;
 
-})();
+}
 
 /** posted when a user that share the SIM created or updated a contact. */
 export const evtContactCreatedOrUpdated = new SyncEvent<{
@@ -163,6 +168,8 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
             }
 
             evtContactCreatedOrUpdated.post({ userSim, contact });
+            
+            console.log({ methodName });
 
             return undefined;
 
@@ -178,9 +185,7 @@ export const evtContactDeleted = new SyncEvent<{
     contact: types.UserSim.Contact
 }>();
 
-
-
-(() => {
+{
 
     const methodName = apiDeclaration.notifyContactDeleted.methodName;
     type Params = apiDeclaration.notifyContactDeleted.Params;
@@ -192,10 +197,9 @@ export const evtContactDeleted = new SyncEvent<{
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
 
-            let i: number;
             let contact: types.UserSim.Contact;
 
-            for (i = 0; i < userSim.phonebook.length; i++) {
+            for (let i = 0; i < userSim.phonebook.length; i++) {
 
                 contact = userSim.phonebook[i];
 
@@ -231,6 +235,8 @@ export const evtContactDeleted = new SyncEvent<{
 
             evtContactDeleted.post({ userSim, "contact": contact! });
 
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -238,13 +244,13 @@ export const evtContactDeleted = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-})();
+}
 
-(() => {
+{
 
-    const methodName = apiDeclaration.notifyDongleCaryingPotentiallyUnregisteredSimOnLan.methodName;
-    type Params = apiDeclaration.notifyDongleCaryingPotentiallyUnregisteredSimOnLan.Params;
-    type Response = apiDeclaration.notifyDongleCaryingPotentiallyUnregisteredSimOnLan.Response;
+    const methodName = apiDeclaration.notifyDongleOnLan.methodName;
+    type Params = apiDeclaration.notifyDongleOnLan.Params;
+    type Response = apiDeclaration.notifyDongleOnLan.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async params => {
@@ -258,58 +264,10 @@ export const evtContactDeleted = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-    //TODO: run exclusive
-    async function interact(dongle: dcTypes.Dongle) {
+    const interact = async (dongle: dcTypes.Dongle) => {
 
-        const shouldAdd_message = (() => {
-
-            let arr = [
-                `SIM inside:`,
-                `${dongle.manufacturer} ${dongle.model}`,
-                `IMEI: ${dongle.imei}`,
-            ];
-
-            if (dongle.sim.iccid) {
-
-                arr = [
-                    ...arr,
-                    "",
-                    "SIM ICCID (number printed on SIM): ",
-                    dongle.sim.iccid
-                ];
-
-            }
-
-            return arr.join("<br>");
-
-        })();
-
-        const shouldAdd = await new Promise<boolean>(
-            resolve => bootbox_custom.dialog({
-                "title": "SIM ready to be registered",
-                "message": `<p class="text-center">${shouldAdd_message}</p>`,
-                "buttons": {
-                    "cancel": {
-                        "label": "Not now",
-                        "callback": () => resolve(false)
-                    },
-                    "success": {
-                        "label": "Yes, register this sim",
-                        "className": "btn-success",
-                        "callback": () => resolve(true)
-                    }
-                },
-                "closeButton": false
-            })
-        );
-
-        if (!shouldAdd) {
-            return undefined;
-        }
 
         if (dcTypes.Dongle.Locked.match(dongle)) {
-
-            let unlockResultValidPin: types.unlockSim_Response.ValidPin;
 
             while (true) {
 
@@ -317,22 +275,22 @@ export const evtContactDeleted = new SyncEvent<{
 
                     bootbox_custom.alert(`${dongle.sim.pinState} require manual unlock`);
 
-                    return undefined;
+                    return;
 
                 }
 
-                let tryLeft = dongle.sim.tryLeft;
+                const tryLeft = dongle.sim.tryLeft;
 
-                let pin = await new Promise<string>(
+                const pin = await new Promise<string>(
                     resolve => bootbox_custom.prompt({
-                        "title": `PIN code? (${tryLeft} tries left)`,
+                        "title": `PIN code for sim inside ${dongle.manufacturer} ${dongle.model} (${tryLeft} tries left)`,
                         "inputType": "number",
                         "callback": result => resolve(result)
                     })
                 );
 
                 if (pin === null) {
-                    return undefined;
+                    return;
                 }
 
                 if (!pin.match(/^[0-9]{4}$/)) {
@@ -345,7 +303,9 @@ export const evtContactDeleted = new SyncEvent<{
                         })
                     );
 
-                    if (!shouldContinue) return undefined;
+                    if (!shouldContinue) {
+                        return;
+                    }
 
                     continue;
 
@@ -355,7 +315,15 @@ export const evtContactDeleted = new SyncEvent<{
 
                 const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
 
-                if (!unlockResult.wasPinValid) {
+                if (!unlockResult) {
+
+                    //TODO: Improve
+                    alert("Unlock failed for unknown reason");
+                    return;
+
+                }
+
+                if (!unlockResult.success) {
 
                     dongle.sim.pinState = unlockResult.pinState;
                     dongle.sim.tryLeft = unlockResult.tryLeft;
@@ -364,88 +332,97 @@ export const evtContactDeleted = new SyncEvent<{
 
                 }
 
-                unlockResultValidPin = unlockResult;
-
                 break;
 
             }
 
-            if (!unlockResultValidPin.isSimRegisterable) {
+            //TODO: Implement some kind of queue as we cant fire an alert when
+            //an other one is already open
 
-                if (unlockResultValidPin.simRegisteredBy.who === "MYSELF") {
 
-                    bootbox_custom.alert([
-                        "Unlock success. You already have registered this SIM,",
-                        " it just needed to be unlock again"
-                    ].join(""));
+        } else {
 
-                } else {
+            const shouldAdd_message = [
+                `SIM inside:`,
+                `${dongle.manufacturer} ${dongle.model}`,
+                `Sim IMSI: ${dongle.sim.imsi}`,
+            ].join("<br>");
 
-                    bootbox_custom.alert([
-                        "Unlock success, the SIM is currently registered ",
-                        `by account: ${unlockResultValidPin.simRegisteredBy.email}`
-                    ].join(""));
+            const shouldAdd = await new Promise<boolean>(
+                resolve => bootbox_custom.dialog({
+                    "title": "SIM ready to be registered",
+                    "message": `<p class="text-center">${shouldAdd_message}</p>`,
+                    "buttons": {
+                        "cancel": {
+                            "label": "Not now",
+                            "callback": () => resolve(false)
+                        },
+                        "success": {
+                            "label": "Yes, register this sim",
+                            "className": "btn-success",
+                            "callback": () => resolve(true)
+                        }
+                    },
+                    "closeButton": false
+                })
+            );
 
-                }
+            if (!shouldAdd) {
+                return;
+            }
 
-                return undefined;
+            if (dongle.isVoiceEnabled !== true) {
+
+                let sure = dongle.isVoiceEnabled === false;
+
+                await new Promise<void>(
+                    resolve => bootbox_custom.alert(
+                        [
+                            "Warning:",
+                            `Voice is ${sure ? "" : "( maybe )"} not enabled on the 3G Key you are using with this SIM.`,
+                            `As as a result you ${sure ? "will" : "may"} not be able to place phones calls ${sure ? "(try and see for yourself)" : ""}.`,
+                            "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
+                            "Go to www.dc-unlocker.com and download dc-unlocker client (windows)",
+                            "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
+                            "once your manage to get your dongle detected by the software go to",
+                            "unlocking -> Activate Voice",
+                            "They will charge you 4€ for it...",
+                            "We are currently trying to implement this ourself so you dont have to pay",
+                            "for that but so far this is the only option.",
+                            "",
+                            `Dongle IMEI: ${dongle.imei}`
+                        ].join("<br>"),
+                        () => resolve()
+                    )
+                );
 
             }
 
-            dongle = unlockResultValidPin.dongle;
+            bootbox_custom.loading("Suggesting a suitable friendly name ...");
 
-        }
+            let friendlyName = await getDefaultFriendlyName(dongle.sim);
 
-        if (dongle.isVoiceEnabled !== true) {
-
-            let sure = dongle.isVoiceEnabled === false;
-
-            await new Promise<void>(
-                resolve => bootbox_custom.alert(
-                    [
-                        "Warning:",
-                        `Voice is ${sure ? "" : "( maybe )"} not enabled on the 3G Key you are using with this SIM.`,
-                        `As as a result you ${sure ? "will" : "may"} not be able to place phones calls ${sure ? "(try and see for yourself)" : ""}.`,
-                        "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
-                        "Go to www.dc-unlocker.com and download dc-unlocker client (windows)",
-                        "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
-                        "once your manage to get your dongle detected by the software go to",
-                        "unlocking -> Activate Voice",
-                        "They will charge you 4€ for it...",
-                        "We are currently trying to implement this ourself so you dont have to pay",
-                        "for that but so far this is the only option.",
-                        "",
-                        `Dongle IMEI: ${dongle.imei}`
-                    ].join("<br>"),
-                    () => resolve()
-                )
+            let friendlyNameSubmitted = await new Promise<string | null>(
+                resolve => bootbox_custom.prompt({
+                    "title": "Friendly name for this sim?",
+                    "value": friendlyName,
+                    "callback": result => resolve(result),
+                })
             );
 
+            if (friendlyNameSubmitted) {
+                friendlyName = friendlyNameSubmitted;
+            }
+
+            bootbox_custom.loading("Registering SIM...");
+
+            await remoteApiCaller.registerSim(dongle, friendlyName);
+
         }
 
-        bootbox_custom.loading("Suggesting a suitable friendly name ...");
+    };
 
-        let friendlyName = await getDefaultFriendlyName(dongle.sim);
-
-        let friendlyNameSubmitted = await new Promise<string | null>(
-            resolve => bootbox_custom.prompt({
-                "title": "Friendly name for this sim?",
-                "value": friendlyName,
-                "callback": result => resolve(result),
-            })
-        );
-
-        if (friendlyNameSubmitted) {
-            friendlyName = friendlyNameSubmitted;
-        }
-
-        bootbox_custom.loading("Registering SIM...");
-
-        await remoteApiCaller.registerSim(dongle, friendlyName);
-
-    }
-
-    async function getDefaultFriendlyName(sim: dcTypes.Sim) {
+    const getDefaultFriendlyName = async (sim: dcTypes.Sim) => {
 
         let tag = sim.serviceProvider.fromImsi || sim.serviceProvider.fromNetwork || "";
 
@@ -475,14 +452,45 @@ export const evtContactDeleted = new SyncEvent<{
 
         return build(i);
 
-    }
+    };
 
+}
 
-})();
+//TODO: Implement usage 
+export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed>();
 
+{
 
+    const methodName = apiDeclaration.notifySimPermissionLost.methodName;
+    type Params = apiDeclaration.notifySimPermissionLost.Params;
+    type Response = apiDeclaration.notifySimPermissionLost.Response;
 
-(() => {
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async ({ imsi }) => {
+
+            const userSims = await remoteApiCaller.getUsableUserSims();
+
+            const userSim = userSims.find(
+                ({ sim }) => sim.imsi === imsi
+            )! as types.UserSim.Shared.Confirmed;
+
+            userSims.splice(userSims.indexOf(userSim), 1);
+
+            evtSimPermissionLost.post(userSim);
+
+            //TODO: Display notification
+            console.log(methodName);
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}
+
+{
 
     const methodName = apiDeclaration.notifySimSharingRequest.methodName;
     type Params = apiDeclaration.notifySimSharingRequest.Params;
@@ -501,11 +509,11 @@ export const evtContactDeleted = new SyncEvent<{
     handlers[methodName] = handler;
 
     //TODO: run exclusive
-    async function interact(
+    const interact = async (
         userSim: types.UserSim.Shared.NotConfirmed
-    ): Promise<void> {
+    ): Promise<void> => {
 
-        let shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
+        const shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
             resolve => bootbox_custom.dialog({
                 "title": `${userSim.ownership.ownerEmail} would like to share a SIM with you, accept?`,
                 "message": userSim.ownership.sharingRequestMessage ?
@@ -561,7 +569,7 @@ export const evtContactDeleted = new SyncEvent<{
 
     }
 
-})();
+}
 
 
 export const evtSharingRequestResponse = new SyncEvent<{
@@ -570,8 +578,7 @@ export const evtSharingRequestResponse = new SyncEvent<{
     isAccepted: boolean;
 }>();
 
-
-(() => {
+{
 
     const methodName = apiDeclaration.notifySharingRequestResponse.methodName;
     type Params = apiDeclaration.notifySharingRequestResponse.Params;
@@ -596,6 +603,8 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
             evtSharingRequestResponse.post({ userSim, email, isAccepted });
 
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -603,14 +612,14 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-})();
+}
 
 export const evtSharedSimUnregistered = new SyncEvent<{
     userSim: types.UserSim.Owned;
     email: string;
 }>();
 
-(() => {
+{
 
     const methodName = apiDeclaration.notifySharedSimUnregistered.methodName;
     type Params = apiDeclaration.notifySharedSimUnregistered.Params;
@@ -630,6 +639,8 @@ export const evtSharedSimUnregistered = new SyncEvent<{
 
             evtSharedSimUnregistered.post({ userSim, email });
 
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -637,21 +648,23 @@ export const evtSharedSimUnregistered = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-})();
+}
 
 export const evtOpenElsewhere = new VoidSyncEvent();
 
-(() => {
+{
 
-    const methodName = apiDeclaration.notifyWebAppOpenOnOtherBrowserTab.methodName;
-    type Params = apiDeclaration.notifyWebAppOpenOnOtherBrowserTab.Params;
-    type Response = apiDeclaration.notifyWebAppOpenOnOtherBrowserTab.Response;
+    const methodName = apiDeclaration.notifyLoggedFromOtherTab.methodName;
+    type Params = apiDeclaration.notifyLoggedFromOtherTab.Params;
+    type Response = apiDeclaration.notifyLoggedFromOtherTab.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async () => {
 
             evtOpenElsewhere.post();
 
+            console.log({ methodName });
+
             return undefined;
 
         }
@@ -659,6 +672,6 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
     handlers[methodName] = handler;
 
-})();
+}
 
 

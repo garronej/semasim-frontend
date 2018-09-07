@@ -113,38 +113,6 @@ export namespace UserSim {
 
 export type Online<T extends UserSim> = T & { isOnline: true; };
 
-export type unlockSim_Response = unlockSim_Response.WrongPin | unlockSim_Response.ValidPin;
-
-export namespace unlockSim_Response {
-
-    export type WrongPin = {
-        wasPinValid: false;
-        pinState: dcTypes.Dongle.Locked.PinState;
-        tryLeft: number;
-    };
-
-    export type ValidPin = ValidPin.Registerable | ValidPin.NotRegisterable;
-
-    export namespace ValidPin {
-
-        export type Registerable = {
-            wasPinValid: true;
-            isSimRegisterable: true;
-            dongle: dcTypes.Dongle.Usable;
-        };
-
-        export type NotRegisterable = {
-            wasPinValid: true;
-            isSimRegisterable: false;
-            simRegisteredBy: { who: "MYSELF" } | { who: "OTHER USER"; email: string; };
-        };
-
-    }
-
-}
-
-
-
 
 export namespace webphoneData {
 

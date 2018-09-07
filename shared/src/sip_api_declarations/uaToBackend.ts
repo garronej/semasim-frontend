@@ -1,5 +1,5 @@
 
-import * as types  from "../lib/types";
+import * as types from "../lib/types";
 
 export namespace notifySimOffline {
 
@@ -66,13 +66,28 @@ export namespace notifyContactDeleted {
 
 }
 
-export namespace notifyDongleCaryingPotentiallyUnregisteredSimOnLan {
+export namespace notifyDongleOnLan {
 
-    export const methodName= "notifyDongleCaryingPotentiallyUnregisteredSimOnLan";
+    export const methodName= "notifyDongleOnLan";
 
     export type Params= import("chan-dongle-extended-client").types.Dongle;
 
     export type Response= undefined;
+
+}
+
+/** 
+ * posted when the owner of the sim stop sharing the sim with the user 
+ * or when the user unregister the sim.
+ * */
+export namespace notifySimPermissionLost {
+
+    export const methodName= "notifySimPermissionLost";
+
+    export type Params= { imsi: string; }
+
+    export type Response= undefined;
+
 
 }
 
@@ -113,14 +128,12 @@ export namespace notifySharedSimUnregistered {
 
 }
 
-export namespace notifyWebAppOpenOnOtherBrowserTab {
+export namespace notifyLoggedFromOtherTab {
 
-    export const methodName = "notifyWebAppOpenOnOtherBrowserTab"
+    export const methodName = "notifyLoggedFromOtherTab"
 
     export type Params = undefined;
 
     export type Response = undefined;
 
 }
-
-
