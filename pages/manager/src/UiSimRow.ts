@@ -65,6 +65,8 @@ export class UiSimRow {
 
         if (!this.userSim.isOnline) {
             this.structure.find(".id_row").addClass("offline");
+        }else{
+            this.structure.find(".id_row").removeClass("offline");
         }
 
         this.structure.find(".id_ownership").text(
@@ -88,7 +90,7 @@ export class UiSimRow {
 
         this.structure.find(".id_owner").text(
             this.userSim.ownership.status === "OWNED" ?
-                "Me" : this.userSim.ownership.ownerEmail
+                "You" : this.userSim.ownership.ownerEmail
         );
 
         this.structure.find(".id_number").text((() => {

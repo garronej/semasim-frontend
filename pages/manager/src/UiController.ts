@@ -34,9 +34,9 @@ export class UiController {
         switch(placeholder){
             case "MAIN": {
 
-                main.show();
-
                 noSim.hide();
+
+                main.show();
 
             }; break;
             case "NO SIM": {
@@ -77,7 +77,7 @@ export class UiController {
         });
 
         localApiHandlers.evtSimIsOnlineStatusChange.attach(
-            _userSim => _userSim === userSim,
+            userSim_ => userSim_ === userSim,
             ()=> {
 
                 uiSimRow.populate();
@@ -134,6 +134,8 @@ export class UiController {
             }
 
         }
+
+        uiSimRow.structure.remove();
 
         if ((await remoteApiCaller.getUsableUserSims()).length === 0) {
 
@@ -227,9 +229,9 @@ export class UiController {
 
             if (shouldProceed) {
 
-                this.removeUserSim(userSim);
-
                 await remoteApiCaller.unregisterSim(userSim);
+
+                this.removeUserSim(userSim);
 
             }
 

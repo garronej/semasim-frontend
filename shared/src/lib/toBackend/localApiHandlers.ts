@@ -50,7 +50,7 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({
             imsi, hasInternalSimStorageChanged,
-            newPassword, newSimDongle, newGatewayLocation
+            password, simDongle, gatewayLocation
         }) => {
 
             const userSim = (await remoteApiCaller.getUsableUserSims())
@@ -64,23 +64,13 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
             }
 
-            if (newPassword !== undefined) {
+            userSim.isOnline= true;
 
-                userSim.password = newPassword;
+            userSim.password = password;
 
-            }
+            userSim.dongle = simDongle;
 
-            if (newSimDongle !== undefined) {
-
-                userSim.dongle = newSimDongle;
-
-            }
-
-            if (newGatewayLocation !== undefined) {
-
-                userSim.gatewayLocation = newGatewayLocation;
-
-            }
+            userSim.gatewayLocation = gatewayLocation;
 
             evtSimIsOnlineStatusChange.post(userSim);
 
@@ -168,7 +158,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
             }
 
             evtContactCreatedOrUpdated.post({ userSim, contact });
-            
+
             console.log({ methodName });
 
             return undefined;
@@ -418,6 +408,8 @@ export const evtContactDeleted = new SyncEvent<{
 
             await remoteApiCaller.registerSim(dongle, friendlyName);
 
+            bootbox_custom.dismissLoading();
+
         }
 
     };
@@ -456,7 +448,6 @@ export const evtContactDeleted = new SyncEvent<{
 
 }
 
-//TODO: Implement usage 
 export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed>();
 
 {
@@ -509,9 +500,7 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
     handlers[methodName] = handler;
 
     //TODO: run exclusive
-    const interact = async (
-        userSim: types.UserSim.Shared.NotConfirmed
-    ): Promise<void> => {
+    const interact = async (userSim: types.UserSim.Shared.NotConfirmed): Promise<void> => {
 
         const shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
             resolve => bootbox_custom.dialog({
@@ -567,7 +556,9 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
             userSim.friendlyName
         );
 
-    }
+        bootbox_custom.dismissLoading();
+
+    };
 
 }
 
@@ -627,7 +618,6 @@ export const evtSharedSimUnregistered = new SyncEvent<{
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, email }) => {
-
 
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned;

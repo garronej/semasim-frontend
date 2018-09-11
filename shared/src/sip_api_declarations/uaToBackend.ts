@@ -19,9 +19,9 @@ export namespace notifySimOnline {
     export type Params= { 
         imsi: string;
         hasInternalSimStorageChanged: boolean; 
-        newPassword?: string;
-        newSimDongle?: types.UserSim["dongle"]
-        newGatewayLocation?: types.UserSim.GatewayLocation 
+        password: string;
+        simDongle: types.UserSim["dongle"]
+        gatewayLocation: types.UserSim.GatewayLocation 
     };
 
     export type Response= undefined;

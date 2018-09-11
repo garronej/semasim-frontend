@@ -401,8 +401,25 @@ export const deleteContact = (() => {
             {
                 "imsi": userSim.sim.imsi,
                 "contactRef": contact.mem_index === null ?
-                    ({ "mem_index": contact.mem_index }) : ({ "number": contact.number_raw })
+                    ({ "mem_index": contact.mem_index }) :
+                    ({ "number": contact.number_raw })
             }
+        );
+
+        if (contact.mem_index !== null) {
+
+            userSim.sim.storage.contacts.splice(
+                userSim.sim.storage.contacts.findIndex(
+                    ({ index }) => index === contact.mem_index
+                ),
+                1
+            );
+
+        }
+
+        userSim.phonebook.splice(
+            userSim.phonebook.indexOf(contact),
+            1
         );
 
         if (new_digest !== undefined) {
@@ -414,7 +431,6 @@ export const deleteContact = (() => {
     };
 
 })();
-
 
 //WebData sync things :
 
@@ -606,8 +622,6 @@ export const fetchOlderWdMessages = (() => {
     }
 
 })();
-
-
 
 /** 
  * 

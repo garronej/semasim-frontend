@@ -103,11 +103,11 @@ export class UiPhonebook {
 
         const getUiContactFromStructure = (li_elem: HTMLElement): UiContact => {
 
-            for (const uiBubble of this.uiContacts.values()) {
+            for (const uiContact of this.uiContacts.values()) {
 
-                if (uiBubble.structure.get(0) === li_elem) {
+                if (uiContact.structure.get(0) === li_elem) {
 
-                    return uiBubble;
+                    return uiContact;
 
                 }
 
@@ -120,7 +120,7 @@ export class UiPhonebook {
 
         const lis = this.structure.find("ul li");
 
-        for( let i= 0; i<= lis.length; i++){
+        for( let i= 0; i< lis.length; i++){
 
             const uiContact_i = getUiContactFromStructure(lis.get(i));
 
