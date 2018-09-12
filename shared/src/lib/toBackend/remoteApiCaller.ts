@@ -11,7 +11,7 @@ import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 
 
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
-export const evtUsableSim= new SyncEvent<types.UserSim.Usable>();
+export const evtUsableSim = new SyncEvent<types.UserSim.Usable>();
 
 export const getUsableUserSims = (() => {
 
@@ -21,18 +21,34 @@ export const getUsableUserSims = (() => {
 
     let usableUserSims: types.UserSim.Usable[] | undefined = undefined;
 
-    return async () => {
+    /** 
+     * The stateless argument is used to re fetch the userSim from the server regardless
+     * of if it have been done previously already.
+     * Will return a new array.
+     */
+    return async (stateless: false | "STATELESS" = false): Promise<types.UserSim.Usable[]> => {
 
-        if (!!usableUserSims) {
+        if (!stateless && !!usableUserSims) {
             return usableUserSims;
         }
 
-        usableUserSims = await sendRequest<Params, Response>(
+        const usableUserSims_ = await sendRequest<Params, Response>(
             methodName,
             undefined
         );
 
-        return getUsableUserSims();
+        if (!!stateless) {
+
+            return usableUserSims_;
+
+        } else {
+
+            usableUserSims = usableUserSims_;
+
+            return getUsableUserSims();
+
+        }
+
 
     };
 
@@ -72,10 +88,10 @@ export const registerSim = (() => {
 
         const userSim = await sendRequest<Params, Response>(
             methodName,
-            { 
-                "imsi": dongle.sim.imsi, 
+            {
+                "imsi": dongle.sim.imsi,
                 "imei": dongle.imei,
-                friendlyName 
+                friendlyName
             }
         );
 
@@ -307,7 +323,7 @@ export const createContact = (() => {
 
         userSim.phonebook.push(contact);
 
-        if( "new_digest" in resp ){
+        if ("new_digest" in resp) {
 
             userSim.sim.storage.contacts.push({
                 "index": resp.mem_index,
@@ -343,9 +359,9 @@ export const updateContactName = (() => {
             type Params = apiDeclaration.updateContactName.contactInSim.Params;
             type Response = apiDeclaration.updateContactName.contactInSim.Response;
 
-            const { 
-                name_as_stored_in_sim, 
-                new_digest 
+            const {
+                name_as_stored_in_sim,
+                new_digest
             } = await sendRequest<Params, Response>(
                 methodName,
                 {
@@ -360,7 +376,7 @@ export const updateContactName = (() => {
             userSim
                 .sim.storage.contacts.find(({ index }) => index === contact.mem_index)!
                 .name = name_as_stored_in_sim;
-            
+
             userSim.sim.storage.digest = new_digest;
 
         } else {
@@ -457,22 +473,10 @@ export const getOrCreateWdInstance = (() => {
     type Params = apiDeclaration.getOrCreateInstance.Params;
     type Response = apiDeclaration.getOrCreateInstance.Response;
 
-    return async function (
-        userSim: types.UserSim.Usable
-    ): Promise<wd.Instance> {
-
-        const { imsi } = userSim.sim;
-
-        const { instance_id, chats } = await sendRequest<Params, Response>(
-            methodName,
-            { imsi }
-        );
-
-        const wdInstance: wd.Instance = {
-            "id_": instance_id,
-            imsi,
-            chats
-        };
+    async function synchronizeUserSimAndWdInstance(
+        userSim: types.UserSim.Usable,
+        wdInstance: wd.Instance
+    ): Promise<void> {
 
         const wdChatWhoseContactNoLongerInPhonebook = new Set(wdInstance.chats);
 
@@ -516,11 +520,33 @@ export const getOrCreateWdInstance = (() => {
 
         }
 
+    }
+
+    return async function (
+        userSim: types.UserSim.Usable
+    ): Promise<wd.Instance> {
+
+        const { imsi } = userSim.sim;
+
+        const { instance_id, chats } = await sendRequest<Params, Response>(
+            methodName,
+            { imsi }
+        );
+
+        const wdInstance: wd.Instance = {
+            "id_": instance_id,
+            imsi,
+            chats
+        };
+
+        await synchronizeUserSimAndWdInstance(userSim, wdInstance);
+
         return wdInstance;
 
     };
 
 })();
+
 
 export const newWdChat = (() => {
 
@@ -1033,7 +1059,7 @@ async function sendRequest<Params, Response>(
 
     } catch (error) {
 
-        if (retry) {
+        if (!!retry) {
 
             return sendRequest<Params, Response>(
                 methodName,

@@ -8,7 +8,7 @@ import {
     urlSafeB64,
     readImsi
 } from "../../../shared/dist/semasim-gateway";
-import * as sipLibrary from "ts-sip";
+import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
@@ -41,9 +41,6 @@ export class Ua {
     /** post isRegistered */
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
 
-    public get isRegistered(): boolean {
-        return this.jsSipUa.isRegistered();
-    }
 
     private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
@@ -51,7 +48,7 @@ export class Ua {
     private readonly jsSipSocket: JsSipSocket;
 
     constructor(
-        public readonly userSim: types.UserSim.Usable,
+        public readonly userSim: types.UserSim.Usable
     ) {
 
         const { imsi } = userSim.sim;
@@ -68,18 +65,53 @@ export class Ua {
             "instance_id": Ua.instanceId,
             "register": false,
             "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}`,
-            "connection_recovery_min_interval": 86400,
-            "connection_recovery_max_interval": 86400,
-            "register_expires": 86400
+            //"connection_recovery_min_interval": 86400,
+            //"connection_recovery_max_interval": 86400,
+            "register_expires": 345600
         });
 
-        this.jsSipUa.on("registered", ({ response }) =>
-            this.evtRegistrationStateChanged.post(true)
+        /* 
+        evt 'registered' is posted only when register change 
+        so we use this instead.
+        */
+        this.jsSipSocket.evtSipPacket.attach(
+            sipPacket => (
+                !sip.matchRequest(sipPacket) &&
+                sipPacket.headers.cseq.method === "REGISTER" &&
+                sipPacket.status === 200
+            ),
+            () => {
+
+                console.log("UA registered");
+
+                this.isRegistered = true;
+
+                this.evtRegistrationStateChanged.post(true);
+
+            }
         );
 
-        this.jsSipUa.on("unregistered", ({ response, cause }) =>
-            this.evtRegistrationStateChanged.post(false)
-        );
+        /*
+        this.jsSipUa.on("registered", () =>{
+            
+            console.log("UA registered");
+
+            this.isRegistered= true;
+
+            this.evtRegistrationStateChanged.post(true);
+
+        });
+        */
+
+        this.jsSipUa.on("unregistered", () => {
+
+            console.log("UA unregistered");
+
+            this.isRegistered = false;
+
+            this.evtRegistrationStateChanged.post(false);
+
+        });
 
         this.jsSipUa.on("newMessage", ({ originator, request }) => {
 
@@ -108,23 +140,41 @@ export class Ua {
         this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
         */
 
+        this.jsSipUa.on("connecting", () => console.log(`UA connecting`));
+        this.jsSipUa.on("connected", () => console.log("UA connected"));
+        this.jsSipUa.on("disconnected", () => console.log("UA disconnected"));
+        this.jsSipUa.on("registrationFailed", () => console.log("UA registrationFailed"));
+        this.jsSipUa.on("registrationExpiring", () => console.log("UA registrationExpiring"));
+
     }
 
+    public isRegistered = false;
+
     //TODO: Test!
-    public register(){
+    public register() {
+
+        console.log("UA calling register, current isRegistered: " + this.isRegistered);
+
         this.jsSipUa.register();
     }
 
-    //TODO; Test!
-    public unregister(){
-        this.jsSipUa.unregister();
+    /** 
+     * Do not actually send a REGISTER expire=0. 
+     * Assert no packet will arrive to this UA until next register.
+     * */
+    public unregister() {
+
+        console.log("UA calling unregister, current isRegistered: " + this.isRegistered);
+
+        this.jsSipUa.emit("unregistered");
+
     }
 
     public readonly evtIncomingMessage = new SyncEvent<{
         fromNumber: phoneNumber;
         bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
         text: string;
-        onProcessed: ()=> void;
+        onProcessed: () => void;
     }>();
 
     private onMessage(request): void {
@@ -262,7 +312,7 @@ export class Ua {
             });
 
             (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
-                ({ streams: [ stream ] }) => playAudioStream(stream);
+                ({ streams: [stream] }) => playAudioStream(stream);
 
         });
 
@@ -342,7 +392,7 @@ export class Ua {
 
 
                         (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
-                            ({ streams: [ stream ] }) => playAudioStream(stream);
+                            ({ streams: [stream] }) => playAudioStream(stream);
 
                     },
                     "confirmed": () => evtEstablished.post(),
@@ -436,28 +486,31 @@ interface IjsSipSocket {
 
 class JsSipSocket implements IjsSipSocket {
 
-    
-    public readonly via_transport: sipLibrary.TransportProtocol= "WSS";
+    public readonly evtSipPacket = new SyncEvent<sip.Packet>();
+
+    public readonly via_transport: sip.TransportProtocol = "WSS";
 
     public readonly url: string = connection.url;
 
-    constructor( 
+    constructor(
         imsi: string,
         public readonly sip_uri: string
-    ){
+    ) {
 
-        (async ()=>{
+        (async () => {
 
-            const onBackedSocketConnect= (backendSocket: sipLibrary.Socket) => {
+            const onBackedSocketConnect = (backendSocket: sip.Socket) => {
 
-                const onSipPacket= (sipPacket: sipLibrary.Packet)=> {
+                const onSipPacket = (sipPacket: sip.Packet) => {
 
-                    if( readImsi(sipPacket) !== imsi ){
+                    if (readImsi(sipPacket) !== imsi) {
                         return;
                     }
 
+                    this.evtSipPacket.post(sipPacket);
+
                     this.ondata(
-                        sipLibrary.toData(sipPacket).toString("utf8")
+                        sip.toData(sipPacket).toString("utf8")
                     );
 
                 }
@@ -471,7 +524,7 @@ class JsSipSocket implements IjsSipSocket {
 
             const socket = connection.get();
 
-            if( !(socket instanceof Promise) ){
+            if (!(socket instanceof Promise)) {
 
                 onBackedSocketConnect(socket);
 
@@ -490,7 +543,7 @@ class JsSipSocket implements IjsSipSocket {
         throw new Error("JsSip should not call disconnect");
     }
 
-    private messageOkDelays= new Map<string, Promise<void>>();
+    private messageOkDelays = new Map<string, Promise<void>>();
 
     /**
      * To call when receiving as SIP MESSAGE 
@@ -504,7 +557,7 @@ class JsSipSocket implements IjsSipSocket {
      * @param pr The response to the SIP MESSAGE
      * will not be sent until this promise resolve.
      */
-    public setMessageOkDelay(request: any, pr: Promise<void>): void{
+    public setMessageOkDelay(request: any, pr: Promise<void>): void {
         this.messageOkDelays.set(
             request.getHeader("Call-ID"),
             pr
@@ -514,42 +567,42 @@ class JsSipSocket implements IjsSipSocket {
 
     public send(data: string): true {
 
-        (async ()=>{
+        (async () => {
 
-            const sipPacket= sipLibrary.parse(Buffer.from(data, "utf8"));
+            const sipPacket = sip.parse(Buffer.from(data, "utf8"));
 
-            if( !sipLibrary.matchRequest(sipPacket)){
+            if (!sip.matchRequest(sipPacket)) {
 
-                const sipResponse: sipLibrary.Response= sipPacket;
+                const sipResponse: sip.Response = sipPacket;
 
-                if( sipResponse.headers.cseq.method === "MESSAGE"){
+                if (sipResponse.headers.cseq.method === "MESSAGE") {
 
-                    const callId: string= sipResponse.headers["call-id"];
+                    const callId: string = sipResponse.headers["call-id"];
 
-                    const pr= this.messageOkDelays.get(callId);
+                    const pr = this.messageOkDelays.get(callId);
 
-                    if( !!pr ){
+                    if (!!pr) {
 
                         await pr;
 
                         this.messageOkDelays.delete(callId);
 
                     }
-                    
+
                 }
 
             }
 
-            const socket= await connection.get();
+            const socket = await connection.get();
 
             socket.write(
-                sipLibrary.parse(
+                sip.parse(
                     Buffer.from(data, "utf8")
                 )
             );
 
         })();
-        
+
         return true;
 
     }

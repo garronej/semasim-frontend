@@ -91,7 +91,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
     contact: types.UserSim.Contact
 }>();
 
-(() => {
+{
 
     const methodName = apiDeclaration.notifyContactCreatedOrUpdated.methodName;
     type Params = apiDeclaration.notifyContactCreatedOrUpdated.Params;
@@ -168,7 +168,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-})();
+}
 
 export const evtContactDeleted = new SyncEvent<{
     userSim: types.UserSim.Usable;

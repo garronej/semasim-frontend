@@ -98,7 +98,6 @@ export class UiWebphoneController {
             () => {
 
                 //TODO: Terminate UA.
-
                 this.structure.remove();
 
 
@@ -180,6 +179,8 @@ export class UiWebphoneController {
             userSim => userSim === this.userSim,
             async () => {
 
+                console.log("sim is online status change, isOnline: " + this.userSim.isOnline );
+
                 if (!this.userSim.isOnline) {
 
                     if (this.ua.isRegistered) {
@@ -207,6 +208,8 @@ export class UiWebphoneController {
 
         //TODO: improve
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
+
+            console.log(`Controller: evtRegistrationChanged: isRegistered` + isRegistered );
 
             for (const uiConversation of this.uiConversations.values()) {
 
