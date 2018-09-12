@@ -29,7 +29,6 @@ export function connect() {
 
     if( socketCurrent === undefined ){
 
-
         window.addEventListener("offline", () => {
 
             const socket = get();
@@ -46,6 +45,7 @@ export function connect() {
 
     const socket = new sip.Socket(
         new WebSocket(url, "SIP"),
+        true,
         {
             "remoteAddress": "www.semasim.com",
             "remotePort": 443
@@ -147,13 +147,9 @@ export function connect() {
 
     socket.evtClose.attachOnce( async () => {
 
-        console.log("connection evtClose!");
-
         for( const userSim of userSims || [] ){
 
             userSim.isOnline = false;
-
-            console.log("post offline");
 
             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
 
@@ -165,13 +161,9 @@ export function connect() {
 
         while( !navigator.onLine ){
 
-            console.log("navigator offline ...");
-
             await new Promise(resolve => setTimeout(resolve, 1000));
 
         }
-
-        console.log("re connect!");
 
         connect();
 

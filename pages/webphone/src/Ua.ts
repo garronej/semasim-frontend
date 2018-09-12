@@ -82,8 +82,6 @@ export class Ua {
             ),
             () => {
 
-                console.log("UA registered");
-
                 this.isRegistered = true;
 
                 this.evtRegistrationStateChanged.post(true);
@@ -91,21 +89,7 @@ export class Ua {
             }
         );
 
-        /*
-        this.jsSipUa.on("registered", () =>{
-            
-            console.log("UA registered");
-
-            this.isRegistered= true;
-
-            this.evtRegistrationStateChanged.post(true);
-
-        });
-        */
-
         this.jsSipUa.on("unregistered", () => {
-
-            console.log("UA unregistered");
 
             this.isRegistered = false;
 
@@ -131,30 +115,11 @@ export class Ua {
 
         this.jsSipUa.start();
 
-
-        /*
-        this.jsSipUa.on("connecting", ({ socket, attempts }) => console.log(`connecting attempts: ${attempts}`));
-        this.jsSipUa.on("connected", ({ socket }) => console.log("connected"));
-        this.jsSipUa.on("disconnected", () => console.log("disconnected"));
-        this.jsSipUa.on("registrationFailed", ({ response, cause }) => console.log("registrationFailed", { response, cause }));
-        this.jsSipUa.on("registrationExpiring", () => console.log("registrationExpiring"));
-        */
-
-        this.jsSipUa.on("connecting", () => console.log(`UA connecting`));
-        this.jsSipUa.on("connected", () => console.log("UA connected"));
-        this.jsSipUa.on("disconnected", () => console.log("UA disconnected"));
-        this.jsSipUa.on("registrationFailed", () => console.log("UA registrationFailed"));
-        this.jsSipUa.on("registrationExpiring", () => console.log("UA registrationExpiring"));
-
     }
 
     public isRegistered = false;
 
-    //TODO: Test!
     public register() {
-
-        console.log("UA calling register, current isRegistered: " + this.isRegistered);
-
         this.jsSipUa.register();
     }
 
@@ -163,11 +128,7 @@ export class Ua {
      * Assert no packet will arrive to this UA until next register.
      * */
     public unregister() {
-
-        console.log("UA calling unregister, current isRegistered: " + this.isRegistered);
-
         this.jsSipUa.emit("unregistered");
-
     }
 
     public readonly evtIncomingMessage = new SyncEvent<{
