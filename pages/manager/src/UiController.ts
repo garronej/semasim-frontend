@@ -1,4 +1,5 @@
 
+import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
@@ -21,10 +22,28 @@ export class UiController {
 
     private readonly uiButtonBar = new UiButtonBar();
 
-    private readonly uiShareSim = new UiShareSim();
+    private readonly uiShareSim = new UiShareSim(
+        (()=>{
+
+            const evt = new SyncEvent<{ 
+                userSim: types.UserSim.Owned;
+                email: string;
+            }>();
+
+            localApiHandlers.evtSharingRequestResponse.attach(
+                ({ userSim, email })=> evt.post({ userSim, email })
+            );
+
+            localApiHandlers.evtSharedSimUnregistered.attach(
+                ({ userSim, email })=> evt.post({ userSim, email })
+            );
+
+            return evt;
+
+        })()
+    );
 
     private readonly uiSimRows: UiSimRow[] =[];
-
 
     private setPlaceholder(placeholder: "MAIN" | "NO SIM"){
 
@@ -117,7 +136,6 @@ export class UiController {
 
     private async removeUserSim(userSim: types.UserSim.Usable) {
 
-
         const uiSimRow = this.uiSimRows.find(uiSimRow => uiSimRow.userSim === userSim)!;
 
         if (this.uiButtonBar.state.isSimRowSelected) {
@@ -131,6 +149,8 @@ export class UiController {
                     "areDetailsShown": false
                 });
 
+                uiSimRow.unselect();
+
             }
 
         }
@@ -143,18 +163,25 @@ export class UiController {
 
         }
 
-
     }
 
     constructor() {
+
+        this.structure.find(".id_placeholder_no_sim").hide();
 
         this.initUiButtonBar();
 
         this.initUiShareSim();
 
-        this.setPlaceholder("NO SIM");
-
         remoteApiCaller.getUsableUserSims().then(userSims => {
+
+            if( userSims.length === 0 ){
+
+                this.setPlaceholder("NO SIM");
+
+                return;
+
+            }
 
             for (const userSim of userSims) {
 

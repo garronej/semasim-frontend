@@ -57,7 +57,18 @@ export class UiShareSim {
 
     }
 
-    constructor() {
+    /** 
+     * The evt argument should post be posted whenever.
+     * -An user accept a sharing request.
+     * -An user reject a sharing request.
+     * -An user unregistered a shared sim.
+     */
+    constructor(
+        private readonly evt: SyncEvent<{
+            userSim: types.UserSim.Owned;
+            email: string;
+        }>
+    ) {
 
         this.structure.modal({
             "keyboard": false,
@@ -147,6 +158,8 @@ export class UiShareSim {
 
     public open(userSim: types.UserSim.Owned): void {
 
+        this.evt.detach(this);
+
         this.currentUserSim = userSim;
 
         this.textareaMessage.html([
@@ -213,6 +226,40 @@ export class UiShareSim {
 
                 divRow.on("click", () => onRowClick(divRow));
 
+                this.evt.attach(
+                    ({ userSim, email: email_ }) => (
+                        userSim === this.currentUserSim &&
+                        email_ === email
+                    ),
+                    this,
+                    () => {
+
+                        if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0 ) {
+
+                            divRow.find(".id_isConfirmed")
+                                .removeClass("color-yellow")
+                                .text("confirmed")
+                                .addClass("color-green")
+                                ;
+
+                        } else {
+
+                            divRow.remove();
+
+                            if (
+                                userSim.ownership.sharedWith.confirmed.length === 0 &&
+                                userSim.ownership.sharedWith.notConfirmed.length === 0
+                            ) {
+
+                                this.divsToHideIfNotShared.hide();
+
+                            }
+
+                        }
+
+                    }
+                );
+
                 this.divListContainer.append(divRow);
 
             };
@@ -230,7 +277,6 @@ export class UiShareSim {
             }
 
             onRowClick();
-
 
         }
 

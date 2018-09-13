@@ -74,8 +74,8 @@ export function connect() {
         "connection": true,
         "error": true,
         "close": true,
-        "incomingTraffic": false,
-        "outgoingTraffic": false,
+        "incomingTraffic": true,
+        "outgoingTraffic": true,
         "ignoreApiTraffic": true
     }, console.log.bind(console));
 

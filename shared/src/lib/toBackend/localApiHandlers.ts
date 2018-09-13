@@ -594,7 +594,7 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
             evtSharingRequestResponse.post({ userSim, email, isAccepted });
 
-            console.log({ methodName });
+            bootbox_custom.alert(`${email} ${isAccepted?"accepted":"rejected"} your sharing request for ${userSim.friendlyName}`);
 
             return undefined;
 
@@ -629,7 +629,7 @@ export const evtSharedSimUnregistered = new SyncEvent<{
 
             evtSharedSimUnregistered.post({ userSim, email });
 
-            console.log({ methodName });
+            bootbox_custom.alert(`${email} no longer share ${userSim.friendlyName}`);
 
             return undefined;
 
