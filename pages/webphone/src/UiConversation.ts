@@ -68,6 +68,10 @@ export class UiConversation {
 
     }
 
+    public readonly evtLoadMore= new SyncEvent<{
+        onLoaded: (wdMessages: wd.Message[])=> void;
+    }>();
+
     constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdChat: wd.Chat
@@ -124,7 +128,35 @@ export class UiConversation {
             "railVisible": true,
             "height": '400px',
             "start": "bottom"
-        });
+        }).bind("slimscroll", ((e_, pos)=> {
+
+            if( pos !== "top" ){
+                return;
+            }
+
+            this.evtLoadMore.post({
+                "onLoaded": wdMessages => {
+
+                    if( wdMessages.length === 0 ){
+                        return;
+                    }
+
+                    const li = this.ul.find("li:first");
+
+
+                    for( const wdMessage of wdMessages ){
+                        this.newMessage(wdMessage, "MUTE");
+                    }
+
+
+                    this.ul.slimScroll({ "scrollTo": `${li.position().top}px` });
+
+
+                }
+            });
+
+        }) as any);
+
 
 
         for (let wdMessage of this.wdChat.messages) {
@@ -143,7 +175,7 @@ export class UiConversation {
             "duration": 0,
             "complete": () => {
 
-                this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
+                this.ul.slimScroll({ "scrollTo": `${this.ul.prop("scrollHeight")}px` });
 
                 this.textarea.trigger("focus");
 
@@ -191,8 +223,11 @@ export class UiConversation {
     /** indexed but wd.Message.id_ */
     private readonly uiBubbles = new Map<number, UiBubble>();
 
-    /** Place uiBubble in the structure, assume all bubbles already sorted */
-    private placeUiBubble(uiBubble: UiBubble) {
+    /** 
+     * Place uiBubble in the structure, assume all bubbles already sorted 
+     * return true if the bubble is the last <li> of the <ul>
+     * */
+    private placeUiBubble(uiBubble: UiBubble): boolean {
 
         const getUiBubbleFromStructure = (li_elem: HTMLElement): UiBubble => {
 
@@ -223,13 +258,15 @@ export class UiConversation {
 
                 uiBubble.structure.insertAfter(uiBubble_i.structure);
 
-                return;
+                return i === lis.length - 1;
 
             }
 
         }
 
         this.ul.prepend(uiBubble.structure);
+
+        return false;
 
     }
 
@@ -281,13 +318,11 @@ export class UiConversation {
 
         this.uiBubbles.set(wdMessage.id_, uiBubble);
 
-        this.placeUiBubble(uiBubble);
+        const isAtBottom= this.placeUiBubble(uiBubble);
 
-        if (this.isSelected) {
+        if( this.isSelected && isAtBottom ){
 
-            this.ul.slimScroll({
-                "scrollTo": this.ul.prop("scrollHeight")
-            });
+            this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
 
         }
 

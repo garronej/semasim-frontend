@@ -644,6 +644,11 @@ export class UiWebphoneController {
 
         });
 
+        uiConversation.evtLoadMore.attach(({ onLoaded }) =>
+            remoteApiCaller.fetchOlderWdMessages(wdChat)
+                .then(wdMessages => onLoaded(wdMessages))
+        );
+
     }
 
     private async getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<wd.Chat> {

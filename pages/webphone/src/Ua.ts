@@ -119,6 +119,7 @@ export class Ua {
 
     public isRegistered = false;
 
+    //TODO: If no response to register do something
     public register() {
         this.jsSipUa.register();
     }
