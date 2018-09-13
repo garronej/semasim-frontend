@@ -653,6 +653,8 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
             evtOpenElsewhere.post();
 
+            bootbox_custom.alert("This session is over, only one semasim web browser tab can be active.");
+
             console.log({ methodName });
 
             return undefined;

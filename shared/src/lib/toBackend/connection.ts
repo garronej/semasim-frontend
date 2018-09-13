@@ -27,6 +27,7 @@ export const evtConnect = new SyncEvent<sip.Socket>();
 
 export function connect() {
 
+    //We register 'offline' event only on the first call of connect()
     if( socketCurrent === undefined ){
 
         window.addEventListener("offline", () => {
