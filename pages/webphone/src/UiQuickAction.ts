@@ -1,7 +1,7 @@
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
-import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
+import { phoneNumber } from "phone-number";
 
 declare const require: any;
 

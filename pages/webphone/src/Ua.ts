@@ -1,5 +1,5 @@
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
+import { phoneNumber } from "phone-number";
 import * as types from "../../../shared/dist/lib/types";
 import {
     types as gwTypes,

@@ -37,7 +37,6 @@ export namespace notifyContactCreatedOrUpdated {
         imsi: string;
         name: string;
         number_raw: string;
-        number_local_format: string;
         storage?: { 
             mem_index: number; 
             name_as_stored: string; 

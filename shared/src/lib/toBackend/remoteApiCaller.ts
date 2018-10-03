@@ -3,8 +3,8 @@ import * as sipLibrary from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as apiDeclaration from "../../sip_api_declarations/backendToUa";
 import * as connection from "./connection";
-import { phoneNumber } from "../phoneNumber";
 import { types as gwTypes } from "../../semasim-gateway";
+import { phoneNumber } from "phone-number";
 import * as types from "../types";
 import wd = types.webphoneData;
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
@@ -13,37 +13,39 @@ import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export const evtUsableSim = new SyncEvent<types.UserSim.Usable>();
 
+//TODO: Fix, it's called two times!!
 export const getUsableUserSims = (() => {
 
     const methodName = apiDeclaration.getUsableUserSims.methodName;
     type Params = apiDeclaration.getUsableUserSims.Params;
     type Response = apiDeclaration.getUsableUserSims.Response;
 
-    let usableUserSims: types.UserSim.Usable[] | undefined = undefined;
+    let prUsableUserSims: Promise<types.UserSim.Usable[]> | undefined = undefined;
 
     /** 
      * The stateless argument is used to re fetch the userSim from the server regardless
-     * of if it have been done previously already.
-     * Will return a new array.
+     * of if it have been done previously already, it will return a new array.
+     * If the 'stateless' argument is omitted then the returned value is static. 
+     * ( only one request is sent to the server )
      */
-    return async (stateless: false | "STATELESS" = false): Promise<types.UserSim.Usable[]> => {
+    return (stateless: false | "STATELESS" = false): Promise<types.UserSim.Usable[]> => {
 
-        if (!stateless && !!usableUserSims) {
-            return usableUserSims;
+        if (!stateless && !!prUsableUserSims) {
+            return prUsableUserSims;
         }
 
-        const usableUserSims_ = await sendRequest<Params, Response>(
+        const prUsableUserSims_ =  sendRequest<Params, Response>(
             methodName,
             undefined
         );
 
         if (!!stateless) {
 
-            return usableUserSims_;
+            return prUsableUserSims_;
 
         } else {
 
-            usableUserSims = usableUserSims_;
+            prUsableUserSims = prUsableUserSims_;
 
             return getUsableUserSims();
 
@@ -315,15 +317,14 @@ export const createContact = (() => {
         );
 
         const contact: types.UserSim.Contact = {
-            "mem_index": ("new_digest" in resp) ? resp.mem_index : undefined,
+            "mem_index": !!resp ? resp.mem_index : undefined,
             name,
-            "number_raw": number,
-            "number_local_format": resp.number_local_format
+            "number_raw": number
         };
 
         userSim.phonebook.push(contact);
 
-        if ("new_digest" in resp) {
+        if (!!resp) {
 
             userSim.sim.storage.contacts.push({
                 "index": resp.mem_index,

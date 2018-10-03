@@ -98,7 +98,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
     type Response = apiDeclaration.notifyContactCreatedOrUpdated.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
-        "handler": async ({ imsi, name, number_raw, number_local_format, storage }) => {
+        "handler": async ({ imsi, name, number_raw, storage }) => {
 
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
@@ -120,7 +120,6 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
 
                 if (!!storage) {
 
-
                     userSim.sim.storage.contacts
                         .find(({ index }) => index === storage.mem_index)!.name =
                         storage.name_as_stored;
@@ -129,9 +128,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
 
             } else {
 
-                contact = {
-                    name, number_raw, number_local_format
-                };
+                contact = { name, number_raw };
 
                 userSim.phonebook.push(contact);
 

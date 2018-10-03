@@ -20,7 +20,8 @@
     "moment": "^2.20.1",
     "run-exclusive": "github:garronej/run-exclusive",
     "ts-events-extended": "github:garronej/ts-events-extended",
-    "ts-sip": "github:garronej/ts-sip"
+    "ts-sip": "github:garronej/ts-sip",
+    "phone-number": "github:garronej/phone-number"
   },
   "devDependencies": {
     "concurrently": "^3.5.1",

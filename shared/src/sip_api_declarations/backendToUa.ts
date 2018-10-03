@@ -145,12 +145,9 @@ export namespace createContact {
     //TODO: changed, update on server
     export type Response = {
         mem_index: number;
-        number_local_format: string;
         name_as_stored_in_sim: string;
         new_digest: string;
-    } | {
-        number_local_format: string;
-    };
+    } | undefined;
 
 
 }

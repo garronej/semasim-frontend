@@ -10,7 +10,7 @@ import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import { phoneNumber } from "../../../shared/dist/lib/phoneNumber";
+import { phoneNumber } from "phone-number";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
 declare const require: any;

@@ -56,7 +56,6 @@ export namespace UserSim {
         mem_index?: number;
         name: string;
         number_raw: string;
-        number_local_format: string;
     };
 
     export type GatewayLocation = {
