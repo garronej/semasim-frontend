@@ -136,3 +136,19 @@ export namespace notifyLoggedFromOtherTab {
     export type Response = undefined;
 
 }
+
+export namespace notifyIceServer {
+
+    export const methodName = "notifyIceServer";
+
+    export type Params = {
+        urls: string[];
+        username: string;
+        credential: string;
+        credentialType: "password";
+    };
+
+    export type Response = undefined;
+
+}
+

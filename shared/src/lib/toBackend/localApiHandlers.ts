@@ -663,4 +663,46 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
 }
 
+export const iceServers: RTCIceServer[] = [
+    {
+        "urls": [
+            "stun:stun1.l.google.com:19302",
+            "stun:stun2.l.google.com:19302",
+            "stun:stun3.l.google.com:19302",
+            "stun:stun4.l.google.com:19302"
+        ] 
+    }
+];
 
+{
+
+    const methodName = apiDeclaration.notifyIceServer.methodName;
+    type Params = apiDeclaration.notifyIceServer.Params;
+    type Response = apiDeclaration.notifyIceServer.Response;
+
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async params => {
+
+            /*
+            if( iceServers.length != 1 ){
+                iceServers.shift();
+            }
+
+            iceServers.unshift(params);
+
+            console.log(JSON.stringify(iceServers, null, 2));
+            */
+
+            iceServers.pop()
+            iceServers.push(params);
+
+            console.log(JSON.stringify(iceServers, null, 2));
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}

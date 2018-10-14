@@ -12,16 +12,19 @@ import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 
 declare const JsSIP: any;
 declare const Buffer: any;
 
-//JsSIP.debug.enable("JsSIP:*");
-JsSIP.debug.disable("JsSIP:*");
+JsSIP.debug.enable("JsSIP:*");
+//JsSIP.debug.disable("JsSIP:*");
 
+/*
 const pcConfig: RTCConfiguration = {
     "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
 };
+*/
 
 export class Ua {
 
@@ -29,12 +32,12 @@ export class Ua {
     public static instanceId: string;
 
     /** Must be called in webphone.ts */
-    public static async init(): Promise<void>{
+    public static async init(): Promise<void> {
 
-        const { email , uaInstanceId }= await remoteApiCaller.getUaInstanceIdAndEmail();
+        const { email, uaInstanceId } = await remoteApiCaller.getUaInstanceIdAndEmail();
 
-        this.email= email;
-        this.instanceId= uaInstanceId;
+        this.email = email;
+        this.instanceId = uaInstanceId;
 
     }
 
@@ -55,18 +58,16 @@ export class Ua {
 
         const uri = `sip:${imsi}-webRTC@semasim.com`;
 
-        this.jsSipSocket= new JsSipSocket(imsi, uri);
+        this.jsSipSocket = new JsSipSocket(imsi, uri);
 
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,
             "authorization_user": imsi,
             "password": this.userSim.password,
-            "instance_id": Ua.instanceId,
+            "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)![1],
             "register": false,
             "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}`,
-            //"connection_recovery_min_interval": 86400,
-            //"connection_recovery_max_interval": 86400,
             "register_expires": 345600
         });
 
@@ -270,7 +271,7 @@ export class Ua {
 
             jsSipRtcSession.answer({
                 "mediaConstraints": { "audio": true, "video": false },
-                pcConfig
+                "pcConfig": { "iceServers": localApiHandlers.iceServers }
             });
 
             (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
@@ -330,7 +331,7 @@ export class Ua {
             `sip:${number}@semasim.com`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
-                pcConfig,
+                "pcConfig": { "iceServers": localApiHandlers.iceServers },
                 "eventHandlers": {
                     "connecting": function () {
 
