@@ -242,7 +242,7 @@ export class UiWebphoneController {
                         }
                         case "STATUS REPORT": {
 
-                            if (bundledData.messageTowardGsm.uaSim.ua.instance === `"<urn:${Ua.instanceId}>"`) {
+                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.instanceId ) {
 
                                 return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
 

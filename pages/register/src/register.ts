@@ -88,11 +88,12 @@ function setHandlers(){
 
 function handleQueryString(){
 
-    let emailAsHex= getURLParameter("email-as-hex");
+    const emailAsHex= getURLParameter("email-as-hex");
 
     if( emailAsHex ){
 
-        $("#email").val( Buffer.from(emailAsHex, "hex").toString("uft8") );
+		$("#email").val( Buffer.from(emailAsHex, "hex").toString("utf8") );
+		$("#email").prop("readonly", true);
 
     }
 

@@ -17,8 +17,8 @@ import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHa
 declare const JsSIP: any;
 declare const Buffer: any;
 
-JsSIP.debug.enable("JsSIP:*");
-//JsSIP.debug.disable("JsSIP:*");
+//JsSIP.debug.enable("JsSIP:*");
+JsSIP.debug.disable("JsSIP:*");
 
 /*
 const pcConfig: RTCConfiguration = {
