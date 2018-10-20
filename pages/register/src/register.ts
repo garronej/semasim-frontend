@@ -3,6 +3,7 @@ import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
 declare const Buffer: any;
+declare const Cookies: any;
 
 function setHandlers(){
 
@@ -70,13 +71,15 @@ function setHandlers(){
                 break;
 
             case "CREATED":
-            case "CREATED NO ACTIVATION REQUIRED":
+			case "CREATED NO ACTIVATION REQUIRED":
+
+				Cookies.set("password", password, { "expires": 1 });
 
                 window.location.href = "/login?" + [
                     regStatus === "CREATED NO ACTIVATION REQUIRED" ?
                         undefined : `activation-code=__prompt__`,
                     `email-as-hex=${Buffer.from(email, "utf8").toString("hex")}`,
-                    `password-as-hex=${Buffer.from(password, "utf8").toString("hex")}`
+                    //`password-as-hex=${Buffer.from(password, "utf8").toString("hex")}`
                 ].filter(v => !!v).join("&");
 
                 break;

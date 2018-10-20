@@ -4,6 +4,7 @@ import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter"
 import { requestRenewPassword } from "./requestRenewPassword";
 
 declare const Buffer: any;
+declare const Cookies: any;
 
 function setHandlers() {
 
@@ -118,10 +119,14 @@ async function handleQueryString() {
 
 	}
 
-	const passwordAsHex = getURLParameter("password-as-hex");
+	const password= Cookies.get("password");
 
-	if (!!passwordAsHex) {
-		$("#password").val(Buffer.from(passwordAsHex, "hex").toString("utf8"));
+	if( !!password ){
+
+		Cookies.remove("password");
+
+		$("#password").val(password);
+
 	}
 
 	let activationCode = getURLParameter("activation-code");
@@ -186,7 +191,7 @@ async function handleQueryString() {
 
 	}
 
-	if (emailAsHex && passwordAsHex) {
+	if (emailAsHex && !!password) {
 
 		$("#login-form").submit();
 
