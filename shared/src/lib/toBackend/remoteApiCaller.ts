@@ -1055,7 +1055,7 @@ async function sendRequest<Params, Response>(
             await connection.get(),
             methodName,
             params,
-            { "timeout": 5 * 1000 }
+            { "timeout": 60 * 1000 }
         );
 
     } catch (error) {

@@ -29,9 +29,6 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
             evtSimIsOnlineStatusChange.post(userSim);
 
-            //TODO: Improve
-            console.log({ methodName });
-
             return undefined;
 
         }
@@ -73,8 +70,6 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
             userSim.gatewayLocation = gatewayLocation;
 
             evtSimIsOnlineStatusChange.post(userSim);
-
-            console.log({ methodName });
 
             return undefined;
 
@@ -156,8 +151,6 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
 
             evtContactCreatedOrUpdated.post({ userSim, contact });
 
-            console.log({ methodName });
-
             return undefined;
 
         }
@@ -221,8 +214,6 @@ export const evtContactDeleted = new SyncEvent<{
             }
 
             evtContactDeleted.post({ userSim, "contact": contact! });
-
-            console.log({ methodName });
 
             return undefined;
 
@@ -466,9 +457,6 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
             evtSimPermissionLost.post(userSim);
 
-            //TODO: Display notification
-            console.log(methodName);
-
             return undefined;
 
         }
@@ -652,8 +640,6 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
             bootbox_custom.alert("This session is over, only one semasim web browser tab can be active.");
 
-            console.log({ methodName });
-
             return undefined;
 
         }
@@ -683,20 +669,8 @@ export const iceServers: RTCIceServer[] = [
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async params => {
 
-            /*
-            if( iceServers.length != 1 ){
-                iceServers.shift();
-            }
-
-            iceServers.unshift(params);
-
-            console.log(JSON.stringify(iceServers, null, 2));
-            */
-
             iceServers.pop()
             iceServers.push(params);
-
-            console.log(JSON.stringify(iceServers, null, 2));
 
             return undefined;
 

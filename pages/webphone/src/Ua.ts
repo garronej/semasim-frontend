@@ -60,6 +60,7 @@ export class Ua {
 
         this.jsSipSocket = new JsSipSocket(imsi, uri);
 
+        //TODO: Try to find a way to put it outside the uri itself.
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,

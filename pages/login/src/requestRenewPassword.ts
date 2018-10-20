@@ -1,12 +1,12 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
-const bootbox: any = window["bootbox"];
 declare const Buffer: any;
 
 export async function requestRenewPassword() {
 
 	let email = await new Promise<string | null>(
-		resolve => bootbox.prompt({
+		resolve => bootbox_custom.prompt({
 			"title": "Account email?",
 			"inputType": "email",
 			"value": $("#email").val() || "",
@@ -22,14 +22,14 @@ export async function requestRenewPassword() {
 
 	if (isSuccess) {
 
-		bootbox.alert("An email that will let you renew your password have been sent to you");
+		bootbox_custom.alert("An email that will let you renew your password have been sent to you");
 
 	} else {
 
-		let shouldProceed = await new Promise<"RETRY" | "REGISTER" | "CANCEL">(
-			resolve => bootbox.dialog({
+		const shouldProceed = await new Promise<"RETRY" | "REGISTER" | "CANCEL">(
+			resolve => bootbox_custom.dialog({
 				"title": "Not found",
-				"message": `Account ${email} does not exist`,
+				"message": `Account '${email}' does not exist`,
 				"buttons": {
 					"cancel": {
 						"label": "Retry",

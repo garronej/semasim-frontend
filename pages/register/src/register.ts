@@ -49,18 +49,18 @@ function setHandlers(){
     });
     /* End code from template */
 
-    $("#register-form").on("submit", async function (event) {
+    $("#register-form").on("submit", async function(event) {
 
         event.preventDefault();
 
         if (!$(this).valid()) return;
 
-        let email= $("#email").val();
-        let password= $("#password").val();
+        let email = $("#email").val();
+        let password = $("#password").val();
 
-        let regStatus= await webApiCaller.registerUser( email, password );
+        let regStatus = await webApiCaller.registerUser(email, password);
 
-        switch( regStatus ){
+        switch (regStatus) {
             case "EMAIL NOT AVAILABLE":
 
                 bootbox_custom.alert(`Semasim account for ${email} has already been created`);
@@ -69,31 +69,32 @@ function setHandlers(){
 
                 break;
 
-            case "CREATED": 
+            case "CREATED":
+            case "CREATED NO ACTIVATION REQUIRED":
 
-                window.location.href= [
-                    "/login",
-                    "?",
-                    `email-as-hex=${ Buffer.from(email, "utf8").toString("hex") }`,
-                    "&",
-                    `password-as-hex=${ Buffer.from(password, "utf8").toString("hex") }`
-                ].join("");
+                window.location.href = "/login?" + [
+                    regStatus === "CREATED NO ACTIVATION REQUIRED" ?
+                        undefined : `activation-code=__prompt__`,
+                    `email-as-hex=${Buffer.from(email, "utf8").toString("hex")}`,
+                    `password-as-hex=${Buffer.from(password, "utf8").toString("hex")}`
+                ].filter(v => !!v).join("&");
 
                 break;
+
         }
 
     });
 
 }
 
-function handleQueryString(){
+function handleQueryString() {
 
-    const emailAsHex= getURLParameter("email-as-hex");
+    const emailAsHex = getURLParameter("email-as-hex");
 
-    if( emailAsHex ){
+    if (emailAsHex) {
 
-		$("#email").val( Buffer.from(emailAsHex, "hex").toString("utf8") );
-		$("#email").prop("readonly", true);
+        $("#email").val(Buffer.from(emailAsHex, "hex").toString("utf8"));
+        $("#email").prop("readonly", true);
 
     }
 

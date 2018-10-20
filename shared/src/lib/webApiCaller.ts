@@ -26,6 +26,7 @@ async function sendRequest<Params, Response>(
     );
 }
 
+
 export function registerUser(
     email: string,
     password: string
@@ -38,6 +39,22 @@ export function registerUser(
     return sendRequest<Params, Response>(
         methodName,
         { email, password }
+    );
+
+}
+
+export function validateEmail(
+    email: string,
+    activationCode: string
+) {
+
+    const methodName = apiDeclaration.validateEmail.methodName;
+    type Params = apiDeclaration.validateEmail.Params;
+    type Response = apiDeclaration.validateEmail.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        { email, activationCode }
     );
 
 }
@@ -83,6 +100,23 @@ export function sendRenewPasswordEmail(
     return sendRequest<Params, Response>(
         methodName,
         { email }
+    );
+
+}
+
+export function renewPassword(
+    email: string,
+    newPassword: string,
+    token: string
+) {
+
+    const methodName = apiDeclaration.renewPassword.methodName;
+    type Params = apiDeclaration.renewPassword.Params;
+    type Response = apiDeclaration.renewPassword.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        { email, newPassword, token }
     );
 
 }

@@ -66,7 +66,6 @@ export function connect() {
         })
     );
 
-    //TODO: Maybe move.
     socket.enableLogger({
         "socketId": idString,
         "remoteEndId": "BACKEND",
