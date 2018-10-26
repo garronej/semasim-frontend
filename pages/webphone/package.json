@@ -1,12 +1,12 @@
 {
   "name": "webphone-page",
   "version": "0.1.0",
-  "main": "./dist/webphone.js",
+  "main": "./dist/main.js",
   "scripts": {
     "build": "npm run tsc && npm run browserify",
     "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
-    "browserify": "node ./node_modules/browserify/bin/cmd . -o ../../static/webphone.js",
-    "watchify": "node ./node_modules/watchify/bin/cmd . -o ../../static/webphone.js",
+    "browserify": "node ./node_modules/browserify/bin/cmd . -o dist/webphone.js",
+    "watchify": "node ./node_modules/watchify/bin/cmd . -o dist/webphone.js",
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
     "watch": "npm run build && node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
   },

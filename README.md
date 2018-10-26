@@ -1,2 +1,6 @@
 # semasim-frontend
-Semasim frontend
+````bash
+npm run fetch-web-assets
+cd static && npm install --only=prod
+````
+

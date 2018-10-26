@@ -3,7 +3,7 @@ import * as sipLibrary from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as apiDeclaration from "../../sip_api_declarations/backendToUa";
 import * as connection from "./connection";
-import { types as gwTypes } from "../../semasim-gateway";
+import { types as gwTypes } from "../../gateway";
 import { phoneNumber } from "phone-number";
 import * as types from "../types";
 import wd = types.webphoneData;

@@ -1,12 +1,12 @@
 {
   "name": "register-page",
   "version": "0.1.0",
-  "main": "./dist/register.js",
+  "main": "./dist/main.js",
   "scripts": {
     "build": "npm run tsc && npm run browserify",
     "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
-    "browserify": "node ./node_modules/browserify/bin/cmd . -o ../../static/register.js",
-    "watchify": "node ./node_modules/watchify/bin/cmd . -o ../../static/register.js",
+    "browserify": "node ./node_modules/browserify/bin/cmd . -o dist/register.js",
+    "watchify": "node ./node_modules/watchify/bin/cmd . -o dist/register.js",
     "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
     "watch": "node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
   },

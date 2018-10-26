@@ -7,7 +7,7 @@ import {
     smuggleBundledDataInHeaders,
     urlSafeB64,
     readImsi
-} from "../../../shared/dist/semasim-gateway";
+} from "../../../shared/dist/gateway";
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
