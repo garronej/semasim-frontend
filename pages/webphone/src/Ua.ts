@@ -56,7 +56,7 @@ export class Ua {
 
         const { imsi } = userSim.sim;
 
-        const uri = `sip:${imsi}-webRTC@semasim.com`;
+        const uri = `sip:${imsi}-webRTC@${connection.baseDomain}`;
 
         this.jsSipSocket = new JsSipSocket(imsi, uri);
 
@@ -225,7 +225,7 @@ export class Ua {
 
         return new Promise<void>(
             (resolve, reject) => this.jsSipUa.sendMessage(
-                `sip:${number}@semasim.com`,
+                `sip:${number}@${connection.baseDomain}`,
                 text,
                 {
                     "contentType": "text/plain; charset=UTF-8",
@@ -329,7 +329,7 @@ export class Ua {
         const evtRingback = new VoidSyncEvent();
 
         this.jsSipUa.call(
-            `sip:${number}@semasim.com`,
+            `sip:${number}@${connection.baseDomain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 "pcConfig": { "iceServers": localApiHandlers.iceServers },
@@ -435,8 +435,8 @@ function playAudioStream(stream: MediaStream) {
 interface IjsSipSocket {
 
     via_transport: string;
-    url: string; /* "wss://www.semasim.com" */
-    sip_uri: string; /* `sip:${imsi}-webRTC@semasim.com` */
+    url: string; /* "wss://www.[dev.]semasim.com" */
+    sip_uri: string; /* `sip:${imsi}-webRTC@[dev.]semasim.com` */
 
     connect(): void;
     disconnect(): void;

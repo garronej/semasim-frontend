@@ -97,7 +97,7 @@ var Ua = /** @class */ (function () {
         /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var imsi = userSim.sim.imsi;
-        var uri = "sip:" + imsi + "-webRTC@semasim.com";
+        var uri = "sip:" + imsi + "-webRTC@" + connection.baseDomain;
         this.jsSipSocket = new JsSipSocket(imsi, uri);
         //TODO: Try to find a way to put it outside the uri itself.
         this.jsSipUa = new JsSIP.UA({
@@ -201,7 +201,7 @@ var Ua = /** @class */ (function () {
             }
             return out;
         })();
-        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@semasim.com", text, {
+        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + connection.baseDomain, text, {
             "contentType": "text/plain; charset=UTF-8",
             extraHeaders: extraHeaders,
             "eventHandlers": {
@@ -270,7 +270,7 @@ var Ua = /** @class */ (function () {
         var evtDtmf = new ts_events_extended_1.SyncEvent();
         var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
         var evtRingback = new ts_events_extended_1.VoidSyncEvent();
-        this.jsSipUa.call("sip:" + number + "@semasim.com", {
+        this.jsSipUa.call("sip:" + number + "@" + connection.baseDomain, {
             "mediaConstraints": { "audio": true, "video": false },
             "pcConfig": { "iceServers": localApiHandlers.iceServers },
             "eventHandlers": {
@@ -14535,8 +14535,9 @@ var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
-var hostname = window.location.href.split("/")[2];
-exports.url = "wss://" + hostname;
+/** semasim.com or dev.semasim.com */
+exports.baseDomain = window.location.href.split("/")[2].split(".")[1];
+exports.url = "wss://www." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
@@ -14560,7 +14561,7 @@ function connect() {
         });
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": hostname,
+        "remoteAddress": "www." + exports.baseDomain,
         "remotePort": 443
     });
     apiServer.startListening(socket);

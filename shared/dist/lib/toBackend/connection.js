@@ -49,8 +49,9 @@ var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
-var hostname = window.location.href.split("/")[2];
-exports.url = "wss://" + hostname;
+/** semasim.com or dev.semasim.com */
+exports.baseDomain = window.location.href.split("/")[2].split(".")[1];
+exports.url = "wss://www." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
@@ -74,7 +75,7 @@ function connect() {
         });
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": hostname,
+        "remoteAddress": "www." + exports.baseDomain,
         "remotePort": 443
     });
     apiServer.startListening(socket);

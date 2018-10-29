@@ -5,9 +5,10 @@ import * as localApiHandlers from "./localApiHandlers";
 import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
 
-const hostname = window.location.href.split("/")[2];
+/** semasim.com or dev.semasim.com */
+export const baseDomain = window.location.href.split("/")[2].split(".")[1];
 
-export const url = `wss://${hostname}`;
+export const url = `wss://www.${baseDomain}`;
 
 const idString = "toBackend";
 
@@ -50,7 +51,7 @@ export function connect() {
         new WebSocket(url, "SIP"),
         true,
         {
-            "remoteAddress": hostname,
+            "remoteAddress": `www.${baseDomain}`,
             "remotePort": 443
         }
     );
