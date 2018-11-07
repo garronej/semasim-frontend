@@ -50,7 +50,7 @@ var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 /** semasim.com or dev.semasim.com */
-exports.baseDomain = window.location.href.split("/")[2].split(".")[1];
+exports.baseDomain = window.location.href.match(/^https:\/\/www\.([^\/]+)/)[1];
 exports.url = "wss://www." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({

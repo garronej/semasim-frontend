@@ -451,7 +451,7 @@ var JsSipSocket = /** @class */ (function () {
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/gateway":67,"../../../shared/dist/lib/toBackend/connection":68,"../../../shared/dist/lib/toBackend/localApiHandlers":69,"../../../shared/dist/lib/toBackend/remoteApiCaller":70,"buffer":9,"phone-number":32,"run-exclusive":34,"ts-events-extended":45,"ts-sip":55}],2:[function(require,module,exports){
+},{"../../../shared/dist/gateway":73,"../../../shared/dist/lib/toBackend/connection":74,"../../../shared/dist/lib/toBackend/localApiHandlers":75,"../../../shared/dist/lib/toBackend/remoteApiCaller":76,"buffer":9,"phone-number":32,"run-exclusive":34,"ts-events-extended":40,"ts-sip":51}],2:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -781,7 +781,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../../../shared/dist/lib/types":73,"../templates/UiConversation.html":59,"../templates/UiConversation.less":60,"buffer":9,"moment":30,"phone-number":32,"ts-events-extended":45}],3:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../../../shared/dist/lib/types":79,"../templates/UiConversation.html":65,"../templates/UiConversation.less":66,"buffer":9,"moment":30,"phone-number":32,"ts-events-extended":40}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -836,7 +836,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../templates/UiHeader.html":61,"ts-events-extended":45}],4:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../templates/UiHeader.html":67,"ts-events-extended":40}],4:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -1053,7 +1053,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../../../shared/dist/lib/types":73,"../templates/UiPhonebook.html":62,"phone-number":32,"ts-events-extended":45}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../../../shared/dist/lib/types":79,"../templates/UiPhonebook.html":68,"phone-number":32,"ts-events-extended":40}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -1185,7 +1185,7 @@ var UiQuickAction = /** @class */ (function () {
 }());
 exports.UiQuickAction = UiQuickAction;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../templates/UiQuickAction.html":63,"phone-number":32,"ts-events-extended":45}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../templates/UiQuickAction.html":69,"phone-number":32,"ts-events-extended":40}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -1361,7 +1361,7 @@ var UiVoiceCall = /** @class */ (function () {
 }());
 exports.UiVoiceCall = UiVoiceCall;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../templates/UiVoiceCall.html":64,"phone-number":32,"ts-events-extended":45}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../templates/UiVoiceCall.html":70,"phone-number":32,"ts-events-extended":40}],7:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1952,7 +1952,7 @@ var UiWebphoneController = /** @class */ (function () {
 }());
 exports.UiWebphoneController = UiWebphoneController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":69,"../../../shared/dist/lib/toBackend/remoteApiCaller":70,"../../../shared/dist/lib/tools/bootbox_custom":71,"../../../shared/dist/lib/tools/loadUiClassHtml":72,"../templates/UiWebphoneController.html":65,"./Ua":1,"./UiConversation":2,"./UiHeader":3,"./UiPhonebook":4,"./UiQuickAction":5,"./UiVoiceCall":6,"phone-number":32,"ts-events-extended":45}],8:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":75,"../../../shared/dist/lib/toBackend/remoteApiCaller":76,"../../../shared/dist/lib/tools/bootbox_custom":77,"../../../shared/dist/lib/tools/loadUiClassHtml":78,"../templates/UiWebphoneController.html":71,"./Ua":1,"./UiConversation":2,"./UiHeader":3,"./UiPhonebook":4,"./UiQuickAction":5,"./UiVoiceCall":6,"phone-number":32,"ts-events-extended":40}],8:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -4087,7 +4087,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":11,"./custom/zalgo":12,"./maps/america":15,"./maps/rainbow":16,"./maps/random":17,"./maps/zebra":18,"./styles":19,"./system/supports-colors":21,"util":58}],11:[function(require,module,exports){
+},{"./custom/trap":11,"./custom/zalgo":12,"./maps/america":15,"./maps/rainbow":16,"./maps/random":17,"./maps/zebra":18,"./styles":19,"./system/supports-colors":21,"util":64}],11:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -10873,467 +10873,6 @@ exports.create = create;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"has":25}],36:[function(require,module,exports){
 "use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-exports.__esModule = true;
-var superJson = require("super-json");
-/** Support undefined and Date by default*/
-function get(serializers) {
-    if (serializers === void 0) { serializers = []; }
-    var myJson = superJson.create({
-        "magic": '#!',
-        "serializers": __spread([
-            superJson.dateSerializer
-        ], serializers)
-    });
-    return {
-        "stringify": function (obj) {
-            if (obj === undefined) {
-                return "undefined";
-            }
-            return myJson.stringify([obj]);
-        },
-        "parse": function (str) {
-            if (str === "undefined") {
-                return undefined;
-            }
-            return myJson.parse(str).pop();
-        }
-    };
-}
-exports.get = get;
-
-},{"super-json":35}],37:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var JSON_CUSTOM = require("./JSON_CUSTOM");
-exports.JSON_CUSTOM = JSON_CUSTOM;
-var stringTransform = require("./stringTransform");
-exports.stringTransform = stringTransform;
-var stringTransformExt = require("./stringTransformExt");
-exports.stringTransformExt = stringTransformExt;
-var testing = require("./testing");
-exports.testing = testing;
-
-},{"./JSON_CUSTOM":36,"./stringTransform":38,"./stringTransformExt":39,"./testing":40}],38:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-exports.__esModule = true;
-function safeBufferFromTo(str, fromEnc, toEnc) {
-    try {
-        return Buffer.from(str, fromEnc).toString(toEnc);
-    }
-    catch (_a) {
-        return (new Buffer(str, fromEnc)).toString(toEnc);
-    }
-}
-exports.safeBufferFromTo = safeBufferFromTo;
-function transcode(encoding, alphabetMap) {
-    if (alphabetMap === void 0) { alphabetMap = {}; }
-    var reverseAlphabetMap = {};
-    for (var char in alphabetMap) {
-        reverseAlphabetMap[alphabetMap[char]] = char;
-    }
-    return {
-        "enc": function (str) { return transcode.applyNewAlphabet(safeBufferFromTo(str, "utf8", encoding), alphabetMap); },
-        "dec": function (encStr) { return safeBufferFromTo(transcode.applyNewAlphabet(encStr, reverseAlphabetMap), encoding, "utf8"); }
-    };
-}
-exports.transcode = transcode;
-(function (transcode) {
-    var regExpCache = {};
-    function applyNewAlphabet(str, alphabetMap) {
-        for (var char in alphabetMap) {
-            var regExp = regExpCache[char];
-            if (!regExp) {
-                regExp = new RegExp("\\" + char, "g");
-                regExpCache[char] = regExp;
-            }
-            str = str.replace(regExp, alphabetMap[char]);
-        }
-        return str;
-    }
-    transcode.applyNewAlphabet = applyNewAlphabet;
-})(transcode = exports.transcode || (exports.transcode = {}));
-/**
- * partLength correspond to string length not byte
- * but in base 64 all char are ascii so partMaxLength <=> partMaxBytes
- **/
-function textSplit(partMaxLength, text) {
-    var parts = [];
-    var rest = text;
-    while (rest) {
-        if (partMaxLength >= rest.length) {
-            parts.push(rest);
-            rest = "";
-        }
-        else {
-            parts.push(rest.substring(0, partMaxLength));
-            rest = rest.substring(partMaxLength, rest.length);
-        }
-    }
-    return parts;
-}
-exports.textSplit = textSplit;
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":9}],39:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var stringTransform_1 = require("./stringTransform");
-/**
- * Assuming there is an index n in [ 0 ... lastIndex ] such as
- * for all i <= n condition(i) is true
- * and for all i > n condition(i) is false
- * this function find n
- */
-function findLastIndexFulfilling(condition, lastIndex) {
-    if (lastIndex < 0) {
-        throw Error("range error");
-    }
-    if (!condition(0)) {
-        throw Error("no index fullfil the condition");
-    }
-    return (function callee(fromIndex, toIndex) {
-        if (fromIndex === toIndex) {
-            return fromIndex;
-        }
-        else if (fromIndex + 1 === toIndex) {
-            if (condition(toIndex)) {
-                return toIndex;
-            }
-            else {
-                return fromIndex;
-            }
-        }
-        else {
-            var length_1 = toIndex - fromIndex + 1;
-            var halfLength = Math.floor(length_1 / 2);
-            var middleIndex = fromIndex + halfLength;
-            if (condition(middleIndex)) {
-                return callee(middleIndex, toIndex);
-            }
-            else {
-                return callee(fromIndex, middleIndex);
-            }
-        }
-    })(0, lastIndex);
-}
-exports.findLastIndexFulfilling = findLastIndexFulfilling;
-function b64crop(partMaxLength, text) {
-    var _a = stringTransform_1.transcode("base64"), enc = _a.enc, dec = _a.dec;
-    var isNotTooLong = function (index) {
-        var part = text.substring(0, index);
-        var encPart = enc(part);
-        return encPart.length <= partMaxLength;
-    };
-    //99.9% of the cases for SMS
-    if (isNotTooLong(text.length)) {
-        return enc(text.substring(0, text.length));
-    }
-    var index = findLastIndexFulfilling(isNotTooLong, text.length);
-    while (true) {
-        var part = text.substring(0, index);
-        var rest = text.substring(index, text.length);
-        if ((dec(enc(part)) + dec(enc(rest))) !== dec(enc(text))) {
-            index--;
-        }
-        else {
-            return enc(part + "[...]");
-        }
-    }
-}
-exports.b64crop = b64crop;
-
-},{"./stringTransform":38}],40:[function(require,module,exports){
-"use strict";
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-exports.__esModule = true;
-var stringTransform_1 = require("./stringTransform");
-/** Compare if two object represent the same data, [ "ok", "foo" ] <=> [ "foo", "ok" ] */
-function assertSame(o1, o2, errorMessage) {
-    if (errorMessage === void 0) { errorMessage = "assertSame error"; }
-    try {
-        assertSame.perform(o1, o2);
-    }
-    catch (e) {
-        var error = new Error(errorMessage + " (" + e.message + ")");
-        error["o1"] = o1;
-        error["o2"] = o2;
-        throw error;
-    }
-}
-exports.assertSame = assertSame;
-(function (assertSame) {
-    assertSame.handleArrayAsSet = true;
-    function perform(o1, o2) {
-        if (o1 instanceof Date) {
-            if (!(o2 instanceof Date)) {
-                console.assert(false, "M0");
-                return;
-            }
-            console.assert(o1.getTime() === o2.getTime(), "Date mismatch");
-        }
-        else if (o1 instanceof Object) {
-            console.assert(o2 instanceof Object, "M1");
-            if (assertSame.handleArrayAsSet && o1 instanceof Array) {
-                if (!(o2 instanceof Array)) {
-                    console.assert(false, "M2");
-                    return;
-                }
-                console.assert(o1.length === o2.length, "M3");
-                var o2Set = new Set(o2);
-                try {
-                    for (var o1_1 = __values(o1), o1_1_1 = o1_1.next(); !o1_1_1.done; o1_1_1 = o1_1.next()) {
-                        var val1 = o1_1_1.value;
-                        var isFound = false;
-                        try {
-                            for (var o2Set_1 = __values(o2Set), o2Set_1_1 = o2Set_1.next(); !o2Set_1_1.done; o2Set_1_1 = o2Set_1.next()) {
-                                var val2 = o2Set_1_1.value;
-                                try {
-                                    perform(val1, val2);
-                                }
-                                catch (_a) {
-                                    continue;
-                                }
-                                isFound = true;
-                                o2Set["delete"](val2);
-                                break;
-                            }
-                        }
-                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                        finally {
-                            try {
-                                if (o2Set_1_1 && !o2Set_1_1.done && (_b = o2Set_1["return"])) _b.call(o2Set_1);
-                            }
-                            finally { if (e_1) throw e_1.error; }
-                        }
-                        console.assert(isFound, "M4");
-                    }
-                }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                finally {
-                    try {
-                        if (o1_1_1 && !o1_1_1.done && (_c = o1_1["return"])) _c.call(o1_1);
-                    }
-                    finally { if (e_2) throw e_2.error; }
-                }
-            }
-            else {
-                if (o1 instanceof Array) {
-                    if (!(o2 instanceof Array)) {
-                        console.assert(false, "M5");
-                        return;
-                    }
-                    console.assert(o1.length === o2.length, "M6");
-                }
-                else {
-                    perform(Object.keys(o1).filter(function (key) { return o1[key] !== undefined; }), Object.keys(o2).filter(function (key) { return o2[key] !== undefined; }));
-                }
-                for (var key in o1) {
-                    perform(o1[key], o2[key]);
-                }
-            }
-        }
-        else {
-            console.assert(o1 === o2, o1 + " !== " + o2);
-        }
-        var e_2, _c, e_1, _b;
-    }
-    assertSame.perform = perform;
-})(assertSame = exports.assertSame || (exports.assertSame = {}));
-/** ex 123320 */
-exports.genDigits = function (n) {
-    return (new Array(n))
-        .fill("")
-        .map(function () { return "" + ~~(Math.random() * 10); })
-        .join("");
-};
-/** Hex str to lower char */
-exports.genHexStr = function (n) { return (new Array(n))
-    .fill("")
-    .map(function () { return (~~(Math.random() * 0x10)).toString(16); })
-    .join(""); };
-/** Length is not Byte length but the number of char */
-function genUtf8Str(length, restrict) {
-    var charGenerator;
-    switch (restrict) {
-        case undefined:
-            charGenerator = genUtf8Str.genUtf8Char;
-            break;
-        case "ONLY 1 BYTE CHAR":
-            charGenerator = genUtf8Str.genUtf8Char1B;
-            break;
-        case "ONLY 4 BYTE CHAR":
-            charGenerator = genUtf8Str.genUtf8Char4B;
-            break;
-    }
-    return (new Array(length)).fill("").map(function () { return charGenerator(); }).join("");
-}
-exports.genUtf8Str = genUtf8Str;
-(function (genUtf8Str) {
-    /** "11110000" => "f0" */
-    function bitStrToHexStr(bin) {
-        var hexChars = [];
-        var i = 0;
-        while (bin[i] !== undefined) {
-            var fourBits = "" + bin[i] + bin[i + 1] + bin[i + 2] + bin[i + 3];
-            var hexChar = parseInt(fourBits, 2).toString(16);
-            hexChars.push(hexChar);
-            i = i + 4;
-        }
-        return hexChars.join("");
-    }
-    ;
-    /** 8 => "11010001"  */
-    function genBitStr(length) {
-        return (new Array(length)).fill("").map(function () { return "" + ~~(Math.random() * 2); }).join("");
-    }
-    /** throw error if hex does not represent a valid utf8 string */
-    function hexStrToUtf8Str(hex) {
-        var str = stringTransform_1.safeBufferFromTo(hex, "hex", "utf8");
-        if (stringTransform_1.safeBufferFromTo(str, "utf8", "hex") !== hex) {
-            throw new Error("Invalid UTF8 data");
-        }
-        return str;
-    }
-    /** return a random utf8 char that fit on one byte */
-    function genUtf8Char1B() {
-        var bin = "0" + genBitStr(7);
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char1B();
-        }
-    }
-    genUtf8Str.genUtf8Char1B = genUtf8Char1B;
-    genUtf8Str.genUtf8Char2B = function () {
-        var bin = "110" + genBitStr(5) + "10" + genBitStr(6);
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Str.genUtf8Char2B();
-        }
-    };
-    function genUtf8Char3B(rand) {
-        if (rand === undefined) {
-            rand = ~~(Math.random() * 8);
-        }
-        var bin;
-        switch (rand) {
-            case 0:
-                bin = "11100000101" + genBitStr(5) + "10" + genBitStr(6);
-                break;
-            case 1:
-                bin = "1110000110" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 2:
-                bin = "1110001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 3:
-                bin = "111001" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 4:
-                bin = "111010" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 5:
-                bin = "1110110010" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 6:
-                bin = "11101101100" + genBitStr(5) + "10" + genBitStr(6);
-                break;
-            case 7:
-                bin = "1110111" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-        }
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char3B();
-        }
-    }
-    genUtf8Str.genUtf8Char3B = genUtf8Char3B;
-    ;
-    function genUtf8Char4B(rand) {
-        if (rand === undefined) {
-            rand = ~~(Math.random() * 5);
-        }
-        var bin;
-        switch (rand) {
-            case 0:
-                bin = "111100001001" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 1:
-                bin = "11110000101" + genBitStr(5) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 2:
-                bin = "1111000110" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 3:
-                bin = "1111001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 4:
-                bin = "111101001000" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-        }
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char4B();
-        }
-    }
-    genUtf8Str.genUtf8Char4B = genUtf8Char4B;
-    ;
-    function genUtf8Char() {
-        var rand = ~~(Math.random() * 4);
-        switch (rand) {
-            case 0: return genUtf8Char1B();
-            case 1: return genUtf8Str.genUtf8Char2B();
-            case 2: return genUtf8Char3B();
-            case 3: return genUtf8Char4B();
-        }
-    }
-    genUtf8Str.genUtf8Char = genUtf8Char;
-    ;
-})(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
-
-},{"./stringTransform":38}],41:[function(require,module,exports){
-"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -11373,7 +10912,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":42}],42:[function(require,module,exports){
+},{"./SyncEventBase":37}],37:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -11591,7 +11130,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":43}],43:[function(require,module,exports){
+},{"./SyncEventBaseProtected":38}],38:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -11876,7 +11415,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":44,"run-exclusive":34}],44:[function(require,module,exports){
+},{"./defs":39,"run-exclusive":41}],39:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -11916,7 +11455,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{}],45:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -11925,7 +11464,9 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":41,"./defs":44}],46:[function(require,module,exports){
+},{"./SyncEvent":36,"./defs":39}],41:[function(require,module,exports){
+arguments[4][34][0].apply(exports,arguments)
+},{"dup":34}],42:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -12097,7 +11638,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":9,"ts-events-extended":45}],47:[function(require,module,exports){
+},{"buffer":9,"ts-events-extended":62}],43:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -12409,7 +11950,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":46,"./api/ApiMessage":48,"./core":52,"./misc":56,"colors":14,"ts-events-extended":45}],48:[function(require,module,exports){
+},{"./IConnection":42,"./api/ApiMessage":44,"./core":48,"./misc":52,"colors":14,"ts-events-extended":62}],44:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -12490,7 +12031,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":52,"../misc":56,"buffer":9,"transfer-tools":37}],49:[function(require,module,exports){
+},{"../core":48,"../misc":52,"buffer":9,"transfer-tools":54}],45:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12672,7 +12213,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":56,"./ApiMessage":48,"colors":14,"util":58}],50:[function(require,module,exports){
+},{"../misc":52,"./ApiMessage":44,"colors":14,"util":64}],46:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -12890,7 +12431,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":56,"./ApiMessage":48}],51:[function(require,module,exports){
+},{"../misc":52,"./ApiMessage":44}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -12898,7 +12439,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":49,"./client":50}],52:[function(require,module,exports){
+},{"./Server":45,"./client":46}],48:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -12981,7 +12522,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":53,"./core/sip":54,"buffer":9}],53:[function(require,module,exports){
+},{"./core/sdp":49,"./core/sip":50,"buffer":9}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -13097,7 +12638,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],54:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -13488,7 +13029,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],55:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -13500,7 +13041,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":47,"./api":51,"./core":52,"./misc":56}],56:[function(require,module,exports){
+},{"./Socket":43,"./api":47,"./core":48,"./misc":52}],52:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -13739,14 +13280,485 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":52,"buffer":9}],57:[function(require,module,exports){
+},{"./core":48,"buffer":9}],53:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var superJson = require("super-json");
+/** Support undefined and Date by default*/
+function get(serializers) {
+    if (serializers === void 0) { serializers = []; }
+    var myJson = superJson.create({
+        "magic": '#!',
+        "serializers": __spread([
+            superJson.dateSerializer
+        ], serializers)
+    });
+    return {
+        "stringify": function (obj) {
+            if (obj === undefined) {
+                return "undefined";
+            }
+            return myJson.stringify([obj]);
+        },
+        "parse": function (str) {
+            if (str === "undefined") {
+                return undefined;
+            }
+            return myJson.parse(str).pop();
+        }
+    };
+}
+exports.get = get;
+
+},{"super-json":35}],54:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var JSON_CUSTOM = require("./JSON_CUSTOM");
+exports.JSON_CUSTOM = JSON_CUSTOM;
+var stringTransform = require("./stringTransform");
+exports.stringTransform = stringTransform;
+var stringTransformExt = require("./stringTransformExt");
+exports.stringTransformExt = stringTransformExt;
+var testing = require("./testing");
+exports.testing = testing;
+
+},{"./JSON_CUSTOM":53,"./stringTransform":55,"./stringTransformExt":56,"./testing":57}],55:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+exports.__esModule = true;
+function safeBufferFromTo(str, fromEnc, toEnc) {
+    try {
+        return Buffer.from(str, fromEnc).toString(toEnc);
+    }
+    catch (_a) {
+        return (new Buffer(str, fromEnc)).toString(toEnc);
+    }
+}
+exports.safeBufferFromTo = safeBufferFromTo;
+function transcode(encoding, alphabetMap) {
+    if (alphabetMap === void 0) { alphabetMap = {}; }
+    var reverseAlphabetMap = {};
+    for (var char in alphabetMap) {
+        reverseAlphabetMap[alphabetMap[char]] = char;
+    }
+    return {
+        "enc": function (str) { return transcode.applyNewAlphabet(safeBufferFromTo(str, "utf8", encoding), alphabetMap); },
+        "dec": function (encStr) { return safeBufferFromTo(transcode.applyNewAlphabet(encStr, reverseAlphabetMap), encoding, "utf8"); }
+    };
+}
+exports.transcode = transcode;
+(function (transcode) {
+    var regExpCache = {};
+    function applyNewAlphabet(str, alphabetMap) {
+        for (var char in alphabetMap) {
+            var regExp = regExpCache[char];
+            if (!regExp) {
+                regExp = new RegExp("\\" + char, "g");
+                regExpCache[char] = regExp;
+            }
+            str = str.replace(regExp, alphabetMap[char]);
+        }
+        return str;
+    }
+    transcode.applyNewAlphabet = applyNewAlphabet;
+})(transcode = exports.transcode || (exports.transcode = {}));
+/**
+ * partLength correspond to string length not byte
+ * but in base 64 all char are ascii so partMaxLength <=> partMaxBytes
+ **/
+function textSplit(partMaxLength, text) {
+    var parts = [];
+    var rest = text;
+    while (rest) {
+        if (partMaxLength >= rest.length) {
+            parts.push(rest);
+            rest = "";
+        }
+        else {
+            parts.push(rest.substring(0, partMaxLength));
+            rest = rest.substring(partMaxLength, rest.length);
+        }
+    }
+    return parts;
+}
+exports.textSplit = textSplit;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":9}],56:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var stringTransform_1 = require("./stringTransform");
+/**
+ * Assuming there is an index n in [ 0 ... lastIndex ] such as
+ * for all i <= n condition(i) is true
+ * and for all i > n condition(i) is false
+ * this function find n
+ */
+function findLastIndexFulfilling(condition, lastIndex) {
+    if (lastIndex < 0) {
+        throw Error("range error");
+    }
+    if (!condition(0)) {
+        throw Error("no index fullfil the condition");
+    }
+    return (function callee(fromIndex, toIndex) {
+        if (fromIndex === toIndex) {
+            return fromIndex;
+        }
+        else if (fromIndex + 1 === toIndex) {
+            if (condition(toIndex)) {
+                return toIndex;
+            }
+            else {
+                return fromIndex;
+            }
+        }
+        else {
+            var length_1 = toIndex - fromIndex + 1;
+            var halfLength = Math.floor(length_1 / 2);
+            var middleIndex = fromIndex + halfLength;
+            if (condition(middleIndex)) {
+                return callee(middleIndex, toIndex);
+            }
+            else {
+                return callee(fromIndex, middleIndex);
+            }
+        }
+    })(0, lastIndex);
+}
+exports.findLastIndexFulfilling = findLastIndexFulfilling;
+function b64crop(partMaxLength, text) {
+    var _a = stringTransform_1.transcode("base64"), enc = _a.enc, dec = _a.dec;
+    var isNotTooLong = function (index) {
+        var part = text.substring(0, index);
+        var encPart = enc(part);
+        return encPart.length <= partMaxLength;
+    };
+    //99.9% of the cases for SMS
+    if (isNotTooLong(text.length)) {
+        return enc(text.substring(0, text.length));
+    }
+    var index = findLastIndexFulfilling(isNotTooLong, text.length);
+    while (true) {
+        var part = text.substring(0, index);
+        var rest = text.substring(index, text.length);
+        if ((dec(enc(part)) + dec(enc(rest))) !== dec(enc(text))) {
+            index--;
+        }
+        else {
+            return enc(part + "[...]");
+        }
+    }
+}
+exports.b64crop = b64crop;
+
+},{"./stringTransform":55}],57:[function(require,module,exports){
+"use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+exports.__esModule = true;
+var stringTransform_1 = require("./stringTransform");
+/** Compare if two object represent the same data, [ "ok", "foo" ] <=> [ "foo", "ok" ] */
+function assertSame(o1, o2, errorMessage) {
+    if (errorMessage === void 0) { errorMessage = "assertSame error"; }
+    try {
+        assertSame.perform(o1, o2);
+    }
+    catch (e) {
+        var error = new Error(errorMessage + " (" + e.message + ")");
+        error["o1"] = o1;
+        error["o2"] = o2;
+        throw error;
+    }
+}
+exports.assertSame = assertSame;
+(function (assertSame) {
+    assertSame.handleArrayAsSet = true;
+    function perform(o1, o2) {
+        if (o1 instanceof Date) {
+            if (!(o2 instanceof Date)) {
+                console.assert(false, "M0");
+                return;
+            }
+            console.assert(o1.getTime() === o2.getTime(), "Date mismatch");
+        }
+        else if (o1 instanceof Object) {
+            console.assert(o2 instanceof Object, "M1");
+            if (assertSame.handleArrayAsSet && o1 instanceof Array) {
+                if (!(o2 instanceof Array)) {
+                    console.assert(false, "M2");
+                    return;
+                }
+                console.assert(o1.length === o2.length, "M3");
+                var o2Set = new Set(o2);
+                try {
+                    for (var o1_1 = __values(o1), o1_1_1 = o1_1.next(); !o1_1_1.done; o1_1_1 = o1_1.next()) {
+                        var val1 = o1_1_1.value;
+                        var isFound = false;
+                        try {
+                            for (var o2Set_1 = __values(o2Set), o2Set_1_1 = o2Set_1.next(); !o2Set_1_1.done; o2Set_1_1 = o2Set_1.next()) {
+                                var val2 = o2Set_1_1.value;
+                                try {
+                                    perform(val1, val2);
+                                }
+                                catch (_a) {
+                                    continue;
+                                }
+                                isFound = true;
+                                o2Set["delete"](val2);
+                                break;
+                            }
+                        }
+                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                        finally {
+                            try {
+                                if (o2Set_1_1 && !o2Set_1_1.done && (_b = o2Set_1["return"])) _b.call(o2Set_1);
+                            }
+                            finally { if (e_1) throw e_1.error; }
+                        }
+                        console.assert(isFound, "M4");
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (o1_1_1 && !o1_1_1.done && (_c = o1_1["return"])) _c.call(o1_1);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+            }
+            else {
+                if (o1 instanceof Array) {
+                    if (!(o2 instanceof Array)) {
+                        console.assert(false, "M5");
+                        return;
+                    }
+                    console.assert(o1.length === o2.length, "M6");
+                }
+                else {
+                    perform(Object.keys(o1).filter(function (key) { return o1[key] !== undefined; }), Object.keys(o2).filter(function (key) { return o2[key] !== undefined; }));
+                }
+                for (var key in o1) {
+                    perform(o1[key], o2[key]);
+                }
+            }
+        }
+        else {
+            console.assert(o1 === o2, o1 + " !== " + o2);
+        }
+        var e_2, _c, e_1, _b;
+    }
+    assertSame.perform = perform;
+})(assertSame = exports.assertSame || (exports.assertSame = {}));
+/** ex 123320 */
+exports.genDigits = function (n) {
+    return (new Array(n))
+        .fill("")
+        .map(function () { return "" + ~~(Math.random() * 10); })
+        .join("");
+};
+/** Hex str to lower char */
+exports.genHexStr = function (n) { return (new Array(n))
+    .fill("")
+    .map(function () { return (~~(Math.random() * 0x10)).toString(16); })
+    .join(""); };
+/** Length is not Byte length but the number of char */
+function genUtf8Str(length, restrict) {
+    var charGenerator;
+    switch (restrict) {
+        case undefined:
+            charGenerator = genUtf8Str.genUtf8Char;
+            break;
+        case "ONLY 1 BYTE CHAR":
+            charGenerator = genUtf8Str.genUtf8Char1B;
+            break;
+        case "ONLY 4 BYTE CHAR":
+            charGenerator = genUtf8Str.genUtf8Char4B;
+            break;
+    }
+    return (new Array(length)).fill("").map(function () { return charGenerator(); }).join("");
+}
+exports.genUtf8Str = genUtf8Str;
+(function (genUtf8Str) {
+    /** "11110000" => "f0" */
+    function bitStrToHexStr(bin) {
+        var hexChars = [];
+        var i = 0;
+        while (bin[i] !== undefined) {
+            var fourBits = "" + bin[i] + bin[i + 1] + bin[i + 2] + bin[i + 3];
+            var hexChar = parseInt(fourBits, 2).toString(16);
+            hexChars.push(hexChar);
+            i = i + 4;
+        }
+        return hexChars.join("");
+    }
+    ;
+    /** 8 => "11010001"  */
+    function genBitStr(length) {
+        return (new Array(length)).fill("").map(function () { return "" + ~~(Math.random() * 2); }).join("");
+    }
+    /** throw error if hex does not represent a valid utf8 string */
+    function hexStrToUtf8Str(hex) {
+        var str = stringTransform_1.safeBufferFromTo(hex, "hex", "utf8");
+        if (stringTransform_1.safeBufferFromTo(str, "utf8", "hex") !== hex) {
+            throw new Error("Invalid UTF8 data");
+        }
+        return str;
+    }
+    /** return a random utf8 char that fit on one byte */
+    function genUtf8Char1B() {
+        var bin = "0" + genBitStr(7);
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char1B();
+        }
+    }
+    genUtf8Str.genUtf8Char1B = genUtf8Char1B;
+    genUtf8Str.genUtf8Char2B = function () {
+        var bin = "110" + genBitStr(5) + "10" + genBitStr(6);
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Str.genUtf8Char2B();
+        }
+    };
+    function genUtf8Char3B(rand) {
+        if (rand === undefined) {
+            rand = ~~(Math.random() * 8);
+        }
+        var bin;
+        switch (rand) {
+            case 0:
+                bin = "11100000101" + genBitStr(5) + "10" + genBitStr(6);
+                break;
+            case 1:
+                bin = "1110000110" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 2:
+                bin = "1110001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 3:
+                bin = "111001" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 4:
+                bin = "111010" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 5:
+                bin = "1110110010" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 6:
+                bin = "11101101100" + genBitStr(5) + "10" + genBitStr(6);
+                break;
+            case 7:
+                bin = "1110111" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+        }
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char3B();
+        }
+    }
+    genUtf8Str.genUtf8Char3B = genUtf8Char3B;
+    ;
+    function genUtf8Char4B(rand) {
+        if (rand === undefined) {
+            rand = ~~(Math.random() * 5);
+        }
+        var bin;
+        switch (rand) {
+            case 0:
+                bin = "111100001001" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 1:
+                bin = "11110000101" + genBitStr(5) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 2:
+                bin = "1111000110" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 3:
+                bin = "1111001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 4:
+                bin = "111101001000" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+        }
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char4B();
+        }
+    }
+    genUtf8Str.genUtf8Char4B = genUtf8Char4B;
+    ;
+    function genUtf8Char() {
+        var rand = ~~(Math.random() * 4);
+        switch (rand) {
+            case 0: return genUtf8Char1B();
+            case 1: return genUtf8Str.genUtf8Char2B();
+            case 2: return genUtf8Char3B();
+            case 3: return genUtf8Char4B();
+        }
+    }
+    genUtf8Str.genUtf8Char = genUtf8Char;
+    ;
+})(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
+
+},{"./stringTransform":55}],58:[function(require,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"./SyncEventBase":59,"dup":36}],59:[function(require,module,exports){
+arguments[4][37][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":60,"dup":37}],60:[function(require,module,exports){
+arguments[4][38][0].apply(exports,arguments)
+},{"./defs":61,"dup":38,"run-exclusive":34}],61:[function(require,module,exports){
+arguments[4][39][0].apply(exports,arguments)
+},{"dup":39}],62:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./SyncEvent":58,"./defs":61,"dup":40}],63:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -14336,21 +14348,21 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":57,"_process":33,"inherits":27}],59:[function(require,module,exports){
+},{"./support/isBuffer":63,"_process":33,"inherits":27}],65:[function(require,module,exports){
 module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"fa fa-wechat\"></i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary\" type=\"button\">\r\n            <i class=\"fa fa-users\"></i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-remove\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i class=\"fa fa-phone\"></i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],60:[function(require,module,exports){
-var css = "div.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndiv.id_UiConversation .panel-body {\n  padding: 0;\n}\ndiv.id_UiConversation .panel-footer {\n  padding: 0;\n}\ndiv.id_UiConversation form {\n  position: relative;\n}\ndiv.id_UiConversation textarea {\n  padding-right: 36px;\n}\ndiv.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\ndiv.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\ndiv.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\ndiv.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\ndiv.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\ndiv.id_UiConversation ul li div.message.in,\ndiv.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.in:before,\ndiv.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\ndiv.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\ndiv.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\ndiv.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":29}],61:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    <h4>\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <i class=\"fa fa-map-marker\"></i>&nbsp;\r\n        <span class=\"id_geoInfo\"></span>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        &nbsp; &nbsp;\r\n        <i class=\"im-blog2\"></i>\r\n        <span class=\"id_state\"></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Number: </strong>\r\n        <span class=\"id_number\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],62:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_ContactWidget ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
-},{}],63:[function(require,module,exports){
-module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    div.id_UiQuickAction input.id_tel-input {\r\n        text-align: center;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-4 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-8\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i class=\"fa fa-phone\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i class=\"fa fa-wechat\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i class=\"fa fa-users\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
-},{}],64:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
-},{}],65:[function(require,module,exports){
-module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-4 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-8 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
 },{}],66:[function(require,module,exports){
+var css = "div.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndiv.id_UiConversation .panel-body {\n  padding: 0;\n}\ndiv.id_UiConversation .panel-footer {\n  padding: 0;\n}\ndiv.id_UiConversation form {\n  position: relative;\n}\ndiv.id_UiConversation textarea {\n  padding-right: 36px;\n}\ndiv.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\ndiv.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\ndiv.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\ndiv.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\ndiv.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\ndiv.id_UiConversation ul li div.message.in,\ndiv.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.in:before,\ndiv.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\ndiv.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\ndiv.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\ndiv.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":29}],67:[function(require,module,exports){
+module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    <h4>\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <i class=\"fa fa-map-marker\"></i>&nbsp;\r\n        <span class=\"id_geoInfo\"></span>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        &nbsp; &nbsp;\r\n        <i class=\"im-blog2\"></i>\r\n        <span class=\"id_state\"></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Number: </strong>\r\n        <span class=\"id_number\"></span>\r\n    </div>\r\n\r\n</div>";
+},{}],68:[function(require,module,exports){
+module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_ContactWidget ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
+},{}],69:[function(require,module,exports){
+module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    div.id_UiQuickAction input.id_tel-input {\r\n        text-align: center;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-4 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-8\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i class=\"fa fa-phone\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i class=\"fa fa-wechat\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i class=\"fa fa-users\"></i>&nbsp;\r\n                                <span class=\"visible-lg-inline visible-xs-inline\">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
+},{}],70:[function(require,module,exports){
+module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
+},{}],71:[function(require,module,exports){
+module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-4 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-8 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+},{}],72:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14471,7 +14483,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":68,"../../../shared/dist/lib/toBackend/remoteApiCaller":70,"../../../shared/dist/lib/tools/bootbox_custom":71,"../../../shared/dist/lib/webApiCaller":74,"./Ua":1,"./UiWebphoneController":7}],67:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":74,"../../../shared/dist/lib/toBackend/remoteApiCaller":76,"../../../shared/dist/lib/tools/bootbox_custom":77,"../../../shared/dist/lib/webApiCaller":80,"./Ua":1,"./UiWebphoneController":7}],73:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var types = require("../../../gateway/dist/lib/types");
@@ -14483,7 +14495,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":126,"../../../gateway/dist/lib/misc/sipRouting":127,"../../../gateway/dist/lib/types":128}],68:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":132,"../../../gateway/dist/lib/misc/sipRouting":133,"../../../gateway/dist/lib/types":134}],74:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14536,7 +14548,7 @@ var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 /** semasim.com or dev.semasim.com */
-exports.baseDomain = window.location.href.split("/")[2].split(".")[1];
+exports.baseDomain = window.location.href.match(/^https:\/\/www\.([^\/]+)/)[1];
 exports.url = "wss://www." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
@@ -14687,7 +14699,7 @@ function get() {
 }
 exports.get = get;
 
-},{"./localApiHandlers":69,"./remoteApiCaller":70,"ts-events-extended":103,"ts-sip":113}],69:[function(require,module,exports){
+},{"./localApiHandlers":75,"./remoteApiCaller":76,"ts-events-extended":109,"ts-sip":120}],75:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15263,7 +15275,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":76,"../tools/bootbox_custom":71,"./remoteApiCaller":70,"chan-dongle-extended-client/dist/lib/types":78,"ts-events-extended":103}],70:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":82,"../tools/bootbox_custom":77,"./remoteApiCaller":76,"chan-dongle-extended-client/dist/lib/types":84,"ts-events-extended":109}],76:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16118,7 +16130,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":75,"../types":73,"./connection":68,"phone-number":95,"ts-events-extended":103,"ts-sip":113}],71:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":81,"../types":79,"./connection":74,"phone-number":101,"ts-events-extended":109,"ts-sip":120}],77:[function(require,module,exports){
 "use strict";
 //TODO: Assert bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16215,7 +16227,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{}],72:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -16229,7 +16241,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],73:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -16443,7 +16455,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],74:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16561,7 +16573,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":77,"transfer-tools/dist/lib/JSON_CUSTOM":98}],75:[function(require,module,exports){
+},{"../web_api_declaration":83,"transfer-tools/dist/lib/JSON_CUSTOM":104}],81:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -16656,7 +16668,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],76:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -16709,7 +16721,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],77:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -16738,7 +16750,7 @@ var renewPassword;
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
 
-},{}],78:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -16759,101 +16771,101 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],79:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"./custom/trap":80,"./custom/zalgo":81,"./maps/america":84,"./maps/rainbow":85,"./maps/random":86,"./maps/zebra":87,"./styles":88,"./system/supports-colors":90,"dup":10,"util":58}],80:[function(require,module,exports){
+},{"./custom/trap":86,"./custom/zalgo":87,"./maps/america":90,"./maps/rainbow":91,"./maps/random":92,"./maps/zebra":93,"./styles":94,"./system/supports-colors":96,"dup":10,"util":64}],86:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],81:[function(require,module,exports){
+},{"dup":11}],87:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],82:[function(require,module,exports){
+},{"dup":12}],88:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colors":79,"dup":13}],83:[function(require,module,exports){
+},{"./colors":85,"dup":13}],89:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./colors":79,"./extendStringPrototype":82,"dup":14}],84:[function(require,module,exports){
+},{"./colors":85,"./extendStringPrototype":88,"dup":14}],90:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],85:[function(require,module,exports){
+},{"dup":15}],91:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],86:[function(require,module,exports){
+},{"dup":16}],92:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],87:[function(require,module,exports){
+},{"dup":17}],93:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],88:[function(require,module,exports){
+},{"dup":18}],94:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19}],89:[function(require,module,exports){
+},{"dup":19}],95:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"_process":33,"dup":20}],90:[function(require,module,exports){
+},{"_process":33,"dup":20}],96:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./has-flag.js":89,"_process":33,"dup":21,"os":31}],91:[function(require,module,exports){
+},{"./has-flag.js":95,"_process":33,"dup":21,"os":31}],97:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],92:[function(require,module,exports){
+},{"dup":23}],98:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./implementation":91,"dup":24}],93:[function(require,module,exports){
+},{"./implementation":97,"dup":24}],99:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"function-bind":92}],94:[function(require,module,exports){
+},{"dup":25,"function-bind":98}],100:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],95:[function(require,module,exports){
+},{"dup":28}],101:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"intl-tel-input/build/js/utils":94}],96:[function(require,module,exports){
+},{"dup":32,"intl-tel-input/build/js/utils":100}],102:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],97:[function(require,module,exports){
+},{"dup":34}],103:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"dup":35,"has":93}],98:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"dup":36,"super-json":97}],99:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"./SyncEventBase":100,"dup":41}],100:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":101,"dup":42}],101:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"./defs":102,"dup":43,"run-exclusive":96}],102:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],103:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"./SyncEvent":99,"./defs":102,"dup":45}],104:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"buffer":9,"dup":46,"ts-events-extended":125}],105:[function(require,module,exports){
-arguments[4][47][0].apply(exports,arguments)
-},{"./IConnection":104,"./api/ApiMessage":106,"./core":110,"./misc":114,"colors":83,"dup":47,"ts-events-extended":125}],106:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"../core":110,"../misc":114,"buffer":9,"dup":48,"transfer-tools":117}],107:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"../misc":114,"./ApiMessage":106,"colors":83,"dup":49,"util":58}],108:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"../misc":114,"./ApiMessage":106,"dup":50}],109:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"./Server":107,"./client":108,"dup":51}],110:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"./core/sdp":111,"./core/sip":112,"buffer":9,"dup":52}],111:[function(require,module,exports){
+},{"dup":35,"has":99}],104:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],112:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],113:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"./Socket":105,"./api":109,"./core":110,"./misc":114,"dup":55}],114:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"./core":110,"buffer":9,"dup":56}],115:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],116:[function(require,module,exports){
+},{"dup":53,"super-json":103}],105:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36,"super-json":97}],117:[function(require,module,exports){
+},{"./SyncEventBase":106,"dup":36}],106:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":116,"./stringTransform":118,"./stringTransformExt":119,"./testing":120,"dup":37}],118:[function(require,module,exports){
+},{"./SyncEventBaseProtected":107,"dup":37}],107:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"buffer":9,"dup":38}],119:[function(require,module,exports){
+},{"./defs":108,"dup":38,"run-exclusive":110}],108:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"./stringTransform":118,"dup":39}],120:[function(require,module,exports){
+},{"dup":39}],109:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
-},{"./stringTransform":118,"dup":40}],121:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"./SyncEventBase":122,"dup":41}],122:[function(require,module,exports){
+},{"./SyncEvent":105,"./defs":108,"dup":40}],110:[function(require,module,exports){
+arguments[4][34][0].apply(exports,arguments)
+},{"dup":34}],111:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":123,"dup":42}],123:[function(require,module,exports){
+},{"buffer":9,"dup":42,"ts-events-extended":131}],112:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"./defs":124,"dup":43,"run-exclusive":115}],124:[function(require,module,exports){
+},{"./IConnection":111,"./api/ApiMessage":113,"./core":117,"./misc":121,"colors":89,"dup":43,"ts-events-extended":131}],113:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],125:[function(require,module,exports){
+},{"../core":117,"../misc":121,"buffer":9,"dup":44,"transfer-tools":123}],114:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./SyncEvent":121,"./defs":124,"dup":45}],126:[function(require,module,exports){
+},{"../misc":121,"./ApiMessage":113,"colors":89,"dup":45,"util":64}],115:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"../misc":121,"./ApiMessage":113,"dup":46}],116:[function(require,module,exports){
+arguments[4][47][0].apply(exports,arguments)
+},{"./Server":114,"./client":115,"dup":47}],117:[function(require,module,exports){
+arguments[4][48][0].apply(exports,arguments)
+},{"./core/sdp":118,"./core/sip":119,"buffer":9,"dup":48}],118:[function(require,module,exports){
+arguments[4][49][0].apply(exports,arguments)
+},{"dup":49}],119:[function(require,module,exports){
+arguments[4][50][0].apply(exports,arguments)
+},{"dup":50}],120:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"./Socket":112,"./api":116,"./core":117,"./misc":121,"dup":51}],121:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"./core":117,"buffer":9,"dup":52}],122:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53,"super-json":103}],123:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":122,"./stringTransform":124,"./stringTransformExt":125,"./testing":126,"dup":54}],124:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"buffer":9,"dup":55}],125:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"./stringTransform":124,"dup":56}],126:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"./stringTransform":124,"dup":57}],127:[function(require,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"./SyncEventBase":128,"dup":36}],128:[function(require,module,exports){
+arguments[4][37][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":129,"dup":37}],129:[function(require,module,exports){
+arguments[4][38][0].apply(exports,arguments)
+},{"./defs":130,"dup":38,"run-exclusive":102}],130:[function(require,module,exports){
+arguments[4][39][0].apply(exports,arguments)
+},{"dup":39}],131:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./SyncEvent":127,"./defs":130,"dup":40}],132:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const stringTransform = require("transfer-tools/dist/lib/stringTransform");
@@ -16917,7 +16929,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":146}],127:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":151}],133:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const stringTransform = require("transfer-tools/dist/lib/stringTransform");
@@ -16982,86 +16994,86 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":146,"ts-sip":156}],128:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":151,"ts-sip":161}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],129:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"./custom/trap":130,"./custom/zalgo":131,"./maps/america":134,"./maps/rainbow":135,"./maps/random":136,"./maps/zebra":137,"./styles":138,"./system/supports-colors":140,"dup":10,"util":58}],130:[function(require,module,exports){
+},{"./custom/trap":136,"./custom/zalgo":137,"./maps/america":140,"./maps/rainbow":141,"./maps/random":142,"./maps/zebra":143,"./styles":144,"./system/supports-colors":146,"dup":10,"util":64}],136:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],131:[function(require,module,exports){
+},{"dup":11}],137:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],132:[function(require,module,exports){
+},{"dup":12}],138:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colors":129,"dup":13}],133:[function(require,module,exports){
+},{"./colors":135,"dup":13}],139:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./colors":129,"./extendStringPrototype":132,"dup":14}],134:[function(require,module,exports){
+},{"./colors":135,"./extendStringPrototype":138,"dup":14}],140:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],135:[function(require,module,exports){
+},{"dup":15}],141:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],136:[function(require,module,exports){
+},{"dup":16}],142:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],137:[function(require,module,exports){
+},{"dup":17}],143:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],138:[function(require,module,exports){
+},{"dup":18}],144:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19}],139:[function(require,module,exports){
+},{"dup":19}],145:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"_process":33,"dup":20}],140:[function(require,module,exports){
+},{"_process":33,"dup":20}],146:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./has-flag.js":139,"_process":33,"dup":21,"os":31}],141:[function(require,module,exports){
+},{"./has-flag.js":145,"_process":33,"dup":21,"os":31}],147:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],142:[function(require,module,exports){
+},{"dup":23}],148:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./implementation":141,"dup":24}],143:[function(require,module,exports){
+},{"./implementation":147,"dup":24}],149:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"function-bind":142}],144:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],145:[function(require,module,exports){
+},{"dup":25,"function-bind":148}],150:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"dup":35,"has":143}],146:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"buffer":9,"dup":38}],147:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"buffer":9,"dup":46,"ts-events-extended":167}],148:[function(require,module,exports){
-arguments[4][47][0].apply(exports,arguments)
-},{"./IConnection":147,"./api/ApiMessage":149,"./core":153,"./misc":157,"colors":133,"dup":47,"ts-events-extended":167}],149:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"../core":153,"../misc":157,"buffer":9,"dup":48,"transfer-tools":159}],150:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"../misc":157,"./ApiMessage":149,"colors":133,"dup":49,"util":58}],151:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"../misc":157,"./ApiMessage":149,"dup":50}],152:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"./Server":150,"./client":151,"dup":51}],153:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"./core/sdp":154,"./core/sip":155,"buffer":9,"dup":52}],154:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],155:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],156:[function(require,module,exports){
+},{"dup":35,"has":149}],151:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"./Socket":148,"./api":152,"./core":153,"./misc":157,"dup":55}],157:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"./core":153,"buffer":9,"dup":56}],158:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"dup":36,"super-json":145}],159:[function(require,module,exports){
-arguments[4][37][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":158,"./stringTransform":160,"./stringTransformExt":161,"./testing":162,"dup":37}],160:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"buffer":9,"dup":38}],161:[function(require,module,exports){
-arguments[4][39][0].apply(exports,arguments)
-},{"./stringTransform":160,"dup":39}],162:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./stringTransform":160,"dup":40}],163:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"./SyncEventBase":164,"dup":41}],164:[function(require,module,exports){
+},{"buffer":9,"dup":55}],152:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":165,"dup":42}],165:[function(require,module,exports){
+},{"buffer":9,"dup":42,"ts-events-extended":173}],153:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"./defs":166,"dup":43,"run-exclusive":144}],166:[function(require,module,exports){
+},{"./IConnection":152,"./api/ApiMessage":154,"./core":158,"./misc":162,"colors":139,"dup":43,"ts-events-extended":173}],154:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],167:[function(require,module,exports){
+},{"../core":158,"../misc":162,"buffer":9,"dup":44,"transfer-tools":165}],155:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./SyncEvent":163,"./defs":166,"dup":45}]},{},[66]);
+},{"../misc":162,"./ApiMessage":154,"colors":139,"dup":45,"util":64}],156:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"../misc":162,"./ApiMessage":154,"dup":46}],157:[function(require,module,exports){
+arguments[4][47][0].apply(exports,arguments)
+},{"./Server":155,"./client":156,"dup":47}],158:[function(require,module,exports){
+arguments[4][48][0].apply(exports,arguments)
+},{"./core/sdp":159,"./core/sip":160,"buffer":9,"dup":48}],159:[function(require,module,exports){
+arguments[4][49][0].apply(exports,arguments)
+},{"dup":49}],160:[function(require,module,exports){
+arguments[4][50][0].apply(exports,arguments)
+},{"dup":50}],161:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"./Socket":153,"./api":157,"./core":158,"./misc":162,"dup":51}],162:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"./core":158,"buffer":9,"dup":52}],163:[function(require,module,exports){
+arguments[4][34][0].apply(exports,arguments)
+},{"dup":34}],164:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53,"super-json":150}],165:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":164,"./stringTransform":166,"./stringTransformExt":167,"./testing":168,"dup":54}],166:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"buffer":9,"dup":55}],167:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"./stringTransform":166,"dup":56}],168:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"./stringTransform":166,"dup":57}],169:[function(require,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"./SyncEventBase":170,"dup":36}],170:[function(require,module,exports){
+arguments[4][37][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":171,"dup":37}],171:[function(require,module,exports){
+arguments[4][38][0].apply(exports,arguments)
+},{"./defs":172,"dup":38,"run-exclusive":163}],172:[function(require,module,exports){
+arguments[4][39][0].apply(exports,arguments)
+},{"dup":39}],173:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./SyncEvent":169,"./defs":172,"dup":40}]},{},[72]);
