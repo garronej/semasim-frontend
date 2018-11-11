@@ -293,6 +293,8 @@ export const evtContactDeleted = new SyncEvent<{
 
                 const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
 
+                bootbox_custom.dismissLoading();
+
                 if (!unlockResult) {
 
                     //TODO: Improve
