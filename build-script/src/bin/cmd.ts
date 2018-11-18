@@ -92,6 +92,7 @@ const build_page = async (
     }
 
     lib.tsc_browserify_minify(
+        path.join(target_module_dir_path, "tsconfig.json"),
         path.join(target_module_dir_path, "dist", "main.js"),
         path.join(
             __dirname, "..", "..", "..", "docs",
@@ -120,8 +121,8 @@ async function program_action_build_page(options) {
 
 }
 
-    const frontend_root_dir_path = path.join(lib.module_dir_path, "..");
-    const pages_dir_path = path.join(frontend_root_dir_path, "pages");
+const frontend_root_dir_path = path.join(lib.module_dir_path, "..");
+const pages_dir_path = path.join(frontend_root_dir_path, "pages");
 
 async function program_action_build_pages(options) {
 
@@ -132,8 +133,6 @@ async function program_action_build_pages(options) {
         startExitRepl();
 
     }
-
-
 
     await lib.tsc(
         path.join(frontend_root_dir_path, "shared", "tsconfig.json"),

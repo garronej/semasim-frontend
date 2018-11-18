@@ -82,9 +82,9 @@ function minify(file_path, watch) {
         }
     });
 }
-function tsc_browserify_minify(entry_point_file_path, out_file_path, watch) {
+function tsc_browserify_minify(tsconfig_path, entry_point_file_path, out_file_path, watch) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield tsc(path.join(process.cwd(), "tsconfig.json"), watch);
+        yield tsc(tsconfig_path, watch);
         yield browserify(entry_point_file_path, out_file_path, watch);
         yield minify(out_file_path, watch);
     });

@@ -141,13 +141,14 @@ async function minify(
 }
 
 export async function tsc_browserify_minify(
+    tsconfig_path: string,
     entry_point_file_path: string,
     out_file_path: string,
     watch?: undefined | "WATCH"
 ) {
 
     await tsc(
-        path.join(process.cwd(), "tsconfig.json"),
+        tsconfig_path,
         watch
     );
 
