@@ -133,7 +133,7 @@ const version= "0.1.0";
     <script src="<%= `${assets_root}js/libs/js.cookie-2.2.0.min.js`; %>"></script>
 
     <!-- Page code -->
-    <script src="<%= `${assets_root}login-${version}${assets_root==='DEV'?'.min':''}.js`; %>"></script>
+    <script src="<%= `${assets_root}login-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
 
 </body>
 </html>

@@ -260,7 +260,7 @@ const version= "0.1.0";
     <script src="<%= `${assets_root}js/main.js`; %>"></script>
     
     <!-- jsSIP -->
-    <script src="<%= `${assets_root}js/libs/jssip/jssip${assets_root==='DEV'?'.min':''}.js`; %>"></script>
+    <script src="<%= `${assets_root}js/libs/jssip/jssip${assets_root==='/'?'':'.min'}.js`; %>"></script>
     
     <!-- intlTelInput -->
     <script src="<%= `${assets_root}plugins/ui/intl-tel-input/js/utils.js`; %>"></script>
@@ -295,7 +295,7 @@ const version= "0.1.0";
     <script src="//cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js"></script>
     
     <!-- Page code -->
-    <script src="<%= `${assets_root}webphone-${version}${assets_root==='DEV'?'.min':''}.js`; %>"></script>
+    <script src="<%= `${assets_root}webphone-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
 
 </body>
 </html>

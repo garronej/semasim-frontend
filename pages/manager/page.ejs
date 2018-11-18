@@ -231,7 +231,7 @@ const version= "0.1.0";
     <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
 
     <!-- Page code -->
-    <script src="<%= `${assets_root}manager-${version}${assets_root==='DEV'?'.min':''}.js`; %>"></script>
+    <script src="<%= `${assets_root}manager-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
 
 </body>
 </html>
