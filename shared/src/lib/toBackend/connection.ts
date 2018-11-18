@@ -6,7 +6,7 @@ import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
 
 /** semasim.com or dev.semasim.com */
-export const baseDomain= window.location.href.match(/^https:\/\/www\.([^\/]+)/)![1];
+export const baseDomain= window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
 
 export const url = `wss://web.${baseDomain}`;
 
