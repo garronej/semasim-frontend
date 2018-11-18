@@ -18,6 +18,10 @@ const version= "0.1.0";
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <meta name="application-name" content="" />
+
+    <!-- Google audit -->
+    <link rel="preload" href="<%= `${assets_root}fonts/glyphicons-halflings-regular.woff2`; %>" as="font" type="font/woff2" crossorigin="anonymous">
+
     <!-- Import google fonts - Heading first/ text second -->
     <link href='//fonts.googleapis.com/css?family=Quattrocento+Sans:400,700' rel='stylesheet' type='text/css'>
     <!-- Css files -->
@@ -62,6 +66,7 @@ const version= "0.1.0";
     <link rel="icon" href="<%= `${assets_root}img/ico/favicon.ico`; %>" type="image/png">
     <!-- Windows8 touch icon ( http://www.buildmypinnedsite.com/ )-->
     <meta name="msapplication-TileColor" content="#3399cc" />
+
 </head>
 
 <body>
@@ -91,24 +96,6 @@ const version= "0.1.0";
             <!-- top right nav -->
             <ul class="nav navbar-nav navbar-right">
 
-                <!-- TODO: see if we use the notification system
-                <li class="dropdown">
-                    <a href="#" data-toggle="dropdown">
-                        <i class="fa fa-bell-o"></i>
-                        <span class="sr-only">Notifications</span>
-                        <span class="badge badge-danger">6</span>
-                    </a>
-                    <ul class="dropdown-menu right dropdown-notification" role="menu">
-                        <li>
-                            <a href="#" class="dropdown-menu-header">Notifications</a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="l-basic-life-buoy"></i> 2 support request</a>
-                        </li>
-                    </ul>
-                </li>
-                -->
                 <li>
                     <a id="logout" href="#">
                         <i class="fa fa-power-off"></i>
@@ -162,6 +149,7 @@ const version= "0.1.0";
             </div>
             <!-- End .sidebar-inner -->
         </aside>
+
         <!-- / page-sidebar -->
         <!-- .page-content -->
         <div class="page-content sidebar-page right-sidebar-page clearfix">
