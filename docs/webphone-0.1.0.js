@@ -14950,7 +14950,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                                     return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
                                 case 4:
                                     unlockResult = _a.sent();
-                                    bootbox_custom.dismissLoading();
+                                    setTimeout(function () { return bootbox_custom.dismissLoading(); }, 10000);
                                     if (!unlockResult) {
                                         //TODO: Improve
                                         alert("Unlock failed for unknown reason");
