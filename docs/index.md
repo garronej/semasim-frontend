@@ -1,1 +1,1 @@
-# Here lies the semasim web assets
+Root for semasim web assets
