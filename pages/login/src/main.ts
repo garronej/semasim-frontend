@@ -16,7 +16,7 @@ function setHandlers() {
 			if (!place.get(0)) {
 				place = element;
 			}
-			if (error.text() !== '') {
+			if (error.text() !== "") {
 				place.after(error);
 			}
 		},
@@ -109,7 +109,7 @@ async function handleQueryString() {
 
 	const emailAsHex = getURLParameter("email-as-hex");
 
-	let email: string = "";
+	let email = "";
 
 	if (!!emailAsHex) {
 

@@ -1,30 +1,17 @@
 {
-  "name": "webphone-page",
   "version": "0.1.0",
-  "main": "./dist/main.js",
   "scripts": {
-    "build": "npm run tsc && npm run browserify",
-    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
-    "browserify": "node ./node_modules/browserify/bin/cmd . -o dist/webphone.js",
-    "watchify": "node ./node_modules/watchify/bin/cmd . -o dist/webphone.js",
-    "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
-    "watch": "npm run build && node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
-  },
-  "browserify": {
-    "transform": [
-      "html2js-browserify",
-      "lessify"
-    ]
+    "build": "node ../../build-script/dist/bin/cmd build_page"
   },
   "dependencies": {
+    "lessify": "^1.0.2",
     "moment": "^2.20.1",
+    "phone-number": "github:garronej/phone-number",
     "run-exclusive": "github:garronej/run-exclusive",
     "ts-events-extended": "github:garronej/ts-events-extended",
-    "ts-sip": "github:garronej/ts-sip",
-    "phone-number": "github:garronej/phone-number"
+    "ts-sip": "github:garronej/ts-sip"
   },
   "devDependencies": {
-    "concurrently": "^3.5.1",
     "@types/autosize": "^3.0.6",
     "@types/bootstrap": "3.3.28",
     "@types/icheck": "^0.8.29",
@@ -33,10 +20,7 @@
     "@types/jquery.slimscroll": "^1.3.31",
     "@types/jquery.validation": "1.13.27",
     "@types/jqueryui": "1.9.27",
-    "browserify": "^14.4.0",
-    "html2js-browserify": "^1.3.0",
-    "lessify": "^1.0.1",
-    "typescript": "^3.0.1",
-    "watchify": "^3.9.0"
+    "lessify": "^1.0.2",
+    "typescript": "^3.0.1"
   }
 }

@@ -1,8 +1,7 @@
 {
   "name": "frontend-shared",
   "scripts": {
-    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
-    "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json"
+    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json"
   },
   "dependencies": {
     "chan-dongle-extended-client": "garronej/chan-dongle-extended-client"

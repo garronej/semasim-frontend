@@ -1,25 +1,14 @@
 {
-  "name": "login-page",
   "version": "0.1.0",
-  "main": "./dist/main.js",
   "scripts": {
-    "build": "npm run tsc && npm run browserify",
-    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
-    "browserify": "node ./node_modules/browserify/bin/cmd . -o dist/login.js",
-    "watchify": "node ./node_modules/watchify/bin/cmd . -o dist/login.js",
-    "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
-    "watch": "node node_modules/concurrently/src/main --kill-others \"npm run tsc-w\" \"npm run watchify\""
+    "build": "node ../../build-script/dist/bin/cmd build_page"
   },
-  "dependencies": {},
   "devDependencies": {
-    "concurrently": "^3.5.1",
     "@types/bootstrap": "3.3.28",
     "@types/icheck": "^0.8.29",
     "@types/jquery": "2.0.48",
     "@types/jquery.validation": "1.13.27",
     "@types/jqueryui": "1.9.27",
-    "browserify": "^14.4.0",
-    "typescript": "^3.0.1",
-    "watchify": "^3.9.0"
+    "typescript": "^3.0.1"
   }
 }

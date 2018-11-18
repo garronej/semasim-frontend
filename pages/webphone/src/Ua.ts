@@ -435,7 +435,7 @@ function playAudioStream(stream: MediaStream) {
 interface IjsSipSocket {
 
     via_transport: string;
-    url: string; /* "wss://www.[dev.]semasim.com" */
+    url: string; /* "wss://dev.[dev.]semasim.com" */
     sip_uri: string; /* `sip:${imsi}-webRTC@[dev.]semasim.com` */
 
     connect(): void;

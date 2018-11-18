@@ -51,7 +51,7 @@ var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 /** semasim.com or dev.semasim.com */
 exports.baseDomain = window.location.href.match(/^https:\/\/www\.([^\/]+)/)[1];
-exports.url = "wss://www." + exports.baseDomain;
+exports.url = "wss://web." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
@@ -75,7 +75,7 @@ function connect() {
         });
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": "www." + exports.baseDomain,
+        "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
     });
     apiServer.startListening(socket);

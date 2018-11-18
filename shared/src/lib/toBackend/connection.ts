@@ -8,7 +8,7 @@ import * as types from "../types";
 /** semasim.com or dev.semasim.com */
 export const baseDomain= window.location.href.match(/^https:\/\/www\.([^\/]+)/)![1];
 
-export const url = `wss://www.${baseDomain}`;
+export const url = `wss://web.${baseDomain}`;
 
 const idString = "toBackend";
 
@@ -51,7 +51,7 @@ export function connect() {
         new WebSocket(url, "SIP"),
         true,
         {
-            "remoteAddress": `www.${baseDomain}`,
+            "remoteAddress": `web.${baseDomain}`,
             "remotePort": 443
         }
     );
