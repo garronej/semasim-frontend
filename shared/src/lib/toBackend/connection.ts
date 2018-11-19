@@ -53,9 +53,9 @@ export function connect() {
         {
             "remoteAddress": `web.${baseDomain}`,
             "remotePort": 443
-        }
+        },
+        20000
     );
-
 
     apiServer.startListening(socket);
 

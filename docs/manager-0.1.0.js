@@ -4710,7 +4710,7 @@ function connect() {
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
-    });
+    }, 20000);
     apiServer.startListening(socket);
     sip.api.client.enableKeepAlive(socket, 6 * 1000);
     sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
@@ -4834,7 +4834,7 @@ function get() {
 }
 exports.get = get;
 
-},{"./localApiHandlers":29,"./remoteApiCaller":30,"ts-events-extended":67,"ts-sip":77}],29:[function(require,module,exports){
+},{"./localApiHandlers":29,"./remoteApiCaller":30,"ts-events-extended":63,"ts-sip":73}],29:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -5411,7 +5411,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":36,"../tools/bootbox_custom":31,"./remoteApiCaller":30,"chan-dongle-extended-client/dist/lib/types":38,"ts-events-extended":67}],30:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":36,"../tools/bootbox_custom":31,"./remoteApiCaller":30,"chan-dongle-extended-client/dist/lib/types":38,"ts-events-extended":63}],30:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -6266,7 +6266,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":35,"../types":33,"./connection":28,"phone-number":55,"ts-events-extended":67,"ts-sip":77}],31:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":35,"../types":33,"./connection":28,"phone-number":55,"ts-events-extended":63,"ts-sip":73}],31:[function(require,module,exports){
 "use strict";
 //TODO: Assert bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -8757,427 +8757,16 @@ function get(serializers) {
 exports.get = get;
 
 },{"super-json":57}],59:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var JSON_CUSTOM = require("./JSON_CUSTOM");
-exports.JSON_CUSTOM = JSON_CUSTOM;
-var stringTransform = require("./stringTransform");
-exports.stringTransform = stringTransform;
-var stringTransformExt = require("./stringTransformExt");
-exports.stringTransformExt = stringTransformExt;
-var testing = require("./testing");
-exports.testing = testing;
-
-},{"./JSON_CUSTOM":58,"./stringTransform":60,"./stringTransformExt":61,"./testing":62}],60:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-exports.__esModule = true;
-function safeBufferFromTo(str, fromEnc, toEnc) {
-    try {
-        return Buffer.from(str, fromEnc).toString(toEnc);
-    }
-    catch (_a) {
-        return (new Buffer(str, fromEnc)).toString(toEnc);
-    }
-}
-exports.safeBufferFromTo = safeBufferFromTo;
-function transcode(encoding, alphabetMap) {
-    if (alphabetMap === void 0) { alphabetMap = {}; }
-    var reverseAlphabetMap = {};
-    for (var char in alphabetMap) {
-        reverseAlphabetMap[alphabetMap[char]] = char;
-    }
-    return {
-        "enc": function (str) { return transcode.applyNewAlphabet(safeBufferFromTo(str, "utf8", encoding), alphabetMap); },
-        "dec": function (encStr) { return safeBufferFromTo(transcode.applyNewAlphabet(encStr, reverseAlphabetMap), encoding, "utf8"); }
-    };
-}
-exports.transcode = transcode;
-(function (transcode) {
-    var regExpCache = {};
-    function applyNewAlphabet(str, alphabetMap) {
-        for (var char in alphabetMap) {
-            var regExp = regExpCache[char];
-            if (!regExp) {
-                regExp = new RegExp("\\" + char, "g");
-                regExpCache[char] = regExp;
-            }
-            str = str.replace(regExp, alphabetMap[char]);
-        }
-        return str;
-    }
-    transcode.applyNewAlphabet = applyNewAlphabet;
-})(transcode = exports.transcode || (exports.transcode = {}));
-/**
- * partLength correspond to string length not byte
- * but in base 64 all char are ascii so partMaxLength <=> partMaxBytes
- **/
-function textSplit(partMaxLength, text) {
-    var parts = [];
-    var rest = text;
-    while (rest) {
-        if (partMaxLength >= rest.length) {
-            parts.push(rest);
-            rest = "";
-        }
-        else {
-            parts.push(rest.substring(0, partMaxLength));
-            rest = rest.substring(partMaxLength, rest.length);
-        }
-    }
-    return parts;
-}
-exports.textSplit = textSplit;
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":2}],61:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var stringTransform_1 = require("./stringTransform");
-/**
- * Assuming there is an index n in [ 0 ... lastIndex ] such as
- * for all i <= n condition(i) is true
- * and for all i > n condition(i) is false
- * this function find n
- */
-function findLastIndexFulfilling(condition, lastIndex) {
-    if (lastIndex < 0) {
-        throw Error("range error");
-    }
-    if (!condition(0)) {
-        throw Error("no index fullfil the condition");
-    }
-    return (function callee(fromIndex, toIndex) {
-        if (fromIndex === toIndex) {
-            return fromIndex;
-        }
-        else if (fromIndex + 1 === toIndex) {
-            if (condition(toIndex)) {
-                return toIndex;
-            }
-            else {
-                return fromIndex;
-            }
-        }
-        else {
-            var length_1 = toIndex - fromIndex + 1;
-            var halfLength = Math.floor(length_1 / 2);
-            var middleIndex = fromIndex + halfLength;
-            if (condition(middleIndex)) {
-                return callee(middleIndex, toIndex);
-            }
-            else {
-                return callee(fromIndex, middleIndex);
-            }
-        }
-    })(0, lastIndex);
-}
-exports.findLastIndexFulfilling = findLastIndexFulfilling;
-function b64crop(partMaxLength, text) {
-    var _a = stringTransform_1.transcode("base64"), enc = _a.enc, dec = _a.dec;
-    var isNotTooLong = function (index) {
-        var part = text.substring(0, index);
-        var encPart = enc(part);
-        return encPart.length <= partMaxLength;
-    };
-    //99.9% of the cases for SMS
-    if (isNotTooLong(text.length)) {
-        return enc(text.substring(0, text.length));
-    }
-    var index = findLastIndexFulfilling(isNotTooLong, text.length);
-    while (true) {
-        var part = text.substring(0, index);
-        var rest = text.substring(index, text.length);
-        if ((dec(enc(part)) + dec(enc(rest))) !== dec(enc(text))) {
-            index--;
-        }
-        else {
-            return enc(part + "[...]");
-        }
-    }
-}
-exports.b64crop = b64crop;
-
-},{"./stringTransform":60}],62:[function(require,module,exports){
-"use strict";
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-exports.__esModule = true;
-var stringTransform_1 = require("./stringTransform");
-/** Compare if two object represent the same data, [ "ok", "foo" ] <=> [ "foo", "ok" ] */
-function assertSame(o1, o2, errorMessage) {
-    if (errorMessage === void 0) { errorMessage = "assertSame error"; }
-    try {
-        assertSame.perform(o1, o2);
-    }
-    catch (e) {
-        var error = new Error(errorMessage + " (" + e.message + ")");
-        error["o1"] = o1;
-        error["o2"] = o2;
-        throw error;
-    }
-}
-exports.assertSame = assertSame;
-(function (assertSame) {
-    assertSame.handleArrayAsSet = true;
-    function perform(o1, o2) {
-        if (o1 instanceof Date) {
-            if (!(o2 instanceof Date)) {
-                console.assert(false, "M0");
-                return;
-            }
-            console.assert(o1.getTime() === o2.getTime(), "Date mismatch");
-        }
-        else if (o1 instanceof Object) {
-            console.assert(o2 instanceof Object, "M1");
-            if (assertSame.handleArrayAsSet && o1 instanceof Array) {
-                if (!(o2 instanceof Array)) {
-                    console.assert(false, "M2");
-                    return;
-                }
-                console.assert(o1.length === o2.length, "M3");
-                var o2Set = new Set(o2);
-                try {
-                    for (var o1_1 = __values(o1), o1_1_1 = o1_1.next(); !o1_1_1.done; o1_1_1 = o1_1.next()) {
-                        var val1 = o1_1_1.value;
-                        var isFound = false;
-                        try {
-                            for (var o2Set_1 = __values(o2Set), o2Set_1_1 = o2Set_1.next(); !o2Set_1_1.done; o2Set_1_1 = o2Set_1.next()) {
-                                var val2 = o2Set_1_1.value;
-                                try {
-                                    perform(val1, val2);
-                                }
-                                catch (_a) {
-                                    continue;
-                                }
-                                isFound = true;
-                                o2Set["delete"](val2);
-                                break;
-                            }
-                        }
-                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                        finally {
-                            try {
-                                if (o2Set_1_1 && !o2Set_1_1.done && (_b = o2Set_1["return"])) _b.call(o2Set_1);
-                            }
-                            finally { if (e_1) throw e_1.error; }
-                        }
-                        console.assert(isFound, "M4");
-                    }
-                }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                finally {
-                    try {
-                        if (o1_1_1 && !o1_1_1.done && (_c = o1_1["return"])) _c.call(o1_1);
-                    }
-                    finally { if (e_2) throw e_2.error; }
-                }
-            }
-            else {
-                if (o1 instanceof Array) {
-                    if (!(o2 instanceof Array)) {
-                        console.assert(false, "M5");
-                        return;
-                    }
-                    console.assert(o1.length === o2.length, "M6");
-                }
-                else {
-                    perform(Object.keys(o1).filter(function (key) { return o1[key] !== undefined; }), Object.keys(o2).filter(function (key) { return o2[key] !== undefined; }));
-                }
-                for (var key in o1) {
-                    perform(o1[key], o2[key]);
-                }
-            }
-        }
-        else {
-            console.assert(o1 === o2, o1 + " !== " + o2);
-        }
-        var e_2, _c, e_1, _b;
-    }
-    assertSame.perform = perform;
-})(assertSame = exports.assertSame || (exports.assertSame = {}));
-/** ex 123320 */
-exports.genDigits = function (n) {
-    return (new Array(n))
-        .fill("")
-        .map(function () { return "" + ~~(Math.random() * 10); })
-        .join("");
-};
-/** Hex str to lower char */
-exports.genHexStr = function (n) { return (new Array(n))
-    .fill("")
-    .map(function () { return (~~(Math.random() * 0x10)).toString(16); })
-    .join(""); };
-/** Length is not Byte length but the number of char */
-function genUtf8Str(length, restrict) {
-    var charGenerator;
-    switch (restrict) {
-        case undefined:
-            charGenerator = genUtf8Str.genUtf8Char;
-            break;
-        case "ONLY 1 BYTE CHAR":
-            charGenerator = genUtf8Str.genUtf8Char1B;
-            break;
-        case "ONLY 4 BYTE CHAR":
-            charGenerator = genUtf8Str.genUtf8Char4B;
-            break;
-    }
-    return (new Array(length)).fill("").map(function () { return charGenerator(); }).join("");
-}
-exports.genUtf8Str = genUtf8Str;
-(function (genUtf8Str) {
-    /** "11110000" => "f0" */
-    function bitStrToHexStr(bin) {
-        var hexChars = [];
-        var i = 0;
-        while (bin[i] !== undefined) {
-            var fourBits = "" + bin[i] + bin[i + 1] + bin[i + 2] + bin[i + 3];
-            var hexChar = parseInt(fourBits, 2).toString(16);
-            hexChars.push(hexChar);
-            i = i + 4;
-        }
-        return hexChars.join("");
-    }
-    ;
-    /** 8 => "11010001"  */
-    function genBitStr(length) {
-        return (new Array(length)).fill("").map(function () { return "" + ~~(Math.random() * 2); }).join("");
-    }
-    /** throw error if hex does not represent a valid utf8 string */
-    function hexStrToUtf8Str(hex) {
-        var str = stringTransform_1.safeBufferFromTo(hex, "hex", "utf8");
-        if (stringTransform_1.safeBufferFromTo(str, "utf8", "hex") !== hex) {
-            throw new Error("Invalid UTF8 data");
-        }
-        return str;
-    }
-    /** return a random utf8 char that fit on one byte */
-    function genUtf8Char1B() {
-        var bin = "0" + genBitStr(7);
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char1B();
-        }
-    }
-    genUtf8Str.genUtf8Char1B = genUtf8Char1B;
-    genUtf8Str.genUtf8Char2B = function () {
-        var bin = "110" + genBitStr(5) + "10" + genBitStr(6);
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Str.genUtf8Char2B();
-        }
-    };
-    function genUtf8Char3B(rand) {
-        if (rand === undefined) {
-            rand = ~~(Math.random() * 8);
-        }
-        var bin;
-        switch (rand) {
-            case 0:
-                bin = "11100000101" + genBitStr(5) + "10" + genBitStr(6);
-                break;
-            case 1:
-                bin = "1110000110" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 2:
-                bin = "1110001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 3:
-                bin = "111001" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 4:
-                bin = "111010" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 5:
-                bin = "1110110010" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 6:
-                bin = "11101101100" + genBitStr(5) + "10" + genBitStr(6);
-                break;
-            case 7:
-                bin = "1110111" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-        }
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char3B();
-        }
-    }
-    genUtf8Str.genUtf8Char3B = genUtf8Char3B;
-    ;
-    function genUtf8Char4B(rand) {
-        if (rand === undefined) {
-            rand = ~~(Math.random() * 5);
-        }
-        var bin;
-        switch (rand) {
-            case 0:
-                bin = "111100001001" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 1:
-                bin = "11110000101" + genBitStr(5) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 2:
-                bin = "1111000110" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 3:
-                bin = "1111001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-            case 4:
-                bin = "111101001000" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
-                break;
-        }
-        var hex = bitStrToHexStr(bin);
-        try {
-            return hexStrToUtf8Str(hex);
-        }
-        catch (_a) {
-            return genUtf8Char4B();
-        }
-    }
-    genUtf8Str.genUtf8Char4B = genUtf8Char4B;
-    ;
-    function genUtf8Char() {
-        var rand = ~~(Math.random() * 4);
-        switch (rand) {
-            case 0: return genUtf8Char1B();
-            case 1: return genUtf8Str.genUtf8Char2B();
-            case 2: return genUtf8Char3B();
-            case 3: return genUtf8Char4B();
-        }
-    }
-    genUtf8Str.genUtf8Char = genUtf8Char;
-    ;
-})(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
-
-},{"./stringTransform":60}],63:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"./SyncEventBase":64,"dup":17}],64:[function(require,module,exports){
+},{"./SyncEventBase":60,"dup":17}],60:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":65,"dup":18}],65:[function(require,module,exports){
+},{"./SyncEventBaseProtected":61,"dup":18}],61:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"./defs":66,"dup":19,"run-exclusive":56}],66:[function(require,module,exports){
+},{"./defs":62,"dup":19,"run-exclusive":56}],62:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],67:[function(require,module,exports){
+},{"dup":20}],63:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./SyncEvent":63,"./defs":66,"dup":21}],68:[function(require,module,exports){
+},{"./SyncEvent":59,"./defs":62,"dup":21}],64:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9349,7 +8938,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":67}],69:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":84}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -9376,8 +8965,9 @@ var Socket = /** @class */ (function () {
      * 2) If using a load balancer the addresses/ports that you want to expose are not really the one
      * used by the underlying socket connection.
      */
-    function Socket(socket, isRemoteTrusted, spoofedAddressAndPort) {
+    function Socket(socket, isRemoteTrusted, spoofedAddressAndPort, connectionTimeout) {
         if (spoofedAddressAndPort === void 0) { spoofedAddressAndPort = {}; }
+        if (connectionTimeout === void 0) { connectionTimeout = 3000; }
         var _this = this;
         this.spoofedAddressAndPort = spoofedAddressAndPort;
         /** To store data contextually link to this socket */
@@ -9482,8 +9072,8 @@ var Socket = /** @class */ (function () {
                 if (!!_this.evtClose.postCount) {
                     return;
                 }
-                _this.connection.emit("error", new Error("Sip socket connection timeout after " + Socket.connectionTimeout));
-            }, Socket.connectionTimeout);
+                _this.connection.emit("error", new Error("Sip socket connection timeout after " + connectionTimeout));
+            }, connectionTimeout);
             this.connection.once("connect", function () {
                 clearTimeout(_this.openTimer);
                 _this.evtConnect.post();
@@ -9656,12 +9246,11 @@ var Socket = /** @class */ (function () {
     };
     Socket.maxBytesHeaders = 7820;
     Socket.maxContentLength = 24624;
-    Socket.connectionTimeout = 3000;
     return Socket;
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":68,"./api/ApiMessage":70,"./core":74,"./misc":78,"colors":43,"ts-events-extended":67}],70:[function(require,module,exports){
+},{"./IConnection":64,"./api/ApiMessage":66,"./core":70,"./misc":74,"colors":43,"ts-events-extended":84}],66:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9742,7 +9331,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":74,"../misc":78,"buffer":2,"transfer-tools":59}],71:[function(require,module,exports){
+},{"../core":70,"../misc":74,"buffer":2,"transfer-tools":76}],67:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9924,7 +9513,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":78,"./ApiMessage":70,"colors":43,"util":8}],72:[function(require,module,exports){
+},{"../misc":74,"./ApiMessage":66,"colors":43,"util":8}],68:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -10142,7 +9731,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":78,"./ApiMessage":70}],73:[function(require,module,exports){
+},{"../misc":74,"./ApiMessage":66}],69:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -10150,7 +9739,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":71,"./client":72}],74:[function(require,module,exports){
+},{"./Server":67,"./client":68}],70:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -10233,7 +9822,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":75,"./core/sip":76,"buffer":2}],75:[function(require,module,exports){
+},{"./core/sdp":71,"./core/sip":72,"buffer":2}],71:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -10349,7 +9938,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],76:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10740,7 +10329,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],77:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -10752,7 +10341,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":69,"./api":73,"./core":74,"./misc":78}],78:[function(require,module,exports){
+},{"./Socket":65,"./api":69,"./core":70,"./misc":74}],74:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -10991,4 +10580,427 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":74,"buffer":2}]},{},[13]);
+},{"./core":70,"buffer":2}],75:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58,"super-json":57}],76:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var JSON_CUSTOM = require("./JSON_CUSTOM");
+exports.JSON_CUSTOM = JSON_CUSTOM;
+var stringTransform = require("./stringTransform");
+exports.stringTransform = stringTransform;
+var stringTransformExt = require("./stringTransformExt");
+exports.stringTransformExt = stringTransformExt;
+var testing = require("./testing");
+exports.testing = testing;
+
+},{"./JSON_CUSTOM":75,"./stringTransform":77,"./stringTransformExt":78,"./testing":79}],77:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+exports.__esModule = true;
+function safeBufferFromTo(str, fromEnc, toEnc) {
+    try {
+        return Buffer.from(str, fromEnc).toString(toEnc);
+    }
+    catch (_a) {
+        return (new Buffer(str, fromEnc)).toString(toEnc);
+    }
+}
+exports.safeBufferFromTo = safeBufferFromTo;
+function transcode(encoding, alphabetMap) {
+    if (alphabetMap === void 0) { alphabetMap = {}; }
+    var reverseAlphabetMap = {};
+    for (var char in alphabetMap) {
+        reverseAlphabetMap[alphabetMap[char]] = char;
+    }
+    return {
+        "enc": function (str) { return transcode.applyNewAlphabet(safeBufferFromTo(str, "utf8", encoding), alphabetMap); },
+        "dec": function (encStr) { return safeBufferFromTo(transcode.applyNewAlphabet(encStr, reverseAlphabetMap), encoding, "utf8"); }
+    };
+}
+exports.transcode = transcode;
+(function (transcode) {
+    var regExpCache = {};
+    function applyNewAlphabet(str, alphabetMap) {
+        for (var char in alphabetMap) {
+            var regExp = regExpCache[char];
+            if (!regExp) {
+                regExp = new RegExp("\\" + char, "g");
+                regExpCache[char] = regExp;
+            }
+            str = str.replace(regExp, alphabetMap[char]);
+        }
+        return str;
+    }
+    transcode.applyNewAlphabet = applyNewAlphabet;
+})(transcode = exports.transcode || (exports.transcode = {}));
+/**
+ * partLength correspond to string length not byte
+ * but in base 64 all char are ascii so partMaxLength <=> partMaxBytes
+ **/
+function textSplit(partMaxLength, text) {
+    var parts = [];
+    var rest = text;
+    while (rest) {
+        if (partMaxLength >= rest.length) {
+            parts.push(rest);
+            rest = "";
+        }
+        else {
+            parts.push(rest.substring(0, partMaxLength));
+            rest = rest.substring(partMaxLength, rest.length);
+        }
+    }
+    return parts;
+}
+exports.textSplit = textSplit;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":2}],78:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var stringTransform_1 = require("./stringTransform");
+/**
+ * Assuming there is an index n in [ 0 ... lastIndex ] such as
+ * for all i <= n condition(i) is true
+ * and for all i > n condition(i) is false
+ * this function find n
+ */
+function findLastIndexFulfilling(condition, lastIndex) {
+    if (lastIndex < 0) {
+        throw Error("range error");
+    }
+    if (!condition(0)) {
+        throw Error("no index fullfil the condition");
+    }
+    return (function callee(fromIndex, toIndex) {
+        if (fromIndex === toIndex) {
+            return fromIndex;
+        }
+        else if (fromIndex + 1 === toIndex) {
+            if (condition(toIndex)) {
+                return toIndex;
+            }
+            else {
+                return fromIndex;
+            }
+        }
+        else {
+            var length_1 = toIndex - fromIndex + 1;
+            var halfLength = Math.floor(length_1 / 2);
+            var middleIndex = fromIndex + halfLength;
+            if (condition(middleIndex)) {
+                return callee(middleIndex, toIndex);
+            }
+            else {
+                return callee(fromIndex, middleIndex);
+            }
+        }
+    })(0, lastIndex);
+}
+exports.findLastIndexFulfilling = findLastIndexFulfilling;
+function b64crop(partMaxLength, text) {
+    var _a = stringTransform_1.transcode("base64"), enc = _a.enc, dec = _a.dec;
+    var isNotTooLong = function (index) {
+        var part = text.substring(0, index);
+        var encPart = enc(part);
+        return encPart.length <= partMaxLength;
+    };
+    //99.9% of the cases for SMS
+    if (isNotTooLong(text.length)) {
+        return enc(text.substring(0, text.length));
+    }
+    var index = findLastIndexFulfilling(isNotTooLong, text.length);
+    while (true) {
+        var part = text.substring(0, index);
+        var rest = text.substring(index, text.length);
+        if ((dec(enc(part)) + dec(enc(rest))) !== dec(enc(text))) {
+            index--;
+        }
+        else {
+            return enc(part + "[...]");
+        }
+    }
+}
+exports.b64crop = b64crop;
+
+},{"./stringTransform":77}],79:[function(require,module,exports){
+"use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+exports.__esModule = true;
+var stringTransform_1 = require("./stringTransform");
+/** Compare if two object represent the same data, [ "ok", "foo" ] <=> [ "foo", "ok" ] */
+function assertSame(o1, o2, errorMessage) {
+    if (errorMessage === void 0) { errorMessage = "assertSame error"; }
+    try {
+        assertSame.perform(o1, o2);
+    }
+    catch (e) {
+        var error = new Error(errorMessage + " (" + e.message + ")");
+        error["o1"] = o1;
+        error["o2"] = o2;
+        throw error;
+    }
+}
+exports.assertSame = assertSame;
+(function (assertSame) {
+    assertSame.handleArrayAsSet = true;
+    function perform(o1, o2) {
+        if (o1 instanceof Date) {
+            if (!(o2 instanceof Date)) {
+                console.assert(false, "M0");
+                return;
+            }
+            console.assert(o1.getTime() === o2.getTime(), "Date mismatch");
+        }
+        else if (o1 instanceof Object) {
+            console.assert(o2 instanceof Object, "M1");
+            if (assertSame.handleArrayAsSet && o1 instanceof Array) {
+                if (!(o2 instanceof Array)) {
+                    console.assert(false, "M2");
+                    return;
+                }
+                console.assert(o1.length === o2.length, "M3");
+                var o2Set = new Set(o2);
+                try {
+                    for (var o1_1 = __values(o1), o1_1_1 = o1_1.next(); !o1_1_1.done; o1_1_1 = o1_1.next()) {
+                        var val1 = o1_1_1.value;
+                        var isFound = false;
+                        try {
+                            for (var o2Set_1 = __values(o2Set), o2Set_1_1 = o2Set_1.next(); !o2Set_1_1.done; o2Set_1_1 = o2Set_1.next()) {
+                                var val2 = o2Set_1_1.value;
+                                try {
+                                    perform(val1, val2);
+                                }
+                                catch (_a) {
+                                    continue;
+                                }
+                                isFound = true;
+                                o2Set["delete"](val2);
+                                break;
+                            }
+                        }
+                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                        finally {
+                            try {
+                                if (o2Set_1_1 && !o2Set_1_1.done && (_b = o2Set_1["return"])) _b.call(o2Set_1);
+                            }
+                            finally { if (e_1) throw e_1.error; }
+                        }
+                        console.assert(isFound, "M4");
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (o1_1_1 && !o1_1_1.done && (_c = o1_1["return"])) _c.call(o1_1);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+            }
+            else {
+                if (o1 instanceof Array) {
+                    if (!(o2 instanceof Array)) {
+                        console.assert(false, "M5");
+                        return;
+                    }
+                    console.assert(o1.length === o2.length, "M6");
+                }
+                else {
+                    perform(Object.keys(o1).filter(function (key) { return o1[key] !== undefined; }), Object.keys(o2).filter(function (key) { return o2[key] !== undefined; }));
+                }
+                for (var key in o1) {
+                    perform(o1[key], o2[key]);
+                }
+            }
+        }
+        else {
+            console.assert(o1 === o2, o1 + " !== " + o2);
+        }
+        var e_2, _c, e_1, _b;
+    }
+    assertSame.perform = perform;
+})(assertSame = exports.assertSame || (exports.assertSame = {}));
+/** ex 123320 */
+exports.genDigits = function (n) {
+    return (new Array(n))
+        .fill("")
+        .map(function () { return "" + ~~(Math.random() * 10); })
+        .join("");
+};
+/** Hex str to lower char */
+exports.genHexStr = function (n) { return (new Array(n))
+    .fill("")
+    .map(function () { return (~~(Math.random() * 0x10)).toString(16); })
+    .join(""); };
+/** Length is not Byte length but the number of char */
+function genUtf8Str(length, restrict) {
+    var charGenerator;
+    switch (restrict) {
+        case undefined:
+            charGenerator = genUtf8Str.genUtf8Char;
+            break;
+        case "ONLY 1 BYTE CHAR":
+            charGenerator = genUtf8Str.genUtf8Char1B;
+            break;
+        case "ONLY 4 BYTE CHAR":
+            charGenerator = genUtf8Str.genUtf8Char4B;
+            break;
+    }
+    return (new Array(length)).fill("").map(function () { return charGenerator(); }).join("");
+}
+exports.genUtf8Str = genUtf8Str;
+(function (genUtf8Str) {
+    /** "11110000" => "f0" */
+    function bitStrToHexStr(bin) {
+        var hexChars = [];
+        var i = 0;
+        while (bin[i] !== undefined) {
+            var fourBits = "" + bin[i] + bin[i + 1] + bin[i + 2] + bin[i + 3];
+            var hexChar = parseInt(fourBits, 2).toString(16);
+            hexChars.push(hexChar);
+            i = i + 4;
+        }
+        return hexChars.join("");
+    }
+    ;
+    /** 8 => "11010001"  */
+    function genBitStr(length) {
+        return (new Array(length)).fill("").map(function () { return "" + ~~(Math.random() * 2); }).join("");
+    }
+    /** throw error if hex does not represent a valid utf8 string */
+    function hexStrToUtf8Str(hex) {
+        var str = stringTransform_1.safeBufferFromTo(hex, "hex", "utf8");
+        if (stringTransform_1.safeBufferFromTo(str, "utf8", "hex") !== hex) {
+            throw new Error("Invalid UTF8 data");
+        }
+        return str;
+    }
+    /** return a random utf8 char that fit on one byte */
+    function genUtf8Char1B() {
+        var bin = "0" + genBitStr(7);
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char1B();
+        }
+    }
+    genUtf8Str.genUtf8Char1B = genUtf8Char1B;
+    genUtf8Str.genUtf8Char2B = function () {
+        var bin = "110" + genBitStr(5) + "10" + genBitStr(6);
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Str.genUtf8Char2B();
+        }
+    };
+    function genUtf8Char3B(rand) {
+        if (rand === undefined) {
+            rand = ~~(Math.random() * 8);
+        }
+        var bin;
+        switch (rand) {
+            case 0:
+                bin = "11100000101" + genBitStr(5) + "10" + genBitStr(6);
+                break;
+            case 1:
+                bin = "1110000110" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 2:
+                bin = "1110001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 3:
+                bin = "111001" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 4:
+                bin = "111010" + genBitStr(2) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 5:
+                bin = "1110110010" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 6:
+                bin = "11101101100" + genBitStr(5) + "10" + genBitStr(6);
+                break;
+            case 7:
+                bin = "1110111" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+        }
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char3B();
+        }
+    }
+    genUtf8Str.genUtf8Char3B = genUtf8Char3B;
+    ;
+    function genUtf8Char4B(rand) {
+        if (rand === undefined) {
+            rand = ~~(Math.random() * 5);
+        }
+        var bin;
+        switch (rand) {
+            case 0:
+                bin = "111100001001" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 1:
+                bin = "11110000101" + genBitStr(5) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 2:
+                bin = "1111000110" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 3:
+                bin = "1111001" + genBitStr(1) + "10" + genBitStr(6) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+            case 4:
+                bin = "111101001000" + genBitStr(4) + "10" + genBitStr(6) + "10" + genBitStr(6);
+                break;
+        }
+        var hex = bitStrToHexStr(bin);
+        try {
+            return hexStrToUtf8Str(hex);
+        }
+        catch (_a) {
+            return genUtf8Char4B();
+        }
+    }
+    genUtf8Str.genUtf8Char4B = genUtf8Char4B;
+    ;
+    function genUtf8Char() {
+        var rand = ~~(Math.random() * 4);
+        switch (rand) {
+            case 0: return genUtf8Char1B();
+            case 1: return genUtf8Str.genUtf8Char2B();
+            case 2: return genUtf8Char3B();
+            case 3: return genUtf8Char4B();
+        }
+    }
+    genUtf8Str.genUtf8Char = genUtf8Char;
+    ;
+})(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
+
+},{"./stringTransform":77}],80:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"./SyncEventBase":81,"dup":17}],81:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":82,"dup":18}],82:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"./defs":83,"dup":19,"run-exclusive":56}],83:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],84:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./SyncEvent":80,"./defs":83,"dup":21}]},{},[13]);

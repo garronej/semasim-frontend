@@ -77,7 +77,7 @@ function connect() {
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
-    });
+    }, 20000);
     apiServer.startListening(socket);
     sip.api.client.enableKeepAlive(socket, 6 * 1000);
     sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
