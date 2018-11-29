@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-const fs = require("fs");
 const child_process = require("child_process");
+const fs_watch = require("node-watch");
 exports.module_dir_path = path.join(__dirname, "..", "..");
 exports.fork = (modulePath, args, options) => new Promise((resolve, reject) => {
     const childProcess = child_process.fork(modulePath, args, options);
@@ -74,7 +74,7 @@ function minify(file_path, watch) {
             path.join(path.dirname(file_path), `${path.basename(file_path, ".js")}.min.js`)
         ]);
         if (!!watch) {
-            fs.watch(file_path, () => run());
+            fs_watch(file_path, () => run());
         }
         const pr = run();
         if (!watch) {

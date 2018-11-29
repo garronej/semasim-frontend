@@ -121,6 +121,45 @@ export function renewPassword(
 
 }
 
+export function getSubscriptionInfos() {
+
+    const methodName = apiDeclaration.getSubscriptionInfos.methodName;
+    type Params = apiDeclaration.getSubscriptionInfos.Params;
+    type Response = apiDeclaration.getSubscriptionInfos.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        undefined
+    );
+
+}
+
+
+export async function subscribeOrUpdateSource(sourceId?: string) {
+
+    const methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
+    type Params = apiDeclaration.subscribeOrUpdateSource.Params;
+    type Response = apiDeclaration.subscribeOrUpdateSource.Response;
+
+    await sendRequest<Params, Response>(
+        methodName,
+        { sourceId }
+    );
+
+}
+
+export async function unsubscribe() {
+
+    const methodName = apiDeclaration.unsubscribe.methodName;
+    type Params = apiDeclaration.unsubscribe.Params;
+    type Response = apiDeclaration.unsubscribe.Response;
+
+    await sendRequest<Params, Response>(
+        methodName,
+        undefined
+    );
+
+}
 
 /*
 function buildUrl(

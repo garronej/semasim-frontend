@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "lib": [
+                    "es5",
+                    "dom",
+                    "es2015"
+            ],
+        "declaration": false,
+        "outDir": "./dist",
+        "strictNullChecks": true,
+        "sourceMap": false,
+        "newLine": "LF",
+        "downlevelIteration": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "strictPropertyInitialization": true,
+        "strictFunctionTypes": true
+    },
+    "filesGlob": [
+        "./src/**/*.ts"
+    ]
+}

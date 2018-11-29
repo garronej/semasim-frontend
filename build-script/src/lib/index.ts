@@ -1,7 +1,7 @@
 
 import * as path from "path";
-import * as fs from "fs";
 import * as child_process from "child_process";
+import * as fs_watch from "node-watch";
 
 export const module_dir_path = path.join(__dirname, "..", "..");
 
@@ -128,7 +128,7 @@ async function minify(
 
     if (!!watch) {
 
-        fs.watch(file_path, () => run());
+        fs_watch(file_path, ()=> run());
 
     }
 

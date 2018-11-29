@@ -92,3 +92,33 @@ export namespace renewPassword {
 
 }
 
+export namespace getSubscriptionInfos {
+
+    export const methodName = "get-subscription-infos";
+
+    export type Params = undefined;
+
+    export type Response = import("./lib/types").SubscriptionInfos;
+
+}
+
+export namespace subscribeOrUpdateSource {
+
+    export const methodName = "subscribe-or-update-source";
+
+    export type Params = { sourceId?: string; };
+
+    export type Response = undefined;
+
+}
+
+export namespace unsubscribe {
+
+    export const methodName = "unsubscribe";
+
+    export type Params = undefined;
+
+    export type Response = undefined;
+
+}
+

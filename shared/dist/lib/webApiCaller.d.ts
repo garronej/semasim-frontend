@@ -6,3 +6,6 @@ export declare function logoutUser(): Promise<undefined>;
 /** Return true if email has account */
 export declare function sendRenewPasswordEmail(email: string): Promise<boolean>;
 export declare function renewPassword(email: string, newPassword: string, token: string): Promise<boolean>;
+export declare function getSubscriptionInfos(): Promise<import("./types").SubscriptionInfos>;
+export declare function subscribeOrUpdateSource(sourceId?: string): Promise<void>;
+export declare function unsubscribe(): Promise<void>;

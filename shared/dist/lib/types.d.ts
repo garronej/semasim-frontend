@@ -1,4 +1,26 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
+export declare type SubscriptionInfos = {
+    source?: SubscriptionInfos.Source;
+    subscription?: SubscriptionInfos.Subscription;
+    due?: SubscriptionInfos.Due;
+};
+export declare namespace SubscriptionInfos {
+    type Source = {
+        isChargeable: boolean;
+        lastDigits: string;
+        expiration: string;
+        brand: string;
+    };
+    type Subscription = {
+        cancel_at_period_end: boolean;
+        current_period_end: Date;
+        start: Date;
+    };
+    type Due = {
+        value: number;
+        currency: string;
+    };
+}
 export declare type SimOwnership = SimOwnership.Owned | SimOwnership.Shared;
 export declare namespace SimOwnership {
     type Owned = {

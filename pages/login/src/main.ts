@@ -54,8 +54,10 @@ function setHandlers() {
 
 		if (!$(this).valid()) return;
 
+		const email = ($("#email").val() as string).toLowerCase();
+
 		const resp = await webApiCaller.loginUser(
-			$("#email").val(),
+			email,
 			$("#password").val()
 		);
 
@@ -67,10 +69,14 @@ function setHandlers() {
 
 		switch (resp.status) {
 			case "SUCCESS":
+
+				Cookies.set("email", email);
+
 				window.location.href = "/";
+
 				break;
 			case "NO SUCH ACCOUNT":
-				bootbox_custom.alert("No Semasim account correspond to that email");
+				bootbox_custom.alert("No Semasim account correspond to this email");
 				break;
 			case "WRONG PASSWORD":
 				bootbox_custom.alert(

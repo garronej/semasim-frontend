@@ -25,3 +25,15 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var getSubscriptionInfos;
+(function (getSubscriptionInfos) {
+    getSubscriptionInfos.methodName = "get-subscription-infos";
+})(getSubscriptionInfos = exports.getSubscriptionInfos || (exports.getSubscriptionInfos = {}));
+var subscribeOrUpdateSource;
+(function (subscribeOrUpdateSource) {
+    subscribeOrUpdateSource.methodName = "subscribe-or-update-source";
+})(subscribeOrUpdateSource = exports.subscribeOrUpdateSource || (exports.subscribeOrUpdateSource = {}));
+var unsubscribe;
+(function (unsubscribe) {
+    unsubscribe.methodName = "unsubscribe";
+})(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));

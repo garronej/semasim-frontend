@@ -9,7 +9,7 @@ const version= "0.1.1";
 
 <head>
     <meta charset="utf-8">
-    <title>Semasim | My SIMs</title>
+    <title>Semasim | Mobile</title>
     <!-- Mobile specific metas -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1 user-scalable=no">
     <!-- Force IE9 to render in normal mode -->
@@ -42,6 +42,7 @@ const version= "0.1.1";
     <link rel="icon" href="<%= `${assets_root}img/ico/favicon.ico`; %>" type="image/png">
     <!-- Windows8 touch icon ( http://www.buildmypinnedsite.com/ )-->
     <meta name="msapplication-TileColor" content="#3399cc" />
+
 </head>
 
 <body>
@@ -101,7 +102,7 @@ const version= "0.1.1";
                     <div class="side-nav">
                         <ul class="nav">
                             <li>
-                                <a href="/manager" class="active">
+                                <a href="/manager">
                                     <i>
                                         <svg class="custom-icon">
                                             <use xlink:href="#icon-sim_card"></use>
@@ -117,7 +118,7 @@ const version= "0.1.1";
                                 </a>
                             </li>
                             <li>
-                                <a href="/subscription">
+                                <a href="/subscription" class="active">
                                     <i class="fa fa-mobile-phone mr20"> </i>
                                     <span class="txt">Mobile subscription</span>
                                 </a>
@@ -135,27 +136,11 @@ const version= "0.1.1";
         <div class="page-content sidebar-page right-sidebar-page clearfix">
             <!-- .page-content-wrapper -->
             <div class="page-content-wrapper">
-                <!-- Start .page-content-inner -->
-                <div class="page-content-inner">
+                <div class="page-content-inner" id="page-payload">
+                    <!-- Start .page-content-inner -->
+                    <!-- Start .row -->
 
-                    <div class="row">
-                        <div class="col-lg-9">
-
-                            <!-- Start .row -->
-                            <div class="row">
-                                <div class="panel plain mt10">
-                                    <!-- Start .panel -->
-                                    <div id="page-payload" class="panel-body">
-                                        <!-- Here goes the page payload -->
-
-
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- End .row -->
-
-                        </div>
-                    </div>
+                    <!-- here insert main.html -->
 
                 </div>
                 <!-- End .page-content-inner -->
@@ -241,8 +226,14 @@ const version= "0.1.1";
 
     <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
 
+    <!-- Cookie manager-->
+    <script src="<%= `${assets_root}js/libs/js.cookie-2.2.0.min.js`; %>"></script>
+
+    <!--Payment-->
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+
     <!-- Page code -->
-    <script src="<%= `${assets_root}manager-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
+    <script src="<%= `${assets_root}subscription-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
 
 </body>
 </html>

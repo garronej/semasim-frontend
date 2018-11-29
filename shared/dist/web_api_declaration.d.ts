@@ -60,3 +60,20 @@ export declare namespace renewPassword {
     /** return false if the token have expired */
     type Response = boolean;
 }
+export declare namespace getSubscriptionInfos {
+    const methodName = "get-subscription-infos";
+    type Params = undefined;
+    type Response = import("./lib/types").SubscriptionInfos;
+}
+export declare namespace subscribeOrUpdateSource {
+    const methodName = "subscribe-or-update-source";
+    type Params = {
+        sourceId?: string;
+    };
+    type Response = undefined;
+}
+export declare namespace unsubscribe {
+    const methodName = "unsubscribe";
+    type Params = undefined;
+    type Response = undefined;
+}

@@ -37,7 +37,7 @@ $(document).ready(async () => {
 
 		const uiWebphoneController = await UiWebphoneController.create(userSim)
 
-		$(".page-content-inner").append(uiWebphoneController.structure);
+		$("#page-payload").append(uiWebphoneController.structure);
 
 	};
 

@@ -89,6 +89,43 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function getSubscriptionInfos() {
+    var methodName = apiDeclaration.getSubscriptionInfos.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getSubscriptionInfos = getSubscriptionInfos;
+function subscribeOrUpdateSource(sourceId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var methodName;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
+                    return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.subscribeOrUpdateSource = subscribeOrUpdateSource;
+function unsubscribe() {
+    return __awaiter(this, void 0, void 0, function () {
+        var methodName;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    methodName = apiDeclaration.unsubscribe.methodName;
+                    return [4 /*yield*/, sendRequest(methodName, undefined)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.unsubscribe = unsubscribe;
 /*
 function buildUrl(
     methodName: string,
