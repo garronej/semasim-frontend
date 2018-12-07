@@ -2059,6 +2059,7 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 var requestRenewPassword_1 = require("./requestRenewPassword");
+var targetPage = "manager";
 function setHandlers() {
     /* Start import from theme */
     $("#login-form").validate({
@@ -2118,7 +2119,7 @@ function setHandlers() {
                         switch (resp.status) {
                             case "SUCCESS":
                                 Cookies.set("email", email);
-                                window.location.href = "/";
+                                window.location.href = "/" + targetPage;
                                 break;
                             case "NO SUCH ACCOUNT":
                                 bootbox_custom.alert("No Semasim account correspond to this email");
@@ -2151,10 +2152,11 @@ function setHandlers() {
 }
 function handleQueryString() {
     return __awaiter(this, void 0, void 0, function () {
-        var emailAsHex, email, password, activationCode, isEmailValidated, token;
+        var emailAsHex, email, password, passwordAsHex, activationCode, isEmailValidated, token;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    targetPage = getURLParameter_1.getURLParameter("target-page") || targetPage;
                     emailAsHex = getURLParameter_1.getURLParameter("email-as-hex");
                     email = "";
                     if (!!emailAsHex) {
@@ -2164,6 +2166,14 @@ function handleQueryString() {
                     password = Cookies.get("password");
                     if (!!password) {
                         Cookies.remove("password");
+                    }
+                    else {
+                        passwordAsHex = getURLParameter_1.getURLParameter("password-as-hex");
+                        if (!!passwordAsHex) {
+                            password = Buffer.from(passwordAsHex, "hex").toString("utf8");
+                        }
+                    }
+                    if (!!password) {
                         $("#password").val(password);
                     }
                     activationCode = getURLParameter_1.getURLParameter("activation-code");
@@ -2207,7 +2217,7 @@ function handleQueryString() {
                     _a.sent();
                     _a.label = 7;
                 case 7:
-                    if (emailAsHex && !!password) {
+                    if (!!emailAsHex && !!password) {
                         $("#login-form").submit();
                         return [2 /*return*/];
                     }

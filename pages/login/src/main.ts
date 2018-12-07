@@ -6,6 +6,8 @@ import { requestRenewPassword } from "./requestRenewPassword";
 declare const Buffer: any;
 declare const Cookies: any;
 
+let targetPage= "manager";
+
 function setHandlers() {
 
 	/* Start import from theme */
@@ -72,7 +74,7 @@ function setHandlers() {
 
 				Cookies.set("email", email);
 
-				window.location.href = "/";
+				window.location.href = `/${targetPage}`;
 
 				break;
 			case "NO SUCH ACCOUNT":
@@ -111,7 +113,10 @@ function setHandlers() {
 
 }
 
+
 async function handleQueryString() {
+
+	targetPage = getURLParameter("target-page") || targetPage;
 
 	const emailAsHex = getURLParameter("email-as-hex");
 
@@ -125,11 +130,25 @@ async function handleQueryString() {
 
 	}
 
-	const password= Cookies.get("password");
+	let password= Cookies.get("password");
 
 	if( !!password ){
 
 		Cookies.remove("password");
+
+	}else{
+
+		const passwordAsHex = getURLParameter("password-as-hex");
+
+		if( !!passwordAsHex ){
+
+			password = Buffer.from(passwordAsHex, "hex").toString("utf8");
+
+		}
+
+	}
+
+	if( !!password ){
 
 		$("#password").val(password);
 
@@ -197,7 +216,7 @@ async function handleQueryString() {
 
 	}
 
-	if (emailAsHex && !!password) {
+	if (!!emailAsHex && !!password) {
 
 		$("#login-form").submit();
 
