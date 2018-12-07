@@ -3,6 +3,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml"
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
+import { currencyByCountry } from "../../../shared/dist/lib/currencyByCountry";
 
 import { UiMySubscription } from "./UiMySubscription";
 import { UiSubscribe } from "./UiSubscribe";
@@ -25,11 +26,11 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
+    private getSource: () => Promise<{ id: string; currency: string; } | undefined>;
+
     constructor(subscriptionInfos: types.SubscriptionInfos) {
 
-
-
-        const { source, subscription, due } = subscriptionInfos;
+        const { pricingByCurrency, source, subscription, due } = subscriptionInfos;
 
         if (!!due) {
 
@@ -44,9 +45,12 @@ export class UiController {
 
         if (!!subscription) {
 
-            const uiMySubscription = new UiMySubscription(subscription);
+            const uiMySubscription = new UiMySubscription(
+                subscription,
+                pricingByCurrency[subscription.currency]
+            );
 
-            uiMySubscription.evtRequestCancel.attachOnce(async () => {
+            uiMySubscription.evtScheduleCancel.attachOnce(async () => {
 
                 bootbox_custom.loading("Canceling your subscription");
 
@@ -58,13 +62,23 @@ export class UiController {
 
             });
 
-            uiMySubscription.evtRequestReEnable.attachOnce(async () => {
+            uiMySubscription.evtReactivate.attachOnce(async () => {
+
+                if( !source!.isChargeable ){
+
+                    bootbox_custom.alert("Please update your payment method first");
+
+                    return;
+
+                }
 
                 bootbox_custom.loading("Re enabling your subscription");
 
                 await webApiCaller.subscribeOrUpdateSource();
 
                 bootbox_custom.dismissLoading();
+
+                location.reload();
 
             });
 
@@ -79,21 +93,45 @@ export class UiController {
 
         } else {
 
-            const uiSubscribe = new UiSubscribe();
+            const uiSubscribe = new UiSubscribe(
+                subscriptionInfos.defaultCurrency,
+                pricingByCurrency[subscriptionInfos.defaultCurrency]
+            );
 
             uiSubscribe.evtRequestSubscribe.attach(async () => {
 
-                const { sourceId } = await this.getSource();
+                const source = await this.getSource();
 
-                if (sourceId === undefined) {
+                if (source === undefined) {
 
                     return;
 
                 }
 
+                const shouldProceed = await new Promise<boolean>(
+                    resolve => bootbox_custom.confirm({
+                        "title": "Enable subscription",
+                        "message": [
+                            `Confirm subscription for `,
+                            (
+                                    pricingByCurrency[source.currency] / 100
+                            ).toLocaleString(
+                                undefined,
+                                { "style": "currency", "currency": source.currency }
+                            ),
+                            `/Month`
+                        ].join(""),
+                        "callback": result => resolve(result)
+                    })
+                );
+
+                if (!shouldProceed) {
+                    return;
+                }
+
                 bootbox_custom.loading("Enabling your subscription");
 
-                await webApiCaller.subscribeOrUpdateSource(sourceId);
+                await webApiCaller.subscribeOrUpdateSource(source.id);
 
                 bootbox_custom.dismissLoading();
 
@@ -105,7 +143,6 @@ export class UiController {
                 .append(uiSubscribe.structure)
                 ;
 
-
         }
 
         if (!!source) {
@@ -114,15 +151,15 @@ export class UiController {
 
             uiPaymentMethod.evtRequestUpdate.attach(async () => {
 
-                const { sourceId } = await this.getSource();
+                const source = await this.getSource();
 
-                if (sourceId === undefined) {
+                if (source === undefined) {
                     return;
                 }
 
                 bootbox_custom.loading("Updating your payment method");
 
-                await webApiCaller.subscribeOrUpdateSource(sourceId);
+                await webApiCaller.subscribeOrUpdateSource(source.id);
 
                 bootbox_custom.dismissLoading();
 
@@ -135,41 +172,54 @@ export class UiController {
 
         }
 
+        this.getSource = (() => {
+
+            const evtSourceId = new SyncEvent<
+                { id: string; currency: string; } |
+                undefined
+                >();
+
+            const handler = StripeCheckout.configure({
+                "key": subscriptionInfos.stripePublicApiKey,
+                "image": 'https://stripe.com/img/documentation/checkout/marketplace.png',
+                "locale": "auto",
+                "allowRememberMe": false,
+                "name": 'Semasim',
+                "email": Cookies.get("email"),
+                "description": "Android app access",
+                "zipCode": true,
+                "panelLabel": "ok",
+                "source": source => {
+
+                    let currency= currencyByCountry[ source.card.country.toLowerCase() ];
+
+                    if( !(currency in pricingByCurrency) ){
+
+                        currency= "usd";
+
+                    }
+
+                    evtSourceId.post({ "id": source.id, currency });
+
+                },
+                "closed": () => evtSourceId.post(undefined)
+            });
+
+            // Close Checkout on page navigation:
+            window.addEventListener("popstate", () => handler.close());
+
+            return () => {
+
+                handler.open()
+
+                return evtSourceId.waitFor();
+
+            };
+
+        })();
+
     }
 
-    private getSource = (() => {
-
-        const evtSourceId = new SyncEvent<string | undefined>();
-
-        const handler = StripeCheckout.configure({
-            "key": 'pk_test_Ai9vCY4RKGRCcRdXHCRMuZ4i',
-            "image": 'https://stripe.com/img/documentation/checkout/marketplace.png',
-            "locale": 'auto',
-            "allowRememberMe": false,
-            "name": 'Semasim',
-            "email": Cookies.get("email"),
-            "description": "Android app access",
-            "zipCode": true,
-            "panelLabel": "Subscribe {{amount}}/month",
-            "amount": 345,
-            "source": ({ id }) => evtSourceId.post(id),
-            "closed": () => evtSourceId.post(undefined)
-        });
-
-        // Close Checkout on page navigation:
-        window.addEventListener("popstate", () => handler.close());
-
-        return async () => {
-
-            handler.open()
-
-            return { "sourceId": await evtSourceId.waitFor() };
-
-        };
-
-
-
-    })();
 
 }
 

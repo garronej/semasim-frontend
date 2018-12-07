@@ -14,7 +14,11 @@ export class UiSubscribe {
 
     public readonly evtRequestSubscribe = new VoidSyncEvent();
 
-    constructor() {
+    constructor(currency: string, amount: number) {
+
+        this.structure.find(".id_amount").text(
+            (amount / 100).toLocaleString(undefined, { "style": "currency", currency })
+        );
 
         this.structure.find("button")
             .on("click", () => this.evtRequestSubscribe.post())

@@ -40,6 +40,7 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var ts_events_extended_1 = require("ts-events-extended");
+var currencyByCountry_1 = require("../../../shared/dist/lib/currencyByCountry");
 var UiMySubscription_1 = require("./UiMySubscription");
 var UiSubscribe_1 = require("./UiSubscribe");
 var UiPaymentMethod_1 = require("./UiPaymentMethod");
@@ -51,50 +52,15 @@ var UiController = /** @class */ (function () {
     function UiController(subscriptionInfos) {
         var _this = this;
         this.structure = html.structure.clone();
-        this.getSource = (function () {
-            var evtSourceId = new ts_events_extended_1.SyncEvent();
-            var handler = StripeCheckout.configure({
-                "key": 'pk_test_Ai9vCY4RKGRCcRdXHCRMuZ4i',
-                "image": 'https://stripe.com/img/documentation/checkout/marketplace.png',
-                "locale": 'auto',
-                "allowRememberMe": false,
-                "name": 'Semasim',
-                "email": Cookies.get("email"),
-                "description": "Android app access",
-                "zipCode": true,
-                "panelLabel": "Subscribe {{amount}}/month",
-                "amount": 345,
-                "source": function (_a) {
-                    var id = _a.id;
-                    return evtSourceId.post(id);
-                },
-                "closed": function () { return evtSourceId.post(undefined); }
-            });
-            // Close Checkout on page navigation:
-            window.addEventListener("popstate", function () { return handler.close(); });
-            return function () { return __awaiter(_this, void 0, void 0, function () {
-                var _a, _b;
-                return __generator(this, function (_c) {
-                    switch (_c.label) {
-                        case 0:
-                            handler.open();
-                            _a = {};
-                            _b = "sourceId";
-                            return [4 /*yield*/, evtSourceId.waitFor()];
-                        case 1: return [2 /*return*/, (_a[_b] = _c.sent(), _a)];
-                    }
-                });
-            }); };
-        })();
-        var source = subscriptionInfos.source, subscription = subscriptionInfos.subscription, due = subscriptionInfos.due;
+        var pricingByCurrency = subscriptionInfos.pricingByCurrency, source = subscriptionInfos.source, subscription = subscriptionInfos.subscription, due = subscriptionInfos.due;
         if (!!due) {
             var uiNegativeBalanceWarning = new UiNegativeBalanceWarning_1.UiNegativeBalanceWarning(due);
             this.structure.find("id_placeholder_UiNegativeBalanceWarning")
                 .append(uiNegativeBalanceWarning.structure);
         }
         if (!!subscription) {
-            var uiMySubscription = new UiMySubscription_1.UiMySubscription(subscription);
-            uiMySubscription.evtRequestCancel.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+            var uiMySubscription = new UiMySubscription_1.UiMySubscription(subscription, pricingByCurrency[subscription.currency]);
+            uiMySubscription.evtScheduleCancel.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -108,15 +74,20 @@ var UiController = /** @class */ (function () {
                     }
                 });
             }); });
-            uiMySubscription.evtRequestReEnable.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+            uiMySubscription.evtReactivate.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
+                            if (!source.isChargeable) {
+                                bootbox_custom.alert("Please update your payment method first");
+                                return [2 /*return*/];
+                            }
                             bootbox_custom.loading("Re enabling your subscription");
                             return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource()];
                         case 1:
                             _a.sent();
                             bootbox_custom.dismissLoading();
+                            location.reload();
                             return [2 /*return*/];
                     }
                 });
@@ -128,20 +99,34 @@ var UiController = /** @class */ (function () {
                 .append(uiDownloadButton.structure);
         }
         else {
-            var uiSubscribe = new UiSubscribe_1.UiSubscribe();
+            var uiSubscribe = new UiSubscribe_1.UiSubscribe(subscriptionInfos.defaultCurrency, pricingByCurrency[subscriptionInfos.defaultCurrency]);
             uiSubscribe.evtRequestSubscribe.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-                var sourceId;
+                var source, shouldProceed;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, this.getSource()];
                         case 1:
-                            sourceId = (_a.sent()).sourceId;
-                            if (sourceId === undefined) {
+                            source = _a.sent();
+                            if (source === undefined) {
+                                return [2 /*return*/];
+                            }
+                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
+                                    "title": "Enable subscription",
+                                    "message": [
+                                        "Confirm subscription for ",
+                                        (pricingByCurrency[source.currency] / 100).toLocaleString(undefined, { "style": "currency", "currency": source.currency }),
+                                        "/Month"
+                                    ].join(""),
+                                    "callback": function (result) { return resolve(result); }
+                                }); })];
+                        case 2:
+                            shouldProceed = _a.sent();
+                            if (!shouldProceed) {
                                 return [2 /*return*/];
                             }
                             bootbox_custom.loading("Enabling your subscription");
-                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(sourceId)];
-                        case 2:
+                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(source.id)];
+                        case 3:
                             _a.sent();
                             bootbox_custom.dismissLoading();
                             location.reload();
@@ -155,17 +140,17 @@ var UiController = /** @class */ (function () {
         if (!!source) {
             var uiPaymentMethod = new UiPaymentMethod_1.UiPaymentMethod(source);
             uiPaymentMethod.evtRequestUpdate.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-                var sourceId;
+                var source;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, this.getSource()];
                         case 1:
-                            sourceId = (_a.sent()).sourceId;
-                            if (sourceId === undefined) {
+                            source = _a.sent();
+                            if (source === undefined) {
                                 return [2 /*return*/];
                             }
                             bootbox_custom.loading("Updating your payment method");
-                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(sourceId)];
+                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(source.id)];
                         case 2:
                             _a.sent();
                             bootbox_custom.dismissLoading();
@@ -177,12 +162,40 @@ var UiController = /** @class */ (function () {
             this.structure.find(".id_placeholder_UiPaymentMethod")
                 .append(uiPaymentMethod.structure);
         }
+        this.getSource = (function () {
+            var evtSourceId = new ts_events_extended_1.SyncEvent();
+            var handler = StripeCheckout.configure({
+                "key": subscriptionInfos.stripePublicApiKey,
+                "image": 'https://stripe.com/img/documentation/checkout/marketplace.png',
+                "locale": "auto",
+                "allowRememberMe": false,
+                "name": 'Semasim',
+                "email": Cookies.get("email"),
+                "description": "Android app access",
+                "zipCode": true,
+                "panelLabel": "ok",
+                "source": function (source) {
+                    var currency = currencyByCountry_1.currencyByCountry[source.card.country.toLowerCase()];
+                    if (!(currency in pricingByCurrency)) {
+                        currency = "usd";
+                    }
+                    evtSourceId.post({ "id": source.id, currency: currency });
+                },
+                "closed": function () { return evtSourceId.post(undefined); }
+            });
+            // Close Checkout on page navigation:
+            window.addEventListener("popstate", function () { return handler.close(); });
+            return function () {
+                handler.open();
+                return evtSourceId.waitFor();
+            };
+        })();
     }
     return UiController;
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":26,"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../../../shared/dist/lib/webApiCaller":28,"../templates/UiController.html":17,"../templates/UiController.less":18,"./UiDownloadButtons":2,"./UiMySubscription":3,"./UiNegativeBalanceWarning":4,"./UiPaymentMethod":5,"./UiSubscribe":6,"ts-events-extended":16}],2:[function(require,module,exports){
+},{"../../../shared/dist/lib/currencyByCountry":26,"../../../shared/dist/lib/tools/bootbox_custom":27,"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../../../shared/dist/lib/webApiCaller":29,"../templates/UiController.html":17,"../templates/UiController.less":18,"./UiDownloadButtons":2,"./UiMySubscription":3,"./UiNegativeBalanceWarning":4,"./UiPaymentMethod":5,"./UiSubscribe":6,"ts-events-extended":16}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -195,7 +208,7 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../templates/UiDownloadButtons.html":19}],3:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../templates/UiDownloadButtons.html":19}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -204,40 +217,37 @@ var moment = require("moment");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiMySubscription.html"), "UiMySubscription");
 require("../templates/UiMySubscription.less");
 var UiMySubscription = /** @class */ (function () {
-    function UiMySubscription(s) {
+    function UiMySubscription(s, amount) {
         var _this = this;
         this.structure = html.structure.clone();
-        this.evtRequestCancel = new ts_events_extended_1.VoidSyncEvent();
-        this.evtRequestReEnable = new ts_events_extended_1.VoidSyncEvent();
+        this.evtScheduleCancel = new ts_events_extended_1.VoidSyncEvent();
+        this.evtReactivate = new ts_events_extended_1.VoidSyncEvent();
         var formatDate = function (date) {
             return moment.unix(~~(date.getTime() / 1000))
                 .format("YYYY-MM-DD");
         };
-        this.structure.find(".id_boundaries").text((function () {
-            var out = "Since " + formatDate(s.start);
-            if (s.cancel_at_period_end) {
-                out += ", will expire the " + formatDate(s.current_period_end);
-            }
-            return out;
-        })());
-        this.structure.find(".payment-next")[s.cancel_at_period_end ? "hide" : "show"]();
-        if (!s.cancel_at_period_end) {
-            this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
-            this.structure.find("id_buttonLabel").html("Want to cancel your subscription?");
-            this.structure.find("button").html("Cancel subscription");
-            this.structure.find("button").on("click", function () { return _this.evtRequestCancel.post(); });
+        if (s.cancel_at_period_end) {
+            this.structure.find(".id_days_left").text((function () {
+                return ~~((s.current_period_end.getTime() - Date.now()) / (24 * 3600 * 1000));
+            })());
+            this.structure.find(".payment-next").hide();
+            this.structure.find("button").html("Reactivate subscription");
+            this.structure.find("button").on("click", function () { return _this.evtReactivate.post(); });
         }
         else {
-            this.structure.find("id_buttonLabel").html("At the end of the current period your subscription will expire");
-            this.structure.find("button").html("Re-enable automatic renewal");
-            this.structure.find("button").on("click", function () { return _this.evtRequestReEnable.post(); });
+            this.structure.find(".id_days_left").parent().hide();
+            this.structure.find(".payment-next").show();
+            this.structure.find(".id_amount").text((amount / 100).toLocaleString(undefined, { "style": "currency", "currency": s.currency }));
+            this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
+            this.structure.find("button").html("Cancel subscription");
+            this.structure.find("button").on("click", function () { return _this.evtScheduleCancel.post(); });
         }
     }
     return UiMySubscription;
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../templates/UiMySubscription.html":20,"../templates/UiMySubscription.less":21,"moment":10,"ts-events-extended":16}],4:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../templates/UiMySubscription.html":20,"../templates/UiMySubscription.less":21,"moment":10,"ts-events-extended":16}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -246,13 +256,13 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
     function UiNegativeBalanceWarning(due) {
         this.structure = html.structure.clone();
         this.structure.find(".id_val")
-            .text("-" + due.value + " " + due.currency);
+            .text((due.value / 100).toLocaleString(undefined, { "style": "currency", "currency": due.currency }));
     }
     return UiNegativeBalanceWarning;
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../templates/UiNegativeBalanceWarning.html":22}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../templates/UiNegativeBalanceWarning.html":22}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -274,17 +284,18 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../templates/UiPaymentMethod.html":23,"../templates/UiPaymentMethod.less":24,"ts-events-extended":16}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../templates/UiPaymentMethod.html":23,"../templates/UiPaymentMethod.less":24,"ts-events-extended":16}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSubscribe.html"), "UiSubscribe");
 var UiSubscribe = /** @class */ (function () {
-    function UiSubscribe() {
+    function UiSubscribe(currency, amount) {
         var _this = this;
         this.structure = html.structure.clone();
         this.evtRequestSubscribe = new ts_events_extended_1.VoidSyncEvent();
+        this.structure.find(".id_amount").text((amount / 100).toLocaleString(undefined, { "style": "currency", currency: currency }));
         this.structure.find("button")
             .on("click", function () { return _this.evtRequestSubscribe.post(); });
     }
@@ -292,7 +303,7 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":27,"../templates/UiSubscribe.html":25,"ts-events-extended":16}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":28,"../templates/UiSubscribe.html":25,"ts-events-extended":16}],7:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -361,7 +372,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":26,"../../../shared/dist/lib/webApiCaller":28,"./UiController":1}],8:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":27,"../../../shared/dist/lib/webApiCaller":29,"./UiController":1}],8:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -5803,18 +5814,23 @@ var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: 
 },{"lessify":9}],19:[function(require,module,exports){
 module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
 },{}],20:[function(require,module,exports){
-module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"id_boundaries payment-text\">Since 13/08/17, <strong>will expire the 12/03/19</strong></p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\">3.45&nbsp;$</dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions\">\r\n                <div class=\"id_buttonLabel payment-text\">Want to cancel your subscription?</div>\r\n                <button class=\"btn btn-primary\" id=\"customButton\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
 },{}],21:[function(require,module,exports){
 var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":9}],22:[function(require,module,exports){
 module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
 },{}],23:[function(require,module,exports){
-module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span id=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
 },{}],24:[function(require,module,exports){
 var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":9}],25:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>For enabling semasim on android</p>\r\n            <button class=\"btn btn-primary\">Subscribe now 3.45$/Month</button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>For enabling semasim on your android devices</p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
 },{}],26:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.currencyByCountry = require("../../res/currency.json");
+
+},{"../../res/currency.json":36}],27:[function(require,module,exports){
 "use strict";
 //TODO: Assert bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -5911,7 +5927,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -5925,7 +5941,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -6080,7 +6096,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":29,"transfer-tools/dist/lib/JSON_CUSTOM":34}],29:[function(require,module,exports){
+},{"../web_api_declaration":30,"transfer-tools/dist/lib/JSON_CUSTOM":35}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -6121,7 +6137,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -6175,21 +6191,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":30}],32:[function(require,module,exports){
+},{"./implementation":31}],33:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":31}],33:[function(require,module,exports){
+},{"function-bind":32}],34:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -6524,7 +6540,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":32}],34:[function(require,module,exports){
+},{"has":33}],35:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -6574,4 +6590,256 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":33}]},{},[7]);
+},{"super-json":34}],36:[function(require,module,exports){
+module.exports={
+  "bd": "bdt",
+  "be": "eur",
+  "bf": "xof",
+  "bg": "bgn",
+  "ba": "bam",
+  "bb": "bbd",
+  "wf": "xpf",
+  "bl": "eur",
+  "bm": "bmd",
+  "bn": "bnd",
+  "bo": "bob",
+  "bh": "bhd",
+  "bi": "bif",
+  "bj": "xof",
+  "bt": "btn",
+  "jm": "jmd",
+  "bv": "nok",
+  "bw": "bwp",
+  "ws": "wst",
+  "bq": "usd",
+  "br": "brl",
+  "bs": "bsd",
+  "je": "gbp",
+  "by": "byr",
+  "bz": "bzd",
+  "ru": "rub",
+  "rw": "rwf",
+  "rs": "rsd",
+  "tl": "usd",
+  "re": "eur",
+  "tm": "tmt",
+  "tj": "tjs",
+  "ro": "ron",
+  "tk": "nzd",
+  "gw": "xof",
+  "gu": "usd",
+  "gt": "gtq",
+  "gs": "gbp",
+  "gr": "eur",
+  "gq": "xaf",
+  "gp": "eur",
+  "jp": "jpy",
+  "gy": "gyd",
+  "gg": "gbp",
+  "gf": "eur",
+  "ge": "gel",
+  "gd": "xcd",
+  "gb": "gbp",
+  "ga": "xaf",
+  "sv": "usd",
+  "gn": "gnf",
+  "gm": "gmd",
+  "gl": "dkk",
+  "gi": "gip",
+  "gh": "ghs",
+  "om": "omr",
+  "tn": "tnd",
+  "jo": "jod",
+  "hr": "hrk",
+  "ht": "htg",
+  "hu": "huf",
+  "hk": "hkd",
+  "hn": "hnl",
+  "hm": "aud",
+  "ve": "vef",
+  "pr": "usd",
+  "ps": "ils",
+  "pw": "usd",
+  "pt": "eur",
+  "sj": "nok",
+  "py": "pyg",
+  "iq": "iqd",
+  "pa": "pab",
+  "pf": "xpf",
+  "pg": "pgk",
+  "pe": "pen",
+  "pk": "pkr",
+  "ph": "php",
+  "pn": "nzd",
+  "pl": "pln",
+  "pm": "eur",
+  "zm": "zmk",
+  "eh": "mad",
+  "ee": "eur",
+  "eg": "egp",
+  "za": "zar",
+  "ec": "usd",
+  "it": "eur",
+  "vn": "vnd",
+  "sb": "sbd",
+  "et": "etb",
+  "so": "sos",
+  "zw": "zwl",
+  "sa": "sar",
+  "es": "eur",
+  "er": "ern",
+  "me": "eur",
+  "md": "mdl",
+  "mg": "mga",
+  "mf": "eur",
+  "ma": "mad",
+  "mc": "eur",
+  "uz": "uzs",
+  "mm": "mmk",
+  "ml": "xof",
+  "mo": "mop",
+  "mn": "mnt",
+  "mh": "usd",
+  "mk": "mkd",
+  "mu": "mur",
+  "mt": "eur",
+  "mw": "mwk",
+  "mv": "mvr",
+  "mq": "eur",
+  "mp": "usd",
+  "ms": "xcd",
+  "mr": "mro",
+  "im": "gbp",
+  "ug": "ugx",
+  "tz": "tzs",
+  "my": "myr",
+  "mx": "mxn",
+  "il": "ils",
+  "fr": "eur",
+  "io": "usd",
+  "sh": "shp",
+  "fi": "eur",
+  "fj": "fjd",
+  "fk": "fkp",
+  "fm": "usd",
+  "fo": "dkk",
+  "ni": "nio",
+  "nl": "eur",
+  "no": "nok",
+  "na": "nad",
+  "vu": "vuv",
+  "nc": "xpf",
+  "ne": "xof",
+  "nf": "aud",
+  "ng": "ngn",
+  "nz": "nzd",
+  "np": "npr",
+  "nr": "aud",
+  "nu": "nzd",
+  "ck": "nzd",
+  "xk": "eur",
+  "ci": "xof",
+  "ch": "chf",
+  "co": "cop",
+  "cn": "cny",
+  "cm": "xaf",
+  "cl": "clp",
+  "cc": "aud",
+  "ca": "cad",
+  "cg": "xaf",
+  "cf": "xaf",
+  "cd": "cdf",
+  "cz": "czk",
+  "cy": "eur",
+  "cx": "aud",
+  "cr": "crc",
+  "cw": "ang",
+  "cv": "cve",
+  "cu": "cup",
+  "sz": "szl",
+  "sy": "syp",
+  "sx": "ang",
+  "kg": "kgs",
+  "ke": "kes",
+  "ss": "ssp",
+  "sr": "srd",
+  "ki": "aud",
+  "kh": "khr",
+  "kn": "xcd",
+  "km": "kmf",
+  "st": "std",
+  "sk": "eur",
+  "kr": "krw",
+  "si": "eur",
+  "kp": "kpw",
+  "kw": "kwd",
+  "sn": "xof",
+  "sm": "eur",
+  "sl": "sll",
+  "sc": "scr",
+  "kz": "kzt",
+  "ky": "kyd",
+  "sg": "sgd",
+  "se": "sek",
+  "sd": "sdg",
+  "do": "dop",
+  "dm": "xcd",
+  "dj": "djf",
+  "dk": "dkk",
+  "vg": "usd",
+  "de": "eur",
+  "ye": "yer",
+  "dz": "dzd",
+  "us": "usd",
+  "uy": "uyu",
+  "yt": "eur",
+  "um": "usd",
+  "lb": "lbp",
+  "lc": "xcd",
+  "la": "lak",
+  "tv": "aud",
+  "tw": "twd",
+  "tt": "ttd",
+  "tr": "try",
+  "lk": "lkr",
+  "li": "chf",
+  "lv": "eur",
+  "to": "top",
+  "lt": "ltl",
+  "lu": "eur",
+  "lr": "lrd",
+  "ls": "lsl",
+  "th": "thb",
+  "tf": "eur",
+  "tg": "xof",
+  "td": "xaf",
+  "tc": "usd",
+  "ly": "lyd",
+  "va": "eur",
+  "vc": "xcd",
+  "ae": "aed",
+  "ad": "eur",
+  "ag": "xcd",
+  "af": "afn",
+  "ai": "xcd",
+  "vi": "usd",
+  "is": "isk",
+  "ir": "irr",
+  "am": "amd",
+  "al": "all",
+  "ao": "aoa",
+  "as": "usd",
+  "ar": "ars",
+  "au": "aud",
+  "at": "eur",
+  "aw": "awg",
+  "in": "inr",
+  "ax": "eur",
+  "az": "azn",
+  "ie": "eur",
+  "id": "idr",
+  "ua": "uah",
+  "qa": "qar",
+  "mz": "mzn"
+}
+},{}]},{},[7]);

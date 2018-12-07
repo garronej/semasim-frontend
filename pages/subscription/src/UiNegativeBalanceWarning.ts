@@ -15,7 +15,7 @@ export class UiNegativeBalanceWarning {
     constructor(due: types.SubscriptionInfos.Due) {
 
         this.structure.find(".id_val")
-            .text(`-${due.value} ${due.currency}`)
+        .text((due.value/100).toLocaleString(undefined,{"style":"currency","currency":due.currency}))
             ;
 
     }

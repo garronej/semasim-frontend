@@ -15,46 +15,43 @@ require("../templates/UiMySubscription.less");
 export class UiMySubscription {
 
     public readonly structure = html.structure.clone();
-    public readonly evtRequestCancel = new VoidSyncEvent();
-    public readonly evtRequestReEnable = new VoidSyncEvent();
+    public readonly evtScheduleCancel = new VoidSyncEvent();
+    public readonly evtReactivate = new VoidSyncEvent();
 
-    constructor(s: types.SubscriptionInfos.Subscription) {
+    constructor(s: types.SubscriptionInfos.Subscription, amount: number) {
 
         const formatDate = (date: Date) =>
             moment.unix(~~(date.getTime() / 1000))
                 .format("YYYY-MM-DD");
-
-        this.structure.find(".id_boundaries").text((() => {
-
-            let out = `Since ${formatDate(s.start)}`;
-
-            if (s.cancel_at_period_end) {
-
-                out += `, will expire the ${formatDate(s.current_period_end)}`;
-
-            }
-
-            return out;
-
-        })());
-
-        this.structure.find(".payment-next")[s.cancel_at_period_end ? "hide" : "show"]();
+            
+        if( s.cancel_at_period_end ){
 
 
-        if (!s.cancel_at_period_end) {
+            this.structure.find(".id_days_left").text((() => { 
+
+                return ~~((s.current_period_end.getTime() - Date.now())/ ( 24 * 3600 * 1000 ));
+
+            })());
+
+            this.structure.find(".payment-next").hide();
+
+            this.structure.find("button").html("Reactivate subscription");
+            this.structure.find("button").on("click", () => this.evtReactivate.post());
+
+        }else{
+
+            this.structure.find(".id_days_left").parent().hide();
+
+            this.structure.find(".payment-next").show();
+
+            this.structure.find(".id_amount").text((amount/100).toLocaleString(undefined,{"style":"currency","currency":s.currency}));
 
             this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
-            this.structure.find("id_buttonLabel").html("Want to cancel your subscription?");
             this.structure.find("button").html("Cancel subscription");
-            this.structure.find("button").on("click", () => this.evtRequestCancel.post());
-
-        } else {
-
-            this.structure.find("id_buttonLabel").html( "At the end of the current period your subscription will expire");
-            this.structure.find("button").html("Re-enable automatic renewal");
-            this.structure.find("button").on("click", () => this.evtRequestReEnable.post());
+            this.structure.find("button").on("click", () => this.evtScheduleCancel.post());
 
         }
+
 
     }
 

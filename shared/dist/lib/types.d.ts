@@ -1,5 +1,10 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 export declare type SubscriptionInfos = {
+    stripePublicApiKey: string;
+    pricingByCurrency: {
+        [currency: string]: number;
+    };
+    defaultCurrency: string;
     source?: SubscriptionInfos.Source;
     subscription?: SubscriptionInfos.Subscription;
     due?: SubscriptionInfos.Due;
@@ -9,12 +14,11 @@ export declare namespace SubscriptionInfos {
         isChargeable: boolean;
         lastDigits: string;
         expiration: string;
-        brand: string;
     };
     type Subscription = {
         cancel_at_period_end: boolean;
         current_period_end: Date;
-        start: Date;
+        currency: string;
     };
     type Due = {
         value: number;
