@@ -4,6 +4,7 @@ import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import { currencyByCountry } from "../../../shared/dist/lib/currencyByCountry";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
 import { UiMySubscription } from "./UiMySubscription";
 import { UiSubscribe } from "./UiSubscribe";
@@ -14,6 +15,7 @@ import { UiNegativeBalanceWarning } from "./UiNegativeBalanceWarning";
 declare const require: (path: string) => any;
 declare const StripeCheckout: any;
 declare const Cookies: any;
+declare const Buffer: any;
 
 const html = loadUiClassHtml(
     require("../templates/UiController.html"),
@@ -64,7 +66,7 @@ export class UiController {
 
             uiMySubscription.evtReactivate.attachOnce(async () => {
 
-                if( !source!.isChargeable ){
+                if (!source!.isChargeable) {
 
                     bootbox_custom.alert("Please update your payment method first");
 
@@ -100,11 +102,25 @@ export class UiController {
 
             uiSubscribe.evtRequestSubscribe.attach(async () => {
 
-                const source = await this.getSource();
+                let newSourceId: string | undefined = undefined;
+                let currency: string;
 
-                if (source === undefined) {
+                if (!source || !source.isChargeable) {
 
-                    return;
+                    const newSource = await this.getSource();
+
+                    if (newSource === undefined) {
+
+                        return;
+
+                    }
+
+                    newSourceId = newSource.id;
+                    currency = newSource.currency;
+
+                } else {
+
+                    currency = source.currency;
 
                 }
 
@@ -114,10 +130,10 @@ export class UiController {
                         "message": [
                             `Confirm subscription for `,
                             (
-                                    pricingByCurrency[source.currency] / 100
+                                pricingByCurrency[currency] / 100
                             ).toLocaleString(
                                 undefined,
-                                { "style": "currency", "currency": source.currency }
+                                { "style": "currency", "currency": currency }
                             ),
                             `/Month`
                         ].join(""),
@@ -129,11 +145,19 @@ export class UiController {
                     return;
                 }
 
+
                 bootbox_custom.loading("Enabling your subscription");
 
-                await webApiCaller.subscribeOrUpdateSource(source.id);
+                await webApiCaller.subscribeOrUpdateSource(newSourceId);
 
                 bootbox_custom.dismissLoading();
+
+                await new Promise<void>(
+                    resolve => bootbox_custom.alert(
+                        "You can now use the semasim Android application",
+                        () => resolve()
+                    )
+                );
 
                 location.reload();
 
@@ -181,21 +205,23 @@ export class UiController {
 
             const handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
-                "image": 'https://stripe.com/img/documentation/checkout/marketplace.png',
+                "image": "/img/shop.png",
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
-                "email": Cookies.get("email"),
+                "email":
+                    Cookies.get("email") ||
+                    Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8"),
                 "description": "Android app access",
                 "zipCode": true,
                 "panelLabel": "ok",
                 "source": source => {
 
-                    let currency= currencyByCountry[ source.card.country.toLowerCase() ];
+                    let currency = currencyByCountry[source.card.country.toLowerCase()];
 
-                    if( !(currency in pricingByCurrency) ){
+                    if (!(currency in pricingByCurrency)) {
 
-                        currency= "usd";
+                        currency = "usd";
 
                     }
 

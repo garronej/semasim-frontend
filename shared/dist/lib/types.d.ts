@@ -14,6 +14,7 @@ export declare namespace SubscriptionInfos {
         isChargeable: boolean;
         lastDigits: string;
         expiration: string;
+        currency: string;
     };
     type Subscription = {
         cancel_at_period_end: boolean;

@@ -77,9 +77,8 @@ function setHandlers(){
 
                 window.location.href = "/login?" + [
                     regStatus === "CREATED NO ACTIVATION REQUIRED" ?
-                        undefined : `activation-code=__prompt__`,
-                    `email-as-hex=${Buffer.from(email, "utf8").toString("hex")}`,
-                    //`password-as-hex=${Buffer.from(password, "utf8").toString("hex")}`
+                        undefined : `email_confirmation_code=__prompt__`,
+                    `email_as_hex=${Buffer.from(email, "utf8").toString("hex")}`
                 ].filter(v => !!v).join("&");
 
                 break;
@@ -92,7 +91,7 @@ function setHandlers(){
 
 function handleQueryString() {
 
-    const emailAsHex = getURLParameter("email-as-hex");
+    const emailAsHex = getURLParameter("email_as_hex");
 
     if (emailAsHex) {
 

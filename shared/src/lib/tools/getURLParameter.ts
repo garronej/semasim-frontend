@@ -9,7 +9,7 @@ export function getURLParameter(sParam: string): string | undefined {
 
 		const sParameterName = sURLVariables[i].split("=");
 
-		if (sParameterName[0] == sParam) {
+		if (sParameterName[0] === sParam) {
 
 			return sParameterName[1];
 		}

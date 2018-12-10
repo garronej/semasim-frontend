@@ -2059,7 +2059,6 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 var requestRenewPassword_1 = require("./requestRenewPassword");
-var targetPage = "manager";
 function setHandlers() {
     /* Start import from theme */
     $("#login-form").validate({
@@ -2119,7 +2118,7 @@ function setHandlers() {
                         switch (resp.status) {
                             case "SUCCESS":
                                 Cookies.set("email", email);
-                                window.location.href = "/" + targetPage;
+                                window.location.href = "/manager";
                                 break;
                             case "NO SUCH ACCOUNT":
                                 bootbox_custom.alert("No Semasim account correspond to this email");
@@ -2152,12 +2151,11 @@ function setHandlers() {
 }
 function handleQueryString() {
     return __awaiter(this, void 0, void 0, function () {
-        var emailAsHex, email, password, passwordAsHex, activationCode, isEmailValidated, token;
+        var emailAsHex, email, password, emailConfirmationCode, isEmailValidated, renewPasswordToken;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    targetPage = getURLParameter_1.getURLParameter("target-page") || targetPage;
-                    emailAsHex = getURLParameter_1.getURLParameter("email-as-hex");
+                    emailAsHex = getURLParameter_1.getURLParameter("email_as_hex");
                     email = "";
                     if (!!emailAsHex) {
                         email = Buffer.from(emailAsHex, "hex").toString("utf8");
@@ -2166,19 +2164,11 @@ function handleQueryString() {
                     password = Cookies.get("password");
                     if (!!password) {
                         Cookies.remove("password");
-                    }
-                    else {
-                        passwordAsHex = getURLParameter_1.getURLParameter("password-as-hex");
-                        if (!!passwordAsHex) {
-                            password = Buffer.from(passwordAsHex, "hex").toString("utf8");
-                        }
-                    }
-                    if (!!password) {
                         $("#password").val(password);
                     }
-                    activationCode = getURLParameter_1.getURLParameter("activation-code");
-                    if (!!!activationCode) return [3 /*break*/, 7];
-                    if (!(activationCode === "__prompt__")) return [3 /*break*/, 2];
+                    emailConfirmationCode = getURLParameter_1.getURLParameter("email_confirmation_code");
+                    if (!!!emailConfirmationCode) return [3 /*break*/, 7];
+                    if (!(emailConfirmationCode === "__prompt__")) return [3 /*break*/, 2];
                     return [4 /*yield*/, (function callee() {
                             return __awaiter(this, void 0, void 0, function () {
                                 var out;
@@ -2201,9 +2191,9 @@ function handleQueryString() {
                             });
                         })()];
                 case 1:
-                    activationCode = _a.sent();
+                    emailConfirmationCode = _a.sent();
                     _a.label = 2;
-                case 2: return [4 /*yield*/, webApiCaller.validateEmail(email, activationCode)];
+                case 2: return [4 /*yield*/, webApiCaller.validateEmail(email, emailConfirmationCode)];
                 case 3:
                     isEmailValidated = _a.sent();
                     if (!!isEmailValidated) return [3 /*break*/, 5];
@@ -2221,8 +2211,8 @@ function handleQueryString() {
                         $("#login-form").submit();
                         return [2 /*return*/];
                     }
-                    token = getURLParameter_1.getURLParameter("token");
-                    if (!!token) {
+                    renewPasswordToken = getURLParameter_1.getURLParameter("renew_password_token");
+                    if (!!renewPasswordToken) {
                         (function callee() {
                             return __awaiter(this, void 0, void 0, function () {
                                 var newPassword, newPasswordConfirm, wasTokenStillValid;
@@ -2256,7 +2246,7 @@ function handleQueryString() {
                                             return [2 /*return*/];
                                         case 6:
                                             bootbox_custom.loading("Renewing password");
-                                            return [4 /*yield*/, webApiCaller.renewPassword(email, newPassword, token)];
+                                            return [4 /*yield*/, webApiCaller.renewPassword(email, newPassword, renewPasswordToken)];
                                         case 7:
                                             wasTokenStillValid = _a.sent();
                                             bootbox_custom.dismissLoading();
@@ -2370,7 +2360,7 @@ function requestRenewPassword() {
                             window.location.href = [
                                 "/register",
                                 "?",
-                                "email-as-hex=" + Buffer.from(email, "utf8").toString("hex")
+                                "email_as_hex=" + Buffer.from(email, "utf8").toString("hex")
                             ].join("");
                             return [2 /*return*/];
                         case "RETRY":
@@ -2492,7 +2482,7 @@ function getURLParameter(sParam) {
     var sURLVariables = sPageURL.split("&");
     for (var i = 0; i < sURLVariables.length; i++) {
         var sParameterName = sURLVariables[i].split("=");
-        if (sParameterName[0] == sParam) {
+        if (sParameterName[0] === sParam) {
             return sParameterName[1];
         }
     }

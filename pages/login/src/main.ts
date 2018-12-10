@@ -6,8 +6,6 @@ import { requestRenewPassword } from "./requestRenewPassword";
 declare const Buffer: any;
 declare const Cookies: any;
 
-let targetPage= "manager";
-
 function setHandlers() {
 
 	/* Start import from theme */
@@ -74,7 +72,7 @@ function setHandlers() {
 
 				Cookies.set("email", email);
 
-				window.location.href = `/${targetPage}`;
+				window.location.href = `/manager`;
 
 				break;
 			case "NO SUCH ACCOUNT":
@@ -116,9 +114,7 @@ function setHandlers() {
 
 async function handleQueryString() {
 
-	targetPage = getURLParameter("target-page") || targetPage;
-
-	const emailAsHex = getURLParameter("email-as-hex");
+	const emailAsHex = getURLParameter("email_as_hex");
 
 	let email = "";
 
@@ -130,37 +126,24 @@ async function handleQueryString() {
 
 	}
 
-	let password= Cookies.get("password");
+	const password= Cookies.get("password");
 
 	if( !!password ){
 
 		Cookies.remove("password");
 
-	}else{
-
-		const passwordAsHex = getURLParameter("password-as-hex");
-
-		if( !!passwordAsHex ){
-
-			password = Buffer.from(passwordAsHex, "hex").toString("utf8");
-
-		}
-
-	}
-
-	if( !!password ){
-
 		$("#password").val(password);
 
 	}
 
-	let activationCode = getURLParameter("activation-code");
 
-	if (!!activationCode) {
+	let emailConfirmationCode = getURLParameter("email_confirmation_code");
 
-		if (activationCode === "__prompt__") {
+	if (!!emailConfirmationCode) {
 
-			activationCode = await (async function callee(): Promise<string> {
+		if (emailConfirmationCode === "__prompt__") {
+
+			emailConfirmationCode = await (async function callee(): Promise<string> {
 
 				const out = await new Promise<string | null>(
 					resolve => bootbox_custom.prompt({
@@ -188,7 +171,7 @@ async function handleQueryString() {
 
 		}
 
-		const isEmailValidated = await webApiCaller.validateEmail(email, activationCode);
+		const isEmailValidated = await webApiCaller.validateEmail(email, emailConfirmationCode);
 
 		if (!isEmailValidated) {
 
@@ -223,9 +206,9 @@ async function handleQueryString() {
 		return;
 	}
 
-	const token = getURLParameter("token");
+	const renewPasswordToken = getURLParameter("renew_password_token");
 
-	if (!!token) {
+	if (!!renewPasswordToken) {
 
 		(async function callee() {
 
@@ -277,7 +260,7 @@ async function handleQueryString() {
 
 			bootbox_custom.loading("Renewing password");
 
-			const wasTokenStillValid = await webApiCaller.renewPassword(email, newPassword, token);
+			const wasTokenStillValid = await webApiCaller.renewPassword(email, newPassword, renewPasswordToken);
 
 			bootbox_custom.dismissLoading();
 

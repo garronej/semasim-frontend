@@ -2125,8 +2125,8 @@ function setHandlers() {
                                 Cookies.set("password", password, { "expires": 1 });
                                 window.location.href = "/login?" + [
                                     regStatus === "CREATED NO ACTIVATION REQUIRED" ?
-                                        undefined : "activation-code=__prompt__",
-                                    "email-as-hex=" + Buffer.from(email, "utf8").toString("hex"),
+                                        undefined : "email_confirmation_code=__prompt__",
+                                    "email_as_hex=" + Buffer.from(email, "utf8").toString("hex")
                                 ].filter(function (v) { return !!v; }).join("&");
                                 break;
                         }
@@ -2137,7 +2137,7 @@ function setHandlers() {
     });
 }
 function handleQueryString() {
-    var emailAsHex = getURLParameter_1.getURLParameter("email-as-hex");
+    var emailAsHex = getURLParameter_1.getURLParameter("email_as_hex");
     if (emailAsHex) {
         $("#email").val(Buffer.from(emailAsHex, "hex").toString("utf8"));
         $("#email").prop("readonly", true);
@@ -2254,7 +2254,7 @@ function getURLParameter(sParam) {
     var sURLVariables = sPageURL.split("&");
     for (var i = 0; i < sURLVariables.length; i++) {
         var sParameterName = sURLVariables[i].split("=");
-        if (sParameterName[0] == sParam) {
+        if (sParameterName[0] === sParam) {
             return sParameterName[1];
         }
     }

@@ -15,6 +15,7 @@ export namespace SubscriptionInfos {
         isChargeable: boolean;
         lastDigits: string;
         expiration: string;
+        currency: string;
     };
 
     export type Subscription = {

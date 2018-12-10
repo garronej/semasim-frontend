@@ -51,7 +51,7 @@ export async function requestRenewPassword() {
 				window.location.href = [
 					"/register",
 					"?",
-					`email-as-hex=${Buffer.from(email, "utf8").toString("hex")}`
+					`email_as_hex=${Buffer.from(email, "utf8").toString("hex")}`
 				].join("");
 				return;
 			case "RETRY":

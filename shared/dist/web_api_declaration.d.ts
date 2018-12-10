@@ -24,7 +24,6 @@ export declare namespace loginUser {
     /** isGranted */
     type Response = {
         status: "SUCCESS";
-        user: number;
     } | {
         status: "NO SUCH ACCOUNT";
     } | {
