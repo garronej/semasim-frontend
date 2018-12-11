@@ -2072,7 +2072,43 @@ var UiController = /** @class */ (function () {
     function UiController(subscriptionInfos) {
         var _this = this;
         this.structure = html.structure.clone();
+        var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
+        this.structure.find(".id_placeholder_UiDownloadButtons")
+            .append(uiDownloadButton.structure);
+        if (subscriptionInfos.customerStatus === "EXEMPTED") {
+            bootbox_custom.alert("You get free access to the service, enjoy :)");
+            return;
+        }
         var pricingByCurrency = subscriptionInfos.pricingByCurrency, source = subscriptionInfos.source, subscription = subscriptionInfos.subscription, due = subscriptionInfos.due;
+        var retreaveUserSourceViaStripeCheckout = (function () {
+            var evtSourceId = new ts_events_extended_1.SyncEvent();
+            var handler = StripeCheckout.configure({
+                "key": subscriptionInfos.stripePublicApiKey,
+                "image": "/img/shop.png",
+                "locale": "auto",
+                "allowRememberMe": false,
+                "name": 'Semasim',
+                "email": Cookies.get("email") ||
+                    Buffer.from(getURLParameter_1.getURLParameter("email_as_hex"), "hex").toString("utf8"),
+                "description": "Android app access",
+                "zipCode": true,
+                "panelLabel": "ok",
+                "source": function (source) {
+                    var currency = currencyByCountry_1.currencyByCountry[source.card.country.toLowerCase()];
+                    if (!(currency in pricingByCurrency)) {
+                        currency = "usd";
+                    }
+                    evtSourceId.post({ "id": source.id, currency: currency });
+                },
+                "closed": function () { return evtSourceId.post(undefined); }
+            });
+            // Close Checkout on page navigation:
+            window.addEventListener("popstate", function () { return handler.close(); });
+            return function () {
+                handler.open();
+                return evtSourceId.waitFor();
+            };
+        })();
         if (!!due) {
             var uiNegativeBalanceWarning = new UiNegativeBalanceWarning_1.UiNegativeBalanceWarning(due);
             this.structure.find("id_placeholder_UiNegativeBalanceWarning")
@@ -2114,11 +2150,9 @@ var UiController = /** @class */ (function () {
             }); });
             this.structure.find(".id_placeholder_UiMySubscription")
                 .append(uiMySubscription.structure);
-            var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
-            this.structure.find(".id_placeholder_UiDownloadButtons")
-                .append(uiDownloadButton.structure);
         }
         else {
+            uiDownloadButton.structure.hide();
             var uiSubscribe = new UiSubscribe_1.UiSubscribe(subscriptionInfos.defaultCurrency, pricingByCurrency[subscriptionInfos.defaultCurrency]);
             uiSubscribe.evtRequestSubscribe.attach(function () { return __awaiter(_this, void 0, void 0, function () {
                 var newSourceId, currency, newSource, shouldProceed;
@@ -2127,7 +2161,7 @@ var UiController = /** @class */ (function () {
                         case 0:
                             newSourceId = undefined;
                             if (!(!source || !source.isChargeable)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.getSource()];
+                            return [4 /*yield*/, retreaveUserSourceViaStripeCheckout()];
                         case 1:
                             newSource = _a.sent();
                             if (newSource === undefined) {
@@ -2175,7 +2209,7 @@ var UiController = /** @class */ (function () {
                 var source;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getSource()];
+                        case 0: return [4 /*yield*/, retreaveUserSourceViaStripeCheckout()];
                         case 1:
                             source = _a.sent();
                             if (source === undefined) {
@@ -2194,35 +2228,6 @@ var UiController = /** @class */ (function () {
             this.structure.find(".id_placeholder_UiPaymentMethod")
                 .append(uiPaymentMethod.structure);
         }
-        this.getSource = (function () {
-            var evtSourceId = new ts_events_extended_1.SyncEvent();
-            var handler = StripeCheckout.configure({
-                "key": subscriptionInfos.stripePublicApiKey,
-                "image": "/img/shop.png",
-                "locale": "auto",
-                "allowRememberMe": false,
-                "name": 'Semasim',
-                "email": Cookies.get("email") ||
-                    Buffer.from(getURLParameter_1.getURLParameter("email_as_hex"), "hex").toString("utf8"),
-                "description": "Android app access",
-                "zipCode": true,
-                "panelLabel": "ok",
-                "source": function (source) {
-                    var currency = currencyByCountry_1.currencyByCountry[source.card.country.toLowerCase()];
-                    if (!(currency in pricingByCurrency)) {
-                        currency = "usd";
-                    }
-                    evtSourceId.post({ "id": source.id, currency: currency });
-                },
-                "closed": function () { return evtSourceId.post(undefined); }
-            });
-            // Close Checkout on page navigation:
-            window.addEventListener("popstate", function () { return handler.close(); });
-            return function () {
-                handler.open();
-                return evtSourceId.waitFor();
-            };
-        })();
     }
     return UiController;
 }());

@@ -1,15 +1,19 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-export declare type SubscriptionInfos = {
-    stripePublicApiKey: string;
-    pricingByCurrency: {
-        [currency: string]: number;
-    };
-    defaultCurrency: string;
-    source?: SubscriptionInfos.Source;
-    subscription?: SubscriptionInfos.Subscription;
-    due?: SubscriptionInfos.Due;
+export declare type SubscriptionInfos = SubscriptionInfos.Regular | {
+    customerStatus: "EXEMPTED";
 };
 export declare namespace SubscriptionInfos {
+    type Regular = {
+        customerStatus: "REGULAR";
+        stripePublicApiKey: string;
+        pricingByCurrency: {
+            [currency: string]: number;
+        };
+        defaultCurrency: string;
+        source?: SubscriptionInfos.Source;
+        subscription?: SubscriptionInfos.Subscription;
+        due?: SubscriptionInfos.Due;
+    };
     type Source = {
         isChargeable: boolean;
         lastDigits: string;

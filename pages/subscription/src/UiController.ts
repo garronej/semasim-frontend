@@ -28,11 +28,71 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    private getSource: () => Promise<{ id: string; currency: string; } | undefined>;
-
     constructor(subscriptionInfos: types.SubscriptionInfos) {
 
+        const uiDownloadButton = new UiDownloadButtons();
+
+        this.structure.find(".id_placeholder_UiDownloadButtons")
+            .append(uiDownloadButton.structure);
+
+
+        if (subscriptionInfos.customerStatus === "EXEMPTED") {
+
+            bootbox_custom.alert("You get free access to the service, enjoy :)");
+
+            return;
+
+        }
+
         const { pricingByCurrency, source, subscription, due } = subscriptionInfos;
+
+        const retreaveUserSourceViaStripeCheckout = (() => {
+
+            const evtSourceId = new SyncEvent<
+                { id: string; currency: string; } |
+                undefined
+                >();
+
+            const handler = StripeCheckout.configure({
+                "key": subscriptionInfos.stripePublicApiKey,
+                "image": "/img/shop.png",
+                "locale": "auto",
+                "allowRememberMe": false,
+                "name": 'Semasim',
+                "email":
+                    Cookies.get("email") ||
+                    Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8"),
+                "description": "Android app access",
+                "zipCode": true,
+                "panelLabel": "ok",
+                "source": source => {
+
+                    let currency = currencyByCountry[source.card.country.toLowerCase()];
+
+                    if (!(currency in pricingByCurrency)) {
+
+                        currency = "usd";
+
+                    }
+
+                    evtSourceId.post({ "id": source.id, currency });
+
+                },
+                "closed": () => evtSourceId.post(undefined)
+            });
+
+            // Close Checkout on page navigation:
+            window.addEventListener("popstate", () => handler.close());
+
+            return () => {
+
+                handler.open()
+
+                return evtSourceId.waitFor();
+
+            };
+
+        })();
 
         if (!!due) {
 
@@ -88,12 +148,10 @@ export class UiController {
                 .append(uiMySubscription.structure)
                 ;
 
-            const uiDownloadButton = new UiDownloadButtons();
-
-            this.structure.find(".id_placeholder_UiDownloadButtons")
-                .append(uiDownloadButton.structure);
 
         } else {
+
+            uiDownloadButton.structure.hide();
 
             const uiSubscribe = new UiSubscribe(
                 subscriptionInfos.defaultCurrency,
@@ -107,7 +165,7 @@ export class UiController {
 
                 if (!source || !source.isChargeable) {
 
-                    const newSource = await this.getSource();
+                    const newSource = await retreaveUserSourceViaStripeCheckout();
 
                     if (newSource === undefined) {
 
@@ -175,7 +233,7 @@ export class UiController {
 
             uiPaymentMethod.evtRequestUpdate.attach(async () => {
 
-                const source = await this.getSource();
+                const source = await retreaveUserSourceViaStripeCheckout();
 
                 if (source === undefined) {
                     return;
@@ -196,53 +254,6 @@ export class UiController {
 
         }
 
-        this.getSource = (() => {
-
-            const evtSourceId = new SyncEvent<
-                { id: string; currency: string; } |
-                undefined
-                >();
-
-            const handler = StripeCheckout.configure({
-                "key": subscriptionInfos.stripePublicApiKey,
-                "image": "/img/shop.png",
-                "locale": "auto",
-                "allowRememberMe": false,
-                "name": 'Semasim',
-                "email":
-                    Cookies.get("email") ||
-                    Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8"),
-                "description": "Android app access",
-                "zipCode": true,
-                "panelLabel": "ok",
-                "source": source => {
-
-                    let currency = currencyByCountry[source.card.country.toLowerCase()];
-
-                    if (!(currency in pricingByCurrency)) {
-
-                        currency = "usd";
-
-                    }
-
-                    evtSourceId.post({ "id": source.id, currency });
-
-                },
-                "closed": () => evtSourceId.post(undefined)
-            });
-
-            // Close Checkout on page navigation:
-            window.addEventListener("popstate", () => handler.close());
-
-            return () => {
-
-                handler.open()
-
-                return evtSourceId.waitFor();
-
-            };
-
-        })();
 
     }
 
