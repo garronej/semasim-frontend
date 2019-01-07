@@ -159,7 +159,9 @@ export class UiQuickAction {
             },
             "errorPlacement": error => {
 
-                this.templates.find("div.id_popover span.id_error-message").html($(error).text());
+                const message = input.val() === "" ? "First enter the number" : $(error).text();
+
+                this.templates.find("div.id_popover span.id_error-message").html(message);
 
                 input.popover("show");
 

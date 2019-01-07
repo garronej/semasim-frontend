@@ -11,9 +11,6 @@
         color: red;
     }
 
-    div.id_UiQuickAction input.id_tel-input {
-        text-align: center;
-    }
 </style>
 
 
@@ -32,25 +29,37 @@
             <fieldset>
                 <div class="row">
 
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-4 mt10">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt10">
                         <input name="tel-input" class="id_tel-input" type="text" required>
                         <!--<input type="tel" class="id_input form-control" placeholder="+33636786385">-->
                     </div>
 
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-8">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="pull-right mt10">
                             <button type="button" class="id_call btn btn-primary ml10">
-                                <i class="fa fa-phone"></i>&nbsp;
-                                <span class="visible-lg-inline visible-xs-inline">Call</span>
+                                <i>
+                                    <svg class="custom-icon">
+                                        <use xlink:href="#icon-call"></use>
+                                    </svg>
+                                </i>
+                                <span class="visible-lg-inline ">Call</span>
                             </button>
                             <button type="button" class="id_sms btn btn-primary ml10">
-                                <i class="fa fa-wechat"></i>&nbsp;
-                                <span class="visible-lg-inline visible-xs-inline">SMS</span>
+                                <i>
+                                    <svg class="custom-icon">
+                                        <use xlink:href="#icon-sms"></use>
+                                    </svg>
+                                </i>
+                                <span class="visible-lg-inline ">SMS</span>
 
                             </button>
                             <button type="button" class="id_contact btn btn-primary ml10">
-                                <i class="fa fa-users"></i>&nbsp;
-                                <span class="visible-lg-inline visible-xs-inline">New Contact</span>
+                                <i>
+                                    <svg class="custom-icon">
+                                        <use xlink:href="#icon-add_contact"></use>
+                                    </svg>
+                                </i>
+                                <span class="visible-lg-inline ">New Contact</span>
                             </button>
                         </div>
                     </div>

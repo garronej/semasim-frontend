@@ -5,27 +5,31 @@
 </style>
 
 <div class="id_UiHeader page-header">
+    <!--
     <div class="pull-right">
         <button class="id_up btn btn-info btn-round btn-sm">
             <i class="glyphicon glyphicon-chevron-up"></i>
         </button>
     </div>
+    -->
     <h4>
-        <i>
+        <i class="id_icon_sim_up">
             <svg class="custom-icon">
                 <use xlink:href="#icon-sim_card"></use>
+            </svg>
+        </i>
+        <i class="id_icon_sim_down">
+            <svg class="custom-icon">
+                <use xlink:href="#icon-sim_card_alert"></use>
             </svg>
         </i>
         <a href="#" class="id_friendly_name">
             <span></span>
         </a>
         &nbsp;
-        <i class="fa fa-map-marker"></i>&nbsp;
-        <span class="id_geoInfo"></span>
-        <div class="id_flag iti-flag"></div>
-        &nbsp; &nbsp;
-        <i class="im-blog2"></i>
-        <span class="id_state"></span>
+        <span class="id_number"></span>
+        &nbsp;
+        <span class="id_offline color-red"><b>Offline</b></span>
     </h4>
 </div>
 
@@ -38,8 +42,8 @@
         <strong>Operator: </strong>
         <span class="id_network"></span>
         <br>
-        <strong>Number: </strong>
-        <span class="id_number"></span>
+        <strong>Current location: </strong>
+        <span class="id_geoInfo"></span>
     </div>
 
 </div>

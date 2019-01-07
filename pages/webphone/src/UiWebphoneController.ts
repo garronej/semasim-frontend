@@ -1,4 +1,3 @@
-import { VoidSyncEvent } from "ts-events-extended";
 import { UiQuickAction } from "./UiQuickAction";
 import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
@@ -23,8 +22,6 @@ const html = loadUiClassHtml(
 export class UiWebphoneController {
 
     public readonly structure = html.structure.clone();
-
-    public readonly evtUp = new VoidSyncEvent();
 
     private readonly uiVoiceCall: UiVoiceCall;
     private readonly uiHeader: UiHeader;
@@ -194,9 +191,6 @@ export class UiWebphoneController {
 
                 }
 
-
-
-
             }
         );
 
@@ -204,8 +198,9 @@ export class UiWebphoneController {
 
     private initUa() {
 
-        //TODO: improve
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
+
+            this.uiHeader.setIsOnline(isRegistered);
 
             for (const uiConversation of this.uiConversations.values()) {
 
@@ -366,10 +361,6 @@ export class UiWebphoneController {
             .find("div.id_header")
             .append(this.uiHeader.structure)
             ;
-
-        this.uiHeader.evtUp.attach(
-            () => this.evtUp.post()
-        );
 
     }
 

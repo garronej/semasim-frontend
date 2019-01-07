@@ -147,7 +147,9 @@ async function handleQueryString() {
 
 				const out = await new Promise<string | null>(
 					resolve => bootbox_custom.prompt({
-						"title": "Please enter the four digits code that have been sent to you via email",
+						"title": "Please enter the code to confirm your email ( check also your SPAM inbox )",
+						"inputType": "number",
+						"placeholder": "XXXX",
 						"callback": result => resolve(result)
 					})
 				);

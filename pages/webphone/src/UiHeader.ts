@@ -1,4 +1,3 @@
-import { VoidSyncEvent } from "ts-events-extended";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 
 import * as types from "../../../shared/dist/lib/types";
@@ -15,16 +14,22 @@ export class UiHeader {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
-    public evtUp = new VoidSyncEvent();
+    public setIsOnline(isOnline: boolean): void{
 
-    /** to call when userSim has changed */
-    public update(){
-        //TODO
+        this.structure.find(".id_icon_sim_up")[isOnline?"show":"hide"]();
+        //this.structure.find(".id_icon_sim_down")[isOnline?"hide":"show"]();
+
+        for( const selector of [ ".id_offline", ".id_icon_sim_down" ]){
+            this.structure.find(selector)[isOnline ? "hide" : "show"]();
+        }
+
     }
 
     constructor(
         public readonly userSim: types.UserSim.Usable
     ) {
+
+        this.setIsOnline(userSim.isOnline);
 
         this.structure.find("a.id_friendly_name").popover({
             "html": true,
@@ -35,19 +40,7 @@ export class UiHeader {
             "content": () => this.templates.find("div.id_popover").html()
         }).find("span").text(this.userSim.friendlyName);
 
-        this.structure.find("button.id_up").on("click", () => this.evtUp.post());
-
-        this.templates.find("div.id_popover div.id_flag").addClass(
-            this.userSim.sim.country ? this.userSim.sim.country.iso : ""
-        );
-
-        this.templates.find("div.id_popover span.id_network").html(
-            this.userSim.sim.serviceProvider.fromImsi || 
-            this.userSim.sim.serviceProvider.fromNetwork || 
-            "Unknown"
-        );
-
-        this.templates.find("div.id_popover span.id_number").text(() => {
+        this.structure.find("span.id_number").text(() => {
 
             if (!!this.userSim.sim.storage.number) {
 
@@ -65,28 +58,29 @@ export class UiHeader {
 
         });
 
-        this.structure.find("span.id_geoInfo").html((()=>{
+        this.templates.find("div.id_popover div.id_flag").addClass(
+            this.userSim.sim.country ? this.userSim.sim.country.iso : ""
+        );
+
+        this.templates.find("div.id_popover span.id_network").html(
+            this.userSim.sim.serviceProvider.fromImsi || 
+            this.userSim.sim.serviceProvider.fromNetwork || 
+            "Unknown"
+        );
+
+        this.templates.find("span.id_geoInfo").html((()=>{
 
             let loc = this.userSim.gatewayLocation;
 
-            let arr: string[] = [];
-
-            if (loc.subdivisions) {
-                arr.push(loc.subdivisions);
-            }
-
-            if (loc.city) {
-                arr.push(loc.city);
-            }
-
-            return `${arr.join(", ")}&nbsp;`;
-
+            return loc.city || loc.subdivisions || loc.countryIso || "?";
 
         })());
 
+        /*
         this.structure.find("div.id_flag").addClass(
             this.userSim.gatewayLocation.countryIso || ""
         );
+        */
 
     }
 

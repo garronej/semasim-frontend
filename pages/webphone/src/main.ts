@@ -5,7 +5,7 @@ import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import * as types from "../../../shared/dist/lib/types";
+//import * as types from "../../../shared/dist/lib/types";
 
 //TODO: implement evtUp
 
@@ -33,28 +33,29 @@ $(document).ready(async () => {
 
 	}
 
-	const addWebphone = async (userSim: types.UserSim.Usable) => {
-
-		const uiWebphoneController = await UiWebphoneController.create(userSim)
-
-		$("#page-payload").append(uiWebphoneController.structure);
-
-	};
-
-	const tasks: Promise<void>[] = [];
-
-	for (const userSim of userSims) {
-
-		tasks[tasks.length] = addWebphone(userSim);
-
-	}
-
-	await Promise.all(tasks);
+	await Promise.all(
+		userSims.map(userSim =>
+			UiWebphoneController
+				.create(userSim)
+				.then(uiWebphoneController => ({ userSim, uiWebphoneController }))
+		)
+	).then(
+		arr => arr.sort((a, b) => +b.userSim.isOnline - +a.userSim.isOnline)
+		.forEach(({ uiWebphoneController }) =>
+			$("#page-payload").append(uiWebphoneController.structure)
+		)
+	);
 
 	bootbox_custom.dismissLoading();
 
 	$("#footer").hide();
 
-	remoteApiCaller.evtUsableSim.attach(userSim => addWebphone(userSim));
+	remoteApiCaller.evtUsableSim.attach(async userSim => {
+
+		const uiWebphoneController = await UiWebphoneController.create(userSim)
+
+		$("#page-payload").append(uiWebphoneController.structure);
+
+	});
 
 });
