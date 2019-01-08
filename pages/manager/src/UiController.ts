@@ -50,39 +50,19 @@ export class UiController {
         switch(placeholder){
             case "MAIN": {
 
+                $("#loader-line-mask").removeClass("loader-line-mask");
+
                 this.structure.show();
 
             }; break;
             case "NO SIM": {
 
+                $("#loader-line-mask").addClass("loader-line-mask");
+
                 this.structure.hide();
 
             }; break;
         }
-
-
-
-        /*
-        const main= this.structure.find(".id_placeholder_main");
-        //const noSim= this.structure.find(".id_placeholder_no_sim");
-
-        switch(placeholder){
-            case "MAIN": {
-
-                //noSim.hide();
-
-                main.show();
-
-            }; break;
-            case "NO SIM": {
-
-                main.hide();
-
-                //noSim.show();
-
-            }; break;
-        }
-        */
 
     }
 
@@ -191,14 +171,6 @@ export class UiController {
         this.initUiShareSim();
 
         remoteApiCaller.getUsableUserSims().then(userSims => {
-
-            if( userSims.length === 0 ){
-
-                this.setPlaceholder("NO SIM");
-
-                return;
-
-            }
 
             for (const userSim of userSims) {
 

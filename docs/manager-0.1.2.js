@@ -3023,10 +3023,6 @@ var UiController = /** @class */ (function () {
         this.initUiButtonBar();
         this.initUiShareSim();
         remoteApiCaller.getUsableUserSims().then(function (userSims) {
-            if (userSims.length === 0) {
-                _this.setPlaceholder("NO SIM");
-                return;
-            }
             for (var _i = 0, userSims_1 = userSims; _i < userSims_1.length; _i++) {
                 var userSim = userSims_1[_i];
                 _this.addUserSim(userSim);
@@ -3039,38 +3035,19 @@ var UiController = /** @class */ (function () {
         switch (placeholder) {
             case "MAIN":
                 {
+                    $("#loader-line-mask").removeClass("loader-line-mask");
                     this.structure.show();
                 }
                 ;
                 break;
             case "NO SIM":
                 {
+                    $("#loader-line-mask").addClass("loader-line-mask");
                     this.structure.hide();
                 }
                 ;
                 break;
         }
-        /*
-        const main= this.structure.find(".id_placeholder_main");
-        //const noSim= this.structure.find(".id_placeholder_no_sim");
-
-        switch(placeholder){
-            case "MAIN": {
-
-                //noSim.hide();
-
-                main.show();
-
-            }; break;
-            case "NO SIM": {
-
-                main.hide();
-
-                //noSim.show();
-
-            }; break;
-        }
-        */
     };
     UiController.prototype.addUserSim = function (userSim) {
         var _this = this;
