@@ -47,13 +47,29 @@ export class UiController {
 
     private setPlaceholder(placeholder: "MAIN" | "NO SIM"){
 
+        switch(placeholder){
+            case "MAIN": {
+
+                this.structure.show();
+
+            }; break;
+            case "NO SIM": {
+
+                this.structure.hide();
+
+            }; break;
+        }
+
+
+
+        /*
         const main= this.structure.find(".id_placeholder_main");
-        const noSim= this.structure.find(".id_placeholder_no_sim");
+        //const noSim= this.structure.find(".id_placeholder_no_sim");
 
         switch(placeholder){
             case "MAIN": {
 
-                noSim.hide();
+                //noSim.hide();
 
                 main.show();
 
@@ -62,10 +78,11 @@ export class UiController {
 
                 main.hide();
 
-                noSim.show();
+                //noSim.show();
 
             }; break;
         }
+        */
 
     }
 
@@ -77,7 +94,7 @@ export class UiController {
 
         this.uiSimRows.push(uiSimRow);
 
-        this.structure.find(".id_placeholder_main").append(uiSimRow.structure);
+        this.structure.append(uiSimRow.structure);
 
         uiSimRow.evtSelected.attach(() => {
 
@@ -167,7 +184,7 @@ export class UiController {
 
     constructor() {
 
-        this.structure.find(".id_placeholder_no_sim").hide();
+        this.setPlaceholder("NO SIM");
 
         this.initUiButtonBar();
 
@@ -211,7 +228,7 @@ export class UiController {
 
     private initUiButtonBar(): void {
 
-        this.structure.find(".id_placeholder_main").append(this.uiButtonBar.structure);
+        this.structure.append(this.uiButtonBar.structure);
 
         this.uiButtonBar.evtToggleDetailVisibility.attach(isShown => {
 

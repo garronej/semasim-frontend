@@ -1,4 +1,5 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { phoneNumber } from "phone-number";
 
 import * as types from "../../../shared/dist/lib/types";
 
@@ -44,15 +45,17 @@ export class UiHeader {
 
             if (!!this.userSim.sim.storage.number) {
 
-                return (intlTelInputUtils as any).formatNumber(
-                    this.userSim.sim.storage.number,
-                    this.userSim.sim.country ? this.userSim.sim.country.iso : null,
-                    intlTelInputUtils.numberFormat.NATIONAL
+                return phoneNumber.prettyPrint(
+                    phoneNumber.build(
+                        this.userSim.sim.storage.number,
+                        this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
+                    ),
+                    this.userSim.sim.country ? this.userSim.sim.country.iso : "DEFAULT"
                 );
 
             } else {
 
-                return "Unknown";
+                return "";
 
             }
 
@@ -63,12 +66,12 @@ export class UiHeader {
         );
 
         this.templates.find("div.id_popover span.id_network").html(
-            this.userSim.sim.serviceProvider.fromImsi || 
-            this.userSim.sim.serviceProvider.fromNetwork || 
+            this.userSim.sim.serviceProvider.fromImsi ||
+            this.userSim.sim.serviceProvider.fromNetwork ||
             "Unknown"
         );
 
-        this.templates.find("span.id_geoInfo").html((()=>{
+        this.templates.find("span.id_geoInfo").html((() => {
 
             let loc = this.userSim.gatewayLocation;
 

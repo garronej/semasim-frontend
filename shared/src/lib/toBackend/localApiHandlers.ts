@@ -351,26 +351,14 @@ export const evtContactDeleted = new SyncEvent<{
                 return;
             }
 
-            if (dongle.isVoiceEnabled !== true) {
+            if( dongle.isVoiceEnabled === false ){
 
-                let sure = dongle.isVoiceEnabled === false;
-
+                //TODO: Improve message.
                 await new Promise<void>(
                     resolve => bootbox_custom.alert(
                         [
-                            "Warning:",
-                            `Voice is ${sure ? "" : "( maybe )"} not enabled on the 3G Key you are using with this SIM.`,
-                            `As as a result you ${sure ? "will" : "may"} not be able to place phones calls ${sure ? "(try and see for yourself)" : ""}.`,
-                            "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
-                            "Go to www.dc-unlocker.com and download dc-unlocker client (windows)",
-                            "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
-                            "once your manage to get your dongle detected by the software go to",
-                            "unlocking -> Activate Voice",
-                            "They will charge you 4€ for it...",
-                            "We are currently trying to implement this ourself so you dont have to pay",
-                            "for that but so far this is the only option.",
-                            "",
-                            `Dongle IMEI: ${dongle.imei}`
+                            "You won't be able to make phone call with this device until it have been voice enabled",
+                            "See: <a href='https://www.semasim.com/enable-voice'></a>"
                         ].join("<br>"),
                         () => resolve()
                     )

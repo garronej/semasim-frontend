@@ -218,7 +218,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
     var interact_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
-        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, sure_1, friendlyName_1, friendlyNameSubmitted;
+        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, friendlyName_1, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -314,24 +314,14 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                     if (!shouldAdd) {
                         return [2 /*return*/];
                     }
-                    if (!(dongle.isVoiceEnabled !== true)) return [3 /*break*/, 7];
-                    sure_1 = dongle.isVoiceEnabled === false;
+                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 7];
+                    //TODO: Improve message.
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert([
-                            "Warning:",
-                            "Voice is " + (sure_1 ? "" : "( maybe )") + " not enabled on the 3G Key you are using with this SIM.",
-                            "As as a result you " + (sure_1 ? "will" : "may") + " not be able to place phones calls " + (sure_1 ? "(try and see for yourself)" : "") + ".",
-                            "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
-                            "Go to www.dc-unlocker.com and download dc-unlocker client (windows)",
-                            "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
-                            "once your manage to get your dongle detected by the software go to",
-                            "unlocking -> Activate Voice",
-                            "They will charge you 4€ for it...",
-                            "We are currently trying to implement this ourself so you dont have to pay",
-                            "for that but so far this is the only option.",
-                            "",
-                            "Dongle IMEI: " + dongle.imei
+                            "You won't be able to make phone call with this device until it have been voice enabled",
+                            "See: <a href='https://www.semasim.com/enable-voice'></a>"
                         ].join("<br>"), function () { return resolve(); }); })];
                 case 6:
+                    //TODO: Improve message.
                     _a.sent();
                     _a.label = 7;
                 case 7:

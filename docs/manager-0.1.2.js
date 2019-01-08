@@ -3019,7 +3019,7 @@ var UiController = /** @class */ (function () {
             return evt;
         })());
         this.uiSimRows = [];
-        this.structure.find(".id_placeholder_no_sim").hide();
+        this.setPlaceholder("NO SIM");
         this.initUiButtonBar();
         this.initUiShareSim();
         remoteApiCaller.getUsableUserSims().then(function (userSims) {
@@ -3036,31 +3036,48 @@ var UiController = /** @class */ (function () {
         localApiHandlers.evtSimPermissionLost.attach(function (userSim) { return _this.removeUserSim(userSim); });
     }
     UiController.prototype.setPlaceholder = function (placeholder) {
-        var main = this.structure.find(".id_placeholder_main");
-        var noSim = this.structure.find(".id_placeholder_no_sim");
         switch (placeholder) {
             case "MAIN":
                 {
-                    noSim.hide();
-                    main.show();
+                    this.structure.show();
                 }
                 ;
                 break;
             case "NO SIM":
                 {
-                    main.hide();
-                    noSim.show();
+                    this.structure.hide();
                 }
                 ;
                 break;
         }
+        /*
+        const main= this.structure.find(".id_placeholder_main");
+        //const noSim= this.structure.find(".id_placeholder_no_sim");
+
+        switch(placeholder){
+            case "MAIN": {
+
+                //noSim.hide();
+
+                main.show();
+
+            }; break;
+            case "NO SIM": {
+
+                main.hide();
+
+                //noSim.show();
+
+            }; break;
+        }
+        */
     };
     UiController.prototype.addUserSim = function (userSim) {
         var _this = this;
         this.setPlaceholder("MAIN");
         var uiSimRow = new UiSimRow_1.UiSimRow(userSim);
         this.uiSimRows.push(uiSimRow);
-        this.structure.find(".id_placeholder_main").append(uiSimRow.structure);
+        this.structure.append(uiSimRow.structure);
         uiSimRow.evtSelected.attach(function () {
             if (_this.uiButtonBar.state.isSimRowSelected) {
                 _this.getSelectedUiSimRow(uiSimRow).unselect();
@@ -3126,7 +3143,7 @@ var UiController = /** @class */ (function () {
     };
     UiController.prototype.initUiButtonBar = function () {
         var _this = this;
-        this.structure.find(".id_placeholder_main").append(this.uiButtonBar.structure);
+        this.structure.append(this.uiButtonBar.structure);
         this.uiButtonBar.evtToggleDetailVisibility.attach(function (isShown) {
             for (var _i = 0, _a = _this.uiSimRows; _i < _a.length; _i++) {
                 var uiSimRow = _a[_i];
@@ -3560,7 +3577,7 @@ var UiSimRow = /** @class */ (function () {
     UiSimRow.prototype.populate = function () {
         var _this = this;
         this.structure.find(".id_simId").text(this.userSim.friendlyName + (!!this.userSim.sim.storage.number ?
-            " ( " + this.userSim.sim.storage.number + " )" : ""));
+            " " + this.userSim.sim.storage.number + " " : ""));
         this.structure.find(".id_connectivity").text(this.userSim.isOnline ? "online" : "offline");
         if (!this.userSim.isOnline) {
             this.structure.find(".id_row").addClass("offline");
@@ -3569,17 +3586,22 @@ var UiSimRow = /** @class */ (function () {
             this.structure.find(".id_row").removeClass("offline");
         }
         this.structure.find(".id_ownership").text(this.userSim.ownership.status === "OWNED" ?
-            "Owned" :
+            "" :
             "owned by: " + this.userSim.ownership.ownerEmail);
-        this.structure.find(".id_connectivity_").text(this.userSim.isOnline ? "Online" : "Offline");
         this.structure.find(".id_gw_location").text([
             this.userSim.gatewayLocation.city || "",
-            this.userSim.gatewayLocation.subdivisions || "",
             this.userSim.gatewayLocation.countryIso || "",
             "( " + this.userSim.gatewayLocation.ip + " )"
         ].join(" "));
-        this.structure.find(".id_owner").text(this.userSim.ownership.status === "OWNED" ?
-            "You" : this.userSim.ownership.ownerEmail);
+        {
+            var span = this.structure.find(".id_owner");
+            if (this.userSim.ownership.status === "OWNED") {
+                span.parent().hide();
+            }
+            else {
+                span.text(this.userSim.ownership.ownerEmail);
+            }
+        }
         this.structure.find(".id_number").text((function () {
             var n = _this.userSim.sim.storage.number;
             return n || "Unknown";
@@ -3600,25 +3622,23 @@ var UiSimRow = /** @class */ (function () {
             }
             return out;
         })());
-        this.structure.find(".id_dongle_info").text((function () {
-            var d = _this.userSim.dongle;
-            return [
-                d.manufacturer,
-                d.model,
-                "firm: " + d.firmwareVersion,
-                "IMEI: " + d.imei
-            ].join(" ");
-        })());
-        this.structure.find(".id_features").text((function () {
-            switch (_this.userSim.dongle.isVoiceEnabled) {
-                case undefined:
-                    return "SMS: yes,  Voice call: not sure, try and see ( may need to manually enable voice on 3G dongle )";
-                case true:
-                    return "SMS: yes, Voice call: yes";
-                case false:
-                    return "SMS: yes, Voice call: no ( need to manually enable voice on 3G dongle )";
+        {
+            var d = this.userSim.dongle;
+            this.structure.find(".id_dongle_model").text(d.manufacturer + " " + d.model);
+            this.structure.find(".id_dongle_firm").text(d.firmwareVersion);
+            this.structure.find(".id_dongle_imei").text(d.imei);
+            {
+                var span = this.structure.find(".id_voice_support");
+                if (d.isVoiceEnabled === undefined) {
+                    span.parent().hide();
+                }
+                else {
+                    span.text(d.isVoiceEnabled ?
+                        "yes" :
+                        "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>");
+                }
             }
-        })());
+        }
         this.structure.find(".id_imsi").text(this.userSim.sim.imsi);
         this.structure.find(".id_iccid").text(this.userSim.sim.iccid);
         this.structure.find(".id_phonebook").text((function () {
@@ -4621,13 +4641,13 @@ exports.EvtError = defs_1.EvtError;
 },{"./SyncEvent":17,"./defs":20}],22:[function(require,module,exports){
 module.exports = "<div class=\"id_UiButtonBar col-md-12 bb pb5\">\r\n    <button type=\"button\" class=\"btn btn-default m5\">Details</button>\r\n    <button type=\"button\" class=\"btn btn-default m5\">\r\n        <i class=\"fa fa-arrow-left\"></i>\r\n    </button>\r\n    <button type=\"button\" class=\"btn btn-danger m5\">Delete</button>\r\n    <button type=\"button\" class=\"btn btn-success m5\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n    <button type=\"button\" class=\"btn btn-default m5\">Rename</button>\r\n    <button type=\"button\" class=\"btn btn-default m5\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot dongle</button>\r\n</div>\r\n";
 },{}],23:[function(require,module,exports){
-module.exports = "<div class=\"id_UiController container-fluid\">\r\n\r\n    <div class=\"id_placeholder_main row\">\r\n    </div>\r\n\r\n    <div class=\"id_placeholder_no_sim jumbotron\">\r\n        <h1>Searching for SIM cards on LAN...</h1>\r\n        <p>Registrable SIM card will appear here</p>\r\n    </div>\r\n\r\n</div>";
+module.exports = "\r\n                                    <div class=\"id_UiController container-fluid panel-body row\">\r\n                                        <!-- Here goes the page payload -->\r\n\r\n\r\n                                    </div>";
 },{}],24:[function(require,module,exports){
 module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal fade\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Remove</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
 },{}],25:[function(require,module,exports){
 var css = "div.id_UiShareSim .id_row {\n  cursor: default;\n}\ndiv.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\ndiv.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\ndiv.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":15}],26:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSimRow\">\r\n    <div class=\"id_row col-md-12 bb p10\">\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned---</span>\r\n    </div>\r\n    <div class=\"id_details col-md-12 pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Connectivity:&nbsp;</span>\r\n            <span class=\"id_connectivity_\">---Online---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:&nbsp;</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:&nbsp;</span>\r\n            <span class=\"id_owner\">---Me---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:&nbsp;</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service privider:&nbsp;</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">GSM USB Dongle:&nbsp;</span>\r\n            <span class=\"id_dongle_info\">---Huawei E160X, firm: 10.12222, IMEI: 111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">GSM USB Dongle supported features:&nbsp;</span>\r\n            <span class=\"id_features\">---Voicecalls + SMS---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:&nbsp;</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:&nbsp;</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook:&nbsp;</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
+module.exports = "<div class=\"id_UiSimRow\">\r\n    <div class=\"id_row col-md-12 bb p10\">\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned---</span>\r\n    </div>\r\n    <div class=\"id_details col-md-12 pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
 },{}],27:[function(require,module,exports){
 var css = "div.id_UiSimRow .id_row {\n  cursor: default;\n}\ndiv.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\ndiv.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":15}],28:[function(require,module,exports){
@@ -5055,7 +5075,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
     var interact_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
-        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, sure_1, friendlyName_1, friendlyNameSubmitted;
+        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, friendlyName_1, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -5151,24 +5171,14 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                     if (!shouldAdd) {
                         return [2 /*return*/];
                     }
-                    if (!(dongle.isVoiceEnabled !== true)) return [3 /*break*/, 7];
-                    sure_1 = dongle.isVoiceEnabled === false;
+                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 7];
+                    //TODO: Improve message.
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert([
-                            "Warning:",
-                            "Voice is " + (sure_1 ? "" : "( maybe )") + " not enabled on the 3G Key you are using with this SIM.",
-                            "As as a result you " + (sure_1 ? "will" : "may") + " not be able to place phones calls " + (sure_1 ? "(try and see for yourself)" : "") + ".",
-                            "Chances are voice can be enabled on your HUAWEI dongle with dc-unlocker",
-                            "Go to www.dc-unlocker.com and download dc-unlocker client (windows)",
-                            "Connect your 3G key to your PC and try to get dc-unlocker to detect it",
-                            "once your manage to get your dongle detected by the software go to",
-                            "unlocking -> Activate Voice",
-                            "They will charge you 4€ for it...",
-                            "We are currently trying to implement this ourself so you dont have to pay",
-                            "for that but so far this is the only option.",
-                            "",
-                            "Dongle IMEI: " + dongle.imei
+                            "You won't be able to make phone call with this device until it have been voice enabled",
+                            "See: <a href='https://www.semasim.com/enable-voice'></a>"
                         ].join("<br>"), function () { return resolve(); }); })];
                 case 6:
+                    //TODO: Improve message.
                     _a.sent();
                     _a.label = 7;
                 case 7:

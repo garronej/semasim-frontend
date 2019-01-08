@@ -55,7 +55,7 @@ export class UiSimRow {
         this.structure.find(".id_simId").text(
             this.userSim.friendlyName + (
                 !!this.userSim.sim.storage.number ?
-                    ` ( ${this.userSim.sim.storage.number} )` : ""
+                    ` ${this.userSim.sim.storage.number} ` : ""
             )
         );
 
@@ -65,33 +65,35 @@ export class UiSimRow {
 
         if (!this.userSim.isOnline) {
             this.structure.find(".id_row").addClass("offline");
-        }else{
+        } else {
             this.structure.find(".id_row").removeClass("offline");
         }
 
         this.structure.find(".id_ownership").text(
             this.userSim.ownership.status === "OWNED" ?
-                "Owned" :
+                "" :
                 `owned by: ${this.userSim.ownership.ownerEmail}`
-        );
-
-        this.structure.find(".id_connectivity_").text(
-            this.userSim.isOnline ? "Online" : "Offline"
         );
 
         this.structure.find(".id_gw_location").text(
             [
                 this.userSim.gatewayLocation.city || "",
-                this.userSim.gatewayLocation.subdivisions || "",
                 this.userSim.gatewayLocation.countryIso || "",
                 `( ${this.userSim.gatewayLocation.ip} )`
             ].join(" ")
         );
 
-        this.structure.find(".id_owner").text(
-            this.userSim.ownership.status === "OWNED" ?
-                "You" : this.userSim.ownership.ownerEmail
-        );
+        {
+
+            const span= this.structure.find(".id_owner");
+
+            if( this.userSim.ownership.status === "OWNED" ){
+                span.parent().hide();
+            }else{
+                span.text(this.userSim.ownership.ownerEmail);
+            }
+
+        }
 
         this.structure.find(".id_number").text((() => {
 
@@ -123,35 +125,42 @@ export class UiSimRow {
             })()
         );
 
-        this.structure.find(".id_dongle_info").text((() => {
+        {
 
             const d = this.userSim.dongle;
 
-            return [
-                d.manufacturer,
-                d.model,
-                `firm: ${d.firmwareVersion}`,
-                `IMEI: ${d.imei}`
-            ].join(" ");
+            this.structure.find(".id_dongle_model").text( 
+                `${d.manufacturer} ${d.model}`
+            );
 
-        })());
+            this.structure.find(".id_dongle_firm").text(
+                d.firmwareVersion
+            );
 
+            this.structure.find(".id_dongle_imei").text(
+                d.imei
+            );
 
-        this.structure.find(".id_features").text(
-            (() => {
+            {
+                const span = this.structure.find(".id_voice_support");
 
-                switch (this.userSim.dongle.isVoiceEnabled) {
-                    case undefined:
-                        return "SMS: yes,  Voice call: not sure, try and see ( may need to manually enable voice on 3G dongle )";
-                    case true:
-                        return "SMS: yes, Voice call: yes"
-                    case false:
-                        return "SMS: yes, Voice call: no ( need to manually enable voice on 3G dongle )";
+                if (d.isVoiceEnabled === undefined) {
+
+                    span.parent().hide();
+
+                } else {
+
+                    span.text(
+                        d.isVoiceEnabled ?
+                            "yes" :
+                            "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>"
+                    );
+
                 }
+            }
 
-            })()
-        );
 
+        }
 
         this.structure.find(".id_imsi").text(
             this.userSim.sim.imsi
