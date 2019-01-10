@@ -70,6 +70,13 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
+/**
+ * Posted when a Dongle with an unlocked SIM goes online.
+ * Used so we can display a loading between the moment
+ * when the card have been unlocked and the card is ready
+ * to use.
+ */
+var evtUsableDongle = new ts_events_extended_1.SyncEvent();
 {
     var methodName = apiDeclaration.notifySimOnline.methodName;
     var handler = {
@@ -79,7 +86,9 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
                 var userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
-                        case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
+                        case 0:
+                            evtUsableDongle.post({ "imei": simDongle.imei });
+                            return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
                         case 1:
                             userSim = (_b.sent())
                                 .find(function (_a) {
@@ -211,6 +220,9 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                if (dcTypes.Dongle.Usable.match(params)) {
+                    evtUsableDongle.post({ "imei": params.imei });
+                }
                 interact_1(params);
                 return [2 /*return*/, undefined];
             });
@@ -260,6 +272,15 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                                     return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
                                 case 4:
                                     unlockResult = _a.sent();
+                                    bootbox_custom.dismissLoading();
+                                    bootbox_custom.loading("Reading sim...", 0);
+                                    return [4 /*yield*/, evtUsableDongle.waitFor(function (_a) {
+                                            var imei = _a.imei;
+                                            return imei === dongle.imei;
+                                        })];
+                                case 5:
+                                    _a.sent();
+                                    bootbox_custom.dismissLoading();
                                     setTimeout(function () { return bootbox_custom.dismissLoading(); }, 10000);
                                     if (!unlockResult) {
                                         //TODO: Improve

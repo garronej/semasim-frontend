@@ -38,6 +38,14 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
 
 }
 
+/** 
+ * Posted when a Dongle with an unlocked SIM goes online.
+ * Used so we can display a loading between the moment 
+ * when the card have been unlocked and the card is ready 
+ * to use.
+ */
+const evtUsableDongle= new SyncEvent<{ imei: string; }>();
+
 {
 
     const methodName = apiDeclaration.notifySimOnline.methodName;
@@ -49,6 +57,8 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
             imsi, hasInternalSimStorageChanged,
             password, simDongle, gatewayLocation
         }) => {
+
+            evtUsableDongle.post({ "imei": simDongle.imei });
 
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
@@ -224,6 +234,7 @@ export const evtContactDeleted = new SyncEvent<{
 
 }
 
+
 {
 
     const methodName = apiDeclaration.notifyDongleOnLan.methodName;
@@ -232,6 +243,10 @@ export const evtContactDeleted = new SyncEvent<{
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async params => {
+
+            if( dcTypes.Dongle.Usable.match(params) ){
+                evtUsableDongle.post({ "imei": params.imei });
+            }
 
             interact(params);
 
@@ -292,6 +307,14 @@ export const evtContactDeleted = new SyncEvent<{
                 bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
 
                 const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
+
+                bootbox_custom.dismissLoading();
+
+                bootbox_custom.loading("Reading sim...", 0);
+
+                await evtUsableDongle.waitFor(({ imei })=> imei === dongle.imei );
+
+                bootbox_custom.dismissLoading();
 
                 setTimeout(() => bootbox_custom.dismissLoading(), 10000);
 
