@@ -40,23 +40,30 @@ export class UiVoiceCall {
             "backdrop": "static"
         });
 
-
         this.structure.find("span.id_me").html(userSim.friendlyName);
 
-        //FIXME: this is redundant.
         this.structure.find("span.id_me_under").html(
             !!this.userSim.sim.storage.number ?
-                (intlTelInputUtils as any).formatNumber(
-                    this.userSim.sim.storage.number,
-                    this.countryIso || null,
-                    intlTelInputUtils.numberFormat.NATIONAL
-                ) : ""
+                (() => {
+
+                    const iso = this.userSim.sim.country ?
+                        this.userSim.sim.country.iso : undefined;
+
+                    return phoneNumber.prettyPrint(
+                        phoneNumber.build(
+                            this.userSim.sim.storage.number,
+                            iso
+                        ),
+                        iso
+                    );
+
+                })() : ""
         );
 
         this.btnGreen.on("click", () => this.evtBtnClick.post("GREEN"));
         this.btnRed.on("click", () => this.evtBtnClick.post("RED"));
 
-        let mouseDownStart: { [signal: string]: number }= {};
+        let mouseDownStart: { [signal: string]: number } = {};
 
         for (let i = 0; i <= 11; i++) {
 
@@ -68,9 +75,9 @@ export class UiVoiceCall {
                 .on("mousedown", () => mouseDownStart[signal] = Date.now())
                 .on("click", () => {
 
-                    let duration= Date.now() - mouseDownStart[signal];
+                    let duration = Date.now() - mouseDownStart[signal];
 
-                    if( duration < 250 ){
+                    if (duration < 250) {
                         duration = 250;
                     }
 
@@ -234,18 +241,18 @@ export class UiVoiceCall {
 
     }
 
-    private state: UiVoiceCall.State= "TERMINATED";
+    private state: UiVoiceCall.State = "TERMINATED";
 
     private setState(
         state: UiVoiceCall.State,
         message: string
     ): void {
 
-        if( state === this.state ){
+        if (state === this.state) {
             return;
         }
 
-        this.state= state;
+        this.state = state;
 
         this.evtBtnClick.detach();
 

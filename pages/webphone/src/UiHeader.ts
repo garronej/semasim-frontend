@@ -45,12 +45,15 @@ export class UiHeader {
 
             if (!!this.userSim.sim.storage.number) {
 
+                const iso = this.userSim.sim.country ? 
+                    this.userSim.sim.country.iso : undefined;
+
                 return phoneNumber.prettyPrint(
                     phoneNumber.build(
                         this.userSim.sim.storage.number,
-                        this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
+                        iso
                     ),
-                    this.userSim.sim.country ? this.userSim.sim.country.iso : "DEFAULT"
+                    iso
                 );
 
             } else {
