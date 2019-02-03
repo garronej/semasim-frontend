@@ -112,6 +112,16 @@ const version= "0.1.3";
         </div>
     </div>
     <!-- Javascripts -->
+
+    <% if( assets_root === "/" ){ %>
+    <script>
+        window.onerror = function(msg, url, linenumber) {
+            alert(msg+'\n'+url+':'+linenumber);
+            return true;
+        };
+    </script>
+    <% } %>
+
     <!-- Important javascript libs(put in all pages) -->
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <script>

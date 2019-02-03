@@ -1,3 +1,7 @@
+declare const require: (path: string) => any;
+require("es6-map/implement");
+require("es6-weak-map/implement");
+require("array.prototype.find").shim();
 
 import { Ua } from "./Ua";
 import { UiWebphoneController } from "./UiWebphoneController";

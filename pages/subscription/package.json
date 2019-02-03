@@ -5,7 +5,10 @@
   },
   "dependencies": {
     "ts-events-extended": "github:garronej/ts-events-extended",
-    "moment": "^2.20.1"
+    "moment": "^2.20.1",
+    "es6-map": "^0.1.5",
+    "es6-weak-map": "^2.0.2",
+    "array.prototype.find": "^2.0.4"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",
