@@ -25,7 +25,9 @@ $(document).ready(async () => {
 
 	connection.connect();
 
-	bootbox_custom.loading("Initialization...");
+	$("#page-payload").html("");
+
+	bootbox_custom.loading("Initialization", 0);
 
 	await Ua.init();
 
