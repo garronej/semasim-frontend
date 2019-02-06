@@ -134,7 +134,7 @@ exports.evtContactCreatedOrUpdated = new ts_events_extended_1.SyncEvent();
                                 if (!!storage) {
                                     return contact.mem_index === storage.mem_index;
                                 }
-                                return number_raw === number_raw;
+                                return contact.number_raw === number_raw;
                             });
                             if (!!contact) {
                                 contact.name = name;

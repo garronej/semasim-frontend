@@ -115,7 +115,7 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
                     return contact.mem_index === storage.mem_index;
                 }
 
-                return number_raw === number_raw;
+                return contact.number_raw === number_raw;
 
             });
 
