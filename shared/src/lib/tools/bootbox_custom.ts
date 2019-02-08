@@ -1,5 +1,7 @@
 
-//TODO: Assert bootstrap and bootbox loaded on the page.
+//TODO: Assert jQuery bootstrap and bootbox loaded on the page.
+
+import * as modal_stack from "./modal_stack";
 
 declare const bootbox: any;
 
@@ -99,7 +101,18 @@ function run(method: string, args: any[], isLoading = false): JQuery {
 
     }
 
-    let modal: JQuery = bootbox[method].apply(bootbox, args);
+
+    const options= typeof args[0] === "string" ? ({
+        "message": args[0],
+        "callback": args[1]
+    }): args[0];
+
+    options.show= false;
+
+    //let modal: JQuery = bootbox[method].apply(bootbox, args);
+    let modal: JQuery = bootbox[method](options);
+
+    modal_stack.add(modal, null as any).show();
 
     if (!isLoading) {
 

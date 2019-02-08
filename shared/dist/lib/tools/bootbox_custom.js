@@ -1,6 +1,7 @@
 "use strict";
-//TODO: Assert bootstrap and bootbox loaded on the page.
+//TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
+var modal_stack = require("./modal_stack");
 var currentLoading = undefined;
 var currentModal = undefined;
 var restoreLoading = undefined;
@@ -55,7 +56,14 @@ function run(method, args, isLoading) {
         dismissLoading();
         restoreLoading = function () { return loading(message_1, delayBeforeShow_1); };
     }
-    var modal = bootbox[method].apply(bootbox, args);
+    var options = typeof args[0] === "string" ? ({
+        "message": args[0],
+        "callback": args[1]
+    }) : args[0];
+    options.show = false;
+    //let modal: JQuery = bootbox[method].apply(bootbox, args);
+    var modal = bootbox[method](options);
+    modal_stack.add(modal, null).show();
     if (!isLoading) {
         currentModal = modal;
     }
