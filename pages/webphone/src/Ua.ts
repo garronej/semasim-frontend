@@ -557,7 +557,11 @@ class JsSipSocket implements IjsSipSocket {
 
             }
 
-            const socket = await connection.get();
+            const socketOrPrSocket = connection.get();
+
+            const socket = socketOrPrSocket instanceof Promise ?
+                (await socketOrPrSocket) :
+                socketOrPrSocket;
 
             socket.write(
                 sip.parse(

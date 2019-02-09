@@ -3289,9 +3289,9 @@ var JsSipSocket = /** @class */ (function () {
     JsSipSocket.prototype.send = function (data) {
         var _this = this;
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var sipPacket, sipResponse, callId, pr, socket;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         sipPacket = sip.parse(Buffer.from(data, "utf8"));
                         if (!!sip.matchRequest(sipPacket)) return [3 /*break*/, 2];
@@ -3302,12 +3302,21 @@ var JsSipSocket = /** @class */ (function () {
                         if (!!!pr) return [3 /*break*/, 2];
                         return [4 /*yield*/, pr];
                     case 1:
-                        _a.sent();
+                        _b.sent();
                         this.messageOkDelays.delete(callId);
-                        _a.label = 2;
-                    case 2: return [4 /*yield*/, connection.get()];
+                        _b.label = 2;
+                    case 2:
+                        socketOrPrSocket = connection.get();
+                        if (!(socketOrPrSocket instanceof Promise)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, socketOrPrSocket];
                     case 3:
-                        socket = _a.sent();
+                        _a = (_b.sent());
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _a = socketOrPrSocket;
+                        _b.label = 5;
+                    case 5:
+                        socket = _a;
                         socket.write(sip.parse(Buffer.from(data, "utf8")));
                         return [2 /*return*/];
                 }
@@ -3328,7 +3337,7 @@ var JsSipSocket = /** @class */ (function () {
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/gateway":163,"../../../shared/dist/lib/toBackend/connection":164,"../../../shared/dist/lib/toBackend/localApiHandlers":165,"../../../shared/dist/lib/toBackend/remoteApiCaller":166,"buffer":2,"phone-number":132,"run-exclusive":133,"ts-events-extended":144,"ts-sip":154}],10:[function(require,module,exports){
+},{"../../../shared/dist/gateway":164,"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"buffer":2,"phone-number":132,"run-exclusive":133,"ts-events-extended":145,"ts-sip":155}],10:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -3386,7 +3395,7 @@ var UiConversation = /** @class */ (function () {
         this.btnCall = this.structure.find("button.id_call");
         this.btnDelete = this.structure.find("button.id_delete");
         this.evtLoadMore = new ts_events_extended_1.SyncEvent();
-        /** indexed but wd.Message.id_ */
+        /** indexed by wd.Message.id_ */
         this.uiBubbles = new Map();
         this.notifyContactNameUpdated();
         this.setReadonly(true);
@@ -3420,7 +3429,7 @@ var UiConversation = /** @class */ (function () {
             "railVisible": true,
             "height": '400px',
             "start": "bottom"
-        }).bind("slimscroll", (function (e_, pos) {
+        }).bind("slimscroll", (function (_e, pos) {
             if (pos !== "top") {
                 return;
             }
@@ -3489,7 +3498,7 @@ var UiConversation = /** @class */ (function () {
             "complete": function () {
                 _this.ul.slimScroll({ "scrollTo": _this.ul.prop("scrollHeight") + "px" });
                 _this.textarea.trigger("focus");
-                _this.textarea.autosize();
+                _this.textarea["autosize"]();
             }
         });
     };
@@ -3658,7 +3667,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../../../shared/dist/lib/types":169,"../templates/UiConversation.html":156,"../templates/UiConversation.less":157,"buffer":2,"moment":129,"phone-number":132,"ts-events-extended":144}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/types":171,"../templates/UiConversation.html":157,"../templates/UiConversation.less":158,"buffer":2,"moment":129,"phone-number":132,"ts-events-extended":145}],11:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -3717,7 +3726,6 @@ var UiHeader = /** @class */ (function () {
         var e_1, _a;
         this.structure.find(".id_icon_sim_up")[isOnline ? "show" : "hide"]();
         try {
-            //this.structure.find(".id_icon_sim_down")[isOnline?"hide":"show"]();
             for (var _b = __values([".id_offline", ".id_icon_sim_down"]), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var selector = _c.value;
                 this.structure.find(selector)[isOnline ? "hide" : "show"]();
@@ -3735,7 +3743,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../templates/UiHeader.html":158,"phone-number":132}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiHeader.html":159,"phone-number":132}],12:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -3952,7 +3960,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../../../shared/dist/lib/types":169,"../templates/UiPhonebook.html":159,"phone-number":132,"ts-events-extended":144}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/types":171,"../templates/UiPhonebook.html":160,"phone-number":132,"ts-events-extended":145}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4085,12 +4093,13 @@ var UiQuickAction = /** @class */ (function () {
 }());
 exports.UiQuickAction = UiQuickAction;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../templates/UiQuickAction.html":160,"phone-number":132,"ts-events-extended":144}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiQuickAction.html":161,"phone-number":132,"ts-events-extended":145}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
+var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiVoiceCall.html"), "UiVoiceCall");
 var UiVoiceCall = /** @class */ (function () {
     function UiVoiceCall(userSim) {
@@ -4104,11 +4113,12 @@ var UiVoiceCall = /** @class */ (function () {
         this.state = "TERMINATED";
         this.countryIso = userSim.sim.country ?
             userSim.sim.country.iso : undefined;
-        this.structure.modal({
+        var _a = modal_stack.add(this.structure, {
             "keyboard": false,
-            "show": false,
             "backdrop": "static"
-        });
+        }), hide = _a.hide, show = _a.show;
+        this.hideModal = hide;
+        this.showModal = show;
         this.structure.find("span.id_me").html(userSim.friendlyName);
         this.structure.find("span.id_me_under").html(!!this.userSim.sim.storage.number ?
             (function () {
@@ -4121,18 +4131,18 @@ var UiVoiceCall = /** @class */ (function () {
         var mouseDownStart = {};
         var _loop_1 = function (i) {
             var signal = (i <= 9) ? "" + i : (i === 10) ? "*" : "#";
-            this_1.structure.find("button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal)))
+            this_1.structure
+                .find("button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal)))
                 .on("mousedown", function () { return mouseDownStart[signal] = Date.now(); })
                 .on("click", function () {
                 var duration = Date.now() - mouseDownStart[signal];
                 if (duration < 250) {
                     duration = 250;
                 }
-                var e = {
+                _this.evtNumpadDtmf.post({
                     signal: signal,
                     duration: duration
-                };
-                _this.evtNumpadDtmf.post(e);
+                });
             });
         };
         var this_1 = this;
@@ -4230,7 +4240,7 @@ var UiVoiceCall = /** @class */ (function () {
         this.evtNumpadDtmf.detach();
         this.btnGreen.addClass("hide");
         this.btnRed.addClass("hide");
-        this.structure.modal("show");
+        this.showModal();
         ion.sound.stop("semasim_ringtone");
         switch (state) {
             case "RINGING":
@@ -4254,7 +4264,7 @@ var UiVoiceCall = /** @class */ (function () {
                 break;
             case "TERMINATED":
                 this.structure.find(".id_icon-hangup").removeClass("hide");
-                setTimeout(function () { return _this.structure.modal("hide"); }, 1500);
+                setTimeout(function () { return _this.hideModal(); }, 1500);
                 break;
             default: break;
         }
@@ -4264,7 +4274,7 @@ var UiVoiceCall = /** @class */ (function () {
 }());
 exports.UiVoiceCall = UiVoiceCall;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../templates/UiVoiceCall.html":161,"phone-number":132,"ts-events-extended":144}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/tools/modal_stack":170,"../templates/UiVoiceCall.html":162,"phone-number":132,"ts-events-extended":145}],15:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4358,24 +4368,6 @@ var UiWebphoneController = /** @class */ (function () {
         $("body").data("dynamic").panels();
         setTimeout(function () { return _this.uiPhonebook.triggerClickOnLastSeenChat(); }, 0);
     }
-    UiWebphoneController.create = function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim_) { return userSim_ === userSim; }, function () {
-                            //TODO: Implement behavior on permission lost.
-                            location.reload();
-                        });
-                        _a = this.bind;
-                        _b = [void 0, userSim];
-                        return [4 /*yield*/, remoteApiCaller.getOrCreateWdInstance(userSim)];
-                    case 1: return [2 /*return*/, new (_a.apply(this, _b.concat([_c.sent()])))()];
-                }
-            });
-        });
-    };
     UiWebphoneController.prototype.registerRemoteNotifyHandlers = function () {
         var _this = this;
         localApiHandlers.evtSharedSimUnregistered.attachOnce(function (_a) {
@@ -4456,7 +4448,6 @@ var UiWebphoneController = /** @class */ (function () {
                     }
                 }
                 else {
-                    //TODO: reload ui header.
                     this.ua.register();
                 }
                 return [2 /*return*/];
@@ -4851,7 +4842,7 @@ var UiWebphoneController = /** @class */ (function () {
 }());
 exports.UiWebphoneController = UiWebphoneController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":165,"../../../shared/dist/lib/toBackend/remoteApiCaller":166,"../../../shared/dist/lib/tools/bootbox_custom":167,"../../../shared/dist/lib/tools/loadUiClassHtml":168,"../templates/UiWebphoneController.html":162,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"phone-number":132}],16:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiWebphoneController.html":163,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"phone-number":132}],16:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4888,6 +4879,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 require("es6-map/implement");
@@ -4899,13 +4900,13 @@ var connection = require("../../../shared/dist/lib/toBackend/connection");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-//import * as types from "../../../shared/dist/lib/types";
+var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 //TODO: implement evtUp
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var userSims;
+    var e_1, _a, userSims, wdInstances, _loop_1, _b, _c, userSim;
     var _this = this;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    return __generator(this, function (_d) {
+        switch (_d.label) {
             case 0:
                 $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
                     return __generator(this, function (_a) {
@@ -4920,37 +4921,56 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                 }); });
                 connection.connect();
                 $("#page-payload").html("");
-                bootbox_custom.loading("Initialization", 0);
+                bootbox_custom.loading("Fetching contacts and SMS history", 0);
                 return [4 /*yield*/, Ua_1.Ua.init()];
             case 1:
-                _a.sent();
+                _d.sent();
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 2:
-                userSims = _a.sent();
+                userSims = _d.sent();
                 if (userSims.length === 0) {
                     window.location.href = "/manager";
                 }
-                return [4 /*yield*/, Promise.all(userSims.map(function (userSim) {
-                        return UiWebphoneController_1.UiWebphoneController
-                            .create(userSim)
-                            .then(function (uiWebphoneController) { return ({ userSim: userSim, uiWebphoneController: uiWebphoneController }); });
-                    })).then(function (arr) { return arr.sort(function (a, b) { return +b.userSim.isOnline - +a.userSim.isOnline; })
-                        .forEach(function (_a) {
-                        var uiWebphoneController = _a.uiWebphoneController;
-                        return $("#page-payload").append(uiWebphoneController.structure);
-                    }); })];
+                return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim); }))];
             case 3:
-                _a.sent();
+                wdInstances = _d.sent();
+                _loop_1 = function (userSim) {
+                    $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(userSim, wdInstances.find(function (_a) {
+                        var imsi = _a.imsi;
+                        return userSim.sim.imsi === imsi;
+                    }))).structure);
+                };
+                try {
+                    for (_b = __values(userSims.sort(function (a, b) { return +b.isOnline - +a.isOnline; })), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        userSim = _c.value;
+                        _loop_1(userSim);
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
                 bootbox_custom.dismissLoading();
                 $("#footer").hide();
+                localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) {
+                    bootbox_custom.alert(userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName);
+                    //TODO: Improve
+                    location.reload();
+                });
                 remoteApiCaller.evtUsableSim.attach(function (userSim) { return __awaiter(_this, void 0, void 0, function () {
-                    var uiWebphoneController;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4 /*yield*/, UiWebphoneController_1.UiWebphoneController.create(userSim)];
+                    var _a, _b, _c, _d;
+                    return __generator(this, function (_e) {
+                        switch (_e.label) {
+                            case 0:
+                                _b = (_a = $("#page-payload")).append;
+                                _c = UiWebphoneController_1.UiWebphoneController.bind;
+                                _d = [void 0, userSim];
+                                return [4 /*yield*/, remoteApiCaller.getOrCreateWdInstance(userSim)];
                             case 1:
-                                uiWebphoneController = _a.sent();
-                                $("#page-payload").append(uiWebphoneController.structure);
+                                _b.apply(_a, [(new (_c.apply(UiWebphoneController_1.UiWebphoneController, _d.concat([_e.sent()])))()).structure]);
                                 return [2 /*return*/];
                         }
                     });
@@ -4960,7 +4980,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":164,"../../../shared/dist/lib/toBackend/remoteApiCaller":166,"../../../shared/dist/lib/tools/bootbox_custom":167,"../../../shared/dist/lib/webApiCaller":170,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"es6-map/implement":103,"es6-weak-map/implement":114}],17:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/webApiCaller":172,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"es6-map/implement":103,"es6-weak-map/implement":114}],17:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -14087,7 +14107,8 @@ var phoneNumber;
             ].join(" "));
         }
     }
-    function remoteLoadUtil() {
+    function remoteLoadUtil(src) {
+        if (src === void 0) { src = "//github.com/garronej/phone-number/releases/download/intlTelInputUtils/utils.js"; }
         return new Promise(function (resolve) {
             return (function (d, s, id) {
                 var js, fjs = d.getElementsByTagName(s)[0];
@@ -14100,9 +14121,9 @@ var phoneNumber;
                 js.onload = function () {
                     resolve();
                 };
-                js.src = "//github.com/garronej/phone-number/releases/download/intlTelInputUtils/utils.js";
+                js.src = src;
                 fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', "intlTelInputUtils"));
+            }(document, "script", "intlTelInputUtils"));
         });
     }
     phoneNumber_1.remoteLoadUtil = remoteLoadUtil;
@@ -14537,6 +14558,25 @@ function buildFnCallback(isGlobal, groupRef, fun) {
 }
 
 },{}],134:[function(require,module,exports){
+'use strict'
+/* eslint no-proto: 0 */
+module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
+
+function setProtoOf (obj, proto) {
+  obj.__proto__ = proto
+  return obj
+}
+
+function mixinProperties (obj, proto) {
+  for (var prop in proto) {
+    if (!obj.hasOwnProperty(prop)) {
+      obj[prop] = proto[prop]
+    }
+  }
+  return obj
+}
+
+},{}],135:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -14871,7 +14911,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":123}],135:[function(require,module,exports){
+},{"has":123}],136:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -14921,7 +14961,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":134}],136:[function(require,module,exports){
+},{"super-json":135}],137:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -14933,7 +14973,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":135,"./stringTransform":137,"./stringTransformExt":138,"./testing":139}],137:[function(require,module,exports){
+},{"./JSON_CUSTOM":136,"./stringTransform":138,"./stringTransformExt":139,"./testing":140}],138:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -14995,7 +15035,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],138:[function(require,module,exports){
+},{"buffer":2}],139:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -15063,7 +15103,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":137}],139:[function(require,module,exports){
+},{"./stringTransform":138}],140:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -15332,7 +15372,7 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":137}],140:[function(require,module,exports){
+},{"./stringTransform":138}],141:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15373,7 +15413,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":141}],141:[function(require,module,exports){
+},{"./SyncEventBase":142}],142:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15591,7 +15631,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":142}],142:[function(require,module,exports){
+},{"./SyncEventBaseProtected":143}],143:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -15876,7 +15916,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":143,"run-exclusive":133}],143:[function(require,module,exports){
+},{"./defs":144,"run-exclusive":133}],144:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15889,6 +15929,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
 var EvtError;
 (function (EvtError) {
     var Timeout = /** @class */ (function (_super) {
@@ -15897,7 +15938,7 @@ var EvtError;
             var _newTarget = this.constructor;
             var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
             _this.timeout = timeout;
-            Object.setPrototypeOf(_this, _newTarget.prototype);
+            setPrototypeOf(_this, _newTarget.prototype);
             return _this;
         }
         return Timeout;
@@ -15908,7 +15949,7 @@ var EvtError;
         function Detached() {
             var _newTarget = this.constructor;
             var _this = _super.call(this, "Evt handler detached") || this;
-            Object.setPrototypeOf(_this, _newTarget.prototype);
+            setPrototypeOf(_this, _newTarget.prototype);
             return _this;
         }
         return Detached;
@@ -15916,7 +15957,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{}],144:[function(require,module,exports){
+},{"setprototypeof":134}],145:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -15925,7 +15966,7 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":140,"./defs":143}],145:[function(require,module,exports){
+},{"./SyncEvent":141,"./defs":144}],146:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16097,7 +16138,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":144}],146:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":145}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -16409,7 +16450,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":145,"./api/ApiMessage":147,"./core":151,"./misc":155,"colors":25,"ts-events-extended":144}],147:[function(require,module,exports){
+},{"./IConnection":146,"./api/ApiMessage":148,"./core":152,"./misc":156,"colors":25,"ts-events-extended":145}],148:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16490,7 +16531,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":151,"../misc":155,"buffer":2,"transfer-tools":136}],148:[function(require,module,exports){
+},{"../core":152,"../misc":156,"buffer":2,"transfer-tools":137}],149:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16672,7 +16713,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":155,"./ApiMessage":147,"colors":25,"util":8}],149:[function(require,module,exports){
+},{"../misc":156,"./ApiMessage":148,"colors":25,"util":8}],150:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -16680,7 +16721,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -16725,6 +16766,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var misc = require("../misc");
 var ApiMessage_1 = require("./ApiMessage");
+var setPrototypeOf = require("setprototypeof");
 function sendRequest(socket, methodName, params, extra) {
     if (extra === void 0) { extra = {}; }
     return __awaiter(this, void 0, void 0, function () {
@@ -16854,7 +16896,7 @@ var SendRequestError = /** @class */ (function (_super) {
         _this.params = params;
         _this.cause = cause;
         _this.misc = {};
-        Object.setPrototypeOf(_this, _newTarget.prototype);
+        setPrototypeOf(_this, _newTarget.prototype);
         return _this;
     }
     return SendRequestError;
@@ -16890,7 +16932,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":155,"./ApiMessage":147}],150:[function(require,module,exports){
+},{"../misc":156,"./ApiMessage":148,"setprototypeof":134}],151:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -16898,7 +16940,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":148,"./client":149}],151:[function(require,module,exports){
+},{"./Server":149,"./client":150}],152:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -16907,7 +16949,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -16917,6 +16959,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var sip = require("./core/sip");
 var _sdp_ = require("./core/sdp");
+var setPrototypeOf = require("setprototypeof");
 function makeStreamParser(handler, floodHandler) {
     var streamParser = (function () {
         if (!floodHandler) {
@@ -16947,7 +16990,7 @@ exports.makeStreamParser = makeStreamParser;
             _this.data = data;
             _this.maxBytesHeaders = maxBytesHeaders;
             _this.maxContentLength = maxContentLength;
-            Object.setPrototypeOf(_this, _newTarget.prototype);
+            setPrototypeOf(_this, _newTarget.prototype);
             return _this;
         }
         FloodError.prototype.toString = function () {
@@ -16981,7 +17024,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":152,"./core/sip":153,"buffer":2}],152:[function(require,module,exports){
+},{"./core/sdp":153,"./core/sip":154,"buffer":2,"setprototypeof":134}],153:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -17097,7 +17140,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17488,7 +17531,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -17500,7 +17543,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":146,"./api":150,"./core":151,"./misc":155}],155:[function(require,module,exports){
+},{"./Socket":147,"./api":151,"./core":152,"./misc":156}],156:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -17739,21 +17782,21 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":151,"buffer":2}],156:[function(require,module,exports){
+},{"./core":152,"buffer":2}],157:[function(require,module,exports){
 module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-chat\"></use>\r\n                </svg>\r\n            </i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                </svg>\r\n            </i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-trash\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i>\r\n                    <svg class=\"custom-icon\">\r\n                        <use xlink:href=\"#icon-call\"></use>\r\n                    </svg>\r\n                </i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 var css = "div.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndiv.id_UiConversation .panel-body {\n  padding: 0;\n}\ndiv.id_UiConversation .panel-footer {\n  padding: 0;\n}\ndiv.id_UiConversation form {\n  position: relative;\n}\ndiv.id_UiConversation textarea {\n  padding-right: 36px;\n}\ndiv.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\ndiv.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\ndiv.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\ndiv.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\ndiv.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\ndiv.id_UiConversation ul li div.message.in,\ndiv.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.in:before,\ndiv.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\ndiv.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\ndiv.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\ndiv.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":128}],158:[function(require,module,exports){
+},{"lessify":128}],159:[function(require,module,exports){
 module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <!--\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    -->\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <i class=\"id_icon_sim_down\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card_alert\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],159:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_ContactWidget ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
 },{}],160:[function(require,module,exports){
-module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_ContactWidget ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
 },{}],161:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
 },{}],162:[function(require,module,exports){
-module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
 },{}],163:[function(require,module,exports){
+module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+},{}],164:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var types = require("../../../gateway/dist/lib/types");
@@ -17765,7 +17808,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":221,"../../../gateway/dist/lib/misc/sipRouting":222,"../../../gateway/dist/lib/types":223}],164:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":217,"../../../gateway/dist/lib/misc/sipRouting":218,"../../../gateway/dist/lib/types":219}],165:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17817,20 +17860,22 @@ var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
+var bootbox_custom = require("../tools/bootbox_custom");
 /** semasim.com or dev.semasim.com */
 exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 exports.url = "wss://web." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": console.log.bind(console),
+    "log": exports.baseDomain.substring(0, 3) === "dev" ?
+        console.log.bind(console) : (function () { }),
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
 var userSims = undefined;
 //TODO: No need to export it.
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
-function connect() {
+function connect(isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -17865,6 +17910,9 @@ function connect() {
     }, console.log.bind(console));
     socketCurrent = socket;
     socket.evtConnect.attachOnce(function () {
+        if (!!isReconnect) {
+            bootbox_custom.dismissLoading();
+        }
         if (userSims === undefined) {
             remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
         }
@@ -17925,6 +17973,9 @@ function connect() {
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
+                    if (socket.evtConnect.postCount === 1) {
+                        bootbox_custom.loading("Reconnecting...");
+                    }
                     try {
                         for (_b = __values(userSims || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                             userSim = _c.value;
@@ -17950,7 +18001,7 @@ function connect() {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect();
+                    connect("RECONNECT");
                     return [2 /*return*/];
             }
         });
@@ -17969,7 +18020,7 @@ function get() {
 }
 exports.get = get;
 
-},{"./localApiHandlers":165,"./remoteApiCaller":166,"ts-events-extended":198,"ts-sip":208}],165:[function(require,module,exports){
+},{"../tools/bootbox_custom":168,"./localApiHandlers":166,"./remoteApiCaller":167,"ts-events-extended":205,"ts-sip":215}],166:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18190,105 +18241,104 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
 {
     var methodName = apiDeclaration.notifyDongleOnLan.methodName;
     var handler = {
-        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (dongle) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                if (dcTypes.Dongle.Usable.match(params)) {
-                    evtUsableDongle.post({ "imei": params.imei });
+                if (dcTypes.Dongle.Locked.match(dongle)) {
+                    interact_onLockedDongle_1(dongle);
                 }
-                interact_1(params);
+                else {
+                    evtUsableDongle.post({ "imei": dongle.imei });
+                    interact_onUsableDongle_1(dongle);
+                }
                 return [2 /*return*/, undefined];
             });
         }); }
     };
     exports.handlers[methodName] = handler;
-    var interact_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
-        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, friendlyName_1, friendlyNameSubmitted;
+    var interact_onLockedDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+        var pin, unlockResult;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!dcTypes.Dongle.Locked.match(dongle)) return [3 /*break*/, 4];
-                    _loop_1 = function () {
-                        var tryLeft, pin, shouldContinue, unlockResult;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    if (dongle.sim.pinState !== "SIM PIN") {
-                                        bootbox_custom.alert(dongle.sim.pinState + " require manual unlock");
-                                        return [2 /*return*/, { value: void 0 }];
+                    if (dongle.sim.pinState !== "SIM PIN") {
+                        bootbox_custom.alert(dongle.sim.pinState + " require manual unlock");
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, (function callee() {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var pin, shouldContinue;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                                                "title": "PIN code for sim inside " + dongle.manufacturer + " " + dongle.model + " (" + dongle.sim.tryLeft + " tries left)",
+                                                "inputType": "number",
+                                                "callback": function (result) { return resolve(result); }
+                                            }); })];
+                                        case 1:
+                                            pin = _a.sent();
+                                            if (pin === null) {
+                                                return [2 /*return*/, undefined];
+                                            }
+                                            if (!!pin.match(/^[0-9]{4}$/)) return [3 /*break*/, 3];
+                                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
+                                                    "title": "PIN malformed!",
+                                                    "message": "A pin code is composed of 4 digits, e.g. 0000",
+                                                    callback: function (result) { return resolve(result); }
+                                                }); })];
+                                        case 2:
+                                            shouldContinue = _a.sent();
+                                            if (!shouldContinue) {
+                                                return [2 /*return*/, undefined];
+                                            }
+                                            return [2 /*return*/, callee()];
+                                        case 3: return [2 /*return*/, pin];
                                     }
-                                    tryLeft = dongle.sim.tryLeft;
-                                    return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                            "title": "PIN code for sim inside " + dongle.manufacturer + " " + dongle.model + " (" + tryLeft + " tries left)",
-                                            "inputType": "number",
-                                            "callback": function (result) { return resolve(result); }
-                                        }); })];
-                                case 1:
-                                    pin = _a.sent();
-                                    if (pin === null) {
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    if (!!pin.match(/^[0-9]{4}$/)) return [3 /*break*/, 3];
-                                    return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                            "title": "PIN malformed!",
-                                            "message": "A pin code is composed of 4 digits, e.g. 0000",
-                                            callback: function (result) { return resolve(result); }
-                                        }); })];
-                                case 2:
-                                    shouldContinue = _a.sent();
-                                    if (!shouldContinue) {
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    return [2 /*return*/, "continue"];
-                                case 3:
-                                    bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
-                                    return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
-                                case 4:
-                                    unlockResult = _a.sent();
-                                    bootbox_custom.dismissLoading();
-                                    bootbox_custom.loading("Reading sim...", 0);
-                                    return [4 /*yield*/, evtUsableDongle.waitFor(function (_a) {
-                                            var imei = _a.imei;
-                                            return imei === dongle.imei;
-                                        })];
-                                case 5:
-                                    _a.sent();
-                                    bootbox_custom.dismissLoading();
-                                    setTimeout(function () { return bootbox_custom.dismissLoading(); }, 10000);
-                                    if (!unlockResult) {
-                                        //TODO: Improve
-                                        alert("Unlock failed for unknown reason");
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    if (!unlockResult.success) {
-                                        dongle.sim.pinState = unlockResult.pinState;
-                                        dongle.sim.tryLeft = unlockResult.tryLeft;
-                                        return [2 /*return*/, "continue"];
-                                    }
-                                    return [2 /*return*/, "break"];
-                            }
-                        });
-                    };
-                    _a.label = 1;
+                                });
+                            });
+                        })()];
                 case 1:
-                    if (!true) return [3 /*break*/, 3];
-                    return [5 /*yield**/, _loop_1()];
+                    pin = _a.sent();
+                    if (pin === undefined) {
+                        return [2 /*return*/];
+                    }
+                    bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
+                    return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
                 case 2:
-                    state_1 = _a.sent();
-                    if (typeof state_1 === "object")
-                        return [2 /*return*/, state_1.value];
-                    if (state_1 === "break")
-                        return [3 /*break*/, 3];
-                    return [3 /*break*/, 1];
-                case 3: return [3 /*break*/, 11];
-                case 4:
-                    shouldAdd_message_1 = [
+                    unlockResult = _a.sent();
+                    bootbox_custom.dismissLoading();
+                    if (!unlockResult) {
+                        alert("Unlock failed for unknown reason");
+                        return [2 /*return*/];
+                    }
+                    if (!unlockResult.success) {
+                        //NOTE: Interact will be called again with an updated dongle.
+                        return [2 /*return*/];
+                    }
+                    bootbox_custom.loading("Initialization of the sim...", 0);
+                    return [4 /*yield*/, evtUsableDongle.waitFor(function (_a) {
+                            var imei = _a.imei;
+                            return imei === dongle.imei;
+                        })];
+                case 3:
+                    _a.sent();
+                    bootbox_custom.dismissLoading();
+                    return [2 /*return*/];
+            }
+        });
+    }); };
+    var interact_onUsableDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+        var shouldAdd_message, shouldAdd, friendlyName, friendlyNameSubmitted;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    shouldAdd_message = [
                         "SIM inside:",
                         dongle.manufacturer + " " + dongle.model,
                         "Sim IMSI: " + dongle.sim.imsi,
                     ].join("<br>");
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.dialog({
                             "title": "SIM ready to be registered",
-                            "message": "<p class=\"text-center\">" + shouldAdd_message_1 + "</p>",
+                            "message": "<p class=\"text-center\">" + shouldAdd_message + "</p>",
                             "buttons": {
                                 "cancel": {
                                     "label": "Not now",
@@ -18302,43 +18352,42 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                             },
                             "closeButton": false
                         }); })];
-                case 5:
+                case 1:
                     shouldAdd = _a.sent();
                     if (!shouldAdd) {
                         return [2 /*return*/];
                     }
-                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 7];
+                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 3];
                     //TODO: Improve message.
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert([
                             "You won't be able to make phone call with this device until it have been voice enabled",
                             "See: <a href='https://www.semasim.com/enable-voice'></a>"
                         ].join("<br>"), function () { return resolve(); }); })];
-                case 6:
+                case 2:
                     //TODO: Improve message.
                     _a.sent();
-                    _a.label = 7;
-                case 7:
+                    _a.label = 3;
+                case 3:
                     bootbox_custom.loading("Suggesting a suitable friendly name ...");
                     return [4 /*yield*/, getDefaultFriendlyName_1(dongle.sim)];
-                case 8:
-                    friendlyName_1 = _a.sent();
+                case 4:
+                    friendlyName = _a.sent();
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                             "title": "Friendly name for this sim?",
-                            "value": friendlyName_1,
+                            "value": friendlyName,
                             "callback": function (result) { return resolve(result); },
                         }); })];
-                case 9:
+                case 5:
                     friendlyNameSubmitted = _a.sent();
                     if (friendlyNameSubmitted) {
-                        friendlyName_1 = friendlyNameSubmitted;
+                        friendlyName = friendlyNameSubmitted;
                     }
                     bootbox_custom.loading("Registering SIM...");
-                    return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName_1)];
-                case 10:
+                    return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName)];
+                case 6:
                     _a.sent();
                     bootbox_custom.dismissLoading();
-                    _a.label = 11;
-                case 11: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     }); };
@@ -18401,14 +18450,14 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                interact_2(params);
+                interact_1(params);
                 return [2 /*return*/, undefined];
             });
         }); }
     };
     exports.handlers[methodName] = handler;
     //TODO: run exclusive
-    var interact_2 = function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    var interact_1 = function (userSim) { return __awaiter(_this, void 0, void 0, function () {
         var shouldProceed, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -18557,7 +18606,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":172,"../tools/bootbox_custom":167,"./remoteApiCaller":166,"chan-dongle-extended-client/dist/lib/types":174,"ts-events-extended":198}],166:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":174,"../tools/bootbox_custom":168,"./remoteApiCaller":167,"chan-dongle-extended-client/dist/lib/types":176,"ts-events-extended":205}],167:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -19412,10 +19461,11 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":171,"../types":169,"./connection":164,"phone-number":190,"ts-events-extended":198,"ts-sip":208}],167:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":173,"../types":171,"./connection":165,"phone-number":192,"ts-events-extended":205,"ts-sip":215}],168:[function(require,module,exports){
 "use strict";
-//TODO: Assert bootstrap and bootbox loaded on the page.
+//TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
+var modal_stack = require("./modal_stack");
 var currentLoading = undefined;
 var currentModal = undefined;
 var restoreLoading = undefined;
@@ -19470,7 +19520,14 @@ function run(method, args, isLoading) {
         dismissLoading();
         restoreLoading = function () { return loading(message_1, delayBeforeShow_1); };
     }
-    var modal = bootbox[method].apply(bootbox, args);
+    var options = typeof args[0] === "string" ? ({
+        "message": args[0],
+        "callback": args[1]
+    }) : args[0];
+    options.show = false;
+    //let modal: JQuery = bootbox[method].apply(bootbox, args);
+    var modal = bootbox[method](options);
+    modal_stack.add(modal, null).show();
     if (!isLoading) {
         currentModal = modal;
     }
@@ -19509,7 +19566,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{}],168:[function(require,module,exports){
+},{"./modal_stack":170}],169:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -19523,7 +19580,110 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],169:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
+"use strict";
+//TODO: Assert jQuery bootstrap loaded on the page.
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var stack = [];
+var onHideKey = " __hide_handler__ ";
+function add(modal, options) {
+    var _this = this;
+    if (options !== null) {
+        modal.modal(__assign({}, options, { "show": false }));
+    }
+    return {
+        "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+            var currentModal_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (stack.indexOf(modal) >= 0) {
+                            return [2 /*return*/];
+                        }
+                        stack.push(modal);
+                        modal[onHideKey] = function () {
+                            var index = stack.indexOf(modal);
+                            var wasOnTop = index === stack.length - 1;
+                            stack.splice(index, 1);
+                            if (wasOnTop && stack.length !== 0) {
+                                stack[stack.length - 1].modal("show");
+                            }
+                        };
+                        modal.one("hide.bs.modal", modal[onHideKey]);
+                        if (!(stack.length !== 1)) return [3 /*break*/, 2];
+                        currentModal_1 = stack[stack.length - 2];
+                        currentModal_1.off("hide.bs.modal", undefined, currentModal_1[onHideKey]);
+                        currentModal_1.modal("hide");
+                        currentModal_1.one("hide.bs.modal", currentModal_1[onHideKey]);
+                        return [4 /*yield*/, new Promise(function (resolve) { return currentModal_1.one("hidden.bs.modal", function () { return resolve(); }); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        modal.modal("show");
+                        modal.one("shown.bs.modal", function () { return resolve(); });
+                        return [2 /*return*/];
+                }
+            });
+        }); }); },
+        "hide": function () { return new Promise(function (resolve) {
+            if (stack.indexOf(modal) < 0) {
+                return;
+            }
+            modal.modal("hide");
+            modal.one("hidden.bs.modal", function () { return resolve(); });
+        }); }
+    };
+}
+exports.add = add;
+
+},{}],171:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -19737,7 +19897,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],170:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19892,7 +20052,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":173,"transfer-tools/dist/lib/JSON_CUSTOM":193}],171:[function(require,module,exports){
+},{"../web_api_declaration":175,"transfer-tools/dist/lib/JSON_CUSTOM":196}],173:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -19987,7 +20147,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],172:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -20040,7 +20200,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],173:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -20081,7 +20241,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],174:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -20102,255 +20262,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],175:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"./custom/trap":176,"./custom/zalgo":177,"./maps/america":180,"./maps/rainbow":181,"./maps/random":182,"./maps/zebra":183,"./styles":184,"./system/supports-colors":186,"dup":21,"util":8}],176:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],177:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],178:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./colors":175,"dup":24}],179:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"./colors":175,"./extendStringPrototype":178,"dup":25}],180:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],181:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],182:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],183:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],184:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],185:[function(require,module,exports){
-arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],186:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":185,"_process":6,"dup":32,"os":5}],187:[function(require,module,exports){
-arguments[4][119][0].apply(exports,arguments)
-},{"dup":119}],188:[function(require,module,exports){
-arguments[4][120][0].apply(exports,arguments)
-},{"./implementation":187,"dup":120}],189:[function(require,module,exports){
-arguments[4][123][0].apply(exports,arguments)
-},{"dup":123,"function-bind":188}],190:[function(require,module,exports){
-arguments[4][132][0].apply(exports,arguments)
-},{"_process":6,"dup":132}],191:[function(require,module,exports){
-arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],192:[function(require,module,exports){
-arguments[4][134][0].apply(exports,arguments)
-},{"dup":134,"has":189}],193:[function(require,module,exports){
-arguments[4][135][0].apply(exports,arguments)
-},{"dup":135,"super-json":192}],194:[function(require,module,exports){
-arguments[4][140][0].apply(exports,arguments)
-},{"./SyncEventBase":195,"dup":140}],195:[function(require,module,exports){
-arguments[4][141][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":196,"dup":141}],196:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"./defs":197,"dup":142,"run-exclusive":191}],197:[function(require,module,exports){
-arguments[4][143][0].apply(exports,arguments)
-},{"dup":143}],198:[function(require,module,exports){
-arguments[4][144][0].apply(exports,arguments)
-},{"./SyncEvent":194,"./defs":197,"dup":144}],199:[function(require,module,exports){
-arguments[4][145][0].apply(exports,arguments)
-},{"buffer":2,"dup":145,"ts-events-extended":220}],200:[function(require,module,exports){
-arguments[4][146][0].apply(exports,arguments)
-},{"./IConnection":199,"./api/ApiMessage":201,"./core":205,"./misc":209,"colors":179,"dup":146,"ts-events-extended":220}],201:[function(require,module,exports){
-arguments[4][147][0].apply(exports,arguments)
-},{"../core":205,"../misc":209,"buffer":2,"dup":147,"transfer-tools":212}],202:[function(require,module,exports){
-arguments[4][148][0].apply(exports,arguments)
-},{"../misc":209,"./ApiMessage":201,"colors":179,"dup":148,"util":8}],203:[function(require,module,exports){
-arguments[4][149][0].apply(exports,arguments)
-},{"../misc":209,"./ApiMessage":201,"dup":149}],204:[function(require,module,exports){
-arguments[4][150][0].apply(exports,arguments)
-},{"./Server":202,"./client":203,"dup":150}],205:[function(require,module,exports){
-arguments[4][151][0].apply(exports,arguments)
-},{"./core/sdp":206,"./core/sip":207,"buffer":2,"dup":151}],206:[function(require,module,exports){
-arguments[4][152][0].apply(exports,arguments)
-},{"dup":152}],207:[function(require,module,exports){
-arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],208:[function(require,module,exports){
-arguments[4][154][0].apply(exports,arguments)
-},{"./Socket":200,"./api":204,"./core":205,"./misc":209,"dup":154}],209:[function(require,module,exports){
-arguments[4][155][0].apply(exports,arguments)
-},{"./core":205,"buffer":2,"dup":155}],210:[function(require,module,exports){
-arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],211:[function(require,module,exports){
-arguments[4][135][0].apply(exports,arguments)
-},{"dup":135,"super-json":192}],212:[function(require,module,exports){
-arguments[4][136][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":211,"./stringTransform":213,"./stringTransformExt":214,"./testing":215,"dup":136}],213:[function(require,module,exports){
-arguments[4][137][0].apply(exports,arguments)
-},{"buffer":2,"dup":137}],214:[function(require,module,exports){
-arguments[4][138][0].apply(exports,arguments)
-},{"./stringTransform":213,"dup":138}],215:[function(require,module,exports){
-arguments[4][139][0].apply(exports,arguments)
-},{"./stringTransform":213,"dup":139}],216:[function(require,module,exports){
-arguments[4][140][0].apply(exports,arguments)
-},{"./SyncEventBase":217,"dup":140}],217:[function(require,module,exports){
-arguments[4][141][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":218,"dup":141}],218:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"./defs":219,"dup":142,"run-exclusive":210}],219:[function(require,module,exports){
-arguments[4][143][0].apply(exports,arguments)
-},{"dup":143}],220:[function(require,module,exports){
-arguments[4][144][0].apply(exports,arguments)
-},{"./SyncEvent":216,"./defs":219,"dup":144}],221:[function(require,module,exports){
-"use strict";
-/* NOTE: Used in the browser. */
-Object.defineProperty(exports, "__esModule", { value: true });
-//NOTE: Transpiled to ES3.
-var stringTransform = require("transfer-tools/dist/lib/stringTransform");
-exports.urlSafeB64 = stringTransform.transcode("base64", { "=": "_" });
-var header = function (i) { return "Bundled-Data-" + i; };
-/**
- *
- * In order to ease the cross implementation in Java and Objective C
- * we use this function to serialize Date instead of JSON_CUSTOM.
- * We serialize by converting date into timestamp.
- *
- * We enforce that any date property must have as name a string
- * that end with Date or date otherwise an error will be thrown.
- *
- * Date are allowed to be null.
- *
- */
-function replacer_reviver(isReplacer, key, value) {
-    if (value === null) {
-        return value;
-    }
-    var cKey = !!key.match(/[Dd]ate$/);
-    var cVal = isReplacer ? (typeof value === "string" &&
-        !!value.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)) : typeof value === "number";
-    if (isReplacer ? (cKey !== cVal) : (cKey && !cVal)) {
-        throw new Error("Bundled data design error");
-    }
-    if (!cKey) {
-        return value;
-    }
-    var date = new Date(value);
-    return isReplacer ? date.getTime() : date;
-}
-;
-function smuggleBundledDataInHeaders(data, headers) {
-    if (headers === void 0) { headers = {}; }
-    var split = stringTransform.textSplit(125, exports.urlSafeB64.enc(JSON.stringify(data, function (key, value) { return replacer_reviver(true, key, value); })));
-    for (var i = 0; i < split.length; i++) {
-        headers[header(i)] = split[i];
-    }
-    return headers;
-}
-exports.smuggleBundledDataInHeaders = smuggleBundledDataInHeaders;
-/** assert there is data */
-function extractBundledDataFromHeaders(headers) {
-    var split = [];
-    var i = 0;
-    while (true) {
-        var key = header(i++);
-        var part = headers[key] || headers[key.toLowerCase()];
-        if (!!part) {
-            split.push(part);
-        }
-        else {
-            break;
-        }
-    }
-    if (!split.length) {
-        throw new Error("No bundled data in header");
-    }
-    return JSON.parse(exports.urlSafeB64.dec(split.join("")), function (key, value) { return replacer_reviver(false, key, value); });
-}
-exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
-
-},{"transfer-tools/dist/lib/stringTransform":243}],222:[function(require,module,exports){
-"use strict";
-/* NOTE: Used in the browser. */
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-//NOTE: Transpiled to ES3.
-var stringTransform = require("transfer-tools/dist/lib/stringTransform");
-//NOTE: Transpiled to ES5
-var sipLibrary = require("ts-sip");
-/**
- * Return true if it's a sipRequest originated of UA
- * or if it's a sipResponse of a request originated by UA.
- * */
-function isRequestFromClient(sipPacket) {
-    return sipPacket.headers.via[sipPacket.headers.via.length - 1].protocol !== "TCP";
-}
-function readImsi(sipPacket) {
-    return sipLibrary.parseUri(sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].uri).user.match(/^([0-9]{15})/)[1];
-}
-exports.readImsi = readImsi;
-/**
- *
- * connectionId:
- *
- * An uniq id of every UA connection to the backend
- * Should be included in every sip packet.
- * The token enclose a timestamp of when the
- * UA connection to the backend was established,
- * the public address of the UA and the source
- * port the UA used to connect.
- *
- * */
-var cid;
-(function (cid) {
-    var _a = stringTransform.transcode("base64", { "=": "_" }), enc = _a.enc, dec = _a.dec;
-    /** on backend when ua connect */
-    function generate(uaSocket, timestamp) {
-        if (timestamp === void 0) { timestamp = Date.now(); }
-        return enc(timestamp + ":" + uaSocket.remoteAddress + ":" + uaSocket.remotePort);
-    }
-    cid.generate = generate;
-    function parse(connectionId) {
-        var _a = __read(dec(connectionId).split(":"), 3), a = _a[0], b = _a[1], c = _a[2];
-        return {
-            "timestamp": parseInt(a),
-            "uaSocket": {
-                "remoteAddress": b,
-                "remotePort": parseInt(c)
-            }
-        };
-    }
-    cid.parse = parse;
-    var key = "connection_id";
-    /**
-     * Include a connection id in a sipRequest.
-     * This must be applied to every new sip request.
-     * ( No need to include the connection id on sip response
-     * as it is already present )
-     */
-    function set(sipRequestNextHop, connectionId) {
-        sipRequestNextHop.headers[isRequestFromClient(sipRequestNextHop) ? "from" : "to"].params[key] = connectionId;
-    }
-    cid.set = set;
-    /** Read the connection id */
-    function read(sipPacket) {
-        return sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].params[key];
-    }
-    cid.read = read;
-})(cid = exports.cid || (exports.cid = {}));
-
-},{"transfer-tools/dist/lib/stringTransform":243,"ts-sip":260}],223:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-
-},{}],224:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -20553,7 +20465,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":225,"./custom/zalgo":226,"./maps/america":229,"./maps/rainbow":230,"./maps/random":231,"./maps/zebra":232,"./styles":233,"./system/supports-colors":235,"util":8}],225:[function(require,module,exports){
+},{"./custom/trap":178,"./custom/zalgo":179,"./maps/america":182,"./maps/rainbow":183,"./maps/random":184,"./maps/zebra":185,"./styles":186,"./system/supports-colors":188,"util":8}],178:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -20601,7 +20513,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],226:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -20713,7 +20625,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],227:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -20825,13 +20737,13 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":224}],228:[function(require,module,exports){
+},{"./colors":177}],181:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./colors":224,"./extendStringPrototype":227,"dup":25}],229:[function(require,module,exports){
+},{"./colors":177,"./extendStringPrototype":180,"dup":25}],182:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],230:[function(require,module,exports){
+},{"dup":26}],183:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],231:[function(require,module,exports){
+},{"dup":27}],184:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -20843,64 +20755,302 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],232:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],233:[function(require,module,exports){
+},{"dup":29}],186:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],234:[function(require,module,exports){
+},{"dup":30}],187:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],235:[function(require,module,exports){
+},{"_process":6,"dup":31}],188:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":234,"_process":6,"dup":32,"os":5}],236:[function(require,module,exports){
+},{"./has-flag.js":187,"_process":6,"dup":32,"os":5}],189:[function(require,module,exports){
 arguments[4][119][0].apply(exports,arguments)
-},{"dup":119}],237:[function(require,module,exports){
+},{"dup":119}],190:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"./implementation":236,"dup":120}],238:[function(require,module,exports){
+},{"./implementation":189,"dup":120}],191:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"dup":123,"function-bind":237}],239:[function(require,module,exports){
+},{"dup":123,"function-bind":190}],192:[function(require,module,exports){
+arguments[4][132][0].apply(exports,arguments)
+},{"_process":6,"dup":132}],193:[function(require,module,exports){
 arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],240:[function(require,module,exports){
+},{"dup":133}],194:[function(require,module,exports){
 arguments[4][134][0].apply(exports,arguments)
-},{"dup":134,"has":238}],241:[function(require,module,exports){
+},{"dup":134}],195:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
-},{"dup":135,"super-json":240}],242:[function(require,module,exports){
+},{"dup":135,"has":191}],196:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":241,"./stringTransform":243,"./stringTransformExt":244,"./testing":245,"dup":136}],243:[function(require,module,exports){
+},{"dup":136,"super-json":195}],197:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"buffer":2,"dup":137}],244:[function(require,module,exports){
+},{"./JSON_CUSTOM":196,"./stringTransform":198,"./stringTransformExt":199,"./testing":200,"dup":137}],198:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"./stringTransform":243,"dup":138}],245:[function(require,module,exports){
+},{"buffer":2,"dup":138}],199:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"./stringTransform":243,"dup":139}],246:[function(require,module,exports){
+},{"./stringTransform":198,"dup":139}],200:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./SyncEventBase":247,"dup":140}],247:[function(require,module,exports){
+},{"./stringTransform":198,"dup":140}],201:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":248,"dup":141}],248:[function(require,module,exports){
+},{"./SyncEventBase":202,"dup":141}],202:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./defs":249,"dup":142,"run-exclusive":239}],249:[function(require,module,exports){
+},{"./SyncEventBaseProtected":203,"dup":142}],203:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"dup":143}],250:[function(require,module,exports){
+},{"./defs":204,"dup":143,"run-exclusive":193}],204:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"./SyncEvent":246,"./defs":249,"dup":144}],251:[function(require,module,exports){
+},{"dup":144,"setprototypeof":194}],205:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"buffer":2,"dup":145,"ts-events-extended":250}],252:[function(require,module,exports){
+},{"./SyncEvent":201,"./defs":204,"dup":145}],206:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"./IConnection":251,"./api/ApiMessage":253,"./core":257,"./misc":261,"colors":228,"dup":146,"ts-events-extended":250}],253:[function(require,module,exports){
+},{"buffer":2,"dup":146,"ts-events-extended":205}],207:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"../core":257,"../misc":261,"buffer":2,"dup":147,"transfer-tools":242}],254:[function(require,module,exports){
+},{"./IConnection":206,"./api/ApiMessage":208,"./core":212,"./misc":216,"colors":181,"dup":147,"ts-events-extended":205}],208:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"../misc":261,"./ApiMessage":253,"colors":228,"dup":148,"util":8}],255:[function(require,module,exports){
+},{"../core":212,"../misc":216,"buffer":2,"dup":148,"transfer-tools":197}],209:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"../misc":261,"./ApiMessage":253,"dup":149}],256:[function(require,module,exports){
+},{"../misc":216,"./ApiMessage":208,"colors":181,"dup":149,"util":8}],210:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"./Server":254,"./client":255,"dup":150}],257:[function(require,module,exports){
+},{"../misc":216,"./ApiMessage":208,"dup":150,"setprototypeof":194}],211:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"./core/sdp":258,"./core/sip":259,"buffer":2,"dup":151}],258:[function(require,module,exports){
+},{"./Server":209,"./client":210,"dup":151}],212:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"dup":152}],259:[function(require,module,exports){
+},{"./core/sdp":213,"./core/sip":214,"buffer":2,"dup":152,"setprototypeof":194}],213:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],260:[function(require,module,exports){
+},{"dup":153}],214:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
-},{"./Socket":252,"./api":256,"./core":257,"./misc":261,"dup":154}],261:[function(require,module,exports){
+},{"dup":154}],215:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"./core":257,"buffer":2,"dup":155}]},{},[16]);
+},{"./Socket":207,"./api":211,"./core":212,"./misc":216,"dup":155}],216:[function(require,module,exports){
+arguments[4][156][0].apply(exports,arguments)
+},{"./core":212,"buffer":2,"dup":156}],217:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+exports.urlSafeB64 = stringTransform.transcode("base64", { "=": "_" });
+var header = function (i) { return "Bundled-Data-" + i; };
+/**
+ *
+ * In order to ease the cross implementation in Java and Objective C
+ * we use this function to serialize Date instead of JSON_CUSTOM.
+ * We serialize by converting date into timestamp.
+ *
+ * We enforce that any date property must have as name a string
+ * that end with Date or date otherwise an error will be thrown.
+ *
+ * Date are allowed to be null.
+ *
+ */
+function replacer_reviver(isReplacer, key, value) {
+    if (value === null) {
+        return value;
+    }
+    var cKey = !!key.match(/[Dd]ate$/);
+    var cVal = isReplacer ? (typeof value === "string" &&
+        !!value.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)) : typeof value === "number";
+    if (isReplacer ? (cKey !== cVal) : (cKey && !cVal)) {
+        throw new Error("Bundled data design error");
+    }
+    if (!cKey) {
+        return value;
+    }
+    var date = new Date(value);
+    return isReplacer ? date.getTime() : date;
+}
+;
+function smuggleBundledDataInHeaders(data, headers) {
+    if (headers === void 0) { headers = {}; }
+    var split = stringTransform.textSplit(125, exports.urlSafeB64.enc(JSON.stringify(data, function (key, value) { return replacer_reviver(true, key, value); })));
+    for (var i = 0; i < split.length; i++) {
+        headers[header(i)] = split[i];
+    }
+    return headers;
+}
+exports.smuggleBundledDataInHeaders = smuggleBundledDataInHeaders;
+/** assert there is data */
+function extractBundledDataFromHeaders(headers) {
+    var split = [];
+    var i = 0;
+    while (true) {
+        var key = header(i++);
+        var part = headers[key] || headers[key.toLowerCase()];
+        if (!!part) {
+            split.push(part);
+        }
+        else {
+            break;
+        }
+    }
+    if (!split.length) {
+        throw new Error("No bundled data in header");
+    }
+    return JSON.parse(exports.urlSafeB64.dec(split.join("")), function (key, value) { return replacer_reviver(false, key, value); });
+}
+exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
+
+},{"transfer-tools/dist/lib/stringTransform":240}],218:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+//NOTE: Transpiled to ES5
+var sipLibrary = require("ts-sip");
+/**
+ * Return true if it's a sipRequest originated of UA
+ * or if it's a sipResponse of a request originated by UA.
+ * */
+function isRequestFromClient(sipPacket) {
+    return sipPacket.headers.via[sipPacket.headers.via.length - 1].protocol !== "TCP";
+}
+function readImsi(sipPacket) {
+    return sipLibrary.parseUri(sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].uri).user.match(/^([0-9]{15})/)[1];
+}
+exports.readImsi = readImsi;
+/**
+ *
+ * connectionId:
+ *
+ * An uniq id of every UA connection to the backend
+ * Should be included in every sip packet.
+ * The token enclose a timestamp of when the
+ * UA connection to the backend was established,
+ * the public address of the UA and the source
+ * port the UA used to connect.
+ *
+ * */
+var cid;
+(function (cid) {
+    var _a = stringTransform.transcode("base64", { "=": "_" }), enc = _a.enc, dec = _a.dec;
+    /** on backend when ua connect */
+    function generate(uaSocket, timestamp) {
+        if (timestamp === void 0) { timestamp = Date.now(); }
+        return enc(timestamp + ":" + uaSocket.remoteAddress + ":" + uaSocket.remotePort);
+    }
+    cid.generate = generate;
+    function parse(connectionId) {
+        var _a = __read(dec(connectionId).split(":"), 3), a = _a[0], b = _a[1], c = _a[2];
+        return {
+            "timestamp": parseInt(a),
+            "uaSocket": {
+                "remoteAddress": b,
+                "remotePort": parseInt(c)
+            }
+        };
+    }
+    cid.parse = parse;
+    var key = "connection_id";
+    /**
+     * Include a connection id in a sipRequest.
+     * This must be applied to every new sip request.
+     * ( No need to include the connection id on sip response
+     * as it is already present )
+     */
+    function set(sipRequestNextHop, connectionId) {
+        sipRequestNextHop.headers[isRequestFromClient(sipRequestNextHop) ? "from" : "to"].params[key] = connectionId;
+    }
+    cid.set = set;
+    /** Read the connection id */
+    function read(sipPacket) {
+        return sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].params[key];
+    }
+    cid.read = read;
+})(cid = exports.cid || (exports.cid = {}));
+
+},{"transfer-tools/dist/lib/stringTransform":240,"ts-sip":257}],219:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],220:[function(require,module,exports){
+arguments[4][177][0].apply(exports,arguments)
+},{"./custom/trap":221,"./custom/zalgo":222,"./maps/america":225,"./maps/rainbow":226,"./maps/random":227,"./maps/zebra":228,"./styles":229,"./system/supports-colors":231,"dup":177,"util":8}],221:[function(require,module,exports){
+arguments[4][178][0].apply(exports,arguments)
+},{"dup":178}],222:[function(require,module,exports){
+arguments[4][179][0].apply(exports,arguments)
+},{"dup":179}],223:[function(require,module,exports){
+arguments[4][180][0].apply(exports,arguments)
+},{"./colors":220,"dup":180}],224:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"./colors":220,"./extendStringPrototype":223,"dup":25}],225:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],226:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],227:[function(require,module,exports){
+arguments[4][184][0].apply(exports,arguments)
+},{"dup":184}],228:[function(require,module,exports){
+arguments[4][29][0].apply(exports,arguments)
+},{"dup":29}],229:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"dup":30}],230:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"_process":6,"dup":31}],231:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"./has-flag.js":230,"_process":6,"dup":32,"os":5}],232:[function(require,module,exports){
+arguments[4][119][0].apply(exports,arguments)
+},{"dup":119}],233:[function(require,module,exports){
+arguments[4][120][0].apply(exports,arguments)
+},{"./implementation":232,"dup":120}],234:[function(require,module,exports){
+arguments[4][123][0].apply(exports,arguments)
+},{"dup":123,"function-bind":233}],235:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],236:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"dup":134}],237:[function(require,module,exports){
+arguments[4][135][0].apply(exports,arguments)
+},{"dup":135,"has":234}],238:[function(require,module,exports){
+arguments[4][136][0].apply(exports,arguments)
+},{"dup":136,"super-json":237}],239:[function(require,module,exports){
+arguments[4][137][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":238,"./stringTransform":240,"./stringTransformExt":241,"./testing":242,"dup":137}],240:[function(require,module,exports){
+arguments[4][138][0].apply(exports,arguments)
+},{"buffer":2,"dup":138}],241:[function(require,module,exports){
+arguments[4][139][0].apply(exports,arguments)
+},{"./stringTransform":240,"dup":139}],242:[function(require,module,exports){
+arguments[4][140][0].apply(exports,arguments)
+},{"./stringTransform":240,"dup":140}],243:[function(require,module,exports){
+arguments[4][141][0].apply(exports,arguments)
+},{"./SyncEventBase":244,"dup":141}],244:[function(require,module,exports){
+arguments[4][142][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":245,"dup":142}],245:[function(require,module,exports){
+arguments[4][143][0].apply(exports,arguments)
+},{"./defs":246,"dup":143,"run-exclusive":235}],246:[function(require,module,exports){
+arguments[4][144][0].apply(exports,arguments)
+},{"dup":144,"setprototypeof":236}],247:[function(require,module,exports){
+arguments[4][145][0].apply(exports,arguments)
+},{"./SyncEvent":243,"./defs":246,"dup":145}],248:[function(require,module,exports){
+arguments[4][146][0].apply(exports,arguments)
+},{"buffer":2,"dup":146,"ts-events-extended":247}],249:[function(require,module,exports){
+arguments[4][147][0].apply(exports,arguments)
+},{"./IConnection":248,"./api/ApiMessage":250,"./core":254,"./misc":258,"colors":224,"dup":147,"ts-events-extended":247}],250:[function(require,module,exports){
+arguments[4][148][0].apply(exports,arguments)
+},{"../core":254,"../misc":258,"buffer":2,"dup":148,"transfer-tools":239}],251:[function(require,module,exports){
+arguments[4][149][0].apply(exports,arguments)
+},{"../misc":258,"./ApiMessage":250,"colors":224,"dup":149,"util":8}],252:[function(require,module,exports){
+arguments[4][150][0].apply(exports,arguments)
+},{"../misc":258,"./ApiMessage":250,"dup":150,"setprototypeof":236}],253:[function(require,module,exports){
+arguments[4][151][0].apply(exports,arguments)
+},{"./Server":251,"./client":252,"dup":151}],254:[function(require,module,exports){
+arguments[4][152][0].apply(exports,arguments)
+},{"./core/sdp":255,"./core/sip":256,"buffer":2,"dup":152,"setprototypeof":236}],255:[function(require,module,exports){
+arguments[4][153][0].apply(exports,arguments)
+},{"dup":153}],256:[function(require,module,exports){
+arguments[4][154][0].apply(exports,arguments)
+},{"dup":154}],257:[function(require,module,exports){
+arguments[4][155][0].apply(exports,arguments)
+},{"./Socket":249,"./api":253,"./core":254,"./misc":258,"dup":155}],258:[function(require,module,exports){
+arguments[4][156][0].apply(exports,arguments)
+},{"./core":254,"buffer":2,"dup":156}]},{},[16]);

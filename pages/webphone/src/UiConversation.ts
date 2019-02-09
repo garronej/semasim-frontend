@@ -128,23 +128,23 @@ export class UiConversation {
             "railVisible": true,
             "height": '400px',
             "start": "bottom"
-        }).bind("slimscroll", ((e_, pos)=> {
+        }).bind("slimscroll", ((_e, pos) => {
 
-            if( pos !== "top" ){
+            if (pos !== "top") {
                 return;
             }
 
             this.evtLoadMore.post({
                 "onLoaded": wdMessages => {
 
-                    if( wdMessages.length === 0 ){
+                    if (wdMessages.length === 0) {
                         return;
                     }
 
                     const li = this.ul.find("li:first");
 
 
-                    for( const wdMessage of wdMessages ){
+                    for (const wdMessage of wdMessages) {
                         this.newMessage(wdMessage, "MUTE");
                     }
 
@@ -156,7 +156,6 @@ export class UiConversation {
             });
 
         }) as any);
-
 
 
         for (let wdMessage of this.wdChat.messages) {
@@ -179,7 +178,7 @@ export class UiConversation {
 
                 this.textarea.trigger("focus");
 
-                (this.textarea as any).autosize();
+                this.textarea["autosize"]();
 
             }
         });
@@ -220,7 +219,7 @@ export class UiConversation {
 
     }
 
-    /** indexed but wd.Message.id_ */
+    /** indexed by wd.Message.id_ */
     private readonly uiBubbles = new Map<number, UiBubble>();
 
     /** 
@@ -231,7 +230,7 @@ export class UiConversation {
 
         const getUiBubbleFromStructure = (li_elem: HTMLElement): UiBubble => {
 
-            for (let uiBubble of this.uiBubbles.values()) {
+            for (const uiBubble of this.uiBubbles.values()) {
 
                 if (uiBubble.structure.get(0) === li_elem) {
 
@@ -318,9 +317,9 @@ export class UiConversation {
 
         this.uiBubbles.set(wdMessage.id_, uiBubble);
 
-        const isAtBottom= this.placeUiBubble(uiBubble);
+        const isAtBottom = this.placeUiBubble(uiBubble);
 
-        if( this.isSelected && isAtBottom ){
+        if (this.isSelected && isAtBottom) {
 
             this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
 

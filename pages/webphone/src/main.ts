@@ -9,7 +9,7 @@ import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-//import * as types from "../../../shared/dist/lib/types";
+import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 
 //TODO: implement evtUp
 
@@ -27,7 +27,7 @@ $(document).ready(async () => {
 
 	$("#page-payload").html("");
 
-	bootbox_custom.loading("Initialization", 0);
+	bootbox_custom.loading("Fetching contacts and SMS history", 0);
 
 	await Ua.init();
 
@@ -39,28 +39,55 @@ $(document).ready(async () => {
 
 	}
 
-	await Promise.all(
-		userSims.map(userSim =>
-			UiWebphoneController
-				.create(userSim)
-				.then(uiWebphoneController => ({ userSim, uiWebphoneController }))
-		)
-	).then(
-		arr => arr.sort((a, b) => +b.userSim.isOnline - +a.userSim.isOnline)
-		.forEach(({ uiWebphoneController }) =>
-			$("#page-payload").append(uiWebphoneController.structure)
+	const wdInstances = await Promise.all(
+		userSims.map(
+			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
 		)
 	);
+
+	for (const userSim of userSims.sort((a, b) => +b.isOnline - +a.isOnline)) {
+
+		$("#page-payload").append(
+			(
+				new UiWebphoneController(
+					userSim,
+					wdInstances.find(({ imsi }) => userSim.sim.imsi === imsi)!
+				)
+			).structure
+		);
+
+	}
 
 	bootbox_custom.dismissLoading();
 
 	$("#footer").hide();
 
+	localApiHandlers.evtSimPermissionLost.attachOnce(
+		userSim => {
+
+			bootbox_custom.alert(
+				`${userSim.ownership.ownerEmail} revoked your access to ${userSim.friendlyName}`
+			);
+
+			//TODO: Improve
+			location.reload();
+
+		}
+	);
+
 	remoteApiCaller.evtUsableSim.attach(async userSim => {
 
-		const uiWebphoneController = await UiWebphoneController.create(userSim)
+		$("#page-payload").append(
+			(
+				new UiWebphoneController(
+					userSim,
+					await remoteApiCaller.getOrCreateWdInstance(
+						userSim
+					)
+				)
+			).structure
+		);
 
-		$("#page-payload").append(uiWebphoneController.structure);
 
 	});
 

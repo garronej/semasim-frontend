@@ -31,27 +31,7 @@ export class UiWebphoneController {
 
     private readonly ua: Ua;
 
-    public static async create(userSim: types.UserSim.Usable): Promise<UiWebphoneController> {
-
-        localApiHandlers.evtSimPermissionLost.attachOnce(
-            userSim_ => userSim_ === userSim,
-            () => {
-
-                //TODO: Implement behavior on permission lost.
-
-                location.reload();
-
-            }
-        );
-
-        return new this(
-            userSim,
-            await remoteApiCaller.getOrCreateWdInstance(userSim)
-        );
-
-    }
-
-    private constructor(
+    public constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: wd.Instance
     ) {
@@ -186,7 +166,6 @@ export class UiWebphoneController {
 
                 } else {
 
-                    //TODO: reload ui header.
                     this.ua.register();
 
                 }
@@ -237,7 +216,7 @@ export class UiWebphoneController {
                         }
                         case "STATUS REPORT": {
 
-                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.instanceId ) {
+                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.instanceId) {
 
                                 return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
 

@@ -4,7 +4,7 @@ import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 import { Ua } from "./Ua";
-
+import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
 
 declare const ion: any;
 declare const require: any;
@@ -27,6 +27,9 @@ export class UiVoiceCall {
 
     private readonly evtNumpadDtmf= new SyncEvent<{ signal: Ua.DtmFSignal; duration: number }>();
 
+    private readonly hideModal: ()=> Promise<void>;
+    private readonly showModal: ()=> Promise<void>;
+
     constructor(
         private readonly userSim: types.UserSim.Usable
     ) {
@@ -34,11 +37,16 @@ export class UiVoiceCall {
         this.countryIso= userSim.sim.country?
             userSim.sim.country.iso : undefined;
 
-        this.structure.modal({
-            "keyboard": false,
-            "show": false,
-            "backdrop": "static"
-        });
+        const { hide, show } = modal_stack.add(
+            this.structure, 
+            {
+                "keyboard": false,
+                "backdrop": "static"
+            }
+        );
+
+        this.hideModal = hide;
+        this.showModal = show;
 
         this.structure.find("span.id_me").html(userSim.friendlyName);
 
@@ -69,9 +77,8 @@ export class UiVoiceCall {
 
             let signal: Ua.DtmFSignal = (i <= 9) ? `${i}` : (i === 10) ? "*" : "#" as any;
 
-            this.structure.find(
-                "button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal))
-            )
+            this.structure
+                .find("button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal)))
                 .on("mousedown", () => mouseDownStart[signal] = Date.now())
                 .on("click", () => {
 
@@ -81,14 +88,11 @@ export class UiVoiceCall {
                         duration = 250;
                     }
 
-                    let e = {
+                    this.evtNumpadDtmf.post({
                         signal,
                         duration
-                    };
-
-                    this.evtNumpadDtmf.post(e);
-                }
-                )
+                    });
+                })
                 ;
 
         }
@@ -274,7 +278,7 @@ export class UiVoiceCall {
         this.btnGreen.addClass("hide");
         this.btnRed.addClass("hide");
 
-        this.structure.modal("show");
+        this.showModal();
 
         ion.sound.stop("semasim_ringtone");
 
@@ -300,7 +304,7 @@ export class UiVoiceCall {
                 break;
             case "TERMINATED":
                 this.structure.find(".id_icon-hangup").removeClass("hide");
-                setTimeout(() => this.structure.modal("hide"), 1500);
+                setTimeout(() => this.hideModal(), 1500);
                 break;
             default: break;
         }
