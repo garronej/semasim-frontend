@@ -49,20 +49,22 @@ var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
+var bootbox_custom = require("../tools/bootbox_custom");
 /** semasim.com or dev.semasim.com */
 exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 exports.url = "wss://web." + exports.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": console.log.bind(console),
+    "log": exports.baseDomain.substring(0, 3) === "dev" ?
+        console.log.bind(console) : (function () { }),
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
 var userSims = undefined;
 //TODO: No need to export it.
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
-function connect() {
+function connect(isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -97,6 +99,9 @@ function connect() {
     }, console.log.bind(console));
     socketCurrent = socket;
     socket.evtConnect.attachOnce(function () {
+        if (!!isReconnect) {
+            bootbox_custom.dismissLoading();
+        }
         if (userSims === undefined) {
             remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
         }
@@ -157,6 +162,9 @@ function connect() {
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
+                    if (socket.evtConnect.postCount === 1) {
+                        bootbox_custom.loading("Reconnecting...");
+                    }
                     try {
                         for (_b = __values(userSims || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                             userSim = _c.value;
@@ -182,7 +190,7 @@ function connect() {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect();
+                    connect("RECONNECT");
                     return [2 /*return*/];
             }
         });

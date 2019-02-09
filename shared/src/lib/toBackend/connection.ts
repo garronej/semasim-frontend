@@ -4,6 +4,7 @@ import { SyncEvent } from "ts-events-extended";
 import * as localApiHandlers from "./localApiHandlers";
 import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
+import * as bootbox_custom from "../tools/bootbox_custom";
 
 /** semasim.com or dev.semasim.com */
 export const baseDomain= window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
@@ -16,7 +17,8 @@ const apiServer = new sip.api.Server(
     localApiHandlers.handlers, 
     sip.api.Server.getDefaultLogger({
         idString,
-        "log": console.log.bind(console),
+        "log": baseDomain.substring(0, 3) === "dev" ? 
+            console.log.bind(console) : (() => { }),
         "hideKeepAlive": true
     })
 );
@@ -28,7 +30,7 @@ let userSims: types.UserSim.Usable[] | undefined = undefined;
 //TODO: No need to export it.
 export const evtConnect = new SyncEvent<sip.Socket>();
 
-export function connect() {
+export function connect(isReconnect?: undefined |"RECONNECT") {
 
     //We register 'offline' event only on the first call of connect()
     if( socketCurrent === undefined ){
@@ -84,6 +86,12 @@ export function connect() {
     socketCurrent = socket;
 
     socket.evtConnect.attachOnce(() => {
+
+        if( !!isReconnect ){
+
+            bootbox_custom.dismissLoading();
+
+        }
 
         if (userSims === undefined) {
 
@@ -150,6 +158,12 @@ export function connect() {
 
     socket.evtClose.attachOnce( async () => {
 
+        if( socket.evtConnect.postCount === 1 ){
+
+            bootbox_custom.loading("Reconnecting...");
+
+        }
+
         for( const userSim of userSims || [] ){
 
             userSim.isOnline = false;
@@ -168,7 +182,7 @@ export function connect() {
 
         }
 
-        connect();
+        connect("RECONNECT");
 
     });
 
