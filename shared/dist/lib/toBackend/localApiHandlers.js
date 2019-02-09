@@ -218,105 +218,104 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
 {
     var methodName = apiDeclaration.notifyDongleOnLan.methodName;
     var handler = {
-        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (dongle) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                if (dcTypes.Dongle.Usable.match(params)) {
-                    evtUsableDongle.post({ "imei": params.imei });
+                if (dcTypes.Dongle.Locked.match(dongle)) {
+                    interact_onLockedDongle_1(dongle);
                 }
-                interact_1(params);
+                else {
+                    evtUsableDongle.post({ "imei": dongle.imei });
+                    interact_onUsableDongle_1(dongle);
+                }
                 return [2 /*return*/, undefined];
             });
         }); }
     };
     exports.handlers[methodName] = handler;
-    var interact_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
-        var _loop_1, state_1, shouldAdd_message_1, shouldAdd, friendlyName_1, friendlyNameSubmitted;
+    var interact_onLockedDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+        var pin, unlockResult;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!dcTypes.Dongle.Locked.match(dongle)) return [3 /*break*/, 4];
-                    _loop_1 = function () {
-                        var tryLeft, pin, shouldContinue, unlockResult;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    if (dongle.sim.pinState !== "SIM PIN") {
-                                        bootbox_custom.alert(dongle.sim.pinState + " require manual unlock");
-                                        return [2 /*return*/, { value: void 0 }];
+                    if (dongle.sim.pinState !== "SIM PIN") {
+                        bootbox_custom.alert(dongle.sim.pinState + " require manual unlock");
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, (function callee() {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var pin, shouldContinue;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                                                "title": "PIN code for sim inside " + dongle.manufacturer + " " + dongle.model + " (" + dongle.sim.tryLeft + " tries left)",
+                                                "inputType": "number",
+                                                "callback": function (result) { return resolve(result); }
+                                            }); })];
+                                        case 1:
+                                            pin = _a.sent();
+                                            if (pin === null) {
+                                                return [2 /*return*/, undefined];
+                                            }
+                                            if (!!pin.match(/^[0-9]{4}$/)) return [3 /*break*/, 3];
+                                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
+                                                    "title": "PIN malformed!",
+                                                    "message": "A pin code is composed of 4 digits, e.g. 0000",
+                                                    callback: function (result) { return resolve(result); }
+                                                }); })];
+                                        case 2:
+                                            shouldContinue = _a.sent();
+                                            if (!shouldContinue) {
+                                                return [2 /*return*/, undefined];
+                                            }
+                                            return [2 /*return*/, callee()];
+                                        case 3: return [2 /*return*/, pin];
                                     }
-                                    tryLeft = dongle.sim.tryLeft;
-                                    return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                            "title": "PIN code for sim inside " + dongle.manufacturer + " " + dongle.model + " (" + tryLeft + " tries left)",
-                                            "inputType": "number",
-                                            "callback": function (result) { return resolve(result); }
-                                        }); })];
-                                case 1:
-                                    pin = _a.sent();
-                                    if (pin === null) {
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    if (!!pin.match(/^[0-9]{4}$/)) return [3 /*break*/, 3];
-                                    return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                            "title": "PIN malformed!",
-                                            "message": "A pin code is composed of 4 digits, e.g. 0000",
-                                            callback: function (result) { return resolve(result); }
-                                        }); })];
-                                case 2:
-                                    shouldContinue = _a.sent();
-                                    if (!shouldContinue) {
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    return [2 /*return*/, "continue"];
-                                case 3:
-                                    bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
-                                    return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
-                                case 4:
-                                    unlockResult = _a.sent();
-                                    bootbox_custom.dismissLoading();
-                                    bootbox_custom.loading("Reading sim...", 0);
-                                    return [4 /*yield*/, evtUsableDongle.waitFor(function (_a) {
-                                            var imei = _a.imei;
-                                            return imei === dongle.imei;
-                                        })];
-                                case 5:
-                                    _a.sent();
-                                    bootbox_custom.dismissLoading();
-                                    setTimeout(function () { return bootbox_custom.dismissLoading(); }, 10000);
-                                    if (!unlockResult) {
-                                        //TODO: Improve
-                                        alert("Unlock failed for unknown reason");
-                                        return [2 /*return*/, { value: void 0 }];
-                                    }
-                                    if (!unlockResult.success) {
-                                        dongle.sim.pinState = unlockResult.pinState;
-                                        dongle.sim.tryLeft = unlockResult.tryLeft;
-                                        return [2 /*return*/, "continue"];
-                                    }
-                                    return [2 /*return*/, "break"];
-                            }
-                        });
-                    };
-                    _a.label = 1;
+                                });
+                            });
+                        })()];
                 case 1:
-                    if (!true) return [3 /*break*/, 3];
-                    return [5 /*yield**/, _loop_1()];
+                    pin = _a.sent();
+                    if (pin === undefined) {
+                        return [2 /*return*/];
+                    }
+                    bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
+                    return [4 /*yield*/, remoteApiCaller.unlockSim(dongle, pin)];
                 case 2:
-                    state_1 = _a.sent();
-                    if (typeof state_1 === "object")
-                        return [2 /*return*/, state_1.value];
-                    if (state_1 === "break")
-                        return [3 /*break*/, 3];
-                    return [3 /*break*/, 1];
-                case 3: return [3 /*break*/, 11];
-                case 4:
-                    shouldAdd_message_1 = [
+                    unlockResult = _a.sent();
+                    bootbox_custom.dismissLoading();
+                    if (!unlockResult) {
+                        alert("Unlock failed for unknown reason");
+                        return [2 /*return*/];
+                    }
+                    if (!unlockResult.success) {
+                        //NOTE: Interact will be called again with an updated dongle.
+                        return [2 /*return*/];
+                    }
+                    bootbox_custom.loading("Initialization of the sim...", 0);
+                    return [4 /*yield*/, evtUsableDongle.waitFor(function (_a) {
+                            var imei = _a.imei;
+                            return imei === dongle.imei;
+                        })];
+                case 3:
+                    _a.sent();
+                    bootbox_custom.dismissLoading();
+                    return [2 /*return*/];
+            }
+        });
+    }); };
+    var interact_onUsableDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+        var shouldAdd_message, shouldAdd, friendlyName, friendlyNameSubmitted;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    shouldAdd_message = [
                         "SIM inside:",
                         dongle.manufacturer + " " + dongle.model,
                         "Sim IMSI: " + dongle.sim.imsi,
                     ].join("<br>");
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.dialog({
                             "title": "SIM ready to be registered",
-                            "message": "<p class=\"text-center\">" + shouldAdd_message_1 + "</p>",
+                            "message": "<p class=\"text-center\">" + shouldAdd_message + "</p>",
                             "buttons": {
                                 "cancel": {
                                     "label": "Not now",
@@ -330,43 +329,42 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                             },
                             "closeButton": false
                         }); })];
-                case 5:
+                case 1:
                     shouldAdd = _a.sent();
                     if (!shouldAdd) {
                         return [2 /*return*/];
                     }
-                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 7];
+                    if (!(dongle.isVoiceEnabled === false)) return [3 /*break*/, 3];
                     //TODO: Improve message.
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert([
                             "You won't be able to make phone call with this device until it have been voice enabled",
                             "See: <a href='https://www.semasim.com/enable-voice'></a>"
                         ].join("<br>"), function () { return resolve(); }); })];
-                case 6:
+                case 2:
                     //TODO: Improve message.
                     _a.sent();
-                    _a.label = 7;
-                case 7:
+                    _a.label = 3;
+                case 3:
                     bootbox_custom.loading("Suggesting a suitable friendly name ...");
                     return [4 /*yield*/, getDefaultFriendlyName_1(dongle.sim)];
-                case 8:
-                    friendlyName_1 = _a.sent();
+                case 4:
+                    friendlyName = _a.sent();
                     return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                             "title": "Friendly name for this sim?",
-                            "value": friendlyName_1,
+                            "value": friendlyName,
                             "callback": function (result) { return resolve(result); },
                         }); })];
-                case 9:
+                case 5:
                     friendlyNameSubmitted = _a.sent();
                     if (friendlyNameSubmitted) {
-                        friendlyName_1 = friendlyNameSubmitted;
+                        friendlyName = friendlyNameSubmitted;
                     }
                     bootbox_custom.loading("Registering SIM...");
-                    return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName_1)];
-                case 10:
+                    return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName)];
+                case 6:
                     _a.sent();
                     bootbox_custom.dismissLoading();
-                    _a.label = 11;
-                case 11: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     }); };
@@ -429,14 +427,14 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                interact_2(params);
+                interact_1(params);
                 return [2 /*return*/, undefined];
             });
         }); }
     };
     exports.handlers[methodName] = handler;
     //TODO: run exclusive
-    var interact_2 = function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    var interact_1 = function (userSim) { return __awaiter(_this, void 0, void 0, function () {
         var shouldProceed, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {

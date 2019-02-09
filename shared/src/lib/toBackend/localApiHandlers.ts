@@ -242,13 +242,19 @@ export const evtContactDeleted = new SyncEvent<{
     type Response = apiDeclaration.notifyDongleOnLan.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
-        "handler": async params => {
+        "handler": async dongle => {
 
-            if( dcTypes.Dongle.Usable.match(params) ){
-                evtUsableDongle.post({ "imei": params.imei });
+            if (dcTypes.Dongle.Locked.match(dongle)) {
+
+                interact_onLockedDongle(dongle);
+
+            } else {
+
+                evtUsableDongle.post({ "imei": dongle.imei });
+
+                interact_onUsableDongle(dongle);
+
             }
-
-            interact(params);
 
             return undefined;
 
@@ -257,161 +263,150 @@ export const evtContactDeleted = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-    const interact = async (dongle: dcTypes.Dongle) => {
+    const interact_onLockedDongle = async (dongle: dcTypes.Dongle.Locked) => {
 
+        if (dongle.sim.pinState !== "SIM PIN") {
 
-        if (dcTypes.Dongle.Locked.match(dongle)) {
+            bootbox_custom.alert(`${dongle.sim.pinState} require manual unlock`);
 
-            while (true) {
+            return;
 
-                if (dongle.sim.pinState !== "SIM PIN") {
+        }
 
-                    bootbox_custom.alert(`${dongle.sim.pinState} require manual unlock`);
+        const pin = await (async function callee(): Promise<string | undefined> {
 
-                    return;
+            const pin = await new Promise<string>(
+                resolve => bootbox_custom.prompt({
+                    "title": `PIN code for sim inside ${dongle.manufacturer} ${dongle.model} (${dongle.sim.tryLeft} tries left)`,
+                    "inputType": "number",
+                    "callback": result => resolve(result)
+                })
+            );
 
-                }
+            if (pin === null) {
+                return undefined;
+            }
 
-                const tryLeft = dongle.sim.tryLeft;
+            if (!pin.match(/^[0-9]{4}$/)) {
 
-                const pin = await new Promise<string>(
-                    resolve => bootbox_custom.prompt({
-                        "title": `PIN code for sim inside ${dongle.manufacturer} ${dongle.model} (${tryLeft} tries left)`,
-                        "inputType": "number",
-                        "callback": result => resolve(result)
+                let shouldContinue = await new Promise<boolean>(
+                    resolve => bootbox_custom.confirm({
+                        "title": "PIN malformed!",
+                        "message": "A pin code is composed of 4 digits, e.g. 0000",
+                        callback: result => resolve(result)
                     })
                 );
 
-                if (pin === null) {
-                    return;
+                if (!shouldContinue) {
+                    return undefined;
                 }
 
-                if (!pin.match(/^[0-9]{4}$/)) {
-
-                    let shouldContinue = await new Promise<boolean>(
-                        resolve => bootbox_custom.confirm({
-                            "title": "PIN malformed!",
-                            "message": "A pin code is composed of 4 digits, e.g. 0000",
-                            callback: result => resolve(result)
-                        })
-                    );
-
-                    if (!shouldContinue) {
-                        return;
-                    }
-
-                    continue;
-
-                }
-
-                bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
-
-                const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
-
-                bootbox_custom.dismissLoading();
-
-                bootbox_custom.loading("Reading sim...", 0);
-
-                await evtUsableDongle.waitFor(({ imei })=> imei === dongle.imei );
-
-                bootbox_custom.dismissLoading();
-
-                setTimeout(() => bootbox_custom.dismissLoading(), 10000);
-
-                if (!unlockResult) {
-
-                    //TODO: Improve
-                    alert("Unlock failed for unknown reason");
-                    return;
-
-                }
-
-                if (!unlockResult.success) {
-
-                    dongle.sim.pinState = unlockResult.pinState;
-                    dongle.sim.tryLeft = unlockResult.tryLeft;
-
-                    continue;
-
-                }
-
-                break;
+                return callee();
 
             }
 
-            //TODO: Implement some kind of queue as we cant fire an alert when
-            //an other one is already open
+            return pin;
 
+        })();
 
-        } else {
+        if (pin === undefined) {
+            return;
+        }
 
-            const shouldAdd_message = [
-                `SIM inside:`,
-                `${dongle.manufacturer} ${dongle.model}`,
-                `Sim IMSI: ${dongle.sim.imsi}`,
-            ].join("<br>");
+        bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
 
-            const shouldAdd = await new Promise<boolean>(
-                resolve => bootbox_custom.dialog({
-                    "title": "SIM ready to be registered",
-                    "message": `<p class="text-center">${shouldAdd_message}</p>`,
-                    "buttons": {
-                        "cancel": {
-                            "label": "Not now",
-                            "callback": () => resolve(false)
-                        },
-                        "success": {
-                            "label": "Yes, register this sim",
-                            "className": "btn-success",
-                            "callback": () => resolve(true)
-                        }
-                    },
-                    "closeButton": false
-                })
-            );
+        const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
 
-            if (!shouldAdd) {
-                return;
-            }
+        bootbox_custom.dismissLoading();
 
-            if( dongle.isVoiceEnabled === false ){
+        if (!unlockResult) {
 
-                //TODO: Improve message.
-                await new Promise<void>(
-                    resolve => bootbox_custom.alert(
-                        [
-                            "You won't be able to make phone call with this device until it have been voice enabled",
-                            "See: <a href='https://www.semasim.com/enable-voice'></a>"
-                        ].join("<br>"),
-                        () => resolve()
-                    )
-                );
-
-            }
-
-            bootbox_custom.loading("Suggesting a suitable friendly name ...");
-
-            let friendlyName = await getDefaultFriendlyName(dongle.sim);
-
-            let friendlyNameSubmitted = await new Promise<string | null>(
-                resolve => bootbox_custom.prompt({
-                    "title": "Friendly name for this sim?",
-                    "value": friendlyName,
-                    "callback": result => resolve(result),
-                })
-            );
-
-            if (friendlyNameSubmitted) {
-                friendlyName = friendlyNameSubmitted;
-            }
-
-            bootbox_custom.loading("Registering SIM...");
-
-            await remoteApiCaller.registerSim(dongle, friendlyName);
-
-            bootbox_custom.dismissLoading();
+            alert("Unlock failed for unknown reason");
+            return;
 
         }
+
+        if (!unlockResult.success) {
+
+            //NOTE: Interact will be called again with an updated dongle.
+            return;
+
+        }
+
+        bootbox_custom.loading("Initialization of the sim...", 0);
+
+        await evtUsableDongle.waitFor(({ imei }) => imei === dongle.imei);
+
+        bootbox_custom.dismissLoading();
+    };
+
+    const interact_onUsableDongle = async (dongle: dcTypes.Dongle.Usable) => {
+
+        const shouldAdd_message = [
+            `SIM inside:`,
+            `${dongle.manufacturer} ${dongle.model}`,
+            `Sim IMSI: ${dongle.sim.imsi}`,
+        ].join("<br>");
+
+        const shouldAdd = await new Promise<boolean>(
+            resolve => bootbox_custom.dialog({
+                "title": "SIM ready to be registered",
+                "message": `<p class="text-center">${shouldAdd_message}</p>`,
+                "buttons": {
+                    "cancel": {
+                        "label": "Not now",
+                        "callback": () => resolve(false)
+                    },
+                    "success": {
+                        "label": "Yes, register this sim",
+                        "className": "btn-success",
+                        "callback": () => resolve(true)
+                    }
+                },
+                "closeButton": false
+            })
+        );
+
+        if (!shouldAdd) {
+            return;
+        }
+
+        if (dongle.isVoiceEnabled === false) {
+
+            //TODO: Improve message.
+            await new Promise<void>(
+                resolve => bootbox_custom.alert(
+                    [
+                        "You won't be able to make phone call with this device until it have been voice enabled",
+                        "See: <a href='https://www.semasim.com/enable-voice'></a>"
+                    ].join("<br>"),
+                    () => resolve()
+                )
+            );
+
+        }
+
+        bootbox_custom.loading("Suggesting a suitable friendly name ...");
+
+        let friendlyName = await getDefaultFriendlyName(dongle.sim);
+
+        let friendlyNameSubmitted = await new Promise<string | null>(
+            resolve => bootbox_custom.prompt({
+                "title": "Friendly name for this sim?",
+                "value": friendlyName,
+                "callback": result => resolve(result),
+            })
+        );
+
+        if (friendlyNameSubmitted) {
+            friendlyName = friendlyNameSubmitted;
+        }
+
+        bootbox_custom.loading("Registering SIM...");
+
+        await remoteApiCaller.registerSim(dongle, friendlyName);
+
+        bootbox_custom.dismissLoading();
 
     };
 
@@ -592,7 +587,7 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
             evtSharingRequestResponse.post({ userSim, email, isAccepted });
 
-            bootbox_custom.alert(`${email} ${isAccepted?"accepted":"rejected"} your sharing request for ${userSim.friendlyName}`);
+            bootbox_custom.alert(`${email} ${isAccepted ? "accepted" : "rejected"} your sharing request for ${userSim.friendlyName}`);
 
             return undefined;
 
@@ -669,7 +664,7 @@ export const iceServers: RTCIceServer[] = [
             "stun:stun2.l.google.com:19302",
             "stun:stun3.l.google.com:19302",
             "stun:stun4.l.google.com:19302"
-        ] 
+        ]
     }
 ];
 
