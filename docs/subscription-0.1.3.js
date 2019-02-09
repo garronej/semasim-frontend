@@ -2234,7 +2234,7 @@ var UiController = /** @class */ (function () {
 exports.UiController = UiController;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/currencyByCountry":129,"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/tools/getURLParameter":131,"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../../../shared/dist/lib/webApiCaller":133,"../templates/UiController.html":120,"../templates/UiController.less":121,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":119}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/currencyByCountry":129,"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/tools/getURLParameter":131,"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../../../shared/dist/lib/webApiCaller":134,"../templates/UiController.html":120,"../templates/UiController.less":121,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":119}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2414,7 +2414,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/webApiCaller":133,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/webApiCaller":134,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -11615,10 +11615,11 @@ module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div cl
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.currencyByCountry = require("../../res/currency.json");
 
-},{"../../res/currency.json":140}],130:[function(require,module,exports){
+},{"../../res/currency.json":141}],130:[function(require,module,exports){
 "use strict";
-//TODO: Assert bootstrap and bootbox loaded on the page.
+//TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
+var modal_stack = require("./modal_stack");
 var currentLoading = undefined;
 var currentModal = undefined;
 var restoreLoading = undefined;
@@ -11673,7 +11674,14 @@ function run(method, args, isLoading) {
         dismissLoading();
         restoreLoading = function () { return loading(message_1, delayBeforeShow_1); };
     }
-    var modal = bootbox[method].apply(bootbox, args);
+    var options = typeof args[0] === "string" ? ({
+        "message": args[0],
+        "callback": args[1]
+    }) : args[0];
+    options.show = false;
+    //let modal: JQuery = bootbox[method].apply(bootbox, args);
+    var modal = bootbox[method](options);
+    modal_stack.add(modal, null).show();
     if (!isLoading) {
         currentModal = modal;
     }
@@ -11712,7 +11720,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{}],131:[function(require,module,exports){
+},{"./modal_stack":133}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11742,6 +11750,109 @@ function loadUiClassHtml(html, widgetClassName) {
 exports.loadUiClassHtml = loadUiClassHtml;
 
 },{}],133:[function(require,module,exports){
+"use strict";
+//TODO: Assert jQuery bootstrap loaded on the page.
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var stack = [];
+var onHideKey = " __hide_handler__ ";
+function add(modal, options) {
+    var _this = this;
+    if (options !== null) {
+        modal.modal(__assign({}, options, { "show": false }));
+    }
+    return {
+        "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+            var currentModal_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (stack.indexOf(modal) >= 0) {
+                            return [2 /*return*/];
+                        }
+                        stack.push(modal);
+                        modal[onHideKey] = function () {
+                            var index = stack.indexOf(modal);
+                            var wasOnTop = index === stack.length - 1;
+                            stack.splice(index, 1);
+                            if (wasOnTop && stack.length !== 0) {
+                                stack[stack.length - 1].modal("show");
+                            }
+                        };
+                        modal.one("hide.bs.modal", modal[onHideKey]);
+                        if (!(stack.length !== 1)) return [3 /*break*/, 2];
+                        currentModal_1 = stack[stack.length - 2];
+                        currentModal_1.off("hide.bs.modal", undefined, currentModal_1[onHideKey]);
+                        currentModal_1.modal("hide");
+                        currentModal_1.one("hide.bs.modal", currentModal_1[onHideKey]);
+                        return [4 /*yield*/, new Promise(function (resolve) { return currentModal_1.one("hidden.bs.modal", function () { return resolve(); }); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        modal.modal("show");
+                        modal.one("shown.bs.modal", function () { return resolve(); });
+                        return [2 /*return*/];
+                }
+            });
+        }); }); },
+        "hide": function () { return new Promise(function (resolve) {
+            if (stack.indexOf(modal) < 0) {
+                return;
+            }
+            modal.modal("hide");
+            modal.one("hidden.bs.modal", function () { return resolve(); });
+        }); }
+    };
+}
+exports.add = add;
+
+},{}],134:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11896,7 +12007,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":134,"transfer-tools/dist/lib/JSON_CUSTOM":139}],134:[function(require,module,exports){
+},{"../web_api_declaration":135,"transfer-tools/dist/lib/JSON_CUSTOM":140}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -11937,13 +12048,13 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],136:[function(require,module,exports){
+},{"dup":101}],137:[function(require,module,exports){
 arguments[4][102][0].apply(exports,arguments)
-},{"./implementation":135,"dup":102}],137:[function(require,module,exports){
+},{"./implementation":136,"dup":102}],138:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
-},{"dup":105,"function-bind":136}],138:[function(require,module,exports){
+},{"dup":105,"function-bind":137}],139:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -12278,7 +12389,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":137}],139:[function(require,module,exports){
+},{"has":138}],140:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -12328,7 +12439,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":138}],140:[function(require,module,exports){
+},{"super-json":139}],141:[function(require,module,exports){
 module.exports={
   "bd": "bdt",
   "be": "eur",
