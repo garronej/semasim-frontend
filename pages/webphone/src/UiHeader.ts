@@ -18,7 +18,6 @@ export class UiHeader {
     public setIsOnline(isOnline: boolean): void{
 
         this.structure.find(".id_icon_sim_up")[isOnline?"show":"hide"]();
-        //this.structure.find(".id_icon_sim_down")[isOnline?"hide":"show"]();
 
         for( const selector of [ ".id_offline", ".id_icon_sim_down" ]){
             this.structure.find(selector)[isOnline ? "hide" : "show"]();
