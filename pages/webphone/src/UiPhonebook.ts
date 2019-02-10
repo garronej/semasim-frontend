@@ -1,6 +1,7 @@
-import { SyncEvent } from "ts-events-extended";
+//NOTE: Slimscroll must be loaded on the page.
+
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
-import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import { phoneNumber } from "phone-number";
 import wd = types.webphoneData;
@@ -78,7 +79,8 @@ export class UiPhonebook {
                 wdChatPrev = undefined;
             }
 
-            this.uiContacts.get(wdChat.id_)!.setSelected();
+            uiContact.setSelected();
+            //this.uiContacts.get(wdChat.id_)!.setSelected();
 
             this.evtContactSelected.post({ wdChatPrev, wdChat });
 

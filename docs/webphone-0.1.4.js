@@ -3745,6 +3745,7 @@ exports.UiHeader = UiHeader;
 
 },{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiHeader.html":159,"phone-number":132}],12:[function(require,module,exports){
 "use strict";
+//NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -3758,7 +3759,6 @@ var __values = (this && this.__values) || function (o) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
-var ts_events_extended_2 = require("ts-events-extended");
 var types = require("../../../shared/dist/lib/types");
 var phone_number_1 = require("phone-number");
 var wd = types.webphoneData;
@@ -3818,7 +3818,8 @@ var UiPhonebook = /** @class */ (function () {
             else {
                 wdChatPrev = undefined;
             }
-            _this.uiContacts.get(wdChat.id_).setSelected();
+            uiContact.setSelected();
+            //this.uiContacts.get(wdChat.id_)!.setSelected();
             _this.evtContactSelected.post({ wdChatPrev: wdChatPrev, wdChat: wdChat });
         });
         this.uiContacts.set(wdChat.id_, uiContact);
@@ -3900,7 +3901,7 @@ var UiContact = /** @class */ (function () {
         this.wdChat = wdChat;
         this.structure = html.templates.find("li").clone();
         /** only forward click event, need to be selected manually from outside */
-        this.evtClick = new ts_events_extended_2.VoidSyncEvent();
+        this.evtClick = new ts_events_extended_1.VoidSyncEvent();
         this.structure.on("click", function () { return _this.evtClick.post(); });
         this.updateContactName();
         this.structure.find("span.id_notifications").hide();
@@ -4336,7 +4337,6 @@ var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiWebphoneController.html"), "UiWebphoneController");
 var UiWebphoneController = /** @class */ (function () {
     function UiWebphoneController(userSim, wdInstance) {
-        var e_1, _a;
         var _this = this;
         this.userSim = userSim;
         this.wdInstance = wdInstance;
@@ -4352,19 +4352,6 @@ var UiWebphoneController = /** @class */ (function () {
         this.initUiHeader();
         this.initUiQuickAction();
         this.initUiPhonebook();
-        try {
-            for (var _b = __values(this.wdInstance.chats), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var wdChat = _c.value;
-                this.initUiConversation(wdChat);
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
         $("body").data("dynamic").panels();
         setTimeout(function () { return _this.uiPhonebook.triggerClickOnLastSeenChat(); }, 0);
     }
@@ -4375,7 +4362,7 @@ var UiWebphoneController = /** @class */ (function () {
             return userSim === _this.userSim;
         }, function () {
             //TODO: Terminate UA.
-            _this.structure.remove();
+            _this.structure.detach();
         });
         localApiHandlers.evtContactCreatedOrUpdated.attach(function (_a) {
             var userSim = _a.userSim;
@@ -4457,7 +4444,7 @@ var UiWebphoneController = /** @class */ (function () {
     UiWebphoneController.prototype.initUa = function () {
         var _this = this;
         this.ua.evtRegistrationStateChanged.attach(function (isRegistered) {
-            var e_2, _a;
+            var e_1, _a;
             _this.uiHeader.setIsOnline(isRegistered);
             try {
                 for (var _b = __values(_this.uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -4465,12 +4452,12 @@ var UiWebphoneController = /** @class */ (function () {
                     uiConversation.setReadonly(!isRegistered);
                 }
             }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
-                finally { if (e_2) throw e_2.error; }
+                finally { if (e_1) throw e_1.error; }
             }
         });
         this.ua.evtIncomingMessage.attach(function (_a) {
@@ -4638,7 +4625,11 @@ var UiWebphoneController = /** @class */ (function () {
             if (wdChatPrev) {
                 _this.uiConversations.get(wdChatPrev).unselect();
             }
-            _this.uiConversations.get(wdChat).setSelected();
+            var uiConversation = _this.uiConversations.get(wdChat);
+            if (!uiConversation) {
+                uiConversation = _this.initUiConversation(wdChat);
+            }
+            uiConversation.setSelected();
         });
     };
     UiWebphoneController.prototype.initUiConversation = function (wdChat) {
@@ -4814,6 +4805,7 @@ var UiWebphoneController = /** @class */ (function () {
             return remoteApiCaller.fetchOlderWdMessages(wdChat)
                 .then(function (wdMessages) { return onLoaded(wdMessages); });
         });
+        return uiConversation;
     };
     UiWebphoneController.prototype.getOrCreateChatByPhoneNumber = function (number) {
         return __awaiter(this, void 0, void 0, function () {
@@ -4830,7 +4822,6 @@ var UiWebphoneController = /** @class */ (function () {
                     case 1:
                         wdChat = _a.sent();
                         this.uiPhonebook.insertContact(wdChat);
-                        this.initUiConversation(wdChat);
                         $('body').data('dynamic').panels();
                         _a.label = 2;
                     case 2: return [2 /*return*/, wdChat];
@@ -17789,7 +17780,7 @@ var css = "div.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndi
 },{"lessify":128}],159:[function(require,module,exports){
 module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <!--\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    -->\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <i class=\"id_icon_sim_down\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card_alert\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>";
 },{}],160:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_ContactWidget ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
+module.exports = "<style>\r\n    div.id_UiPhonebook ul li a {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li h5.separator {\r\n        border-bottom: 1px solid black;\r\n        padding-bottom: 5px;\r\n        margin-left: 5px;\r\n        margin-right: 5px;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected a,\r\n    div.id_UiPhonebook ul li a:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages a {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-address-book\"></i>\r\n            Contacts\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search for contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <a href=\"javascript:void(0); \">\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </a>\r\n    </li>\r\n</div>";
 },{}],161:[function(require,module,exports){
 module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
 },{}],162:[function(require,module,exports){
@@ -19879,6 +19870,7 @@ var webphoneData;
         }
         return vA < vB;
     }
+    webphoneData.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
     function getUnreadMessagesCount(wdChat) {
         var count = 0;
         for (var i = wdChat.messages.length - 1; i >= 0; i--) {

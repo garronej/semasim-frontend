@@ -56,12 +56,6 @@ export class UiWebphoneController {
 
         this.initUiPhonebook();
 
-        for (const wdChat of this.wdInstance.chats) {
-
-            this.initUiConversation(wdChat);
-
-        }
-
         $("body").data("dynamic").panels();
 
         setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
@@ -75,7 +69,7 @@ export class UiWebphoneController {
             () => {
 
                 //TODO: Terminate UA.
-                this.structure.remove();
+                this.structure.detach();
 
 
             }
@@ -391,14 +385,20 @@ export class UiWebphoneController {
 
                 }
 
-                this.uiConversations.get(wdChat)!.setSelected();
+                let uiConversation = this.uiConversations.get(wdChat);
+
+                if( !uiConversation ){
+                    uiConversation = this.initUiConversation(wdChat);
+                }
+
+                uiConversation.setSelected();
 
             }
         );
 
     }
 
-    private initUiConversation(wdChat: wd.Chat) {
+    private initUiConversation(wdChat: wd.Chat): UiConversation {
 
         const uiConversation = new UiConversation(this.userSim, wdChat);
 
@@ -619,6 +619,8 @@ export class UiWebphoneController {
                 .then(wdMessages => onLoaded(wdMessages))
         );
 
+        return uiConversation;
+
     }
 
     private async getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<wd.Chat> {
@@ -635,8 +637,6 @@ export class UiWebphoneController {
 
             this.uiPhonebook.insertContact(wdChat);
 
-            this.initUiConversation(wdChat);
-
             $('body').data('dynamic').panels();
 
         }
@@ -644,6 +644,5 @@ export class UiWebphoneController {
         return wdChat;
 
     }
-
 
 }
