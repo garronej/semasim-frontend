@@ -1,42 +1,32 @@
 <style>
-    div.id_UiPhonebook ul li a {
+    div.id_UiPhonebook ul li > div {
         padding: 6px 10px;
         color: #030303;
         border-top: 1px solid #EAEAEA;
+        cursor: pointer;
     }
 
-    div.id_UiPhonebook ul li h5.separator {
-        border-bottom: 1px solid black;
-        padding-bottom: 5px;
-        margin-left: 5px;
-        margin-right: 5px;
+    div.id_UiPhonebook ul li .id_number {
+        cursor: text !important;
     }
 
-    div.id_UiPhonebook ul li.selected a,
-    div.id_UiPhonebook ul li a:hover {
+    div.id_UiPhonebook ul li.selected > div,
+    div.id_UiPhonebook ul li > div:hover {
         color: #000000;
         background-color: #e9ebeb !important;
     }
 
-    div.id_UiPhonebook ul li.has-messages a {
+    div.id_UiPhonebook ul li.has-messages > div {
         background-color: #f4f5f5;
     }
 </style>
 
 
 <div class="id_UiPhonebook panel">
-    <!--
-    <div class="panel-heading">
-        <h4 class="panel-title">
-            <i class="im-address-book"></i>
-            Contacts
-        </h4>
-    </div>
-    -->
     <div class="panel-body p0">
         <div class="p15">
             <form action="javascript:void(0);">
-                <input class="form-control" type="text" name="search" placeholder="Search for contacts... ">
+                <input class="form-control" type="text" name="search" placeholder="Search contacts... ">
             </form>
         </div>
         <ul class="nav ">
@@ -47,12 +37,13 @@
 <div class="templates ">
 
     <li>
-        <a href="javascript:void(0); ">
+        <div>
             <span class="id_name "></span>
-            <span class="id_number "></span>
+            <span class="id_number pl15"></span>
             <div class="pull-right ">
                 <span class="id_notifications label blue-light-bg"></span>
             </div>
-        </a>
+        </div>
     </li>
+
 </div>

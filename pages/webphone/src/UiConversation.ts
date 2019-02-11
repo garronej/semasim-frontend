@@ -89,6 +89,18 @@ export class UiConversation {
         this.btnDelete
             .on("click", () => this.evtDelete.post());
 
+        this.structure.find("span.id_number")
+            .on("dblclick", e => {
+                e.preventDefault();
+
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(e.currentTarget);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+            });
+
 
         this.aSend.on("click", () => {
 
@@ -208,7 +220,8 @@ export class UiConversation {
 
             this.structure.find("span.id_name").text(this.wdChat.contactName);
 
-            this.structure.find("span.id_number").text(` ( ${prettyNumber} ) `);
+            this.structure.find("span.id_number").text(prettyNumber);
+
 
         } else {
 

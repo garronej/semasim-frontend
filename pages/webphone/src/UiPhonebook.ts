@@ -202,7 +202,30 @@ class UiContact {
         public readonly wdChat: wd.Chat
     ) {
 
-        this.structure.on("click", () => this.evtClick.post());
+        this.structure.on("click", () => {
+
+            var selection = window.getSelection();
+
+            //Do not trigger click if text selected.
+            if (selection.toString().length !== 0) {
+                return;
+            }
+
+            this.evtClick.post();
+
+        })
+            .find(".id_number")
+            .on("dblclick", e => {
+                e.preventDefault();  //cancel system double-click event
+
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(e.currentTarget);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+            });
+
 
         this.updateContactName();
 
@@ -257,7 +280,7 @@ class UiContact {
 
             spanNumber
                 .addClass("visible-lg-inline")
-                .html(` ( ${prettyNumber} ) `)
+                .html(prettyNumber)
                 ;
 
         } else {

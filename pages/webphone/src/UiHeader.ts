@@ -15,11 +15,11 @@ export class UiHeader {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
-    public setIsOnline(isOnline: boolean): void{
+    public setIsOnline(isOnline: boolean): void {
 
-        this.structure.find(".id_icon_sim_up")[isOnline?"show":"hide"]();
+        this.structure.find(".id_icon_sim_up")[isOnline ? "show" : "hide"]();
 
-        for( const selector of [ ".id_offline", ".id_icon_sim_down" ]){
+        for (const selector of [".id_offline", ".id_icon_sim_down"]) {
             this.structure.find(selector)[isOnline ? "hide" : "show"]();
         }
 
@@ -44,7 +44,7 @@ export class UiHeader {
 
             if (!!this.userSim.sim.storage.number) {
 
-                const iso = this.userSim.sim.country ? 
+                const iso = this.userSim.sim.country ?
                     this.userSim.sim.country.iso : undefined;
 
                 return phoneNumber.prettyPrint(
@@ -61,7 +61,18 @@ export class UiHeader {
 
             }
 
-        });
+        })
+            .on("dblclick", e => {
+
+                e.preventDefault();
+
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(e.currentTarget);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+            });
 
         this.templates.find("div.id_popover div.id_flag").addClass(
             this.userSim.sim.country ? this.userSim.sim.country.iso : ""
