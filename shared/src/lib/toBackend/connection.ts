@@ -158,12 +158,6 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
     socket.evtClose.attachOnce( async () => {
 
-        if( socket.evtConnect.postCount === 1 ){
-
-            bootbox_custom.loading("Reconnecting...");
-
-        }
-
         for( const userSim of userSims || [] ){
 
             userSim.isOnline = false;
@@ -174,6 +168,12 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
         if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
             return;
+        }
+
+        if( socket.evtConnect.postCount === 1 ){
+
+            bootbox_custom.loading("Reconnecting...");
+
         }
 
         while( !navigator.onLine ){

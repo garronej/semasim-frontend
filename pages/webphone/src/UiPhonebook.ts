@@ -202,18 +202,19 @@ class UiContact {
         public readonly wdChat: wd.Chat
     ) {
 
-        this.structure.on("click", () => {
+        this.structure
+            .on("click", () => {
 
-            var selection = window.getSelection();
+                var selection = window.getSelection();
 
-            //Do not trigger click if text selected.
-            if (selection.toString().length !== 0) {
-                return;
-            }
+                //Do not trigger click if text selected.
+                if (selection.toString().length !== 0) {
+                    return;
+                }
 
-            this.evtClick.post();
+                this.evtClick.post();
 
-        })
+            })
             .find(".id_number")
             .on("dblclick", e => {
                 e.preventDefault();  //cancel system double-click event

@@ -1,9 +1,10 @@
 
 //TODO: Assert jQuery bootstrap loaded on the page.
 
-const stack: JQuery[]= [];
+const stack: JQuery[] = [];
 
-const onHideKey= " __hide_handler__ ";
+const onHideKey = " __hide_handler__ ";
+
 
 export function add(
     modal: JQuery,
@@ -13,6 +14,7 @@ export function add(
     hide(): Promise<void>;
 } {
 
+    //NOTE: null only when called by bootbox_custom.
     if (options !== null) {
 
         modal.modal({
@@ -25,7 +27,7 @@ export function add(
     return {
         "show": () => new Promise<void>(async resolve => {
 
-            if( stack.indexOf(modal) >= 0 ){
+            if (stack.indexOf(modal) >= 0) {
                 return;
             }
 
@@ -41,7 +43,26 @@ export function add(
 
                 if (wasOnTop && stack.length !== 0) {
 
-                    stack[stack.length - 1].modal("show");
+                    const modalToRestore = stack[stack.length - 1];
+
+                    modalToRestore[" scheduled to be shown "] = true;
+
+                    /*
+                    NOTE: To prevent flickering we do not restore 
+                    the previous modal if an other one is immediately
+                    opened ( form with successive bootbox_custom )
+                    */
+                    setTimeout(() => {
+
+                        delete modalToRestore[" scheduled to be shown "];
+
+                        if (modalToRestore !== stack[stack.length - 1]) {
+                            return;
+                        }
+
+                        modalToRestore.modal("show");
+
+                    }, 100);
 
                 }
 
@@ -51,26 +72,30 @@ export function add(
 
             if (stack.length !== 1) {
 
-                const currentModal = stack[stack.length-2];
+                const currentModal = stack[stack.length - 2];
 
-                currentModal.off("hide.bs.modal", undefined, currentModal[onHideKey]);
+                if (!currentModal[" scheduled to be shown "]) {
 
-                currentModal.modal("hide");
+                    currentModal.off("hide.bs.modal", undefined, currentModal[onHideKey]);
 
-                currentModal.one("hide.bs.modal", currentModal[onHideKey]);
+                    currentModal.modal("hide");
 
-                await new Promise(resolve => currentModal.one("hidden.bs.modal", () => resolve()));
+                    currentModal.one("hide.bs.modal", currentModal[onHideKey]);
+
+                    await new Promise(resolve => currentModal.one("hidden.bs.modal", () => resolve()));
+
+                }
 
             }
 
             modal.modal("show");
 
-            modal.one("shown.bs.modal", () => resolve() ); 
+            modal.one("shown.bs.modal", () => resolve());
 
         }),
         "hide": () => new Promise<void>(resolve => {
 
-            if( stack.indexOf(modal) < 0 ){
+            if (stack.indexOf(modal) < 0) {
                 return;
             }
 

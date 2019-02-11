@@ -32,6 +32,25 @@ const version= "0.2.0";
 
     <link href="<%= `${assets_root}plugins/ui/multiple-emails/multiple-emails.css`; %>" rel="stylesheet">
 
+    <!-- intlTelInput -->
+    <link rel="stylesheet" href="<%= `${assets_root}plugins/ui/intl-tel-input/css/intlTelInput.css`; %>">
+    <style>
+        .iti-flag {
+            background-image: url("<%= `${assets_root}plugins/ui/intl-tel-input/img/flags.png`; %>");
+        }
+
+        @media only screen and (-webkit-min-device-pixel-ratio: 2),
+        only screen and (min--moz-device-pixel-ratio: 2),
+        only screen and (-o-min-device-pixel-ratio: 2 / 1),
+        only screen and (min-device-pixel-ratio: 2),
+        only screen and (min-resolution: 192dpi),
+        only screen and (min-resolution: 2dppx) {
+            .iti-flag {
+                background-image: url("<%= `${assets_root}plugins/ui/intl-tel-input/img/flags@2x.png`; %>")
+            }
+        }
+    </style>
+
     <link rel="apple-touch-icon" sizes="57x57" href="<%= `${assets_root}img/ico/apple-icon-57x57.png`; %>">
     <link rel="apple-touch-icon" sizes="60x60" href="<%= `${assets_root}img/ico/apple-icon-60x60.png`; %>">
     <link rel="apple-touch-icon" sizes="72x72" href="<%= `${assets_root}img/ico/apple-icon-72x72.png`; %>">
@@ -297,7 +316,7 @@ const version= "0.2.0";
 
 
                                 </div>
-                                <button id="register-new-sim" type="button" class="btn btn-primary">Register new SIM</button>
+                                <button id="register-new-sim" type="button" class="btn btn-primary hidden">Register new SIM</button>
                             </div>
                             <!-- End .row -->
 
@@ -408,16 +427,14 @@ const version= "0.2.0";
     <% if( assets_root === "/" ){ %>
     <script src="//cdn.jsdelivr.net/npm/bluebird@3.5.3/js/browser/bluebird.js"></script>
     <script>
-        if( !/Chrome/.test(navigator.userAgent) ){
-            window.onerror = function(msg, url, linenumber) {
-                alert(msg+'\n'+url+':'+linenumber);
-                return false;
-            };
-            Promise.onPossiblyUnhandledRejection(function(error){
-                alert(error.message + " " + error.stack);
-                throw error;
-            });
-        }
+        window.onerror = function(msg, url, linenumber) {
+            alert(msg+'\n'+url+':'+linenumber);
+            return false;
+        };
+        Promise.onPossiblyUnhandledRejection(function(error){
+            alert(error.message + " " + error.stack);
+            throw error;
+        });
     </script>
     <% }else{ %>
     <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
@@ -451,6 +468,9 @@ const version= "0.2.0";
     <script src="<%= `${assets_root}plugins/core/quicksearch/jquery.quicksearch.js`; %>"></script>
     <!-- Bootbox fast bootstrap modals -->
     <script src="<%= `${assets_root}plugins/ui/bootbox/bootbox.min.js`; %>"></script>
+
+    <!-- intlTelInput -->
+    <script src="<%= `${assets_root}plugins/ui/intl-tel-input/js/intlTelInput.min.js`; %>"></script>
 
     <script src="<%= `${assets_root}plugins/ui/multiple-emails/multiple-emails.js`; %>"></script>
 

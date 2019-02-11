@@ -162,9 +162,6 @@ function connect(isReconnect) {
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
-                    if (socket.evtConnect.postCount === 1) {
-                        bootbox_custom.loading("Reconnecting...");
-                    }
                     try {
                         for (_b = __values(userSims || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                             userSim = _c.value;
@@ -181,6 +178,9 @@ function connect(isReconnect) {
                     }
                     if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
                         return [2 /*return*/];
+                    }
+                    if (socket.evtConnect.postCount === 1) {
+                        bootbox_custom.loading("Reconnecting...");
                     }
                     _d.label = 1;
                 case 1:

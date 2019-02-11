@@ -2,7 +2,6 @@ import { VoidSyncEvent } from "ts-events-extended";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import * as types from "../../../shared/dist/lib/types";
 
-
 declare const require: (path: string) => any;
 
 const html = loadUiClassHtml(
@@ -52,11 +51,43 @@ export class UiSimRow {
     /** To call when userSim has changed */
     public populate() {
 
+        /*
         this.structure.find(".id_simId").text(
-            this.userSim.friendlyName + (
-                !!this.userSim.sim.storage.number ?
-                    ` ${this.userSim.sim.storage.number} ` : ""
-            )
+            (() => {
+
+                let out = this.userSim.friendlyName;
+
+                const number = this.userSim.sim.storage.number
+
+                if (!!number) {
+                    out += " " + phoneNumber.prettyPrint(
+                        phoneNumber.build(
+                            number,
+                            !!this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
+                        )
+                    ) + " ";
+                }
+
+                return out;
+
+            })()
+        );
+        */
+
+        this.structure.find(".id_simId").text(
+            (() => {
+
+                let out = this.userSim.friendlyName;
+
+                const number = this.userSim.sim.storage.number
+
+                if (!!number) {
+                    out += " " + number + " ";
+                }
+
+                return out;
+
+            })()
         );
 
         this.structure.find(".id_connectivity").text(
@@ -85,11 +116,11 @@ export class UiSimRow {
 
         {
 
-            const span= this.structure.find(".id_owner");
+            const span = this.structure.find(".id_owner");
 
-            if( this.userSim.ownership.status === "OWNED" ){
+            if (this.userSim.ownership.status === "OWNED") {
                 span.parent().hide();
-            }else{
+            } else {
                 span.text(this.userSim.ownership.ownerEmail);
             }
 
@@ -129,7 +160,7 @@ export class UiSimRow {
 
             const d = this.userSim.dongle;
 
-            this.structure.find(".id_dongle_model").text( 
+            this.structure.find(".id_dongle_model").text(
                 `${d.manufacturer} ${d.model}`
             );
 

@@ -211,5 +211,6 @@ export declare namespace webphoneData {
      *
      */
     function compareChat(chat1: Chat, chat2: Chat): -1 | 0 | 1;
+    function isAscendingAlphabeticalOrder(a: string, b: string): boolean;
     function getUnreadMessagesCount(wdChat: Chat): number;
 }

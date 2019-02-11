@@ -6,6 +6,7 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";
+import { UiPhonebook } from "./UiPhonebook";
 import { UiSimRow } from "./UiSimRow";
 import { UiShareSim } from "./UiShareSim";
 
@@ -31,11 +32,11 @@ export class UiController {
             }>();
 
             localApiHandlers.evtSharingRequestResponse.attach(
-                ({ userSim, email })=> evt.post({ userSim, email })
+                ({ userSim, email }) => evt.post({ userSim, email })
             );
 
             localApiHandlers.evtSharedSimUnregistered.attach(
-                ({ userSim, email })=> evt.post({ userSim, email })
+                ({ userSim, email }) => evt.post({ userSim, email })
             );
 
             return evt;
@@ -43,11 +44,13 @@ export class UiController {
         })()
     );
 
-    private readonly uiSimRows: UiSimRow[] =[];
+    private readonly uiSimRows: UiSimRow[] = [];
 
-    private setPlaceholder(placeholder: "MAIN" | "NO SIM"){
+    private readonly uiPhonebooks: UiPhonebook[] = [];
 
-        switch(placeholder){
+    private setState(placeholder: "MAIN" | "NO SIM") {
+
+        switch (placeholder) {
             case "MAIN": {
 
                 $("#loader-line-mask").removeClass("loader-line-mask");
@@ -66,9 +69,9 @@ export class UiController {
 
     }
 
-    private addUserSim(userSim: types.UserSim.Usable ){
+    private addUserSim(userSim: types.UserSim.Usable) {
 
-        this.setPlaceholder("MAIN");
+        this.setState("MAIN");
 
         const uiSimRow = new UiSimRow(userSim);
 
@@ -94,11 +97,11 @@ export class UiController {
 
         localApiHandlers.evtSimIsOnlineStatusChange.attach(
             userSim_ => userSim_ === userSim,
-            ()=> {
+            () => {
 
                 uiSimRow.populate();
 
-                if( uiSimRow.isSelected ){
+                if (uiSimRow.isSelected) {
 
                     this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
 
@@ -108,7 +111,10 @@ export class UiController {
         );
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
-        for (const evt of [localApiHandlers.evtContactCreatedOrUpdated, localApiHandlers.evtContactDeleted]) {
+        for (const evt of [
+            localApiHandlers.evtContactCreatedOrUpdated, 
+            localApiHandlers.evtContactDeleted
+        ]) {
 
             evt.attach(
                 ({ userSim: _userSim, contact }) => _userSim === userSim && contact.mem_index !== undefined,
@@ -156,35 +162,31 @@ export class UiController {
 
         if ((await remoteApiCaller.getUsableUserSims()).length === 0) {
 
-            this.setPlaceholder("NO SIM");
+            this.setState("NO SIM");
 
         }
 
     }
 
-    constructor() {
+    constructor(userSims: types.UserSim.Usable[]) {
 
-        this.setPlaceholder("NO SIM");
+        this.setState("NO SIM");
 
         this.initUiButtonBar();
 
         this.initUiShareSim();
 
-        remoteApiCaller.getUsableUserSims().then(userSims => {
+        for (const userSim of userSims.sort((a, b) => +b.isOnline - +a.isOnline)) {
 
-            for (const userSim of userSims) {
+            this.addUserSim(userSim);
 
-                this.addUserSim(userSim);
-
-            }
-
-        });
+        }
 
         remoteApiCaller.evtUsableSim.attach(
             userSim => this.addUserSim(userSim)
         );
 
-        localApiHandlers.evtSimPermissionLost.attach(
+        localApiHandlers.evtSimPermissionLost.attachOnce(
             userSim => this.removeUserSim(userSim)
         );
 
@@ -197,6 +199,73 @@ export class UiController {
         )!;
 
     }
+
+    private async initUiPhonebook(userSim: types.UserSim.Usable): Promise<UiPhonebook> {
+
+        if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
+
+            bootbox_custom.loading("Loading");
+
+            await UiPhonebook.fetchPhoneNumberUtilityScript();
+
+            bootbox_custom.dismissLoading();
+
+        }
+
+        const uiPhonebook = new UiPhonebook(userSim);
+
+        this.uiPhonebooks.push(uiPhonebook);
+
+        uiPhonebook.evtClickCreateContact.attach(
+            ({ name, number, onSubmitted }) =>
+                remoteApiCaller.createContact(
+                    userSim,
+                    name,
+                    number
+                ).then(contact => onSubmitted(contact))
+        );
+
+        uiPhonebook.evtClickDeleteContacts.attach(
+            ({ contacts, onSubmitted }) => Promise.all(
+                contacts.map(
+                    contact => remoteApiCaller.deleteContact(
+                        userSim,
+                        contact
+                    )
+                )
+            ).then(() => onSubmitted())
+        );
+
+        uiPhonebook.evtClickUpdateContactName.attach(
+            ({ contact, newName, onSubmitted }) =>
+                remoteApiCaller.updateContactName(
+                    userSim,
+                    contact,
+                    newName
+                ).then(() => onSubmitted())
+        );
+
+        localApiHandlers.evtSimPermissionLost.attachOnce(
+            userSim_ => userSim_ === userSim,
+            () => uiPhonebook.hideModal().then(() =>
+                uiPhonebook.structure.detach()
+            )
+        );
+
+        localApiHandlers.evtContactCreatedOrUpdated.attach(
+            e => e.userSim === userSim,
+            ({ contact }) => uiPhonebook.notifyContactChanged(contact)
+        );
+
+        localApiHandlers.evtContactDeleted.attach(
+            e => e.userSim === userSim,
+            ({ contact }) => uiPhonebook.notifyContactChanged(contact)
+        );
+
+        return uiPhonebook;
+
+    }
+
 
     private initUiButtonBar(): void {
 
@@ -230,6 +299,24 @@ export class UiController {
 
         });
 
+        this.uiButtonBar.evtClickContacts.attach(async () => {
+
+            const { userSim } = this.getSelectedUiSimRow();
+
+            let uiPhonebook = this.uiPhonebooks.find(
+                uiPhonebook => uiPhonebook.userSim === userSim
+            );
+
+            if (!uiPhonebook) {
+
+                uiPhonebook = await this.initUiPhonebook(userSim);
+
+
+            }
+
+            uiPhonebook.showModal();
+
+        });
 
         this.uiButtonBar.evtClickDelete.attach(async () => {
 

@@ -51,6 +51,7 @@ var stack = [];
 var onHideKey = " __hide_handler__ ";
 function add(modal, options) {
     var _this = this;
+    //NOTE: null only when called by bootbox_custom.
     if (options !== null) {
         modal.modal(__assign({}, options, { "show": false }));
     }
@@ -69,12 +70,26 @@ function add(modal, options) {
                             var wasOnTop = index === stack.length - 1;
                             stack.splice(index, 1);
                             if (wasOnTop && stack.length !== 0) {
-                                stack[stack.length - 1].modal("show");
+                                var modalToRestore_1 = stack[stack.length - 1];
+                                modalToRestore_1[" scheduled to be shown "] = true;
+                                /*
+                                NOTE: To prevent flickering we do not restore
+                                the previous modal if an other one is immediately
+                                opened ( form with successive bootbox_custom )
+                                */
+                                setTimeout(function () {
+                                    delete modalToRestore_1[" scheduled to be shown "];
+                                    if (modalToRestore_1 !== stack[stack.length - 1]) {
+                                        return;
+                                    }
+                                    modalToRestore_1.modal("show");
+                                }, 100);
                             }
                         };
                         modal.one("hide.bs.modal", modal[onHideKey]);
                         if (!(stack.length !== 1)) return [3 /*break*/, 2];
                         currentModal_1 = stack[stack.length - 2];
+                        if (!!currentModal_1[" scheduled to be shown "]) return [3 /*break*/, 2];
                         currentModal_1.off("hide.bs.modal", undefined, currentModal_1[onHideKey]);
                         currentModal_1.modal("hide");
                         currentModal_1.one("hide.bs.modal", currentModal_1[onHideKey]);

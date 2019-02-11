@@ -2,6 +2,7 @@ import * as types from "../../../shared/dist/lib/types";
 import { SyncEvent } from "ts-events-extended";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
 
 declare const require: any;
 
@@ -39,15 +40,8 @@ export class UiShareSim {
 
     private currentUserSim: types.UserSim.Owned | undefined = undefined;
 
-    private hide(): Promise<void> {
-
-        this.structure.modal("hide");
-
-        return new Promise(resolve =>
-            this.structure.one("hidden.bs.modal", () => resolve())
-        );
-
-    }
+    private readonly hideModal: ()=> Promise<void>;
+    private readonly showModal: ()=> Promise<void>;
 
     private getInputEmails(): string[] {
 
@@ -70,15 +64,17 @@ export class UiShareSim {
         }>
     ) {
 
-        this.structure.modal({
+        const { hide, show }= modal_stack.add(this.structure, {
             "keyboard": false,
-            "show": false,
-            "backdrop": "true"
+            "backdrop": true
         });
 
-        this.buttonClose.on("click", () => this.structure.modal("hide"));
+        this.hideModal= hide;
+        this.showModal= show;
 
-        (this.structure.find(".id_emails") as any).multiple_emails({
+        this.buttonClose.on("click", () => this.hideModal());
+
+        (this.inputEmails as any).multiple_emails({
             "placeholder": "Enter email addresses",
             "checkDupEmail": true
         });
@@ -93,7 +89,7 @@ export class UiShareSim {
 
             });
 
-            await this.hide();
+            await this.hideModal();
 
             bootbox_custom.loading("Revoking some user's SIM access");
 
@@ -113,24 +109,33 @@ export class UiShareSim {
 
         this.buttonSubmit.on("click", async () => {
 
-            const emails = this.getInputEmails();
+            if (this.getInputEmails().length === 0) {
 
-            await this.hide();
+                this.structure.find(".id_emails")
+                    .trigger(jQuery.Event("keypress", { "keycode": 13 }));
 
-            bootbox_custom.loading("Granting sim access to some users");
+            } else {
 
-            await new Promise(resolve =>
-                this.evtShare.post({
-                    "userSim": this.currentUserSim!,
-                    emails,
-                    "message": this.textareaMessage.html(),
-                    "onSubmitted": () => resolve()
-                })
-            );
+                const emails = this.getInputEmails();
 
-            bootbox_custom.dismissLoading();
+                await this.hideModal();
 
-            this.open(this.currentUserSim!);
+                bootbox_custom.loading("Granting sim access to some users");
+
+                await new Promise(resolve =>
+                    this.evtShare.post({
+                        "userSim": this.currentUserSim!,
+                        emails,
+                        "message": this.textareaMessage.html(),
+                        "onSubmitted": () => resolve()
+                    })
+                );
+
+                bootbox_custom.dismissLoading();
+
+                this.open(this.currentUserSim!);
+
+            }
 
         });
 
@@ -138,16 +143,17 @@ export class UiShareSim {
 
             if (this.getInputEmails().length === 0) {
 
-                this.buttonSubmit.addClass("disabled");
+                this.buttonSubmit.text("Validate email");
 
                 this.textareaMessage.parent().hide();
 
             } else {
 
-                this.buttonSubmit.removeClass("disabled");
+                this.buttonSubmit.text("Share");
 
-                this.textareaMessage.parent().show();
-
+                this.textareaMessage.parent().show({
+                    "done": ()=> this.textareaMessage.focus()
+                });
 
             }
 
@@ -207,7 +213,7 @@ export class UiShareSim {
 
                     this.buttonStopSharing.show();
 
-                    this.buttonStopSharing.find("span").html(`Remove (${selectedCount})`);
+                    this.buttonStopSharing.find("span").html(`Revoke access (${selectedCount})`);
 
                 }
 
@@ -234,7 +240,7 @@ export class UiShareSim {
                     this,
                     () => {
 
-                        if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0 ) {
+                        if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0) {
 
                             divRow.find(".id_isConfirmed")
                                 .removeClass("color-yellow")
@@ -280,7 +286,7 @@ export class UiShareSim {
 
         }
 
-        this.structure.modal("show");
+        this.showModal();
 
     }
 

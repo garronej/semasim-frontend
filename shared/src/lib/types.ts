@@ -26,7 +26,7 @@ export namespace SubscriptionInfos {
     export type Subscription = {
         cancel_at_period_end: boolean;
         current_period_end: Date;
-        currency: string
+        currency: string;
     };
 
     export type Due = {
@@ -422,7 +422,7 @@ export namespace webphoneData {
 
             return isAscendingAlphabeticalOrder(
                 chat1.contactName, chat2.contactName
-            ) ? -1 : 1;
+            ) ? 1 : -1;
 
         } else {
 
@@ -432,7 +432,7 @@ export namespace webphoneData {
 
     }
 
-    function isAscendingAlphabeticalOrder(
+    export function isAscendingAlphabeticalOrder(
         a: string,
         b: string
     ): boolean {

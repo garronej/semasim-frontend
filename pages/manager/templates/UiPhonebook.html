@@ -1,0 +1,110 @@
+<style>
+
+    div.id_UiPhonebook ul li > div {
+        padding: 6px 10px;
+        color: #030303;
+        border-top: 1px solid #EAEAEA;
+        cursor: pointer;
+    }
+
+    div.id_UiPhonebook ul li > div .id_number {
+        cursor: text;
+    }
+
+    div.id_UiPhonebook ul li.selected > div {
+        color: #000000;
+        background-color: #e9ebeb !important;
+    }
+
+</style>
+
+<div class="templates">
+
+    <li>
+        <div>
+            <span class="id_name "></span>
+            <div class="pull-right ">
+                <span class="id_number "></span>
+            </div>
+        </div>
+    </li>
+
+</div>
+
+<!-- Panel Modal -->
+<div class="id_UiPhonebook modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p0">
+                <div class="panel panel-default mb0">
+                    <!-- Start .panel -->
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Sim Phonebook</h4>
+                        <div class="panel-controls panel-controls-right">
+                            <a href="#" class="panel-close id_close">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                    <div class="panel-body p0">
+                        <div class="container-fluid">
+
+                            <div class="row">
+
+                                <div class="col-xd-12 pt15 pr15 pl15">
+
+                                    <div style="float: right">
+
+                                        <button class="id_edit btn btn-primary" style="padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;" type="button">
+                                            <i>
+                                                <svg class="custom-icon">
+                                                    <use xlink:href="#icon-edit_contact"></use>
+                                                </svg>
+                                            </i>
+                                        </button>
+                                        <button class="id_delete btn btn-danger" type="button">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                            <span></span>
+                                        </button>
+                                        <button class="id_createContact btn btn-success btn-sm" type="button" >
+                                            <i>
+                                                <svg class="custom-icon">
+                                                    <use xlink:href="#icon-add_contact"></use>
+                                                </svg>
+                                            </i>
+                                        </button>
+
+                                    </div>
+                                    <div style="overflow: hidden; padding-right: .5em;">
+                                        <input class="form-control" type="text" name="search" placeholder="Search"  style="width: 100%;"/>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-xs-12 pb15 bl15 pr15">
+
+                                    <ul class="nav ">
+                                    </ul>
+
+                                </div>
+
+
+                            </div>
+
+
+
+
+
+
+
+                        </div>
+
+
+                    </div>
+                </div>
+                <!-- End .panel -->
+            </div>
+        </div>
+    </div>
+</div>

@@ -168,7 +168,7 @@ var webphoneData;
             if (!hasContactName(chat2)) {
                 return 1;
             }
-            return isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? -1 : 1;
+            return isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? 1 : -1;
         }
         else {
             return chat1.contactNumber < chat2.contactNumber ? -1 : 1;
@@ -193,6 +193,7 @@ var webphoneData;
         }
         return vA < vB;
     }
+    webphoneData.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
     function getUnreadMessagesCount(wdChat) {
         var count = 0;
         for (var i = wdChat.messages.length - 1; i >= 0; i--) {

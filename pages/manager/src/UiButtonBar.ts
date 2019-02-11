@@ -20,15 +20,17 @@ export class UiButtonBar {
     public readonly evtClickShare = new VoidSyncEvent();
     public readonly evtClickRename = new VoidSyncEvent();
     public readonly evtClickReboot = new VoidSyncEvent();
+    public readonly evtClickContacts = new VoidSyncEvent();
 
     private readonly buttons = this.structure.find("button");
 
     public readonly btnDetail = $(this.buttons.get(0));
     private readonly btnBack = $(this.buttons.get(1));
     private readonly btnDelete = $(this.buttons.get(2));
-    private readonly btnShare = $(this.buttons.get(3));
-    private readonly btnRename = $(this.buttons.get(4));
-    private readonly btnReboot = $(this.buttons.get(5));
+    private readonly btnContacts = $(this.buttons.get(3));
+    private readonly btnShare = $(this.buttons.get(4));
+    private readonly btnRename = $(this.buttons.get(5));
+    private readonly btnReboot = $(this.buttons.get(6));
 
     public state: UiButtonBar.State;
 
@@ -38,14 +40,14 @@ export class UiButtonBar {
             this.state[key] = state[key];
         }
 
-        this.buttons.removeClass("disabled");
+        this.buttons.prop("disabled", false);
         this.btnDetail.show();
         this.btnBack.show();
 
         if (!this.state.isSimRowSelected) {
 
             this.buttons.each(i => {
-                $(this.buttons[i]).addClass("disabled");
+                $(this.buttons[i]).prop("disabled", true );
             });
 
         }
@@ -57,11 +59,11 @@ export class UiButtonBar {
         }
 
         if (!this.state.isSimSharable) {
-            this.btnShare.addClass("disabled");
+            this.btnShare.prop("disabled", true);
         }
 
         if(!this.state.isSimOnline){
-            this.btnReboot.addClass("disabled");
+            this.btnReboot.prop("disabled", true);
         }
 
     }
@@ -79,6 +81,8 @@ export class UiButtonBar {
         });
 
         this.btnDelete.click(() => this.evtClickDelete.post());
+
+        this.btnContacts.click(()=> this.evtClickContacts.post());
 
         this.btnShare.tooltip();
         this.btnShare.click(() => this.evtClickShare.post());
