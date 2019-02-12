@@ -91,6 +91,7 @@ async function browserify(
             "-e", path.resolve(entry_point_file_path),
             "-t", "html2js-browserify",
             "-t", "lessify",
+            "-t", "brfs",
             "-o", path.resolve(dst_file_path)
         ],
         { "cwd": module_dir_path }

@@ -1,11 +1,44 @@
-<div class="id_UiButtonBar col-md-12 bb pb5">
-    <button type="button" class="btn btn-default m5">Details</button>
-    <button type="button" class="btn btn-default m5">
-        <i class="fa fa-arrow-left"></i>
-    </button>
-    <button type="button" class="btn btn-danger m5">Delete</button>
-    <button type="button" class="btn btn-primary m5">Contacts</button>
-    <button type="button" class="btn btn-success m5" data-toggle="tooltip" data-placement="bottom" title="Make SIM usable by other Semasim users">Share</button>
-    <button type="button" class="btn btn-default m5">Rename</button>
-    <button type="button" class="btn btn-default m5" data-toggle="tooltip" data-placement="bottom" title="Restart the GSM dongle that hold the SIM">Reboot dongle</button>
+<style>
+    .id_UiButtonBar .st_flex {
+        display:flex;
+        justify-content:space-around;
+    }
+
+    .id_UiButtonBar button {
+        width: 100%;
+        margin: 5px;
+    }
+
+    @media (min-width: 768px) {
+        .id_UiButtonBar .id_g1 {
+            padding-right: 0px !important;
+        }
+        .id_UiButtonBar .id_g2 {
+            padding-left: 0px !important;
+        }
+    }
+</style>
+
+<div class="id_UiButtonBar col-xs-12 mb10">
+
+    <div class="row">
+
+        <div class="id_g1 col-sm-6 col-xs-12">
+            <div class="st_flex">
+                <button type="button" class="btn btn-default">Details</button>
+                <button type="button" class="btn btn-default"> <i class="fa fa-arrow-left"></i> </button>
+                <button type="button" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-primary">Contacts</button>
+            </div>
+        </div>
+        <div class="id_g2 col-sm-6 col-xs-12">
+            <div class="st_flex">
+                <button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="Make SIM usable by other Semasim users">Share</button>
+                <button type="button" class="btn btn-default">Rename!</button>
+                <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Restart the GSM dongle that hold the SIM">Reboot dongle</button>
+            </div>
+        </div>
+
+    </div>
+    
 </div>

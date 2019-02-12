@@ -1,0 +1,6 @@
+Any new SIM should be automatically detected, you dont even need to refresh the page.
+No SIM found ? Make sure that:
+-This device and the Semasim gateway ( the Raspberry Pi ) are connected to the same local network. ( required only for pairing the SIM with the account ).
+-The SIM you are trying to register have not already been registered with an other account.
+-Your Semasim gateway is able to power all the GSM dongles connected to it.
+-The problem does not come from the USB hub you might be using.

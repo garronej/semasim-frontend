@@ -107,6 +107,10 @@ function run(method: string, args: any[], isLoading = false): JQuery {
         "callback": args[1]
     }): args[0];
 
+    if( !("animate" in options) ){
+        options.animate = false;
+    }
+
     options.show= false;
 
     //let modal: JQuery = bootbox[method].apply(bootbox, args);

@@ -5,6 +5,7 @@
     "build_pages": "node ./dist/bin/cmd build_pages"
   },
   "dependencies": {
+    "brfs": "^2.0.1",
     "browserify": "^16.2.3",
     "commander": "^2.19.0",
     "html2js-browserify": "^1.3.0",

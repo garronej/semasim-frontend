@@ -60,6 +60,9 @@ function run(method, args, isLoading) {
         "message": args[0],
         "callback": args[1]
     }) : args[0];
+    if (!("animate" in options)) {
+        options.animate = false;
+    }
     options.show = false;
     //let modal: JQuery = bootbox[method].apply(bootbox, args);
     var modal = bootbox[method](options);

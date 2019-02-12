@@ -5,7 +5,6 @@ const stack: JQuery[] = [];
 
 const onHideKey = " __hide_handler__ ";
 
-
 export function add(
     modal: JQuery,
     options: { keyboard: boolean; backdrop: boolean | "static"; }
@@ -78,11 +77,14 @@ export function add(
 
                     currentModal.off("hide.bs.modal", undefined, currentModal[onHideKey]);
 
+                    //If no transition hidden is instant.
+                    const prHidden= new Promise(resolve => currentModal.one("hidden.bs.modal", () => resolve()));
+
                     currentModal.modal("hide");
 
                     currentModal.one("hide.bs.modal", currentModal[onHideKey]);
 
-                    await new Promise(resolve => currentModal.one("hidden.bs.modal", () => resolve()));
+                    await prHidden;
 
                 }
 
@@ -99,9 +101,9 @@ export function add(
                 return;
             }
 
-            modal.modal("hide");
-
             modal.one("hidden.bs.modal", () => resolve());
+
+            modal.modal("hide");
 
         })
     }

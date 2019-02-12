@@ -11678,6 +11678,9 @@ function run(method, args, isLoading) {
         "message": args[0],
         "callback": args[1]
     }) : args[0];
+    if (!("animate" in options)) {
+        options.animate = false;
+    }
     options.show = false;
     //let modal: JQuery = bootbox[method].apply(bootbox, args);
     var modal = bootbox[method](options);
@@ -11809,7 +11812,7 @@ function add(modal, options) {
     }
     return {
         "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-            var currentModal_1;
+            var currentModal_1, prHidden;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -11843,9 +11846,10 @@ function add(modal, options) {
                         currentModal_1 = stack[stack.length - 2];
                         if (!!currentModal_1[" scheduled to be shown "]) return [3 /*break*/, 2];
                         currentModal_1.off("hide.bs.modal", undefined, currentModal_1[onHideKey]);
+                        prHidden = new Promise(function (resolve) { return currentModal_1.one("hidden.bs.modal", function () { return resolve(); }); });
                         currentModal_1.modal("hide");
                         currentModal_1.one("hide.bs.modal", currentModal_1[onHideKey]);
-                        return [4 /*yield*/, new Promise(function (resolve) { return currentModal_1.one("hidden.bs.modal", function () { return resolve(); }); })];
+                        return [4 /*yield*/, prHidden];
                     case 1:
                         _a.sent();
                         _a.label = 2;
@@ -11860,8 +11864,8 @@ function add(modal, options) {
             if (stack.indexOf(modal) < 0) {
                 return;
             }
-            modal.modal("hide");
             modal.one("hidden.bs.modal", function () { return resolve(); });
+            modal.modal("hide");
         }); }
     };
 }
