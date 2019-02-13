@@ -4904,15 +4904,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
         }
-    };
+        finally { if (e) throw e.error; }
+    }
+    return ar;
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -4926,12 +4932,13 @@ var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCalle
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
+var types = require("../../../shared/dist/lib/types");
 //TODO: implement evtUp
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var e_1, _a, userSims, wdInstances, _loop_1, _b, _c, userSim;
+    var userSims, wdInstances;
     var _this = this;
-    return __generator(this, function (_d) {
-        switch (_d.label) {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
             case 0:
                 $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
                     return __generator(this, function (_a) {
@@ -4949,35 +4956,37 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                 bootbox_custom.loading("Fetching contacts and SMS history", 0);
                 return [4 /*yield*/, Ua_1.Ua.init()];
             case 1:
-                _d.sent();
+                _a.sent();
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 2:
-                userSims = _d.sent();
+                userSims = _a.sent();
                 if (userSims.length === 0) {
                     window.location.href = "/manager";
                 }
-                return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim); }))];
+                wdInstances = new Map();
+                return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim)
+                        .then(function (wdInstance) { return wdInstances.set(userSim, wdInstance); }); }))];
             case 3:
-                wdInstances = _d.sent();
-                _loop_1 = function (userSim) {
-                    $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(userSim, wdInstances.find(function (_a) {
-                        var imsi = _a.imsi;
-                        return userSim.sim.imsi === imsi;
-                    }))).structure);
-                };
-                try {
-                    for (_b = __values(userSims.sort(function (a, b) { return +b.isOnline - +a.isOnline; })), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        userSim = _c.value;
-                        _loop_1(userSim);
+                _a.sent();
+                //NOTE: Sort user sims so we always have the most relevant at the top of the page.
+                userSims
+                    .sort(function (s1, s2) {
+                    if (s1.isOnline !== s2.isOnline) {
+                        return s1.isOnline ? 1 : -1;
                     }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    var _a = __read([s1, s2].map(function (userSim) {
+                        return types.webphoneData.getChatWithLatestActivity(wdInstances.get(userSim));
+                    }), 2), c1 = _a[0], c2 = _a[1];
+                    if (!c1 !== !c2) {
+                        return !!c1 ? 1 : -1;
                     }
-                    finally { if (e_1) throw e_1.error; }
-                }
+                    if (!c1) {
+                        return 0;
+                    }
+                    return types.webphoneData.compareChat(c1, c2);
+                })
+                    .reverse()
+                    .forEach(function (userSim) { return $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(userSim, wdInstances.get(userSim))).structure); });
                 bootbox_custom.dismissLoading();
                 localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) {
                     bootbox_custom.alert(userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName);
@@ -5004,7 +5013,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/webApiCaller":172,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"es6-map/implement":103,"es6-weak-map/implement":114}],17:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/types":171,"../../../shared/dist/lib/webApiCaller":172,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"es6-map/implement":103,"es6-weak-map/implement":114}],17:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -19784,7 +19793,7 @@ var webphoneData;
         var e_1, _a;
         //TODO: what if last seen message not loaded.
         var findMessageByIdAndGetTime = function (wdChat, message_id) {
-            if (message_id = -1) {
+            if (message_id === null) {
                 return 0;
             }
             for (var i = wdChat.messages.length - 1; i >= 0; i--) {

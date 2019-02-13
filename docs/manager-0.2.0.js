@@ -11318,7 +11318,7 @@ var webphoneData;
         var e_1, _a;
         //TODO: what if last seen message not loaded.
         var findMessageByIdAndGetTime = function (wdChat, message_id) {
-            if (message_id = -1) {
+            if (message_id === null) {
                 return 0;
             }
             for (var i = wdChat.messages.length - 1; i >= 0; i--) {

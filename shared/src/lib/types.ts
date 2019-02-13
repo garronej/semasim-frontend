@@ -246,6 +246,7 @@ export namespace webphoneData {
 
     export type NoId<T extends Message> = Pick<T, Exclude<keyof T, "id_">>;
 
+
     /** Best guess on previously opened chat: */
     export function getChatWithLatestActivity(
         wdInstance: Instance
@@ -257,7 +258,7 @@ export namespace webphoneData {
             message_id: number | null
         ): number => {
 
-            if (message_id = -1) {
+            if (message_id === null ) {
                 return 0;
             }
 
@@ -275,7 +276,6 @@ export namespace webphoneData {
 
         };
 
-
         const findLastMessageSentByUserAndGetTime = (chat: Chat): number => {
 
             for (let i = chat.messages.length - 1; i >= 0; i--) {
@@ -291,7 +291,6 @@ export namespace webphoneData {
                 ) {
                     return message.time;
                 }
-
 
             }
 

@@ -10,6 +10,7 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
+import * as types from "../../../shared/dist/lib/types";
 
 //TODO: implement evtUp
 
@@ -39,24 +40,50 @@ $(document).ready(async () => {
 
 	}
 
-	const wdInstances = await Promise.all(
+	const wdInstances = new Map<types.UserSim, types.webphoneData.Instance>();
+
+	await Promise.all(
 		userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
+				.then(wdInstance => wdInstances.set(userSim,wdInstance))
 		)
 	);
 
-	for (const userSim of userSims.sort((a, b) => +b.isOnline - +a.isOnline)) {
+	//NOTE: Sort user sims so we always have the most relevant at the top of the page.
+	userSims
+		.sort((s1, s2) => {
 
-		$("#page-payload").append(
+			if (s1.isOnline !== s2.isOnline) {
+				return s1.isOnline ? 1 : -1;
+			}
+
+			const [c1, c2] = [s1, s2].map(userSim =>
+				types.webphoneData.getChatWithLatestActivity(
+					wdInstances.get(userSim)!
+				)
+			);
+
+			if (!c1 !== !c2) {
+				return !!c1 ? 1 : -1;
+			}
+
+			if (!c1) {
+				return 0;
+			}
+
+			return types.webphoneData.compareChat(c1, c2!);
+
+		})
+		.reverse()
+		.forEach(userSim => $("#page-payload").append(
 			(
 				new UiWebphoneController(
 					userSim,
-					wdInstances.find(({ imsi }) => userSim.sim.imsi === imsi)!
+					wdInstances.get(userSim)!
 				)
 			).structure
-		);
+		));
 
-	}
 
 	bootbox_custom.dismissLoading();
 
