@@ -107,6 +107,12 @@ export class UiController {
 
                 }
 
+                const uiPhonebook= this.uiPhonebooks.find( ui=> ui.userSim === userSim )
+
+                if( !!uiPhonebook ){
+                    uiPhonebook.updateButtons();
+                }
+
             }
         );
 

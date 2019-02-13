@@ -11,6 +11,9 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types";
+import * as DetectRTC from "detectrtc";
+
+			//alert(DetectRTC.isRtpDataChannelsSupported);
 
 //TODO: implement evtUp
 
@@ -30,7 +33,6 @@ $(document).ready(async () => {
 
 	bootbox_custom.loading("Fetching contacts and SMS history", 0);
 
-	await Ua.init();
 
 	const userSims = await remoteApiCaller.getUsableUserSims();
 
@@ -42,12 +44,15 @@ $(document).ready(async () => {
 
 	const wdInstances = new Map<types.UserSim, types.webphoneData.Instance>();
 
-	await Promise.all(
-		userSims.map(
+
+	await Promise.all([
+		new Promise<void>(resolve=> DetectRTC.load(resolve)),
+	 	Ua.init(),
+		...userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
-				.then(wdInstance => wdInstances.set(userSim,wdInstance))
-		)
-	);
+				.then(wdInstance => { wdInstances.set(userSim,wdInstance) })
+		),
+	]);
 
 	//NOTE: Sort user sims so we always have the most relevant at the top of the page.
 	userSims

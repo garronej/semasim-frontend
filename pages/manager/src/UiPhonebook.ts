@@ -131,7 +131,6 @@ export class UiPhonebook {
             const contact = Array.from(this.uiContacts.values())
                 .find(uiContact => uiContact.isSelected)!.contact;
 
-            bootbox_custom.loading("Updating contact name ...");
 
             const newName = await new Promise<string | null>(
                 resolve => bootbox_custom.prompt({
@@ -145,6 +144,8 @@ export class UiPhonebook {
                 return;
             }
 
+            bootbox_custom.loading("Updating contact name ...");
+
             await new Promise(resolve =>
                 this.evtClickUpdateContactName.post({
                     contact,
@@ -153,9 +154,10 @@ export class UiPhonebook {
                 })
             );
 
+            bootbox_custom.dismissLoading();
+
             this.notifyContactChanged(contact);
 
-            bootbox_custom.dismissLoading();
 
         });
 
@@ -203,10 +205,10 @@ export class UiPhonebook {
 
                     const input = modal.find("input");
 
-                    const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                    const gwIso = userSim.gatewayLocation.countryIso;
+                    input.intlTelInput((() => {
 
-                    {
+                        const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
+                        const gwIso = userSim.gatewayLocation.countryIso;
 
                         const intlTelInputOptions: IntlTelInput.Options = {
                             "dropdownContainer": "body"
@@ -230,9 +232,9 @@ export class UiPhonebook {
                             intlTelInputOptions.initialCountry = simIso || gwIso;
                         }
 
-                        input.intlTelInput(intlTelInputOptions);
+                        return intlTelInputOptions;
 
-                    }
+                    })());
 
                 }
             );
@@ -300,14 +302,25 @@ export class UiPhonebook {
 
         });
 
-
     }
+
 
     //TODO: Make sure contact ref is kept.
     /** mapped by types.UserSim.Contact */
     private readonly uiContacts = new Map<types.UserSim.Contact, UiContact>();
 
-    private updateButtons() {
+
+
+    /** to call (outside of the class) when sim online status change */
+    public updateButtons() {
+
+        [
+            this.buttonClose,
+            this.buttonCreateContact,
+            this.buttonDelete,
+            this.buttonEdit
+        ].forEach(button => button.prop("disabled", !this.userSim.isOnline));
+
 
         const selectedCount = Array.from(this.uiContacts.values())
             .filter(uiContact => uiContact.isSelected).length;

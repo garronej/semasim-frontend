@@ -3337,7 +3337,7 @@ var JsSipSocket = /** @class */ (function () {
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/gateway":164,"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"buffer":2,"phone-number":132,"run-exclusive":133,"ts-events-extended":145,"ts-sip":155}],10:[function(require,module,exports){
+},{"../../../shared/dist/gateway":165,"../../../shared/dist/lib/toBackend/connection":166,"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"buffer":2,"phone-number":133,"run-exclusive":134,"ts-events-extended":146,"ts-sip":156}],10:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -3676,7 +3676,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/types":171,"../templates/UiConversation.html":157,"../templates/UiConversation.less":158,"buffer":2,"moment":129,"phone-number":132,"ts-events-extended":145}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/types":172,"../templates/UiConversation.html":158,"../templates/UiConversation.less":159,"buffer":2,"moment":130,"phone-number":133,"ts-events-extended":146}],11:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -3760,7 +3760,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiHeader.html":159,"phone-number":132}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiHeader.html":160,"phone-number":133}],12:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function (o) {
@@ -3995,32 +3995,23 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/types":171,"../templates/UiPhonebook.html":160,"phone-number":132,"ts-events-extended":145}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/types":172,"../templates/UiPhonebook.html":161,"phone-number":133,"ts-events-extended":146}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
-(function () {
-    $.validator.addMethod("validateTelInput", function (value, element) {
-        try {
-            phone_number_1.phoneNumber.build(value, $(element).intlTelInput("getSelectedCountryData").iso2, "MUST BE DIALABLE");
-        }
-        catch (_a) {
-            return false;
-        }
-        return true;
-    }, "Malformed phone number");
-    /*
-    let errorMessages = Object.keys((intlTelInputUtils as any).validationError)
-        .map(value => value.toLowerCase().split("_").join(" "));
-
-    $.validator.addMethod("validateTelInput", (value, element) =>
-        $(element).intlTelInput("getValidationError") === intlTelInputUtils.validationError.IS_POSSIBLE,
-        ((bool, element) => errorMessages[$(element).intlTelInput("getValidationError")]) as any
-    );
-    */
-})();
+var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
+console.log("op");
+$.validator.addMethod("validateTelInput", function (value, element) {
+    try {
+        phone_number_1.phoneNumber.build(value, $(element).intlTelInput("getSelectedCountryData").iso2, "MUST BE DIALABLE");
+    }
+    catch (_a) {
+        return false;
+    }
+    return true;
+}, "Malformed phone number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiQuickAction.html"), "UiQuickAction");
 var UiQuickAction = /** @class */ (function () {
     function UiQuickAction(userSim) {
@@ -4028,8 +4019,6 @@ var UiQuickAction = /** @class */ (function () {
         this.userSim = userSim;
         this.structure = html.structure.clone();
         this.templates = html.templates.clone();
-        //TODO: type StaticNotificationWidget
-        this.evtStaticNotification = new ts_events_extended_1.SyncEvent();
         this.evtVoiceCall = new ts_events_extended_1.SyncEvent();
         this.evtSms = new ts_events_extended_1.SyncEvent();
         this.evtNewContact = new ts_events_extended_1.SyncEvent();
@@ -4062,15 +4051,11 @@ var UiQuickAction = /** @class */ (function () {
                 if (countryData.iso2 === simIso)
                     return;
                 input.off("countrychange", undefined, calleeA);
-                //TODO: do with StaticNotificationWidget
-                var staticNotification = {
-                    "message": [
-                        "Warning: Consult ",
-                        self.userSim.sim.serviceProvider.fromImsi || "Your operator",
-                        "'s pricing for Calls/SMS toward " + countryData.name
-                    ].join("")
-                };
-                self.evtStaticNotification.post(staticNotification);
+                bootbox_custom.alert([
+                    "Warning: Consult ",
+                    self.userSim.sim.serviceProvider.fromImsi || "Your operator",
+                    "'s pricing for Calls/SMS toward " + countryData.name
+                ].join(""));
                 input.on("countrychange", function calleeB(_, countryData) {
                     if (countryData.iso2 !== simIso)
                         return;
@@ -4123,12 +4108,16 @@ var UiQuickAction = /** @class */ (function () {
             }
             input.intlTelInput("setNumber", "");
         });
+        this.notifySimOnlineStatusChanged();
     }
+    UiQuickAction.prototype.notifySimOnlineStatusChanged = function () {
+        this.structure.find("button").prop("disabled", !this.userSim.isOnline);
+    };
     return UiQuickAction;
 }());
 exports.UiQuickAction = UiQuickAction;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiQuickAction.html":161,"phone-number":132,"ts-events-extended":145}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiQuickAction.html":162,"phone-number":133,"ts-events-extended":146}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4309,7 +4298,7 @@ var UiVoiceCall = /** @class */ (function () {
 }());
 exports.UiVoiceCall = UiVoiceCall;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../../../shared/dist/lib/tools/modal_stack":170,"../templates/UiVoiceCall.html":162,"phone-number":132,"ts-events-extended":145}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/tools/modal_stack":171,"../templates/UiVoiceCall.html":163,"phone-number":133,"ts-events-extended":146}],15:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4367,6 +4356,7 @@ var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml"
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var phone_number_1 = require("phone-number");
+var DetectRTC = require("detectrtc");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiWebphoneController.html"), "UiWebphoneController");
 var UiWebphoneController = /** @class */ (function () {
@@ -4471,6 +4461,7 @@ var UiWebphoneController = /** @class */ (function () {
                 else {
                     this.ua.register();
                 }
+                this.uiQuickAction.notifySimOnlineStatusChanged();
                 return [2 /*return*/];
             });
         }); });
@@ -4727,6 +4718,17 @@ var UiWebphoneController = /** @class */ (function () {
             });
         }); });
         uiConversation.evtVoiceCall.attach(function () {
+            if (!DetectRTC.isRtpDataChannelsSupported) {
+                var message = "Call not supported by this browser.";
+                if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
+                    message += " Android app available";
+                }
+                else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    message += " iOS app coming soon.";
+                }
+                bootbox_custom.alert(message);
+                return;
+            }
             var _a = _this.ua.placeOutgoingCall(wdChat.contactNumber), terminate = _a.terminate, prTerminated = _a.prTerminated, prNextState = _a.prNextState;
             var _b = _this.uiVoiceCall.onOutgoing(wdChat), onTerminated = _b.onTerminated, onRingback = _b.onRingback, prUserInput = _b.prUserInput;
             prTerminated.then(function () { return onTerminated("Call terminated"); });
@@ -4867,7 +4869,7 @@ var UiWebphoneController = /** @class */ (function () {
 }());
 exports.UiWebphoneController = UiWebphoneController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/tools/loadUiClassHtml":169,"../templates/UiWebphoneController.html":163,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"phone-number":132}],16:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiWebphoneController.html":164,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"detectrtc":37,"phone-number":133}],16:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4920,6 +4922,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 require("es6-map/implement");
@@ -4933,6 +4939,8 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var types = require("../../../shared/dist/lib/types");
+var DetectRTC = require("detectrtc");
+//alert(DetectRTC.isRtpDataChannelsSupported);
 //TODO: implement evtUp
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
     var userSims, wdInstances;
@@ -4954,19 +4962,19 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                 connection.connect();
                 $("#page-payload").html("");
                 bootbox_custom.loading("Fetching contacts and SMS history", 0);
-                return [4 /*yield*/, Ua_1.Ua.init()];
-            case 1:
-                _a.sent();
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
-            case 2:
+            case 1:
                 userSims = _a.sent();
                 if (userSims.length === 0) {
                     window.location.href = "/manager";
                 }
                 wdInstances = new Map();
-                return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim)
-                        .then(function (wdInstance) { return wdInstances.set(userSim, wdInstance); }); }))];
-            case 3:
+                return [4 /*yield*/, Promise.all(__spread([
+                        new Promise(function (resolve) { return DetectRTC.load(resolve); }),
+                        Ua_1.Ua.init()
+                    ], userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim)
+                        .then(function (wdInstance) { wdInstances.set(userSim, wdInstance); }); })))];
+            case 2:
                 _a.sent();
                 //NOTE: Sort user sims so we always have the most relevant at the top of the page.
                 userSims
@@ -5013,7 +5021,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":165,"../../../shared/dist/lib/toBackend/localApiHandlers":166,"../../../shared/dist/lib/toBackend/remoteApiCaller":167,"../../../shared/dist/lib/tools/bootbox_custom":168,"../../../shared/dist/lib/types":171,"../../../shared/dist/lib/webApiCaller":172,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"es6-map/implement":103,"es6-weak-map/implement":114}],17:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":166,"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/types":172,"../../../shared/dist/lib/webApiCaller":173,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"detectrtc":37,"es6-map/implement":104,"es6-weak-map/implement":115}],17:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -5037,7 +5045,7 @@ module.exports = function find(predicate) {
 	return undefined;
 };
 
-},{"es-abstract/es6":40}],18:[function(require,module,exports){
+},{"es-abstract/es6":41}],18:[function(require,module,exports){
 'use strict';
 
 var define = require('define-properties');
@@ -5065,7 +5073,7 @@ define(boundFindShim, {
 
 module.exports = boundFindShim;
 
-},{"./implementation":17,"./polyfill":19,"./shim":20,"define-properties":36,"es-abstract/es6":40}],19:[function(require,module,exports){
+},{"./implementation":17,"./polyfill":19,"./shim":20,"define-properties":36,"es-abstract/es6":41}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function getPolyfill() {
@@ -5973,7 +5981,7 @@ module.exports = function (props/*, options*/) {
 	return map(props, function (desc, name) { return define(name, desc, options); });
 };
 
-},{"es5-ext/object/copy":73,"es5-ext/object/map":82,"es5-ext/object/normalize-options":83,"es5-ext/object/valid-callable":88,"es5-ext/object/valid-value":90}],35:[function(require,module,exports){
+},{"es5-ext/object/copy":74,"es5-ext/object/map":83,"es5-ext/object/normalize-options":84,"es5-ext/object/valid-callable":89,"es5-ext/object/valid-value":91}],35:[function(require,module,exports){
 'use strict';
 
 var assign        = require('es5-ext/object/assign')
@@ -6038,7 +6046,7 @@ d.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign(normalizeOpts(options), desc);
 };
 
-},{"es5-ext/object/assign":70,"es5-ext/object/is-callable":76,"es5-ext/object/normalize-options":83,"es5-ext/string/#/contains":91}],36:[function(require,module,exports){
+},{"es5-ext/object/assign":71,"es5-ext/object/is-callable":77,"es5-ext/object/normalize-options":84,"es5-ext/string/#/contains":92}],36:[function(require,module,exports){
 'use strict';
 
 var keys = require('object-keys');
@@ -6098,7 +6106,1159 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":130}],37:[function(require,module,exports){
+},{"object-keys":131}],37:[function(require,module,exports){
+(function (process,global){
+'use strict';
+
+// Last Updated On: 2019-01-10 5:32:55 AM UTC
+
+// ________________
+// DetectRTC v1.3.9
+
+// Open-Sourced: https://github.com/muaz-khan/DetectRTC
+
+// --------------------------------------------------
+// Muaz Khan     - www.MuazKhan.com
+// MIT License   - www.WebRTC-Experiment.com/licence
+// --------------------------------------------------
+
+(function() {
+
+    var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+    var isNodejs = typeof process === 'object' && typeof process.versions === 'object' && process.versions.node && /*node-process*/ !process.browser;
+    if (isNodejs) {
+        var version = process.versions.node.toString().replace('v', '');
+        browserFakeUserAgent = 'Nodejs/' + version + ' (NodeOS) AppleWebKit/' + version + ' (KHTML, like Gecko) Nodejs/' + version + ' Nodejs/' + version
+    }
+
+    (function(that) {
+        if (typeof window !== 'undefined') {
+            return;
+        }
+
+        if (typeof window === 'undefined' && typeof global !== 'undefined') {
+            global.navigator = {
+                userAgent: browserFakeUserAgent,
+                getUserMedia: function() {}
+            };
+
+            /*global window:true */
+            that.window = global;
+        } else if (typeof window === 'undefined') {
+            // window = this;
+        }
+
+        if (typeof location === 'undefined') {
+            /*global location:true */
+            that.location = {
+                protocol: 'file:',
+                href: '',
+                hash: ''
+            };
+        }
+
+        if (typeof screen === 'undefined') {
+            /*global screen:true */
+            that.screen = {
+                width: 0,
+                height: 0
+            };
+        }
+    })(typeof global !== 'undefined' ? global : window);
+
+    /*global navigator:true */
+    var navigator = window.navigator;
+
+    if (typeof navigator !== 'undefined') {
+        if (typeof navigator.webkitGetUserMedia !== 'undefined') {
+            navigator.getUserMedia = navigator.webkitGetUserMedia;
+        }
+
+        if (typeof navigator.mozGetUserMedia !== 'undefined') {
+            navigator.getUserMedia = navigator.mozGetUserMedia;
+        }
+    } else {
+        navigator = {
+            getUserMedia: function() {},
+            userAgent: browserFakeUserAgent
+        };
+    }
+
+    var isMobileDevice = !!(/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(navigator.userAgent || ''));
+
+    var isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveOrOpenBlob || !!navigator.msSaveBlob);
+
+    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    var isFirefox = typeof window.InstallTrigger !== 'undefined';
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    var isChrome = !!window.chrome && !isOpera;
+    var isIE = typeof document !== 'undefined' && !!document.documentMode && !isEdge;
+
+    // this one can also be used:
+    // https://www.websocket.org/js/stuff.js (DetectBrowser.js)
+
+    function getBrowserInfo() {
+        var nVer = navigator.appVersion;
+        var nAgt = navigator.userAgent;
+        var browserName = navigator.appName;
+        var fullVersion = '' + parseFloat(navigator.appVersion);
+        var majorVersion = parseInt(navigator.appVersion, 10);
+        var nameOffset, verOffset, ix;
+
+        // both and safri and chrome has same userAgent
+        if (isSafari && !isChrome && nAgt.indexOf('CriOS') !== -1) {
+            isSafari = false;
+            isChrome = true;
+        }
+
+        // In Opera, the true version is after 'Opera' or after 'Version'
+        if (isOpera) {
+            browserName = 'Opera';
+            try {
+                fullVersion = navigator.userAgent.split('OPR/')[1].split(' ')[0];
+                majorVersion = fullVersion.split('.')[0];
+            } catch (e) {
+                fullVersion = '0.0.0.0';
+                majorVersion = 0;
+            }
+        }
+        // In MSIE version <=10, the true version is after 'MSIE' in userAgent
+        // In IE 11, look for the string after 'rv:'
+        else if (isIE) {
+            verOffset = nAgt.indexOf('rv:');
+            if (verOffset > 0) { //IE 11
+                fullVersion = nAgt.substring(verOffset + 3);
+            } else { //IE 10 or earlier
+                verOffset = nAgt.indexOf('MSIE');
+                fullVersion = nAgt.substring(verOffset + 5);
+            }
+            browserName = 'IE';
+        }
+        // In Chrome, the true version is after 'Chrome' 
+        else if (isChrome) {
+            verOffset = nAgt.indexOf('Chrome');
+            browserName = 'Chrome';
+            fullVersion = nAgt.substring(verOffset + 7);
+        }
+        // In Safari, the true version is after 'Safari' or after 'Version' 
+        else if (isSafari) {
+            verOffset = nAgt.indexOf('Safari');
+
+            browserName = 'Safari';
+            fullVersion = nAgt.substring(verOffset + 7);
+
+            if ((verOffset = nAgt.indexOf('Version')) !== -1) {
+                fullVersion = nAgt.substring(verOffset + 8);
+            }
+
+            if (navigator.userAgent.indexOf('Version/') !== -1) {
+                fullVersion = navigator.userAgent.split('Version/')[1].split(' ')[0];
+            }
+        }
+        // In Firefox, the true version is after 'Firefox' 
+        else if (isFirefox) {
+            verOffset = nAgt.indexOf('Firefox');
+            browserName = 'Firefox';
+            fullVersion = nAgt.substring(verOffset + 8);
+        }
+
+        // In most other browsers, 'name/version' is at the end of userAgent 
+        else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) < (verOffset = nAgt.lastIndexOf('/'))) {
+            browserName = nAgt.substring(nameOffset, verOffset);
+            fullVersion = nAgt.substring(verOffset + 1);
+
+            if (browserName.toLowerCase() === browserName.toUpperCase()) {
+                browserName = navigator.appName;
+            }
+        }
+
+        if (isEdge) {
+            browserName = 'Edge';
+            fullVersion = navigator.userAgent.split('Edge/')[1];
+            // fullVersion = parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10).toString();
+        }
+
+        // trim the fullVersion string at semicolon/space/bracket if present
+        if ((ix = fullVersion.search(/[; \)]/)) !== -1) {
+            fullVersion = fullVersion.substring(0, ix);
+        }
+
+        majorVersion = parseInt('' + fullVersion, 10);
+
+        if (isNaN(majorVersion)) {
+            fullVersion = '' + parseFloat(navigator.appVersion);
+            majorVersion = parseInt(navigator.appVersion, 10);
+        }
+
+        return {
+            fullVersion: fullVersion,
+            version: majorVersion,
+            name: browserName,
+            isPrivateBrowsing: false
+        };
+    }
+
+    // via: https://gist.github.com/cou929/7973956
+
+    function retry(isDone, next) {
+        var currentTrial = 0,
+            maxRetry = 50,
+            interval = 10,
+            isTimeout = false;
+        var id = window.setInterval(
+            function() {
+                if (isDone()) {
+                    window.clearInterval(id);
+                    next(isTimeout);
+                }
+                if (currentTrial++ > maxRetry) {
+                    window.clearInterval(id);
+                    isTimeout = true;
+                    next(isTimeout);
+                }
+            },
+            10
+        );
+    }
+
+    function isIE10OrLater(userAgent) {
+        var ua = userAgent.toLowerCase();
+        if (ua.indexOf('msie') === 0 && ua.indexOf('trident') === 0) {
+            return false;
+        }
+        var match = /(?:msie|rv:)\s?([\d\.]+)/.exec(ua);
+        if (match && parseInt(match[1], 10) >= 10) {
+            return true;
+        }
+        return false;
+    }
+
+    function detectPrivateMode(callback) {
+        var isPrivate;
+
+        try {
+
+            if (window.webkitRequestFileSystem) {
+                window.webkitRequestFileSystem(
+                    window.TEMPORARY, 1,
+                    function() {
+                        isPrivate = false;
+                    },
+                    function(e) {
+                        isPrivate = true;
+                    }
+                );
+            } else if (window.indexedDB && /Firefox/.test(window.navigator.userAgent)) {
+                var db;
+                try {
+                    db = window.indexedDB.open('test');
+                    db.onerror = function() {
+                        return true;
+                    };
+                } catch (e) {
+                    isPrivate = true;
+                }
+
+                if (typeof isPrivate === 'undefined') {
+                    retry(
+                        function isDone() {
+                            return db.readyState === 'done' ? true : false;
+                        },
+                        function next(isTimeout) {
+                            if (!isTimeout) {
+                                isPrivate = db.result ? false : true;
+                            }
+                        }
+                    );
+                }
+            } else if (isIE10OrLater(window.navigator.userAgent)) {
+                isPrivate = false;
+                try {
+                    if (!window.indexedDB) {
+                        isPrivate = true;
+                    }
+                } catch (e) {
+                    isPrivate = true;
+                }
+            } else if (window.localStorage && /Safari/.test(window.navigator.userAgent)) {
+                try {
+                    window.localStorage.setItem('test', 1);
+                } catch (e) {
+                    isPrivate = true;
+                }
+
+                if (typeof isPrivate === 'undefined') {
+                    isPrivate = false;
+                    window.localStorage.removeItem('test');
+                }
+            }
+
+        } catch (e) {
+            isPrivate = false;
+        }
+
+        retry(
+            function isDone() {
+                return typeof isPrivate !== 'undefined' ? true : false;
+            },
+            function next(isTimeout) {
+                callback(isPrivate);
+            }
+        );
+    }
+
+    var isMobile = {
+        Android: function() {
+            return navigator.userAgent.match(/Android/i);
+        },
+        BlackBerry: function() {
+            return navigator.userAgent.match(/BlackBerry|BB10/i);
+        },
+        iOS: function() {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+        },
+        Opera: function() {
+            return navigator.userAgent.match(/Opera Mini/i);
+        },
+        Windows: function() {
+            return navigator.userAgent.match(/IEMobile/i);
+        },
+        any: function() {
+            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+        },
+        getOsName: function() {
+            var osName = 'Unknown OS';
+            if (isMobile.Android()) {
+                osName = 'Android';
+            }
+
+            if (isMobile.BlackBerry()) {
+                osName = 'BlackBerry';
+            }
+
+            if (isMobile.iOS()) {
+                osName = 'iOS';
+            }
+
+            if (isMobile.Opera()) {
+                osName = 'Opera Mini';
+            }
+
+            if (isMobile.Windows()) {
+                osName = 'Windows';
+            }
+
+            return osName;
+        }
+    };
+
+    // via: http://jsfiddle.net/ChristianL/AVyND/
+    function detectDesktopOS() {
+        var unknown = '-';
+
+        var nVer = navigator.appVersion;
+        var nAgt = navigator.userAgent;
+
+        var os = unknown;
+        var clientStrings = [{
+            s: 'Windows 10',
+            r: /(Windows 10.0|Windows NT 10.0)/
+        }, {
+            s: 'Windows 8.1',
+            r: /(Windows 8.1|Windows NT 6.3)/
+        }, {
+            s: 'Windows 8',
+            r: /(Windows 8|Windows NT 6.2)/
+        }, {
+            s: 'Windows 7',
+            r: /(Windows 7|Windows NT 6.1)/
+        }, {
+            s: 'Windows Vista',
+            r: /Windows NT 6.0/
+        }, {
+            s: 'Windows Server 2003',
+            r: /Windows NT 5.2/
+        }, {
+            s: 'Windows XP',
+            r: /(Windows NT 5.1|Windows XP)/
+        }, {
+            s: 'Windows 2000',
+            r: /(Windows NT 5.0|Windows 2000)/
+        }, {
+            s: 'Windows ME',
+            r: /(Win 9x 4.90|Windows ME)/
+        }, {
+            s: 'Windows 98',
+            r: /(Windows 98|Win98)/
+        }, {
+            s: 'Windows 95',
+            r: /(Windows 95|Win95|Windows_95)/
+        }, {
+            s: 'Windows NT 4.0',
+            r: /(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/
+        }, {
+            s: 'Windows CE',
+            r: /Windows CE/
+        }, {
+            s: 'Windows 3.11',
+            r: /Win16/
+        }, {
+            s: 'Android',
+            r: /Android/
+        }, {
+            s: 'Open BSD',
+            r: /OpenBSD/
+        }, {
+            s: 'Sun OS',
+            r: /SunOS/
+        }, {
+            s: 'Linux',
+            r: /(Linux|X11)/
+        }, {
+            s: 'iOS',
+            r: /(iPhone|iPad|iPod)/
+        }, {
+            s: 'Mac OS X',
+            r: /Mac OS X/
+        }, {
+            s: 'Mac OS',
+            r: /(MacPPC|MacIntel|Mac_PowerPC|Macintosh)/
+        }, {
+            s: 'QNX',
+            r: /QNX/
+        }, {
+            s: 'UNIX',
+            r: /UNIX/
+        }, {
+            s: 'BeOS',
+            r: /BeOS/
+        }, {
+            s: 'OS/2',
+            r: /OS\/2/
+        }, {
+            s: 'Search Bot',
+            r: /(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/
+        }];
+        for (var i = 0, cs; cs = clientStrings[i]; i++) {
+            if (cs.r.test(nAgt)) {
+                os = cs.s;
+                break;
+            }
+        }
+
+        var osVersion = unknown;
+
+        if (/Windows/.test(os)) {
+            if (/Windows (.*)/.test(os)) {
+                osVersion = /Windows (.*)/.exec(os)[1];
+            }
+            os = 'Windows';
+        }
+
+        switch (os) {
+            case 'Mac OS X':
+                if (/Mac OS X (10[\.\_\d]+)/.test(nAgt)) {
+                    osVersion = /Mac OS X (10[\.\_\d]+)/.exec(nAgt)[1];
+                }
+                break;
+            case 'Android':
+                if (/Android ([\.\_\d]+)/.test(nAgt)) {
+                    osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
+                }
+                break;
+            case 'iOS':
+                if (/OS (\d+)_(\d+)_?(\d+)?/.test(nAgt)) {
+                    osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
+                    osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
+                }
+                break;
+        }
+
+        return {
+            osName: os,
+            osVersion: osVersion
+        };
+    }
+
+    var osName = 'Unknown OS';
+    var osVersion = 'Unknown OS Version';
+
+    function getAndroidVersion(ua) {
+        ua = (ua || navigator.userAgent).toLowerCase();
+        var match = ua.match(/android\s([0-9\.]*)/);
+        return match ? match[1] : false;
+    }
+
+    var osInfo = detectDesktopOS();
+
+    if (osInfo && osInfo.osName && osInfo.osName != '-') {
+        osName = osInfo.osName;
+        osVersion = osInfo.osVersion;
+    } else if (isMobile.any()) {
+        osName = isMobile.getOsName();
+
+        if (osName == 'Android') {
+            osVersion = getAndroidVersion();
+        }
+    }
+
+    var isNodejs = typeof process === 'object' && typeof process.versions === 'object' && process.versions.node;
+
+    if (osName === 'Unknown OS' && isNodejs) {
+        osName = 'Nodejs';
+        osVersion = process.versions.node.toString().replace('v', '');
+    }
+
+    var isCanvasSupportsStreamCapturing = false;
+    var isVideoSupportsStreamCapturing = false;
+    ['captureStream', 'mozCaptureStream', 'webkitCaptureStream'].forEach(function(item) {
+        if (typeof document === 'undefined' || typeof document.createElement !== 'function') {
+            return;
+        }
+
+        if (!isCanvasSupportsStreamCapturing && item in document.createElement('canvas')) {
+            isCanvasSupportsStreamCapturing = true;
+        }
+
+        if (!isVideoSupportsStreamCapturing && item in document.createElement('video')) {
+            isVideoSupportsStreamCapturing = true;
+        }
+    });
+
+    var regexIpv4Local = /^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/,
+        regexIpv4 = /([0-9]{1,3}(\.[0-9]{1,3}){3})/,
+        regexIpv6 = /[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}/;
+
+    // via: https://github.com/diafygi/webrtc-ips
+    function DetectLocalIPAddress(callback, stream) {
+        if (!DetectRTC.isWebRTCSupported) {
+            return;
+        }
+
+        var isPublic = true,
+            isIpv4 = true;
+        getIPs(function(ip) {
+            if (!ip) {
+                callback(); // Pass nothing to tell that ICE-gathering-ended
+            } else if (ip.match(regexIpv4Local)) {
+                isPublic = false;
+                callback('Local: ' + ip, isPublic, isIpv4);
+            } else if (ip.match(regexIpv6)) { //via https://ourcodeworld.com/articles/read/257/how-to-get-the-client-ip-address-with-javascript-only
+                isIpv4 = false;
+                callback('Public: ' + ip, isPublic, isIpv4);
+            } else {
+                callback('Public: ' + ip, isPublic, isIpv4);
+            }
+        }, stream);
+    }
+
+    function getIPs(callback, stream) {
+        if (typeof document === 'undefined' || typeof document.getElementById !== 'function') {
+            return;
+        }
+
+        var ipDuplicates = {};
+
+        var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+
+        if (!RTCPeerConnection) {
+            var iframe = document.getElementById('iframe');
+            if (!iframe) {
+                return;
+            }
+            var win = iframe.contentWindow;
+            RTCPeerConnection = win.RTCPeerConnection || win.mozRTCPeerConnection || win.webkitRTCPeerConnection;
+        }
+
+        if (!RTCPeerConnection) {
+            return;
+        }
+
+        var peerConfig = null;
+
+        if (DetectRTC.browser === 'Chrome' && DetectRTC.browser.version < 58) {
+            // todo: add support for older Opera
+            peerConfig = {
+                optional: [{
+                    RtpDataChannels: true
+                }]
+            };
+        }
+
+        var servers = {
+            iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            }]
+        };
+
+        var pc = new RTCPeerConnection(servers, peerConfig);
+
+        if (stream) {
+            if (pc.addStream) {
+                pc.addStream(stream);
+            } else if (pc.addTrack && stream.getTracks()[0]) {
+                pc.addTrack(stream.getTracks()[0], stream);
+            }
+        }
+
+        function handleCandidate(candidate) {
+            if (!candidate) {
+                callback(); // Pass nothing to tell that ICE-gathering-ended
+                return;
+            }
+
+            var match = regexIpv4.exec(candidate);
+            if (!match) {
+                return;
+            }
+            var ipAddress = match[1];
+            var isPublic = (candidate.match(regexIpv4Local)),
+                isIpv4 = true;
+
+            if (ipDuplicates[ipAddress] === undefined) {
+                callback(ipAddress, isPublic, isIpv4);
+            }
+
+            ipDuplicates[ipAddress] = true;
+        }
+
+        // listen for candidate events
+        pc.onicecandidate = function(event) {
+            if (event.candidate && event.candidate.candidate) {
+                handleCandidate(event.candidate.candidate);
+            } else {
+                handleCandidate(); // Pass nothing to tell that ICE-gathering-ended
+            }
+        };
+
+        // create data channel
+        if (!stream) {
+            try {
+                pc.createDataChannel('sctp', {});
+            } catch (e) {}
+        }
+
+        // create an offer sdp
+        if (DetectRTC.isPromisesSupported) {
+            pc.createOffer().then(function(result) {
+                pc.setLocalDescription(result).then(afterCreateOffer);
+            });
+        } else {
+            pc.createOffer(function(result) {
+                pc.setLocalDescription(result, afterCreateOffer, function() {});
+            }, function() {});
+        }
+
+        function afterCreateOffer() {
+            var lines = pc.localDescription.sdp.split('\n');
+
+            lines.forEach(function(line) {
+                if (line && line.indexOf('a=candidate:') === 0) {
+                    handleCandidate(line);
+                }
+            });
+        }
+    }
+
+    var MediaDevices = [];
+
+    var audioInputDevices = [];
+    var audioOutputDevices = [];
+    var videoInputDevices = [];
+
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        // Firefox 38+ seems having support of enumerateDevices
+        // Thanks @xdumaine/enumerateDevices
+        navigator.enumerateDevices = function(callback) {
+            var enumerateDevices = navigator.mediaDevices.enumerateDevices();
+            if (enumerateDevices && enumerateDevices.then) {
+                navigator.mediaDevices.enumerateDevices().then(callback).catch(function() {
+                    callback([]);
+                });
+            } else {
+                callback([]);
+            }
+        };
+    }
+
+    // Media Devices detection
+    var canEnumerate = false;
+
+    /*global MediaStreamTrack:true */
+    if (typeof MediaStreamTrack !== 'undefined' && 'getSources' in MediaStreamTrack) {
+        canEnumerate = true;
+    } else if (navigator.mediaDevices && !!navigator.mediaDevices.enumerateDevices) {
+        canEnumerate = true;
+    }
+
+    var hasMicrophone = false;
+    var hasSpeakers = false;
+    var hasWebcam = false;
+
+    var isWebsiteHasMicrophonePermissions = false;
+    var isWebsiteHasWebcamPermissions = false;
+
+    // http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediadevices
+    function checkDeviceSupport(callback) {
+        if (!canEnumerate) {
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+
+        if (!navigator.enumerateDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
+            navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
+        }
+
+        if (!navigator.enumerateDevices && navigator.enumerateDevices) {
+            navigator.enumerateDevices = navigator.enumerateDevices.bind(navigator);
+        }
+
+        if (!navigator.enumerateDevices) {
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+
+        MediaDevices = [];
+
+        audioInputDevices = [];
+        audioOutputDevices = [];
+        videoInputDevices = [];
+
+        hasMicrophone = false;
+        hasSpeakers = false;
+        hasWebcam = false;
+
+        isWebsiteHasMicrophonePermissions = false;
+        isWebsiteHasWebcamPermissions = false;
+
+        // to prevent duplication
+        var alreadyUsedDevices = {};
+
+        navigator.enumerateDevices(function(devices) {
+            devices.forEach(function(_device) {
+                var device = {};
+                for (var d in _device) {
+                    try {
+                        if (typeof _device[d] !== 'function') {
+                            device[d] = _device[d];
+                        }
+                    } catch (e) {}
+                }
+
+                if (alreadyUsedDevices[device.deviceId + device.label + device.kind]) {
+                    return;
+                }
+
+                // if it is MediaStreamTrack.getSources
+                if (device.kind === 'audio') {
+                    device.kind = 'audioinput';
+                }
+
+                if (device.kind === 'video') {
+                    device.kind = 'videoinput';
+                }
+
+                if (!device.deviceId) {
+                    device.deviceId = device.id;
+                }
+
+                if (!device.id) {
+                    device.id = device.deviceId;
+                }
+
+                if (!device.label) {
+                    device.isCustomLabel = true;
+
+                    if (device.kind === 'videoinput') {
+                        device.label = 'Camera ' + (videoInputDevices.length + 1);
+                    } else if (device.kind === 'audioinput') {
+                        device.label = 'Microphone ' + (audioInputDevices.length + 1);
+                    } else if (device.kind === 'audiooutput') {
+                        device.label = 'Speaker ' + (audioOutputDevices.length + 1);
+                    } else {
+                        device.label = 'Please invoke getUserMedia once.';
+                    }
+
+                    if (typeof DetectRTC !== 'undefined' && DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+                        if (typeof document !== 'undefined' && typeof document.domain === 'string' && document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+                            device.label = 'HTTPs is required to get label of this ' + device.kind + ' device.';
+                        }
+                    }
+                } else {
+                    // Firefox on Android still returns empty label
+                    if (device.kind === 'videoinput' && !isWebsiteHasWebcamPermissions) {
+                        isWebsiteHasWebcamPermissions = true;
+                    }
+
+                    if (device.kind === 'audioinput' && !isWebsiteHasMicrophonePermissions) {
+                        isWebsiteHasMicrophonePermissions = true;
+                    }
+                }
+
+                if (device.kind === 'audioinput') {
+                    hasMicrophone = true;
+
+                    if (audioInputDevices.indexOf(device) === -1) {
+                        audioInputDevices.push(device);
+                    }
+                }
+
+                if (device.kind === 'audiooutput') {
+                    hasSpeakers = true;
+
+                    if (audioOutputDevices.indexOf(device) === -1) {
+                        audioOutputDevices.push(device);
+                    }
+                }
+
+                if (device.kind === 'videoinput') {
+                    hasWebcam = true;
+
+                    if (videoInputDevices.indexOf(device) === -1) {
+                        videoInputDevices.push(device);
+                    }
+                }
+
+                // there is no 'videoouput' in the spec.
+                MediaDevices.push(device);
+
+                alreadyUsedDevices[device.deviceId + device.label + device.kind] = device;
+            });
+
+            if (typeof DetectRTC !== 'undefined') {
+                // to sync latest outputs
+                DetectRTC.MediaDevices = MediaDevices;
+                DetectRTC.hasMicrophone = hasMicrophone;
+                DetectRTC.hasSpeakers = hasSpeakers;
+                DetectRTC.hasWebcam = hasWebcam;
+
+                DetectRTC.isWebsiteHasWebcamPermissions = isWebsiteHasWebcamPermissions;
+                DetectRTC.isWebsiteHasMicrophonePermissions = isWebsiteHasMicrophonePermissions;
+
+                DetectRTC.audioInputDevices = audioInputDevices;
+                DetectRTC.audioOutputDevices = audioOutputDevices;
+                DetectRTC.videoInputDevices = videoInputDevices;
+            }
+
+            if (callback) {
+                callback();
+            }
+        });
+    }
+
+    var DetectRTC = window.DetectRTC || {};
+
+    // ----------
+    // DetectRTC.browser.name || DetectRTC.browser.version || DetectRTC.browser.fullVersion
+    DetectRTC.browser = getBrowserInfo();
+
+    detectPrivateMode(function(isPrivateBrowsing) {
+        DetectRTC.browser.isPrivateBrowsing = !!isPrivateBrowsing;
+    });
+
+    // DetectRTC.isChrome || DetectRTC.isFirefox || DetectRTC.isEdge
+    DetectRTC.browser['is' + DetectRTC.browser.name] = true;
+
+    // -----------
+    DetectRTC.osName = osName;
+    DetectRTC.osVersion = osVersion;
+
+    var isNodeWebkit = typeof process === 'object' && typeof process.versions === 'object' && process.versions['node-webkit'];
+
+    // --------- Detect if system supports WebRTC 1.0 or WebRTC 1.1.
+    var isWebRTCSupported = false;
+    ['RTCPeerConnection', 'webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function(item) {
+        if (isWebRTCSupported) {
+            return;
+        }
+
+        if (item in window) {
+            isWebRTCSupported = true;
+        }
+    });
+    DetectRTC.isWebRTCSupported = isWebRTCSupported;
+
+    //-------
+    DetectRTC.isORTCSupported = typeof RTCIceGatherer !== 'undefined';
+
+    // --------- Detect if system supports screen capturing API
+    var isScreenCapturingSupported = false;
+    if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 35) {
+        isScreenCapturingSupported = true;
+    } else if (DetectRTC.browser.isFirefox && DetectRTC.browser.version >= 34) {
+        isScreenCapturingSupported = true;
+    } else if (DetectRTC.browser.isEdge && DetectRTC.browser.version >= 17) {
+        isScreenCapturingSupported = true; // navigator.getDisplayMedia
+    } else if (DetectRTC.osName === 'Android' && DetectRTC.browser.isChrome) {
+        isScreenCapturingSupported = true;
+    }
+
+    if (!/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+        var isNonLocalHost = typeof document !== 'undefined' && typeof document.domain === 'string' && document.domain.search && document.domain.search(/localhost|127.0./g) === -1;
+        if (isNonLocalHost && (DetectRTC.browser.isChrome || DetectRTC.browser.isEdge || DetectRTC.browser.isOpera)) {
+            isScreenCapturingSupported = false;
+        } else if (DetectRTC.browser.isFirefox) {
+            isScreenCapturingSupported = false;
+        }
+    }
+    DetectRTC.isScreenCapturingSupported = isScreenCapturingSupported;
+
+    // --------- Detect if WebAudio API are supported
+    var webAudio = {
+        isSupported: false,
+        isCreateMediaStreamSourceSupported: false
+    };
+
+    ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
+        if (webAudio.isSupported) {
+            return;
+        }
+
+        if (item in window) {
+            webAudio.isSupported = true;
+
+            if (window[item] && 'createMediaStreamSource' in window[item].prototype) {
+                webAudio.isCreateMediaStreamSourceSupported = true;
+            }
+        }
+    });
+    DetectRTC.isAudioContextSupported = webAudio.isSupported;
+    DetectRTC.isCreateMediaStreamSourceSupported = webAudio.isCreateMediaStreamSourceSupported;
+
+    // ---------- Detect if SCTP/RTP channels are supported.
+
+    var isRtpDataChannelsSupported = false;
+    if (DetectRTC.browser.isChrome && DetectRTC.browser.version > 31) {
+        isRtpDataChannelsSupported = true;
+    }
+    DetectRTC.isRtpDataChannelsSupported = isRtpDataChannelsSupported;
+
+    var isSCTPSupportd = false;
+    if (DetectRTC.browser.isFirefox && DetectRTC.browser.version > 28) {
+        isSCTPSupportd = true;
+    } else if (DetectRTC.browser.isChrome && DetectRTC.browser.version > 25) {
+        isSCTPSupportd = true;
+    } else if (DetectRTC.browser.isOpera && DetectRTC.browser.version >= 11) {
+        isSCTPSupportd = true;
+    }
+    DetectRTC.isSctpDataChannelsSupported = isSCTPSupportd;
+
+    // ---------
+
+    DetectRTC.isMobileDevice = isMobileDevice; // "isMobileDevice" boolean is defined in "getBrowserInfo.js"
+
+    // ------
+    var isGetUserMediaSupported = false;
+    if (navigator.getUserMedia) {
+        isGetUserMediaSupported = true;
+    } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        isGetUserMediaSupported = true;
+    }
+
+    if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+        if (typeof document !== 'undefined' && typeof document.domain === 'string' && document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+            isGetUserMediaSupported = 'Requires HTTPs';
+        }
+    }
+
+    if (DetectRTC.osName === 'Nodejs') {
+        isGetUserMediaSupported = false;
+    }
+    DetectRTC.isGetUserMediaSupported = isGetUserMediaSupported;
+
+    var displayResolution = '';
+    if (screen.width) {
+        var width = (screen.width) ? screen.width : '';
+        var height = (screen.height) ? screen.height : '';
+        displayResolution += '' + width + ' x ' + height;
+    }
+    DetectRTC.displayResolution = displayResolution;
+
+    function getAspectRatio(w, h) {
+        function gcd(a, b) {
+            return (b == 0) ? a : gcd(b, a % b);
+        }
+        var r = gcd(w, h);
+        return (w / r) / (h / r);
+    }
+
+    DetectRTC.displayAspectRatio = getAspectRatio(screen.width, screen.height).toFixed(2);
+
+    // ----------
+    DetectRTC.isCanvasSupportsStreamCapturing = isCanvasSupportsStreamCapturing;
+    DetectRTC.isVideoSupportsStreamCapturing = isVideoSupportsStreamCapturing;
+
+    if (DetectRTC.browser.name == 'Chrome' && DetectRTC.browser.version >= 53) {
+        if (!DetectRTC.isCanvasSupportsStreamCapturing) {
+            DetectRTC.isCanvasSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+        }
+
+        if (!DetectRTC.isVideoSupportsStreamCapturing) {
+            DetectRTC.isVideoSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+        }
+    }
+
+    // ------
+    DetectRTC.DetectLocalIPAddress = DetectLocalIPAddress;
+
+    DetectRTC.isWebSocketsSupported = 'WebSocket' in window && 2 === window.WebSocket.CLOSING;
+    DetectRTC.isWebSocketsBlocked = !DetectRTC.isWebSocketsSupported;
+
+    if (DetectRTC.osName === 'Nodejs') {
+        DetectRTC.isWebSocketsSupported = true;
+        DetectRTC.isWebSocketsBlocked = false;
+    }
+
+    DetectRTC.checkWebSocketsSupport = function(callback) {
+        callback = callback || function() {};
+        try {
+            var starttime;
+            var websocket = new WebSocket('wss://echo.websocket.org:443/');
+            websocket.onopen = function() {
+                DetectRTC.isWebSocketsBlocked = false;
+                starttime = (new Date).getTime();
+                websocket.send('ping');
+            };
+            websocket.onmessage = function() {
+                DetectRTC.WebsocketLatency = (new Date).getTime() - starttime + 'ms';
+                callback();
+                websocket.close();
+                websocket = null;
+            };
+            websocket.onerror = function() {
+                DetectRTC.isWebSocketsBlocked = true;
+                callback();
+            };
+        } catch (e) {
+            DetectRTC.isWebSocketsBlocked = true;
+            callback();
+        }
+    };
+
+    // -------
+    DetectRTC.load = function(callback) {
+        callback = callback || function() {};
+        checkDeviceSupport(callback);
+    };
+
+    // check for microphone/camera support!
+    if (typeof checkDeviceSupport === 'function') {
+        // checkDeviceSupport();
+    }
+
+    if (typeof MediaDevices !== 'undefined') {
+        DetectRTC.MediaDevices = MediaDevices;
+    } else {
+        DetectRTC.MediaDevices = [];
+    }
+
+    DetectRTC.hasMicrophone = hasMicrophone;
+    DetectRTC.hasSpeakers = hasSpeakers;
+    DetectRTC.hasWebcam = hasWebcam;
+
+    DetectRTC.isWebsiteHasWebcamPermissions = isWebsiteHasWebcamPermissions;
+    DetectRTC.isWebsiteHasMicrophonePermissions = isWebsiteHasMicrophonePermissions;
+
+    DetectRTC.audioInputDevices = audioInputDevices;
+    DetectRTC.audioOutputDevices = audioOutputDevices;
+    DetectRTC.videoInputDevices = videoInputDevices;
+
+    // ------
+    var isSetSinkIdSupported = false;
+    if (typeof document !== 'undefined' && typeof document.createElement === 'function' && 'setSinkId' in document.createElement('video')) {
+        isSetSinkIdSupported = true;
+    }
+    DetectRTC.isSetSinkIdSupported = isSetSinkIdSupported;
+
+    // -----
+    var isRTPSenderReplaceTracksSupported = false;
+    if (DetectRTC.browser.isFirefox && typeof mozRTCPeerConnection !== 'undefined' /*&& DetectRTC.browser.version > 39*/ ) {
+        /*global mozRTCPeerConnection:true */
+        if ('getSenders' in mozRTCPeerConnection.prototype) {
+            isRTPSenderReplaceTracksSupported = true;
+        }
+    } else if (DetectRTC.browser.isChrome && typeof webkitRTCPeerConnection !== 'undefined') {
+        /*global webkitRTCPeerConnection:true */
+        if ('getSenders' in webkitRTCPeerConnection.prototype) {
+            isRTPSenderReplaceTracksSupported = true;
+        }
+    }
+    DetectRTC.isRTPSenderReplaceTracksSupported = isRTPSenderReplaceTracksSupported;
+
+    //------
+    var isRemoteStreamProcessingSupported = false;
+    if (DetectRTC.browser.isFirefox && DetectRTC.browser.version > 38) {
+        isRemoteStreamProcessingSupported = true;
+    }
+    DetectRTC.isRemoteStreamProcessingSupported = isRemoteStreamProcessingSupported;
+
+    //-------
+    var isApplyConstraintsSupported = false;
+
+    /*global MediaStreamTrack:true */
+    if (typeof MediaStreamTrack !== 'undefined' && 'applyConstraints' in MediaStreamTrack.prototype) {
+        isApplyConstraintsSupported = true;
+    }
+    DetectRTC.isApplyConstraintsSupported = isApplyConstraintsSupported;
+
+    //-------
+    var isMultiMonitorScreenCapturingSupported = false;
+    if (DetectRTC.browser.isFirefox && DetectRTC.browser.version >= 43) {
+        // version 43 merely supports platforms for multi-monitors
+        // version 44 will support exact multi-monitor selection i.e. you can select any monitor for screen capturing.
+        isMultiMonitorScreenCapturingSupported = true;
+    }
+    DetectRTC.isMultiMonitorScreenCapturingSupported = isMultiMonitorScreenCapturingSupported;
+
+    DetectRTC.isPromisesSupported = !!('Promise' in window);
+
+    // version is generated by "grunt"
+    DetectRTC.version = '1.3.9';
+
+    if (typeof DetectRTC === 'undefined') {
+        window.DetectRTC = {};
+    }
+
+    var MediaStream = window.MediaStream;
+
+    if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+        MediaStream = webkitMediaStream;
+    }
+
+    if (typeof MediaStream !== 'undefined' && typeof MediaStream === 'function') {
+        DetectRTC.MediaStream = Object.keys(MediaStream.prototype);
+    } else DetectRTC.MediaStream = false;
+
+    if (typeof MediaStreamTrack !== 'undefined') {
+        DetectRTC.MediaStreamTrack = Object.keys(MediaStreamTrack.prototype);
+    } else DetectRTC.MediaStreamTrack = false;
+
+    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+
+    if (typeof RTCPeerConnection !== 'undefined') {
+        DetectRTC.RTCPeerConnection = Object.keys(RTCPeerConnection.prototype);
+    } else DetectRTC.RTCPeerConnection = false;
+
+    window.DetectRTC = DetectRTC;
+
+    if (typeof module !== 'undefined' /* && !!module.exports*/ ) {
+        module.exports = DetectRTC;
+    }
+
+    if (typeof define === 'function' && define.amd) {
+        define('DetectRTC', [], function() {
+            return DetectRTC;
+        });
+    }
+})();
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":6}],38:[function(require,module,exports){
 'use strict';
 
 /* globals
@@ -6277,7 +7437,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return INTRINSICS[key];
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -7069,7 +8229,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":37,"./es5":39,"./helpers/assertRecord":41,"./helpers/assign":42,"./helpers/isFinite":43,"./helpers/isNaN":44,"./helpers/isPrimitive":45,"./helpers/mod":46,"./helpers/sign":47,"es-to-primitive/es6":50,"function-bind":120,"has":123,"is-regex":126,"object-keys":130}],39:[function(require,module,exports){
+},{"./GetIntrinsic":38,"./es5":40,"./helpers/assertRecord":42,"./helpers/assign":43,"./helpers/isFinite":44,"./helpers/isNaN":45,"./helpers/isPrimitive":46,"./helpers/mod":47,"./helpers/sign":48,"es-to-primitive/es6":51,"function-bind":121,"has":124,"is-regex":127,"object-keys":131}],40:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -7306,12 +8466,12 @@ var ES5 = {
 
 module.exports = ES5;
 
-},{"./GetIntrinsic":37,"./helpers/assertRecord":41,"./helpers/isFinite":43,"./helpers/isNaN":44,"./helpers/mod":46,"./helpers/sign":47,"es-to-primitive/es5":49,"has":123,"is-callable":124}],40:[function(require,module,exports){
+},{"./GetIntrinsic":38,"./helpers/assertRecord":42,"./helpers/isFinite":44,"./helpers/isNaN":45,"./helpers/mod":47,"./helpers/sign":48,"es-to-primitive/es5":50,"has":124,"is-callable":125}],41:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./es2015');
 
-},{"./es2015":38}],41:[function(require,module,exports){
+},{"./es2015":39}],42:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('../GetIntrinsic');
@@ -7362,7 +8522,7 @@ module.exports = function assertRecord(ES, recordType, argumentName, value) {
   console.log(predicate(ES, value), value);
 };
 
-},{"../GetIntrinsic":37,"has":123}],42:[function(require,module,exports){
+},{"../GetIntrinsic":38,"has":124}],43:[function(require,module,exports){
 var bind = require('function-bind');
 var has = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
@@ -7381,33 +8541,33 @@ module.exports = function assign(target, source) {
 	return target;
 };
 
-},{"function-bind":120}],43:[function(require,module,exports){
+},{"function-bind":121}],44:[function(require,module,exports){
 var $isNaN = Number.isNaN || function (a) { return a !== a; };
 
 module.exports = Number.isFinite || function (x) { return typeof x === 'number' && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = Number.isNaN || function isNaN(a) {
 	return a !== a;
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = function isPrimitive(value) {
 	return value === null || (typeof value !== 'function' && typeof value !== 'object');
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports = function mod(number, modulo) {
 	var remain = number % modulo;
 	return Math.floor(remain >= 0 ? remain : remain + modulo);
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = function sign(number) {
 	return number >= 0 ? 1 : -1;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
@@ -7484,7 +8644,7 @@ module.exports = function ToPrimitive(input) {
 	return ordinaryToPrimitive(input, hint === 'default' ? 'number' : hint);
 };
 
-},{"./helpers/isPrimitive":51,"is-callable":124,"is-date-object":125,"is-symbol":127}],49:[function(require,module,exports){
+},{"./helpers/isPrimitive":52,"is-callable":125,"is-date-object":126,"is-symbol":128}],50:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -7531,11 +8691,11 @@ module.exports = function ToPrimitive(input) {
 	return ES5internalSlots['[[DefaultValue]]'](input);
 };
 
-},{"./helpers/isPrimitive":51,"is-callable":124}],50:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./es2015":48,"dup":40}],51:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],52:[function(require,module,exports){
+},{"./helpers/isPrimitive":52,"is-callable":125}],51:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"./es2015":49,"dup":41}],52:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"dup":46}],53:[function(require,module,exports){
 // Inspired by Google Closure:
 // http://closure-library.googlecode.com/svn/docs/
 // closure_goog_array_array.js.html#goog.array.clear
@@ -7549,7 +8709,7 @@ module.exports = function () {
 	return this;
 };
 
-},{"../../object/valid-value":90}],53:[function(require,module,exports){
+},{"../../object/valid-value":91}],54:[function(require,module,exports){
 "use strict";
 
 var numberIsNaN       = require("../../number/is-nan")
@@ -7579,14 +8739,14 @@ module.exports = function (searchElement /*, fromIndex*/) {
 	return -1;
 };
 
-},{"../../number/is-nan":64,"../../number/to-pos-integer":68,"../../object/valid-value":90}],54:[function(require,module,exports){
+},{"../../number/is-nan":65,"../../number/to-pos-integer":69,"../../object/valid-value":91}],55:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Array.from
 	: require("./shim");
 
-},{"./is-implemented":55,"./shim":56}],55:[function(require,module,exports){
+},{"./is-implemented":56,"./shim":57}],56:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -7597,7 +8757,7 @@ module.exports = function () {
 	return Boolean(result && (result !== arr) && (result[1] === "dwa"));
 };
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 
 var iteratorSymbol = require("es6-symbol").iterator
@@ -7718,7 +8878,7 @@ module.exports = function (arrayLike /*, mapFn, thisArg*/) {
 	return arr;
 };
 
-},{"../../function/is-arguments":57,"../../function/is-function":58,"../../number/to-pos-integer":68,"../../object/is-value":78,"../../object/valid-callable":88,"../../object/valid-value":90,"../../string/is-string":94,"es6-symbol":109}],57:[function(require,module,exports){
+},{"../../function/is-arguments":58,"../../function/is-function":59,"../../number/to-pos-integer":69,"../../object/is-value":79,"../../object/valid-callable":89,"../../object/valid-value":91,"../../string/is-string":95,"es6-symbol":110}],58:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString
@@ -7732,7 +8892,7 @@ module.exports = function (value) {
 	return objToString.call(value) === id;
 };
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call(require("./noop"));
@@ -7741,27 +8901,27 @@ module.exports = function (value) {
 	return typeof value === "function" && objToString.call(value) === id;
 };
 
-},{"./noop":59}],59:[function(require,module,exports){
+},{"./noop":60}],60:[function(require,module,exports){
 "use strict";
 
 // eslint-disable-next-line no-empty-function
 module.exports = function () {};
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /* eslint strict: "off" */
 
 module.exports = (function () {
 	return this;
 }());
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Math.sign
 	: require("./shim");
 
-},{"./is-implemented":62,"./shim":63}],62:[function(require,module,exports){
+},{"./is-implemented":63,"./shim":64}],63:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -7770,7 +8930,7 @@ module.exports = function () {
 	return (sign(10) === 1) && (sign(-20) === -1);
 };
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -7779,14 +8939,14 @@ module.exports = function (value) {
 	return value > 0 ? 1 : -1;
 };
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Number.isNaN
 	: require("./shim");
 
-},{"./is-implemented":65,"./shim":66}],65:[function(require,module,exports){
+},{"./is-implemented":66,"./shim":67}],66:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -7795,7 +8955,7 @@ module.exports = function () {
 	return !numberIsNaN({}) && numberIsNaN(NaN) && !numberIsNaN(34);
 };
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -7803,7 +8963,7 @@ module.exports = function (value) {
 	return value !== value;
 };
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
 
 var sign = require("../math/sign")
@@ -7817,7 +8977,7 @@ module.exports = function (value) {
 	return sign(value) * floor(abs(value));
 };
 
-},{"../math/sign":61}],68:[function(require,module,exports){
+},{"../math/sign":62}],69:[function(require,module,exports){
 "use strict";
 
 var toInteger = require("./to-integer")
@@ -7828,7 +8988,7 @@ module.exports = function (value) {
  return max(0, toInteger(value));
 };
 
-},{"./to-integer":67}],69:[function(require,module,exports){
+},{"./to-integer":68}],70:[function(require,module,exports){
 // Internal method, used by iteration functions.
 // Calls a function for each key-value pair found in object
 // Optionally takes compareFn to iterate object in specific order
@@ -7860,14 +9020,14 @@ module.exports = function (method, defVal) {
 	};
 };
 
-},{"./valid-callable":88,"./valid-value":90}],70:[function(require,module,exports){
+},{"./valid-callable":89,"./valid-value":91}],71:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.assign
 	: require("./shim");
 
-},{"./is-implemented":71,"./shim":72}],71:[function(require,module,exports){
+},{"./is-implemented":72,"./shim":73}],72:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -7878,7 +9038,7 @@ module.exports = function () {
 	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
 };
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 "use strict";
 
 var keys  = require("../keys")
@@ -7903,7 +9063,7 @@ module.exports = function (dest, src /*, …srcn*/) {
 	return dest;
 };
 
-},{"../keys":79,"../valid-value":90}],73:[function(require,module,exports){
+},{"../keys":80,"../valid-value":91}],74:[function(require,module,exports){
 "use strict";
 
 var aFrom  = require("../array/from")
@@ -7924,7 +9084,7 @@ module.exports = function (obj/*, propertyNames, options*/) {
 	return result;
 };
 
-},{"../array/from":54,"./assign":70,"./valid-value":90}],74:[function(require,module,exports){
+},{"../array/from":55,"./assign":71,"./valid-value":91}],75:[function(require,module,exports){
 // Workaround for http://code.google.com/p/v8/issues/detail?id=2804
 
 "use strict";
@@ -7974,12 +9134,12 @@ module.exports = (function () {
 	};
 }());
 
-},{"./set-prototype-of/is-implemented":86,"./set-prototype-of/shim":87}],75:[function(require,module,exports){
+},{"./set-prototype-of/is-implemented":87,"./set-prototype-of/shim":88}],76:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./_iterate")("forEach");
 
-},{"./_iterate":69}],76:[function(require,module,exports){
+},{"./_iterate":70}],77:[function(require,module,exports){
 // Deprecated
 
 "use strict";
@@ -7988,7 +9148,7 @@ module.exports = function (obj) {
  return typeof obj === "function";
 };
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -7999,7 +9159,7 @@ module.exports = function (value) {
 	return (isValue(value) && map[typeof value]) || false;
 };
 
-},{"./is-value":78}],78:[function(require,module,exports){
+},{"./is-value":79}],79:[function(require,module,exports){
 "use strict";
 
 var _undefined = require("../function/noop")(); // Support ES3 engines
@@ -8008,12 +9168,12 @@ module.exports = function (val) {
  return (val !== _undefined) && (val !== null);
 };
 
-},{"../function/noop":59}],79:[function(require,module,exports){
+},{"../function/noop":60}],80:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")() ? Object.keys : require("./shim");
 
-},{"./is-implemented":80,"./shim":81}],80:[function(require,module,exports){
+},{"./is-implemented":81,"./shim":82}],81:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -8025,7 +9185,7 @@ module.exports = function () {
 	}
 };
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 
 var isValue = require("../is-value");
@@ -8034,7 +9194,7 @@ var keys = Object.keys;
 
 module.exports = function (object) { return keys(isValue(object) ? Object(object) : object); };
 
-},{"../is-value":78}],82:[function(require,module,exports){
+},{"../is-value":79}],83:[function(require,module,exports){
 "use strict";
 
 var callable = require("./valid-callable")
@@ -8050,7 +9210,7 @@ module.exports = function (obj, cb /*, thisArg*/) {
 	return result;
 };
 
-},{"./for-each":75,"./valid-callable":88}],83:[function(require,module,exports){
+},{"./for-each":76,"./valid-callable":89}],84:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -8072,7 +9232,7 @@ module.exports = function (opts1 /*, …options*/) {
 	return result;
 };
 
-},{"./is-value":78}],84:[function(require,module,exports){
+},{"./is-value":79}],85:[function(require,module,exports){
 "use strict";
 
 var forEach = Array.prototype.forEach, create = Object.create;
@@ -8086,14 +9246,14 @@ module.exports = function (arg /*, …args*/) {
 	return set;
 };
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.setPrototypeOf
 	: require("./shim");
 
-},{"./is-implemented":86,"./shim":87}],86:[function(require,module,exports){
+},{"./is-implemented":87,"./shim":88}],87:[function(require,module,exports){
 "use strict";
 
 var create = Object.create, getPrototypeOf = Object.getPrototypeOf, plainObject = {};
@@ -8104,7 +9264,7 @@ module.exports = function (/* CustomCreate*/) {
 	return getPrototypeOf(setPrototypeOf(customCreate(null), plainObject)) === plainObject;
 };
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /* eslint no-proto: "off" */
 
 // Big thanks to @WebReflection for sorting this out
@@ -8192,7 +9352,7 @@ module.exports = (function (status) {
 
 require("../create");
 
-},{"../create":74,"../is-object":77,"../valid-value":90}],88:[function(require,module,exports){
+},{"../create":75,"../is-object":78,"../valid-value":91}],89:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -8200,7 +9360,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 "use strict";
 
 var isObject = require("./is-object");
@@ -8210,7 +9370,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-object":77}],90:[function(require,module,exports){
+},{"./is-object":78}],91:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -8220,14 +9380,14 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-value":78}],91:[function(require,module,exports){
+},{"./is-value":79}],92:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? String.prototype.contains
 	: require("./shim");
 
-},{"./is-implemented":92,"./shim":93}],92:[function(require,module,exports){
+},{"./is-implemented":93,"./shim":94}],93:[function(require,module,exports){
 "use strict";
 
 var str = "razdwatrzy";
@@ -8237,7 +9397,7 @@ module.exports = function () {
 	return (str.contains("dwa") === true) && (str.contains("foo") === false);
 };
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 "use strict";
 
 var indexOf = String.prototype.indexOf;
@@ -8246,7 +9406,7 @@ module.exports = function (searchString/*, position*/) {
 	return indexOf.call(this, searchString, arguments[1]) > -1;
 };
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call("");
@@ -8261,7 +9421,7 @@ module.exports = function (value) {
 	);
 };
 
-},{}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 "use strict";
 
 var generated = Object.create(null), random = Math.random;
@@ -8276,7 +9436,7 @@ module.exports = function () {
 	return str;
 };
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 "use strict";
 
 var setPrototypeOf = require("es5-ext/object/set-prototype-of")
@@ -8310,7 +9470,7 @@ ArrayIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(ArrayIterator.prototype, Symbol.toStringTag, d("c", "Array Iterator"));
 
-},{"./":99,"d":35,"es5-ext/object/set-prototype-of":85,"es5-ext/string/#/contains":91,"es6-symbol":109}],97:[function(require,module,exports){
+},{"./":100,"d":35,"es5-ext/object/set-prototype-of":86,"es5-ext/string/#/contains":92,"es6-symbol":110}],98:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -8359,7 +9519,7 @@ module.exports = function (iterable, cb /*, thisArg*/) {
 	}
 };
 
-},{"./get":98,"es5-ext/function/is-arguments":57,"es5-ext/object/valid-callable":88,"es5-ext/string/is-string":94}],98:[function(require,module,exports){
+},{"./get":99,"es5-ext/function/is-arguments":58,"es5-ext/object/valid-callable":89,"es5-ext/string/is-string":95}],99:[function(require,module,exports){
 "use strict";
 
 var isArguments    = require("es5-ext/function/is-arguments")
@@ -8376,7 +9536,7 @@ module.exports = function (obj) {
 	return new ArrayIterator(obj);
 };
 
-},{"./array":96,"./string":101,"./valid-iterable":102,"es5-ext/function/is-arguments":57,"es5-ext/string/is-string":94,"es6-symbol":109}],99:[function(require,module,exports){
+},{"./array":97,"./string":102,"./valid-iterable":103,"es5-ext/function/is-arguments":58,"es5-ext/string/is-string":95,"es6-symbol":110}],100:[function(require,module,exports){
 "use strict";
 
 var clear    = require("es5-ext/array/#/clear")
@@ -8484,7 +9644,7 @@ defineProperty(
 	})
 );
 
-},{"d":35,"d/auto-bind":34,"es5-ext/array/#/clear":52,"es5-ext/object/assign":70,"es5-ext/object/valid-callable":88,"es5-ext/object/valid-value":90,"es6-symbol":109}],100:[function(require,module,exports){
+},{"d":35,"d/auto-bind":34,"es5-ext/array/#/clear":53,"es5-ext/object/assign":71,"es5-ext/object/valid-callable":89,"es5-ext/object/valid-value":91,"es6-symbol":110}],101:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -8502,7 +9662,7 @@ module.exports = function (value) {
 	return typeof value[iteratorSymbol] === "function";
 };
 
-},{"es5-ext/function/is-arguments":57,"es5-ext/object/is-value":78,"es5-ext/string/is-string":94,"es6-symbol":109}],101:[function(require,module,exports){
+},{"es5-ext/function/is-arguments":58,"es5-ext/object/is-value":79,"es5-ext/string/is-string":95,"es6-symbol":110}],102:[function(require,module,exports){
 // Thanks @mathiasbynens
 // http://mathiasbynens.be/notes/javascript-unicode#iterating-over-symbols
 
@@ -8543,7 +9703,7 @@ StringIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(StringIterator.prototype, Symbol.toStringTag, d("c", "String Iterator"));
 
-},{"./":99,"d":35,"es5-ext/object/set-prototype-of":85,"es6-symbol":109}],102:[function(require,module,exports){
+},{"./":100,"d":35,"es5-ext/object/set-prototype-of":86,"es6-symbol":110}],103:[function(require,module,exports){
 "use strict";
 
 var isIterable = require("./is-iterable");
@@ -8553,7 +9713,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-iterable":100}],103:[function(require,module,exports){
+},{"./is-iterable":101}],104:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -8562,7 +9722,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":104,"./polyfill":108,"es5-ext/global":60}],104:[function(require,module,exports){
+},{"./is-implemented":105,"./polyfill":109,"es5-ext/global":61}],105:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -8596,7 +9756,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 // Exports true if environment provides native `Map` implementation,
 // whatever that is.
 
@@ -8607,13 +9767,13 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new Map()) === '[object Map]');
 }());
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 
 module.exports = require('es5-ext/object/primitive-set')('key',
 	'value', 'key+value');
 
-},{"es5-ext/object/primitive-set":84}],107:[function(require,module,exports){
+},{"es5-ext/object/primitive-set":85}],108:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -8653,7 +9813,7 @@ MapIterator.prototype = Object.create(Iterator.prototype, {
 Object.defineProperty(MapIterator.prototype, toStringTagSymbol,
 	d('c', 'Map Iterator'));
 
-},{"./iterator-kinds":106,"d":35,"es5-ext/object/set-prototype-of":85,"es6-iterator":99,"es6-symbol":109}],108:[function(require,module,exports){
+},{"./iterator-kinds":107,"d":35,"es5-ext/object/set-prototype-of":86,"es6-iterator":100,"es6-symbol":110}],109:[function(require,module,exports){
 'use strict';
 
 var clear          = require('es5-ext/array/#/clear')
@@ -8759,12 +9919,12 @@ Object.defineProperty(MapPoly.prototype, Symbol.iterator, d(function () {
 }));
 Object.defineProperty(MapPoly.prototype, Symbol.toStringTag, d('c', 'Map'));
 
-},{"./is-native-implemented":105,"./lib/iterator":107,"d":35,"es5-ext/array/#/clear":52,"es5-ext/array/#/e-index-of":53,"es5-ext/object/set-prototype-of":85,"es5-ext/object/valid-callable":88,"es5-ext/object/valid-value":90,"es6-iterator/for-of":97,"es6-iterator/valid-iterable":102,"es6-symbol":109,"event-emitter":118}],109:[function(require,module,exports){
+},{"./is-native-implemented":106,"./lib/iterator":108,"d":35,"es5-ext/array/#/clear":53,"es5-ext/array/#/e-index-of":54,"es5-ext/object/set-prototype-of":86,"es5-ext/object/valid-callable":89,"es5-ext/object/valid-value":91,"es6-iterator/for-of":98,"es6-iterator/valid-iterable":103,"es6-symbol":110,"event-emitter":119}],110:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')() ? Symbol : require('./polyfill');
 
-},{"./is-implemented":110,"./polyfill":112}],110:[function(require,module,exports){
+},{"./is-implemented":111,"./polyfill":113}],111:[function(require,module,exports){
 'use strict';
 
 var validTypes = { object: true, symbol: true };
@@ -8783,7 +9943,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 'use strict';
 
 module.exports = function (x) {
@@ -8794,7 +9954,7 @@ module.exports = function (x) {
 	return (x[x.constructor.toStringTag] === 'Symbol');
 };
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 // ES2015 Symbol polyfill for environments that do not (or partially) support it
 
 'use strict';
@@ -8914,7 +10074,7 @@ defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
 defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
 	d('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
 
-},{"./validate-symbol":113,"d":35}],113:[function(require,module,exports){
+},{"./validate-symbol":114,"d":35}],114:[function(require,module,exports){
 'use strict';
 
 var isSymbol = require('./is-symbol');
@@ -8924,7 +10084,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-symbol":111}],114:[function(require,module,exports){
+},{"./is-symbol":112}],115:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -8933,7 +10093,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":115,"./polyfill":117,"es5-ext/global":60}],115:[function(require,module,exports){
+},{"./is-implemented":116,"./polyfill":118,"es5-ext/global":61}],116:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -8955,7 +10115,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 // Exports true if environment provides native `WeakMap` implementation, whatever that is.
 
 'use strict';
@@ -8965,7 +10125,7 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new WeakMap()) === '[object WeakMap]');
 }());
 
-},{}],117:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -9033,7 +10193,7 @@ Object.defineProperties(WeakMapPoly.prototype, {
 });
 defineProperty(WeakMapPoly.prototype, toStringTagSymbol, d('c', 'WeakMap'));
 
-},{"./is-native-implemented":116,"d":35,"es5-ext/object/set-prototype-of":85,"es5-ext/object/valid-object":89,"es5-ext/object/valid-value":90,"es5-ext/string/random-uniq":95,"es6-iterator/for-of":97,"es6-iterator/get":98,"es6-symbol":109}],118:[function(require,module,exports){
+},{"./is-native-implemented":117,"d":35,"es5-ext/object/set-prototype-of":86,"es5-ext/object/valid-object":90,"es5-ext/object/valid-value":91,"es5-ext/string/random-uniq":96,"es6-iterator/for-of":98,"es6-iterator/get":99,"es6-symbol":110}],119:[function(require,module,exports){
 'use strict';
 
 var d        = require('d')
@@ -9167,7 +10327,7 @@ module.exports = exports = function (o) {
 };
 exports.methods = methods;
 
-},{"d":35,"es5-ext/object/valid-callable":88}],119:[function(require,module,exports){
+},{"d":35,"es5-ext/object/valid-callable":89}],120:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -9221,14 +10381,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":119}],121:[function(require,module,exports){
+},{"./implementation":120}],122:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -9245,7 +10405,7 @@ module.exports = function hasNativeSymbols() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./shams":122}],122:[function(require,module,exports){
+},{"./shams":123}],123:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 17], max-statements: [2, 33] */
@@ -9289,14 +10449,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],123:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":120}],124:[function(require,module,exports){
+},{"function-bind":121}],125:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -9335,7 +10495,7 @@ module.exports = function isCallable(value) {
 	return strClass === fnClass || strClass === genClass;
 };
 
-},{}],125:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 'use strict';
 
 var getDay = Date.prototype.getDay;
@@ -9357,7 +10517,7 @@ module.exports = function isDateObject(value) {
 	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
 };
 
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -9398,7 +10558,7 @@ module.exports = function isRegex(value) {
 	return tryRegexExecCall(value);
 };
 
-},{"has":123}],127:[function(require,module,exports){
+},{"has":124}],128:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -9435,10 +10595,10 @@ if (hasSymbols) {
 	};
 }
 
-},{"has-symbols":121}],128:[function(require,module,exports){
+},{"has-symbols":122}],129:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":33}],129:[function(require,module,exports){
+},{"cssify":33}],130:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -13946,7 +15106,7 @@ module.exports = require('cssify');
 
 })));
 
-},{}],130:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 // modified from https://github.com/es-shims/es5-shim
@@ -14089,7 +15249,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./isArguments":131}],131:[function(require,module,exports){
+},{"./isArguments":132}],132:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -14108,7 +15268,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],132:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 (function (process,global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14298,7 +15458,7 @@ var phoneNumber;
 })(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],133:[function(require,module,exports){
+},{"_process":6}],134:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -14590,7 +15750,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],134:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -14609,7 +15769,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -14944,7 +16104,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":123}],136:[function(require,module,exports){
+},{"has":124}],137:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -14994,7 +16154,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":135}],137:[function(require,module,exports){
+},{"super-json":136}],138:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -15006,7 +16166,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":136,"./stringTransform":138,"./stringTransformExt":139,"./testing":140}],138:[function(require,module,exports){
+},{"./JSON_CUSTOM":137,"./stringTransform":139,"./stringTransformExt":140,"./testing":141}],139:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -15068,7 +16228,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],139:[function(require,module,exports){
+},{"buffer":2}],140:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -15136,7 +16296,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":138}],140:[function(require,module,exports){
+},{"./stringTransform":139}],141:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -15405,7 +16565,7 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":138}],141:[function(require,module,exports){
+},{"./stringTransform":139}],142:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15446,7 +16606,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":142}],142:[function(require,module,exports){
+},{"./SyncEventBase":143}],143:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15664,7 +16824,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":143}],143:[function(require,module,exports){
+},{"./SyncEventBaseProtected":144}],144:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -15949,7 +17109,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":144,"run-exclusive":133}],144:[function(require,module,exports){
+},{"./defs":145,"run-exclusive":134}],145:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -15990,7 +17150,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":134}],145:[function(require,module,exports){
+},{"setprototypeof":135}],146:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -15999,7 +17159,7 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":141,"./defs":144}],146:[function(require,module,exports){
+},{"./SyncEvent":142,"./defs":145}],147:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16171,7 +17331,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":145}],147:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":146}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -16483,7 +17643,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":146,"./api/ApiMessage":148,"./core":152,"./misc":156,"colors":25,"ts-events-extended":145}],148:[function(require,module,exports){
+},{"./IConnection":147,"./api/ApiMessage":149,"./core":153,"./misc":157,"colors":25,"ts-events-extended":146}],149:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16564,7 +17724,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":152,"../misc":156,"buffer":2,"transfer-tools":137}],149:[function(require,module,exports){
+},{"../core":153,"../misc":157,"buffer":2,"transfer-tools":138}],150:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16746,7 +17906,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":156,"./ApiMessage":148,"colors":25,"util":8}],150:[function(require,module,exports){
+},{"../misc":157,"./ApiMessage":149,"colors":25,"util":8}],151:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -16965,7 +18125,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":156,"./ApiMessage":148,"setprototypeof":134}],151:[function(require,module,exports){
+},{"../misc":157,"./ApiMessage":149,"setprototypeof":135}],152:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -16973,7 +18133,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":149,"./client":150}],152:[function(require,module,exports){
+},{"./Server":150,"./client":151}],153:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -17057,7 +18217,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":153,"./core/sip":154,"buffer":2,"setprototypeof":134}],153:[function(require,module,exports){
+},{"./core/sdp":154,"./core/sip":155,"buffer":2,"setprototypeof":135}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -17173,7 +18333,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17564,7 +18724,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -17576,7 +18736,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":147,"./api":151,"./core":152,"./misc":156}],156:[function(require,module,exports){
+},{"./Socket":148,"./api":152,"./core":153,"./misc":157}],157:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -17815,21 +18975,21 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":152,"buffer":2}],157:[function(require,module,exports){
+},{"./core":153,"buffer":2}],158:[function(require,module,exports){
 module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-chat\"></use>\r\n                </svg>\r\n            </i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number ml10\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary ml10\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                </svg>\r\n            </i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-trash\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i>\r\n                    <svg class=\"custom-icon\">\r\n                        <use xlink:href=\"#icon-call\"></use>\r\n                    </svg>\r\n                </i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 var css = "div.id_UiConversation .panel-heading {\n  cursor: default;\n}\ndiv.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndiv.id_UiConversation .panel-title span {\n  cursor: text;\n}\ndiv.id_UiConversation .panel-body {\n  padding: 0;\n}\ndiv.id_UiConversation .panel-footer {\n  padding: 0;\n}\ndiv.id_UiConversation form {\n  position: relative;\n}\ndiv.id_UiConversation textarea {\n  padding-right: 36px;\n}\ndiv.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\ndiv.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\ndiv.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\ndiv.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\ndiv.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\ndiv.id_UiConversation ul li div.message.in,\ndiv.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.in:before,\ndiv.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\ndiv.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\ndiv.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\ndiv.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":128}],159:[function(require,module,exports){
+},{"lessify":129}],160:[function(require,module,exports){
 module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <!--\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    -->\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <i class=\"id_icon_sim_down\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card_alert\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],160:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div,\r\n    div.id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],161:[function(require,module,exports){
-module.exports = "<style>\r\n    .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt10\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n                        <div class=\"pull-right mt10\">\r\n                            <button type=\"button\" class=\"id_call btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary ml10\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div,\r\n    div.id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],162:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    .id_UiQuickAction .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt5 mb10 pl20 pr20\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n\r\n                        <div class=\"st_flex\">\r\n\r\n                            <button type=\"button\" class=\"id_call btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n\r\n                        </div>\r\n\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
 },{}],163:[function(require,module,exports){
-module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
 },{}],164:[function(require,module,exports){
+module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+},{}],165:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var types = require("../../../gateway/dist/lib/types");
@@ -17841,7 +19001,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":217,"../../../gateway/dist/lib/misc/sipRouting":218,"../../../gateway/dist/lib/types":219}],165:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":218,"../../../gateway/dist/lib/misc/sipRouting":219,"../../../gateway/dist/lib/types":220}],166:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18053,7 +19213,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":168,"./localApiHandlers":166,"./remoteApiCaller":167,"ts-events-extended":205,"ts-sip":215}],166:[function(require,module,exports){
+},{"../tools/bootbox_custom":169,"./localApiHandlers":167,"./remoteApiCaller":168,"ts-events-extended":206,"ts-sip":216}],167:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18639,7 +19799,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":174,"../tools/bootbox_custom":168,"./remoteApiCaller":167,"chan-dongle-extended-client/dist/lib/types":176,"ts-events-extended":205}],167:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":175,"../tools/bootbox_custom":169,"./remoteApiCaller":168,"chan-dongle-extended-client/dist/lib/types":177,"ts-events-extended":206}],168:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -19494,7 +20654,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":173,"../types":171,"./connection":165,"phone-number":192,"ts-events-extended":205,"ts-sip":215}],168:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":174,"../types":172,"./connection":166,"phone-number":193,"ts-events-extended":206,"ts-sip":216}],169:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19602,7 +20762,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":170}],169:[function(require,module,exports){
+},{"./modal_stack":171}],170:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -19616,7 +20776,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],170:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -19735,7 +20895,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],171:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -19950,7 +21110,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],172:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -20105,7 +21265,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":175,"transfer-tools/dist/lib/JSON_CUSTOM":196}],173:[function(require,module,exports){
+},{"../web_api_declaration":176,"transfer-tools/dist/lib/JSON_CUSTOM":197}],174:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -20200,7 +21360,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],174:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -20253,7 +21413,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],175:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -20294,7 +21454,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],176:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -20315,7 +21475,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],177:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -20518,7 +21678,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":178,"./custom/zalgo":179,"./maps/america":182,"./maps/rainbow":183,"./maps/random":184,"./maps/zebra":185,"./styles":186,"./system/supports-colors":188,"util":8}],178:[function(require,module,exports){
+},{"./custom/trap":179,"./custom/zalgo":180,"./maps/america":183,"./maps/rainbow":184,"./maps/random":185,"./maps/zebra":186,"./styles":187,"./system/supports-colors":189,"util":8}],179:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -20566,7 +21726,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],179:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -20678,7 +21838,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],180:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -20790,13 +21950,13 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":177}],181:[function(require,module,exports){
+},{"./colors":178}],182:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./colors":177,"./extendStringPrototype":180,"dup":25}],182:[function(require,module,exports){
+},{"./colors":178,"./extendStringPrototype":181,"dup":25}],183:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],183:[function(require,module,exports){
+},{"dup":26}],184:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],184:[function(require,module,exports){
+},{"dup":27}],185:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -20808,71 +21968,71 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],185:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],186:[function(require,module,exports){
+},{"dup":29}],187:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],187:[function(require,module,exports){
+},{"dup":30}],188:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],188:[function(require,module,exports){
+},{"_process":6,"dup":31}],189:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":187,"_process":6,"dup":32,"os":5}],189:[function(require,module,exports){
-arguments[4][119][0].apply(exports,arguments)
-},{"dup":119}],190:[function(require,module,exports){
+},{"./has-flag.js":188,"_process":6,"dup":32,"os":5}],190:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"./implementation":189,"dup":120}],191:[function(require,module,exports){
-arguments[4][123][0].apply(exports,arguments)
-},{"dup":123,"function-bind":190}],192:[function(require,module,exports){
-arguments[4][132][0].apply(exports,arguments)
-},{"_process":6,"dup":132}],193:[function(require,module,exports){
+},{"dup":120}],191:[function(require,module,exports){
+arguments[4][121][0].apply(exports,arguments)
+},{"./implementation":190,"dup":121}],192:[function(require,module,exports){
+arguments[4][124][0].apply(exports,arguments)
+},{"dup":124,"function-bind":191}],193:[function(require,module,exports){
 arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],194:[function(require,module,exports){
+},{"_process":6,"dup":133}],194:[function(require,module,exports){
 arguments[4][134][0].apply(exports,arguments)
 },{"dup":134}],195:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
-},{"dup":135,"has":191}],196:[function(require,module,exports){
+},{"dup":135}],196:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"dup":136,"super-json":195}],197:[function(require,module,exports){
+},{"dup":136,"has":192}],197:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":196,"./stringTransform":198,"./stringTransformExt":199,"./testing":200,"dup":137}],198:[function(require,module,exports){
+},{"dup":137,"super-json":196}],198:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"buffer":2,"dup":138}],199:[function(require,module,exports){
+},{"./JSON_CUSTOM":197,"./stringTransform":199,"./stringTransformExt":200,"./testing":201,"dup":138}],199:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"./stringTransform":198,"dup":139}],200:[function(require,module,exports){
+},{"buffer":2,"dup":139}],200:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./stringTransform":198,"dup":140}],201:[function(require,module,exports){
+},{"./stringTransform":199,"dup":140}],201:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./SyncEventBase":202,"dup":141}],202:[function(require,module,exports){
+},{"./stringTransform":199,"dup":141}],202:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":203,"dup":142}],203:[function(require,module,exports){
+},{"./SyncEventBase":203,"dup":142}],203:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"./defs":204,"dup":143,"run-exclusive":193}],204:[function(require,module,exports){
+},{"./SyncEventBaseProtected":204,"dup":143}],204:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"dup":144,"setprototypeof":194}],205:[function(require,module,exports){
+},{"./defs":205,"dup":144,"run-exclusive":194}],205:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"./SyncEvent":201,"./defs":204,"dup":145}],206:[function(require,module,exports){
+},{"dup":145,"setprototypeof":195}],206:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"buffer":2,"dup":146,"ts-events-extended":205}],207:[function(require,module,exports){
+},{"./SyncEvent":202,"./defs":205,"dup":146}],207:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"./IConnection":206,"./api/ApiMessage":208,"./core":212,"./misc":216,"colors":181,"dup":147,"ts-events-extended":205}],208:[function(require,module,exports){
+},{"buffer":2,"dup":147,"ts-events-extended":206}],208:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"../core":212,"../misc":216,"buffer":2,"dup":148,"transfer-tools":197}],209:[function(require,module,exports){
+},{"./IConnection":207,"./api/ApiMessage":209,"./core":213,"./misc":217,"colors":182,"dup":148,"ts-events-extended":206}],209:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"../misc":216,"./ApiMessage":208,"colors":181,"dup":149,"util":8}],210:[function(require,module,exports){
+},{"../core":213,"../misc":217,"buffer":2,"dup":149,"transfer-tools":198}],210:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"../misc":216,"./ApiMessage":208,"dup":150,"setprototypeof":194}],211:[function(require,module,exports){
+},{"../misc":217,"./ApiMessage":209,"colors":182,"dup":150,"util":8}],211:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"./Server":209,"./client":210,"dup":151}],212:[function(require,module,exports){
+},{"../misc":217,"./ApiMessage":209,"dup":151,"setprototypeof":195}],212:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"./core/sdp":213,"./core/sip":214,"buffer":2,"dup":152,"setprototypeof":194}],213:[function(require,module,exports){
+},{"./Server":210,"./client":211,"dup":152}],213:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],214:[function(require,module,exports){
+},{"./core/sdp":214,"./core/sip":215,"buffer":2,"dup":153,"setprototypeof":195}],214:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
 },{"dup":154}],215:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"./Socket":207,"./api":211,"./core":212,"./misc":216,"dup":155}],216:[function(require,module,exports){
+},{"dup":155}],216:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./core":212,"buffer":2,"dup":156}],217:[function(require,module,exports){
+},{"./Socket":208,"./api":212,"./core":213,"./misc":217,"dup":156}],217:[function(require,module,exports){
+arguments[4][157][0].apply(exports,arguments)
+},{"./core":213,"buffer":2,"dup":157}],218:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20939,7 +22099,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":240}],218:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":241}],219:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -21024,86 +22184,86 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":240,"ts-sip":257}],219:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":241,"ts-sip":258}],220:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],220:[function(require,module,exports){
-arguments[4][177][0].apply(exports,arguments)
-},{"./custom/trap":221,"./custom/zalgo":222,"./maps/america":225,"./maps/rainbow":226,"./maps/random":227,"./maps/zebra":228,"./styles":229,"./system/supports-colors":231,"dup":177,"util":8}],221:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 arguments[4][178][0].apply(exports,arguments)
-},{"dup":178}],222:[function(require,module,exports){
+},{"./custom/trap":222,"./custom/zalgo":223,"./maps/america":226,"./maps/rainbow":227,"./maps/random":228,"./maps/zebra":229,"./styles":230,"./system/supports-colors":232,"dup":178,"util":8}],222:[function(require,module,exports){
 arguments[4][179][0].apply(exports,arguments)
 },{"dup":179}],223:[function(require,module,exports){
 arguments[4][180][0].apply(exports,arguments)
-},{"./colors":220,"dup":180}],224:[function(require,module,exports){
+},{"dup":180}],224:[function(require,module,exports){
+arguments[4][181][0].apply(exports,arguments)
+},{"./colors":221,"dup":181}],225:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./colors":220,"./extendStringPrototype":223,"dup":25}],225:[function(require,module,exports){
+},{"./colors":221,"./extendStringPrototype":224,"dup":25}],226:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],226:[function(require,module,exports){
+},{"dup":26}],227:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],227:[function(require,module,exports){
-arguments[4][184][0].apply(exports,arguments)
-},{"dup":184}],228:[function(require,module,exports){
+},{"dup":27}],228:[function(require,module,exports){
+arguments[4][185][0].apply(exports,arguments)
+},{"dup":185}],229:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],229:[function(require,module,exports){
+},{"dup":29}],230:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],230:[function(require,module,exports){
+},{"dup":30}],231:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],231:[function(require,module,exports){
+},{"_process":6,"dup":31}],232:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":230,"_process":6,"dup":32,"os":5}],232:[function(require,module,exports){
-arguments[4][119][0].apply(exports,arguments)
-},{"dup":119}],233:[function(require,module,exports){
+},{"./has-flag.js":231,"_process":6,"dup":32,"os":5}],233:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"./implementation":232,"dup":120}],234:[function(require,module,exports){
-arguments[4][123][0].apply(exports,arguments)
-},{"dup":123,"function-bind":233}],235:[function(require,module,exports){
-arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],236:[function(require,module,exports){
+},{"dup":120}],234:[function(require,module,exports){
+arguments[4][121][0].apply(exports,arguments)
+},{"./implementation":233,"dup":121}],235:[function(require,module,exports){
+arguments[4][124][0].apply(exports,arguments)
+},{"dup":124,"function-bind":234}],236:[function(require,module,exports){
 arguments[4][134][0].apply(exports,arguments)
 },{"dup":134}],237:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
-},{"dup":135,"has":234}],238:[function(require,module,exports){
+},{"dup":135}],238:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"dup":136,"super-json":237}],239:[function(require,module,exports){
+},{"dup":136,"has":235}],239:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":238,"./stringTransform":240,"./stringTransformExt":241,"./testing":242,"dup":137}],240:[function(require,module,exports){
+},{"dup":137,"super-json":238}],240:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"buffer":2,"dup":138}],241:[function(require,module,exports){
+},{"./JSON_CUSTOM":239,"./stringTransform":241,"./stringTransformExt":242,"./testing":243,"dup":138}],241:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"./stringTransform":240,"dup":139}],242:[function(require,module,exports){
+},{"buffer":2,"dup":139}],242:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./stringTransform":240,"dup":140}],243:[function(require,module,exports){
+},{"./stringTransform":241,"dup":140}],243:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./SyncEventBase":244,"dup":141}],244:[function(require,module,exports){
+},{"./stringTransform":241,"dup":141}],244:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":245,"dup":142}],245:[function(require,module,exports){
+},{"./SyncEventBase":245,"dup":142}],245:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"./defs":246,"dup":143,"run-exclusive":235}],246:[function(require,module,exports){
+},{"./SyncEventBaseProtected":246,"dup":143}],246:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"dup":144,"setprototypeof":236}],247:[function(require,module,exports){
+},{"./defs":247,"dup":144,"run-exclusive":236}],247:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"./SyncEvent":243,"./defs":246,"dup":145}],248:[function(require,module,exports){
+},{"dup":145,"setprototypeof":237}],248:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"buffer":2,"dup":146,"ts-events-extended":247}],249:[function(require,module,exports){
+},{"./SyncEvent":244,"./defs":247,"dup":146}],249:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"./IConnection":248,"./api/ApiMessage":250,"./core":254,"./misc":258,"colors":224,"dup":147,"ts-events-extended":247}],250:[function(require,module,exports){
+},{"buffer":2,"dup":147,"ts-events-extended":248}],250:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"../core":254,"../misc":258,"buffer":2,"dup":148,"transfer-tools":239}],251:[function(require,module,exports){
+},{"./IConnection":249,"./api/ApiMessage":251,"./core":255,"./misc":259,"colors":225,"dup":148,"ts-events-extended":248}],251:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"../misc":258,"./ApiMessage":250,"colors":224,"dup":149,"util":8}],252:[function(require,module,exports){
+},{"../core":255,"../misc":259,"buffer":2,"dup":149,"transfer-tools":240}],252:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"../misc":258,"./ApiMessage":250,"dup":150,"setprototypeof":236}],253:[function(require,module,exports){
+},{"../misc":259,"./ApiMessage":251,"colors":225,"dup":150,"util":8}],253:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"./Server":251,"./client":252,"dup":151}],254:[function(require,module,exports){
+},{"../misc":259,"./ApiMessage":251,"dup":151,"setprototypeof":237}],254:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"./core/sdp":255,"./core/sip":256,"buffer":2,"dup":152,"setprototypeof":236}],255:[function(require,module,exports){
+},{"./Server":252,"./client":253,"dup":152}],255:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],256:[function(require,module,exports){
+},{"./core/sdp":256,"./core/sip":257,"buffer":2,"dup":153,"setprototypeof":237}],256:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
 },{"dup":154}],257:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"./Socket":249,"./api":253,"./core":254,"./misc":258,"dup":155}],258:[function(require,module,exports){
+},{"dup":155}],258:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./core":254,"buffer":2,"dup":156}]},{},[16]);
+},{"./Socket":250,"./api":254,"./core":255,"./misc":259,"dup":156}],259:[function(require,module,exports){
+arguments[4][157][0].apply(exports,arguments)
+},{"./core":255,"buffer":2,"dup":157}]},{},[16]);

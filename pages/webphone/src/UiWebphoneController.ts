@@ -10,6 +10,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml"
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
+import * as DetectRTC from "detectrtc";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
 declare const require: any;
@@ -163,6 +164,8 @@ export class UiWebphoneController {
                     this.ua.register();
 
                 }
+
+                this.uiQuickAction.notifySimOnlineStatusChanged();
 
             }
         );
@@ -468,6 +471,25 @@ export class UiWebphoneController {
 
         uiConversation.evtVoiceCall.attach(
             () => {
+
+                if (!DetectRTC.isRtpDataChannelsSupported) {
+
+                    let message = "Call not supported by this browser.";
+
+                    if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
+
+                        message += " Android app available";
+
+                    } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+
+                        message += " iOS app coming soon.";
+
+                    }
+
+                    bootbox_custom.alert(message);
+                    return;
+
+                }
 
                 const { terminate, prTerminated, prNextState } =
                     this.ua.placeOutgoingCall(wdChat.contactNumber);

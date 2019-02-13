@@ -3073,6 +3073,10 @@ var UiController = /** @class */ (function () {
             if (uiSimRow.isSelected) {
                 _this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
             }
+            var uiPhonebook = _this.uiPhonebooks.find(function (ui) { return ui.userSim === userSim; });
+            if (!!uiPhonebook) {
+                uiPhonebook.updateButtons();
+            }
         });
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
         for (var _i = 0, _a = [
@@ -3462,7 +3466,6 @@ var UiPhonebook = /** @class */ (function () {
                     case 0:
                         contact = Array.from(this.uiContacts.values())
                             .find(function (uiContact) { return uiContact.isSelected; }).contact;
-                        bootbox_custom.loading("Updating contact name ...");
                         return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                                 "title": "New contact name",
                                 "value": contact.name || "",
@@ -3473,6 +3476,7 @@ var UiPhonebook = /** @class */ (function () {
                         if (!newName || contact.name === newName) {
                             return [2 /*return*/];
                         }
+                        bootbox_custom.loading("Updating contact name ...");
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return _this.evtClickUpdateContactName.post({
                                     contact: contact,
@@ -3482,8 +3486,8 @@ var UiPhonebook = /** @class */ (function () {
                             })];
                     case 2:
                         _a.sent();
-                        this.notifyContactChanged(contact);
                         bootbox_custom.dismissLoading();
+                        this.notifyContactChanged(contact);
                         return [2 /*return*/];
                 }
             });
@@ -3523,9 +3527,9 @@ var UiPhonebook = /** @class */ (function () {
                             });
                             modal.find(".bootbox-body").css("text-align", "center");
                             var input = modal.find("input");
-                            var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                            var gwIso = userSim.gatewayLocation.countryIso;
-                            {
+                            input.intlTelInput((function () {
+                                var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
+                                var gwIso = userSim.gatewayLocation.countryIso;
                                 var intlTelInputOptions = {
                                     "dropdownContainer": "body"
                                 };
@@ -3542,8 +3546,8 @@ var UiPhonebook = /** @class */ (function () {
                                 if (simIso || gwIso) {
                                     intlTelInputOptions.initialCountry = simIso || gwIso;
                                 }
-                                input.intlTelInput(intlTelInputOptions);
-                            }
+                                return intlTelInputOptions;
+                            })());
                         })];
                     case 1:
                         number = _a.sent();
@@ -3618,7 +3622,15 @@ var UiPhonebook = /** @class */ (function () {
             });
         });
     };
+    /** to call (outside of the class) when sim online status change */
     UiPhonebook.prototype.updateButtons = function () {
+        var _this = this;
+        [
+            this.buttonClose,
+            this.buttonCreateContact,
+            this.buttonDelete,
+            this.buttonEdit
+        ].forEach(function (button) { return button.prop("disabled", !_this.userSim.isOnline); });
         var selectedCount = Array.from(this.uiContacts.values())
             .filter(function (uiContact) { return uiContact.isSelected; }).length;
         if (selectedCount === 0) {
@@ -9353,7 +9365,7 @@ var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
 },{"./SyncEvent":122,"./defs":125}],127:[function(require,module,exports){
-module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot dongle</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
+module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
 },{}],128:[function(require,module,exports){
 module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
 },{}],129:[function(require,module,exports){

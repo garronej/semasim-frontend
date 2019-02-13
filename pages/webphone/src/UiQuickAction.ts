@@ -2,48 +2,34 @@ import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
 declare const require: any;
 
-(() => {
+console.log("op");
 
-    $.validator.addMethod(
-        "validateTelInput",
-        (value, element) => {
+$.validator.addMethod(
+    "validateTelInput",
+    (value, element) => {
 
-            try {
+        try {
 
-                phoneNumber.build(
-                    value, 
-                    $(element).intlTelInput("getSelectedCountryData").iso2,
-                    "MUST BE DIALABLE"
-                );
+            phoneNumber.build(
+                value,
+                $(element).intlTelInput("getSelectedCountryData").iso2,
+                "MUST BE DIALABLE"
+            );
 
-            } catch{
+        } catch{
 
-                return false;
+            return false;
 
-            }
+        }
 
-            return true;
-        },
-        "Malformed phone number"
-    );
-
-
-    /*
-    let errorMessages = Object.keys((intlTelInputUtils as any).validationError)
-        .map(value => value.toLowerCase().split("_").join(" "));
-
-    $.validator.addMethod("validateTelInput", (value, element) =>
-        $(element).intlTelInput("getValidationError") === intlTelInputUtils.validationError.IS_POSSIBLE,
-        ((bool, element) => errorMessages[$(element).intlTelInput("getValidationError")]) as any
-    );
-    */
-
-
-})();
-
+        return true;
+    },
+    "Malformed phone number"
+);
 
 const html = loadUiClassHtml(
     require("../templates/UiQuickAction.html"),
@@ -55,11 +41,15 @@ export class UiQuickAction {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
-    //TODO: type StaticNotificationWidget
-    public evtStaticNotification = new SyncEvent<any>();
     public evtVoiceCall = new SyncEvent<phoneNumber>();
     public evtSms = new SyncEvent<phoneNumber>();
     public evtNewContact = new SyncEvent<phoneNumber>();
+
+    public notifySimOnlineStatusChanged() {
+
+        this.structure.find("button").prop("disabled", !this.userSim.isOnline);
+
+    }
 
     constructor(
         public readonly userSim: types.UserSim.Usable
@@ -114,16 +104,11 @@ export class UiQuickAction {
 
                 input.off("countrychange", undefined, calleeA as any);
 
-                //TODO: do with StaticNotificationWidget
-                let staticNotification = {
-                    "message": [
-                        "Warning: Consult ",
-                        self.userSim.sim.serviceProvider.fromImsi || "Your operator",
-                        `'s pricing for Calls/SMS toward ${countryData.name}`
-                    ].join("")
-                };
-
-                self.evtStaticNotification.post(staticNotification);
+                bootbox_custom.alert([
+                    "Warning: Consult ",
+                    self.userSim.sim.serviceProvider.fromImsi || "Your operator",
+                    `'s pricing for Calls/SMS toward ${countryData.name}`
+                ].join(""));
 
                 input.on("countrychange", function calleeB(_, countryData: IntlTelInput.CountryData) {
 
@@ -172,25 +157,25 @@ export class UiQuickAction {
 
         this.structure.on("mouseleave", () => input.popover("hide"));
 
-        this.structure.find("button").on("click", event=> {
+        this.structure.find("button").on("click", event => {
 
-            if(!validator.form() ){
+            if (!validator.form()) {
                 return;
             }
 
             let evt: SyncEvent<phoneNumber>;
 
-            if( $(event.currentTarget).hasClass("id_call") ){
-                evt= this.evtVoiceCall;
-            }else if( $(event.currentTarget).hasClass("id_sms") ){
-                evt= this.evtSms;
-            }else if( $(event.currentTarget).hasClass("id_contact") ){
-                evt= this.evtNewContact;
+            if ($(event.currentTarget).hasClass("id_call")) {
+                evt = this.evtVoiceCall;
+            } else if ($(event.currentTarget).hasClass("id_sms")) {
+                evt = this.evtSms;
+            } else if ($(event.currentTarget).hasClass("id_contact")) {
+                evt = this.evtNewContact;
             }
 
             evt!.post(
                 phoneNumber.build(
-                    input.val(), 
+                    input.val(),
                     input.intlTelInput("getSelectedCountryData").iso2
                 )
             );
@@ -203,6 +188,7 @@ export class UiQuickAction {
 
         });
 
+        this.notifySimOnlineStatusChanged();
 
     }
 }
