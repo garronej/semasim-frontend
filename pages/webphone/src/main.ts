@@ -60,8 +60,6 @@ $(document).ready(async () => {
 
 	bootbox_custom.dismissLoading();
 
-	$("#footer").hide();
-
 	localApiHandlers.evtSimPermissionLost.attachOnce(
 		userSim => {
 

@@ -7,45 +7,14 @@ const version= "0.1.3";
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Register | Semasim</title>
-    <!-- Mobile specific metas -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1 user-scalable=no">
-    <!-- Force IE9 to render in normal mode -->
-    <!--[if IE]><meta http-equiv="x-ua-compatible" content="IE=9" /><![endif]-->
-    <meta name="author" content="" />
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <meta name="application-name" content="" />
-    <!-- Import google fonts - Heading first/ text second -->
-    <link href='//fonts.googleapis.com/css?family=Quattrocento+Sans:400,700' rel='stylesheet' type='text/css'>
-    <!-- Css files -->
-    <!-- Icons -->
-    <link href="<%= `${assets_root}css/icons.css`; %>" rel="stylesheet" />
-    <!-- Bootstrap stylesheets (included template modifications) -->
-    <link href="<%= `${assets_root}css/bootstrap.css`; %>" rel="stylesheet" />
-    <!-- Plugins stylesheets (all plugin custom css) -->
-    <link href="<%= `${assets_root}css/plugins.css`; %>" rel="stylesheet" />
-    <!-- Main stylesheets (template main css file) -->
-    <link href="<%= `${assets_root}css/main.css`; %>" rel="stylesheet" />
+    <%- include("/meta_common.ejs"); %>
 
-    <link rel="apple-touch-icon" sizes="57x57" href="<%= `${assets_root}img/ico/apple-icon-57x57.png`; %>">
-    <link rel="apple-touch-icon" sizes="60x60" href="<%= `${assets_root}img/ico/apple-icon-60x60.png`; %>">
-    <link rel="apple-touch-icon" sizes="72x72" href="<%= `${assets_root}img/ico/apple-icon-72x72.png`; %>">
-    <link rel="apple-touch-icon" sizes="76x76" href="<%= `${assets_root}img/ico/apple-icon-76x76.png`; %>">
-    <link rel="apple-touch-icon" sizes="114x114" href="<%= `${assets_root}img/ico/apple-icon-114x114.png`; %>">
-    <link rel="apple-touch-icon" sizes="120x120" href="<%= `${assets_root}img/ico/apple-icon-120x120.png`; %>">
-    <link rel="apple-touch-icon" sizes="144x144" href="<%= `${assets_root}img/ico/apple-icon-144x144.png`; %>">
-    <link rel="apple-touch-icon" sizes="152x152" href="<%= `${assets_root}img/ico/apple-icon-152x152.png`; %>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<%= `${assets_root}img/ico/apple-icon-180x180.png`; %>">
-    <link rel="icon" type="image/png" sizes="192x192" href="<%= `${assets_root}img/ico/android-icon-192x192.png`; %>">
-    <link rel="icon" type="image/png" sizes="32x32" href="<%= `${assets_root}img/ico/favicon-32x32.png`; %>">
-    <link rel="icon" type="image/png" sizes="96x96" href="<%= `${assets_root}img/ico/favicon-96x96.png`; %>">
-    <link rel="icon" type="image/png" sizes="16x16" href="<%= `${assets_root}img/ico/favicon-16x16.png`; %>">
-    <link rel="manifest" href="<%= `${assets_root}img/ico/manifest.json`; %>">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" href="<%= `${assets_root}img/ico/ms-icon-144x144.png`; %>">
-    <meta name="theme-color" content="#ffffff">
+    <title>Register | Semasim</title>
+
+    <!-- Css files -->
+    <%- include("/style_common.ejs"); %>
+
+    <%- include("/favicon.ejs"); %>
 
 </head>
 
@@ -56,7 +25,7 @@ const version= "0.1.3";
             <!-- Start .panel -->
             <div class="panel-heading">
                 <h4 class="panel-title text-center">
-                    <img id="logo" src="<%= `${assets_root}img/logo-dark.png`; %>" alt="Dynamic logo">
+                    <img id="logo" src="<%-assets_root%>img/logo-dark.png" alt="Dynamic logo">
                 </h4>
             </div>
             <div class="panel-body">
@@ -113,50 +82,27 @@ const version= "0.1.3";
     </div>
     <!-- Javascripts -->
 
-    <% if( assets_root === "/" ){ %>
-    <script src="//cdn.jsdelivr.net/npm/bluebird@3.5.3/js/browser/bluebird.js"></script>
-    <script>
-        window.onerror = function(msg, url, linenumber) {
-            alert(msg+'\n'+url+':'+linenumber);
-            return false;
-        };
-        Promise.onPossiblyUnhandledRejection(function(error){
-            alert(error.message + " " + error.stack);
-            throw error;
-        });
-    </script>
-    <% }else{ %>
-    <script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
-    <% } %>
+    <%- include("/debug.ejs"); %>
 
     <!-- Important javascript libs(put in all pages) -->
-    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script>
-        window.jQuery || document.write('<script src="<%= `${assets_root}js/libs/jquery-2.1.1.min.js`; %>">\x3C/script>')
-    </script>
-    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
-    <script>
-        window.jQuery || document.write('<script src="<%= `${assets_root}js/libs/jquery-ui-1.10.4.min.js`; %>">\x3C/script>')
-    </script>
-    <!--[if lt IE 9]> <script type="text/javascript" src="<%= `${assets_root}js/libs/excanvas.min.js`; %>"></script> <script type="text/javascript" src="//html5shim.googlecode.com/svn/trunk/html5.js"></script> <script type="text/javascript" src="<%= `${assets_root}js/libs/respond.min.js`; %>"></script> <![endif]-->
+    <%- include("/include_jquery.ejs"); %>
 
     <!-- Bootstrap plugins -->
-    <script src="<%= `${assets_root}js/bootstrap/bootstrap.min.js`; %>"></script>
+    <script src="<%-assets_root%>js/bootstrap/bootstrap.min.js"></script>
     <!-- Form plugins -->
-    <script src="<%= `${assets_root}plugins/forms/validation/jquery.validate.min.js`; %>"></script>
-    <script src="<%= `${assets_root}plugins/forms/validation/additional-methods.min.js`; %>"></script>
+    <script src="<%-assets_root%>plugins/forms/validation/jquery.validate.min.js"></script>
+    <script src="<%-assets_root%>plugins/forms/validation/additional-methods.min.js"></script>
 
     <!-- Bootbox fast bootstrap modals -->
-    <script src="<%= `${assets_root}plugins/ui/bootbox/bootbox.min.js`; %>"></script>
+    <script src="<%-assets_root%>plugins/ui/bootbox/bootbox.min.js"></script>
 
     <!-- Retina.js for high res images -->
-    <script type="text/javascript" src="<%= `${assets_root}js/libs/retina.js/retina.min.js`; %>"></script>
+    <script type="text/javascript" src="<%-assets_root%>js/libs/retina.js/retina.min.js"></script>
 
     <!-- Cookie manager-->
-    <script src="<%= `${assets_root}js/libs/js.cookie-2.2.0.min.js`; %>"></script>
+    <script src="<%-assets_root%>js/libs/js.cookie-2.2.0.min.js"></script>
 
-    <!-- Page code -->
-    <script src="<%= `${assets_root}register-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
+    <%- include("/page_script.ejs", {"page":"register", version}); %>
 
 </body>
 </html>

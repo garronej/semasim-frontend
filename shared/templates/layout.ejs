@@ -1,0 +1,113 @@
+<% if( section === "top" ) { %>
+
+<!-- .page-navbar -->
+<div id="header" class="page-navbar">
+    <!-- .navbar-brand -->
+    <a href="/" class="navbar-brand hidden-xs hidden-sm">
+        <img src="<%-assets_root%>img/logo@2x.png" width="191" height="48" class="logo hidden-xs" alt="Dynamic logo">
+        <img src="<%-assets_root%>img/logosm@2x.png" width="17" height="48" class="logo-sm hidden-lg hidden-md" alt="Dynamic logo">
+    </a>
+    <!-- / navbar-brand -->
+    <!-- .no-collapse -->
+    <div id="navbar-no-collapse" class="navbar-no-collapse">
+        <!-- top left nav -->
+        <ul class="nav navbar-nav">
+            <li class="toggle-sidebar">
+                <a href="#">
+                    <i class="fa fa-reorder"></i>
+                    <span class="sr-only">Collapse sidebar</span>
+                </a>
+            </li>
+        </ul>
+        <!-- / top left nav -->
+        <!-- top right nav -->
+        <ul class="nav navbar-nav navbar-right">
+
+            <li>
+                <a id="logout" href="#">
+                    <i class="fa fa-power-off"></i>
+                    <span class="sr-only">Logout</span>
+                </a>
+            </li>
+        </ul>
+        <!-- / top right nav -->
+    </div>
+    <!-- / collapse -->
+</div>
+<!-- / page-navbar -->
+<!-- #wrapper -->
+<div id="wrapper">
+
+    <!-- .page-sidebar -->
+    <aside id="sidebar" class="page-sidebar hidden-md hidden-sm hidden-xs">
+        <!-- Start .sidebar-inner -->
+        <div class="sidebar-inner">
+            <!-- Start .sidebar-scrollarea -->
+            <div class="sidebar-scrollarea">
+                <!--  .sidebar-panel -->
+                <div class="sidebar-panel">
+                    <h5 class="sidebar-panel-title">Navigation</h5>
+                </div>
+                <!-- / .sidebar-panel -->
+                <!-- .side-nav -->
+                <div class="side-nav">
+                    <ul class="nav">
+                        <li>
+                            <a href="/manager"<%-page==="manager"?` class="active"`:``; %>>
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-sim_cards"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">SIMs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/webphone"<%-page==="webphone"?` class="active"`:``; %>>
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-webphone"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">Web phone</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/subscription"<%-page==="subscription"?` class="active"`:``; %>>
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-subscription"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">Payments</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- / side-nav -->
+            </div>
+            <!-- End .sidebar-scrollarea -->
+        </div>
+        <!-- End .sidebar-inner -->
+    </aside>
+    <!-- / page-sidebar -->
+    <!-- .page-content -->
+    <div class="page-content sidebar-page right-sidebar-page clearfix">
+
+        <!-- .page-content-wrapper -->
+        <div class="page-content-wrapper">
+            <!-- Start .page-content-inner -->
+            <div class="page-content-inner">
+
+<% }else if( section === "bottom" ) { %>
+
+            </div>
+            <!-- End .page-content-inner -->
+        </div>
+        <!-- / page-content-wrapper -->
+    </div>
+    <!-- / page-content -->
+</div>
+<!-- / #wrapper -->
+
+<% } %>

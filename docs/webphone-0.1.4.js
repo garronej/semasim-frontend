@@ -4979,7 +4979,6 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     finally { if (e_1) throw e_1.error; }
                 }
                 bootbox_custom.dismissLoading();
-                $("#footer").hide();
                 localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) {
                     bootbox_custom.alert(userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName);
                     //TODO: Improve
