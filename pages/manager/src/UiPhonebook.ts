@@ -62,6 +62,7 @@ export class UiPhonebook {
 
     }
 
+
     constructor(public readonly userSim: types.UserSim.Usable) {
 
         {
@@ -104,6 +105,22 @@ export class UiPhonebook {
             const contacts = Array.from(this.uiContacts.values())
                 .filter(uiContact => uiContact.isSelected)
                 .map(uiContact => uiContact.contact);
+            
+            const isConfirmed= await new Promise<boolean>(resolve =>
+                bootbox_custom.confirm({
+                    "size": "small",
+                    "message": [
+                        "Confirm deletion of",
+                        contacts.map(({ name }) => name).join(" "),
+                        "from SIM's internal storage ?"
+                    ].join(" "),
+                    "callback": result => resolve(result)
+                })
+            );
+
+            if( !isConfirmed ){
+                return;
+            }
 
             bootbox_custom.loading("Deleting contacts...");
 
@@ -161,146 +178,7 @@ export class UiPhonebook {
 
         });
 
-        this.buttonCreateContact.on("click", async () => {
-
-            const number = await new Promise<phoneNumber | null>(
-                function callee(resolve) {
-
-                    const modal = bootbox_custom.prompt({
-                        "title": `Phone number`,
-                        "size": "small",
-                        "callback": async result => {
-
-                            if (result === null) {
-                                resolve(result);
-                                return;
-                            }
-
-                            const number = phoneNumber.build(
-                                input.val(),
-                                input.intlTelInput("getSelectedCountryData").iso2
-                            );
-
-                            if (!phoneNumber.isDialable(number)) {
-
-                                await new Promise(
-                                    resolve_ => bootbox_custom.alert(
-                                        `${number} is not a valid phone number`,
-                                        () => resolve_()
-                                    )
-                                );
-
-                                callee(resolve);
-
-                                return;
-
-                            }
-
-                            resolve(number);
-
-                        },
-                    });
-
-                    modal.find(".bootbox-body").css("text-align", "center");
-
-                    const input = modal.find("input");
-
-                    input.intlTelInput((() => {
-
-                        const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                        const gwIso = userSim.gatewayLocation.countryIso;
-
-                        const intlTelInputOptions: IntlTelInput.Options = {
-                            "dropdownContainer": "body"
-                        };
-
-                        const preferredCountries: string[] = [];
-
-                        if (simIso) {
-                            preferredCountries.push(simIso);
-                        }
-
-                        if (gwIso && simIso !== gwIso) {
-                            preferredCountries.push(gwIso);
-                        }
-
-                        if (preferredCountries.length) {
-                            intlTelInputOptions.preferredCountries = preferredCountries;
-                        }
-
-                        if (simIso || gwIso) {
-                            intlTelInputOptions.initialCountry = simIso || gwIso;
-                        }
-
-                        return intlTelInputOptions;
-
-                    })());
-
-                }
-            );
-
-            if (number === null) {
-                return;
-            }
-
-            const contact = userSim.phonebook.find(
-                ({ number_raw }) => phoneNumber.areSame(
-                    number,
-                    number_raw
-                )
-            );
-
-            const name = await new Promise<string | null>(
-                resolve => bootbox_custom.prompt({
-                    "title": `contact name for ${phoneNumber.prettyPrint(number)}`,
-                    "value": !!contact ? contact.name : "New contact",
-                    "callback": result => resolve(result),
-                })
-            );
-
-            if (!name) {
-                return;
-            }
-
-            if (!contact) {
-
-                bootbox_custom.loading("Creating contact...");
-
-                const contact = await new Promise<types.UserSim.Contact>(resolve =>
-                    this.evtClickCreateContact.post({
-                        name,
-                        number,
-                        "onSubmitted": contact => resolve(contact)
-                    })
-                );
-
-                this.createUiContact(contact);
-
-            } else {
-
-                if (contact.name === name) {
-                    return;
-                }
-
-                bootbox_custom.loading(
-                    "Updating contact name..."
-                );
-
-                await new Promise(resolve =>
-                    this.evtClickUpdateContactName.post({
-                        contact,
-                        "newName": name,
-                        "onSubmitted": () => resolve()
-                    })
-                );
-
-                this.notifyContactChanged(contact);
-
-            }
-
-            bootbox_custom.dismissLoading();
-
-        });
+        this.buttonCreateContact.on("click", () => this.interact_createContact());
 
     }
 
@@ -489,9 +367,158 @@ export class UiPhonebook {
 
     }
 
-    public triggerCreateContactClick(number: string) {
-        ///TODO
+
+    /** 
+     * Trigger ui process to create a contact.
+     * External call when create contact from 
+     * android app, provide number.
+     * Internally when button is clicked no number provided.
+     */
+    public async interact_createContact(provided_number?: phoneNumber) {
+
+        const userSim = this.userSim;
+
+        const number = provided_number || await new Promise<phoneNumber | undefined>(
+            function callee(resolve) {
+
+                const modal = bootbox_custom.prompt({
+                    "title": `Phone number`,
+                    "size": "small",
+                    "callback": async result => {
+
+                        if (result === undefined) {
+                            resolve(result);
+                            return;
+                        }
+
+                        const number = phoneNumber.build(
+                            input.val(),
+                            input.intlTelInput("getSelectedCountryData").iso2
+                        );
+
+                        if (!phoneNumber.isDialable(number)) {
+
+                            await new Promise(
+                                resolve_ => bootbox_custom.alert(
+                                    `${number} is not a valid phone number`,
+                                    () => resolve_()
+                                )
+                            );
+
+                            callee(resolve);
+
+                            return;
+
+                        }
+
+                        resolve(number);
+
+                    },
+                });
+
+                modal.find(".bootbox-body").css("text-align", "center");
+
+                const input = modal.find("input");
+
+                input.intlTelInput((() => {
+
+                    const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
+                    const gwIso = userSim.gatewayLocation.countryIso;
+
+                    const intlTelInputOptions: IntlTelInput.Options = {
+                        "dropdownContainer": "body"
+                    };
+
+                    const preferredCountries: string[] = [];
+
+                    if (simIso) {
+                        preferredCountries.push(simIso);
+                    }
+
+                    if (gwIso && simIso !== gwIso) {
+                        preferredCountries.push(gwIso);
+                    }
+
+                    if (preferredCountries.length) {
+                        intlTelInputOptions.preferredCountries = preferredCountries;
+                    }
+
+                    if (simIso || gwIso) {
+                        intlTelInputOptions.initialCountry = simIso || gwIso;
+                    }
+
+                    return intlTelInputOptions;
+
+                })());
+
+            }
+        );
+
+        if (!number) {
+            return;
+        }
+
+        const contact = userSim.phonebook.find(
+            ({ number_raw }) => phoneNumber.areSame(
+                number,
+                number_raw
+            )
+        );
+
+        const name = await new Promise<string | null>(
+            resolve => bootbox_custom.prompt({
+                "title": `contact name for ${phoneNumber.prettyPrint(number)}`,
+                "value": !!contact ? contact.name : "New contact",
+                "callback": result => resolve(result),
+            })
+        );
+
+        if (!name) {
+            return;
+        }
+
+        if (!contact) {
+
+            bootbox_custom.loading("Creating contact...");
+
+            const contact = await new Promise<types.UserSim.Contact>(resolve =>
+                this.evtClickCreateContact.post({
+                    name,
+                    number,
+                    "onSubmitted": contact => resolve(contact)
+                })
+            );
+
+            this.createUiContact(contact);
+
+        } else {
+
+            if (contact.name === name) {
+                return;
+            }
+
+            bootbox_custom.loading(
+                "Updating contact name..."
+            );
+
+            await new Promise(resolve =>
+                this.evtClickUpdateContactName.post({
+                    contact,
+                    "newName": name,
+                    "onSubmitted": () => resolve()
+                })
+            );
+
+            this.notifyContactChanged(contact);
+
+        }
+
+        bootbox_custom.dismissLoading();
+
     }
+
+
+
 
 }
 

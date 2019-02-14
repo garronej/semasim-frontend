@@ -2956,7 +2956,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":138,"../templates/UiButtonBar.html":127,"ts-events-extended":126}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../templates/UiButtonBar.html":127,"ts-events-extended":126}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3006,8 +3006,9 @@ var UiSimRow_1 = require("./UiSimRow");
 var UiShareSim_1 = require("./UiShareSim");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 var UiController = /** @class */ (function () {
-    function UiController(userSims) {
+    function UiController(userSims, action) {
         var _this = this;
+        this.action = action;
         this.structure = html.structure.clone();
         this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
         this.uiShareSim = new UiShareSim_1.UiShareSim((function () {
@@ -3033,6 +3034,21 @@ var UiController = /** @class */ (function () {
         }
         remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
         localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
+        if (!!action) {
+            switch (action.type) {
+                case "CREATE_CONTACT":
+                    {
+                        var userSim_1 = userSims.find(function (_a) {
+                            var sim = _a.sim;
+                            return sim.imsi === action.imsi;
+                        });
+                        var uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim_1; });
+                        uiSimRow.structure.click();
+                        this.uiButtonBar.evtClickContacts.post();
+                    }
+                    break;
+            }
+        }
     }
     UiController.prototype.setState = function (placeholder) {
         switch (placeholder) {
@@ -3209,8 +3225,17 @@ var UiController = /** @class */ (function () {
                         uiPhonebook = _a.sent();
                         _a.label = 2;
                     case 2:
+                        if (!!this.action) return [3 /*break*/, 3];
                         uiPhonebook.showModal();
-                        return [2 /*return*/];
+                        return [3 /*break*/, 5];
+                    case 3:
+                        if (!(this.action.type === "CREATE_CONTACT")) return [3 /*break*/, 5];
+                        return [4 /*yield*/, uiPhonebook.interact_createContact(this.action.number)];
+                    case 4:
+                        _a.sent();
+                        window.location.href = "semasim://main";
+                        _a.label = 5;
+                    case 5: return [2 /*return*/];
                 }
             });
         }); });
@@ -3344,7 +3369,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":138,"../../../shared/dist/lib/types":140,"../templates/UiController.html":128,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"ts-events-extended":126}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/types":141,"../templates/UiController.html":128,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"ts-events-extended":126}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -3431,7 +3456,7 @@ var UiPhonebook = /** @class */ (function () {
         this.updateButtons();
         this.buttonClose.on("click", function () { return _this.hideModal(); });
         this.buttonDelete.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var contacts, _i, contacts_1, contact;
+            var contacts, isConfirmed, _i, contacts_1, contact;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -3439,6 +3464,25 @@ var UiPhonebook = /** @class */ (function () {
                         contacts = Array.from(this.uiContacts.values())
                             .filter(function (uiContact) { return uiContact.isSelected; })
                             .map(function (uiContact) { return uiContact.contact; });
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.confirm({
+                                    "size": "small",
+                                    "message": [
+                                        "Confirm deletion of",
+                                        contacts.map(function (_a) {
+                                            var name = _a.name;
+                                            return name;
+                                        }).join(" "),
+                                        "from SIM's internal storage ?"
+                                    ].join(" "),
+                                    "callback": function (result) { return resolve(result); }
+                                });
+                            })];
+                    case 1:
+                        isConfirmed = _a.sent();
+                        if (!isConfirmed) {
+                            return [2 /*return*/];
+                        }
                         bootbox_custom.loading("Deleting contacts...");
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return _this.evtClickDeleteContacts.post({
@@ -3446,7 +3490,7 @@ var UiPhonebook = /** @class */ (function () {
                                     "onSubmitted": function () { return resolve(); }
                                 });
                             })];
-                    case 1:
+                    case 2:
                         _a.sent();
                         for (_i = 0, contacts_1 = contacts; _i < contacts_1.length; _i++) {
                             contact = contacts_1[_i];
@@ -3492,117 +3536,7 @@ var UiPhonebook = /** @class */ (function () {
                 }
             });
         }); });
-        this.buttonCreateContact.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var number, contact, name, contact_1;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, new Promise(function callee(resolve) {
-                            var _this = this;
-                            var modal = bootbox_custom.prompt({
-                                "title": "Phone number",
-                                "size": "small",
-                                "callback": function (result) { return __awaiter(_this, void 0, void 0, function () {
-                                    var number;
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0:
-                                                if (result === null) {
-                                                    resolve(result);
-                                                    return [2 /*return*/];
-                                                }
-                                                number = phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2);
-                                                if (!!phone_number_1.phoneNumber.isDialable(number)) return [3 /*break*/, 2];
-                                                return [4 /*yield*/, new Promise(function (resolve_) { return bootbox_custom.alert(number + " is not a valid phone number", function () { return resolve_(); }); })];
-                                            case 1:
-                                                _a.sent();
-                                                callee(resolve);
-                                                return [2 /*return*/];
-                                            case 2:
-                                                resolve(number);
-                                                return [2 /*return*/];
-                                        }
-                                    });
-                                }); },
-                            });
-                            modal.find(".bootbox-body").css("text-align", "center");
-                            var input = modal.find("input");
-                            input.intlTelInput((function () {
-                                var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                                var gwIso = userSim.gatewayLocation.countryIso;
-                                var intlTelInputOptions = {
-                                    "dropdownContainer": "body"
-                                };
-                                var preferredCountries = [];
-                                if (simIso) {
-                                    preferredCountries.push(simIso);
-                                }
-                                if (gwIso && simIso !== gwIso) {
-                                    preferredCountries.push(gwIso);
-                                }
-                                if (preferredCountries.length) {
-                                    intlTelInputOptions.preferredCountries = preferredCountries;
-                                }
-                                if (simIso || gwIso) {
-                                    intlTelInputOptions.initialCountry = simIso || gwIso;
-                                }
-                                return intlTelInputOptions;
-                            })());
-                        })];
-                    case 1:
-                        number = _a.sent();
-                        if (number === null) {
-                            return [2 /*return*/];
-                        }
-                        contact = userSim.phonebook.find(function (_a) {
-                            var number_raw = _a.number_raw;
-                            return phone_number_1.phoneNumber.areSame(number, number_raw);
-                        });
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "contact name for " + phone_number_1.phoneNumber.prettyPrint(number),
-                                "value": !!contact ? contact.name : "New contact",
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 2:
-                        name = _a.sent();
-                        if (!name) {
-                            return [2 /*return*/];
-                        }
-                        if (!!contact) return [3 /*break*/, 4];
-                        bootbox_custom.loading("Creating contact...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickCreateContact.post({
-                                    name: name,
-                                    number: number,
-                                    "onSubmitted": function (contact) { return resolve(contact); }
-                                });
-                            })];
-                    case 3:
-                        contact_1 = _a.sent();
-                        this.createUiContact(contact_1);
-                        return [3 /*break*/, 6];
-                    case 4:
-                        if (contact.name === name) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Updating contact name...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    "newName": name,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 5:
-                        _a.sent();
-                        this.notifyContactChanged(contact);
-                        _a.label = 6;
-                    case 6:
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
+        this.buttonCreateContact.on("click", function () { return _this.interact_createContact(); });
     }
     /** Fetch phone number utils, need to be called before instantiating objects */
     UiPhonebook.fetchPhoneNumberUtilityScript = function () {
@@ -3733,8 +3667,131 @@ var UiPhonebook = /** @class */ (function () {
             this.placeUiContact(uiContact);
         }
     };
-    UiPhonebook.prototype.triggerCreateContactClick = function (number) {
-        ///TODO
+    /**
+     * Trigger ui process to create a contact.
+     * External call when create contact from
+     * android app, provide number.
+     * Internally when button is clicked no number provided.
+     */
+    UiPhonebook.prototype.interact_createContact = function (provided_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var userSim, number, _a, contact, name, contact_1;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        userSim = this.userSim;
+                        _a = provided_number;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, new Promise(function callee(resolve) {
+                                var _this = this;
+                                var modal = bootbox_custom.prompt({
+                                    "title": "Phone number",
+                                    "size": "small",
+                                    "callback": function (result) { return __awaiter(_this, void 0, void 0, function () {
+                                        var number;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    if (result === undefined) {
+                                                        resolve(result);
+                                                        return [2 /*return*/];
+                                                    }
+                                                    number = phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2);
+                                                    if (!!phone_number_1.phoneNumber.isDialable(number)) return [3 /*break*/, 2];
+                                                    return [4 /*yield*/, new Promise(function (resolve_) { return bootbox_custom.alert(number + " is not a valid phone number", function () { return resolve_(); }); })];
+                                                case 1:
+                                                    _a.sent();
+                                                    callee(resolve);
+                                                    return [2 /*return*/];
+                                                case 2:
+                                                    resolve(number);
+                                                    return [2 /*return*/];
+                                            }
+                                        });
+                                    }); },
+                                });
+                                modal.find(".bootbox-body").css("text-align", "center");
+                                var input = modal.find("input");
+                                input.intlTelInput((function () {
+                                    var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
+                                    var gwIso = userSim.gatewayLocation.countryIso;
+                                    var intlTelInputOptions = {
+                                        "dropdownContainer": "body"
+                                    };
+                                    var preferredCountries = [];
+                                    if (simIso) {
+                                        preferredCountries.push(simIso);
+                                    }
+                                    if (gwIso && simIso !== gwIso) {
+                                        preferredCountries.push(gwIso);
+                                    }
+                                    if (preferredCountries.length) {
+                                        intlTelInputOptions.preferredCountries = preferredCountries;
+                                    }
+                                    if (simIso || gwIso) {
+                                        intlTelInputOptions.initialCountry = simIso || gwIso;
+                                    }
+                                    return intlTelInputOptions;
+                                })());
+                            })];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        number = _a;
+                        if (!number) {
+                            return [2 /*return*/];
+                        }
+                        contact = userSim.phonebook.find(function (_a) {
+                            var number_raw = _a.number_raw;
+                            return phone_number_1.phoneNumber.areSame(number, number_raw);
+                        });
+                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                                "title": "contact name for " + phone_number_1.phoneNumber.prettyPrint(number),
+                                "value": !!contact ? contact.name : "New contact",
+                                "callback": function (result) { return resolve(result); },
+                            }); })];
+                    case 3:
+                        name = _b.sent();
+                        if (!name) {
+                            return [2 /*return*/];
+                        }
+                        if (!!contact) return [3 /*break*/, 5];
+                        bootbox_custom.loading("Creating contact...");
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return _this.evtClickCreateContact.post({
+                                    name: name,
+                                    number: number,
+                                    "onSubmitted": function (contact) { return resolve(contact); }
+                                });
+                            })];
+                    case 4:
+                        contact_1 = _b.sent();
+                        this.createUiContact(contact_1);
+                        return [3 /*break*/, 7];
+                    case 5:
+                        if (contact.name === name) {
+                            return [2 /*return*/];
+                        }
+                        bootbox_custom.loading("Updating contact name...");
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return _this.evtClickUpdateContactName.post({
+                                    contact: contact,
+                                    "newName": name,
+                                    "onSubmitted": function () { return resolve(); }
+                                });
+                            })];
+                    case 6:
+                        _b.sent();
+                        this.notifyContactChanged(contact);
+                        _b.label = 7;
+                    case 7:
+                        bootbox_custom.dismissLoading();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     UiPhonebook.isPhoneNumberUtilityScriptLoaded = false;
     return UiPhonebook;
@@ -3800,7 +3857,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":138,"../../../shared/dist/lib/tools/modal_stack":139,"../../../shared/dist/lib/types":140,"../templates/UiPhonebook.html":129,"phone-number":119,"ts-events-extended":126}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/tools/modal_stack":140,"../../../shared/dist/lib/types":141,"../templates/UiPhonebook.html":129,"phone-number":119,"ts-events-extended":126}],12:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4032,7 +4089,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":138,"../../../shared/dist/lib/tools/modal_stack":139,"../templates/UiShareSim.html":130,"../templates/UiShareSim.less":131,"ts-events-extended":126}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/tools/modal_stack":140,"../templates/UiShareSim.html":130,"../templates/UiShareSim.less":131,"ts-events-extended":126}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4187,7 +4244,8 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":138,"../templates/UiSimRow.html":132,"../templates/UiSimRow.less":133,"ts-events-extended":126}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../templates/UiSimRow.html":132,"../templates/UiSimRow.less":133,"ts-events-extended":126}],14:[function(require,module,exports){
+(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4240,8 +4298,9 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
+var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var uiController, _a;
+    var action, uiController, _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -4250,10 +4309,24 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     window.location.href = "/login";
                 });
                 connection.connect();
+                action = (function () {
+                    var type = getURLParameter_1.getURLParameter("action");
+                    if (!type) {
+                        return undefined;
+                    }
+                    switch (type) {
+                        case "CREATE_CONTACT": return {
+                            type: type,
+                            "number": Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"),
+                            "imsi": getURLParameter_1.getURLParameter("imsi")
+                        };
+                    }
+                })();
                 _a = UiController_1.UiController.bind;
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 1:
-                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent()]))();
+                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent(),
+                    action]))();
                 $("#page-payload").html("").append(uiController.structure);
                 $("#register-new-sim")
                     .removeClass("hidden")
@@ -4264,7 +4337,8 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/webApiCaller":141,"./UiController":10,"array-from":15,"array.prototype.find":18,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/getURLParameter":138,"../../../shared/dist/lib/webApiCaller":142,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
 module.exports = (typeof Array.from === 'function' ?
   Array.from :
   require('./polyfill')
@@ -9590,7 +9664,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":137,"./localApiHandlers":135,"./remoteApiCaller":136,"ts-events-extended":174,"ts-sip":184}],135:[function(require,module,exports){
+},{"../tools/bootbox_custom":137,"./localApiHandlers":135,"./remoteApiCaller":136,"ts-events-extended":175,"ts-sip":185}],135:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10176,7 +10250,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":143,"../tools/bootbox_custom":137,"./remoteApiCaller":136,"chan-dongle-extended-client/dist/lib/types":145,"ts-events-extended":174}],136:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":144,"../tools/bootbox_custom":137,"./remoteApiCaller":136,"chan-dongle-extended-client/dist/lib/types":146,"ts-events-extended":175}],136:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -11031,7 +11105,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":142,"../types":140,"./connection":134,"phone-number":161,"ts-events-extended":174,"ts-sip":184}],137:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":143,"../types":141,"./connection":134,"phone-number":162,"ts-events-extended":175,"ts-sip":185}],137:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11139,7 +11213,22 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":139}],138:[function(require,module,exports){
+},{"./modal_stack":140}],138:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function getURLParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split("&");
+    for (var i = 0; i < sURLVariables.length; i++) {
+        var sParameterName = sURLVariables[i].split("=");
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1];
+        }
+    }
+}
+exports.getURLParameter = getURLParameter;
+
+},{}],139:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11153,7 +11242,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11272,7 +11361,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -11487,7 +11576,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],141:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11642,7 +11731,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":144,"transfer-tools/dist/lib/JSON_CUSTOM":165}],142:[function(require,module,exports){
+},{"../web_api_declaration":145,"transfer-tools/dist/lib/JSON_CUSTOM":166}],143:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -11737,7 +11826,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -11790,7 +11879,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -11831,7 +11920,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -11852,7 +11941,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12055,7 +12144,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":147,"./custom/zalgo":148,"./maps/america":151,"./maps/rainbow":152,"./maps/random":153,"./maps/zebra":154,"./styles":155,"./system/supports-colors":157,"util":8}],147:[function(require,module,exports){
+},{"./custom/trap":148,"./custom/zalgo":149,"./maps/america":152,"./maps/rainbow":153,"./maps/random":154,"./maps/zebra":155,"./styles":156,"./system/supports-colors":158,"util":8}],148:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12103,7 +12192,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],148:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12215,7 +12304,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12327,7 +12416,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":146}],150:[function(require,module,exports){
+},{"./colors":147}],151:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12342,7 +12431,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":146,"./extendStringPrototype":149}],151:[function(require,module,exports){
+},{"./colors":147,"./extendStringPrototype":150}],152:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12354,7 +12443,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12368,7 +12457,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12380,14 +12469,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12466,7 +12555,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12505,7 +12594,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],157:[function(require,module,exports){
+},{"_process":6}],158:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -12660,19 +12749,19 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":156,"_process":6,"os":5}],158:[function(require,module,exports){
+},{"./has-flag.js":157,"_process":6,"os":5}],159:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],159:[function(require,module,exports){
+},{"dup":107}],160:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":158,"dup":108}],160:[function(require,module,exports){
+},{"./implementation":159,"dup":108}],161:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":159}],161:[function(require,module,exports){
+},{"dup":111,"function-bind":160}],162:[function(require,module,exports){
 arguments[4][119][0].apply(exports,arguments)
-},{"_process":6,"dup":119}],162:[function(require,module,exports){
+},{"_process":6,"dup":119}],163:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}],163:[function(require,module,exports){
+},{"dup":120}],164:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],164:[function(require,module,exports){
+},{"dup":121}],165:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13007,7 +13096,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":160}],165:[function(require,module,exports){
+},{"has":161}],166:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13057,7 +13146,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":164}],166:[function(require,module,exports){
+},{"super-json":165}],167:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13069,7 +13158,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":165,"./stringTransform":167,"./stringTransformExt":168,"./testing":169}],167:[function(require,module,exports){
+},{"./JSON_CUSTOM":166,"./stringTransform":168,"./stringTransformExt":169,"./testing":170}],168:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13131,7 +13220,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],168:[function(require,module,exports){
+},{"buffer":2}],169:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13199,7 +13288,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":167}],169:[function(require,module,exports){
+},{"./stringTransform":168}],170:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -13468,17 +13557,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":167}],170:[function(require,module,exports){
+},{"./stringTransform":168}],171:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"./SyncEventBase":171,"dup":122}],171:[function(require,module,exports){
+},{"./SyncEventBase":172,"dup":122}],172:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":172,"dup":123}],172:[function(require,module,exports){
+},{"./SyncEventBaseProtected":173,"dup":123}],173:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./defs":173,"dup":124,"run-exclusive":162}],173:[function(require,module,exports){
+},{"./defs":174,"dup":124,"run-exclusive":163}],174:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"dup":125,"setprototypeof":163}],174:[function(require,module,exports){
+},{"dup":125,"setprototypeof":164}],175:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"./SyncEvent":170,"./defs":173,"dup":126}],175:[function(require,module,exports){
+},{"./SyncEvent":171,"./defs":174,"dup":126}],176:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -13650,7 +13739,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":174}],176:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":175}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -13962,7 +14051,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":175,"./api/ApiMessage":177,"./core":181,"./misc":185,"colors":150,"ts-events-extended":174}],177:[function(require,module,exports){
+},{"./IConnection":176,"./api/ApiMessage":178,"./core":182,"./misc":186,"colors":151,"ts-events-extended":175}],178:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14043,7 +14132,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":181,"../misc":185,"buffer":2,"transfer-tools":166}],178:[function(require,module,exports){
+},{"../core":182,"../misc":186,"buffer":2,"transfer-tools":167}],179:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14225,7 +14314,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":185,"./ApiMessage":177,"colors":150,"util":8}],179:[function(require,module,exports){
+},{"../misc":186,"./ApiMessage":178,"colors":151,"util":8}],180:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -14444,7 +14533,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":185,"./ApiMessage":177,"setprototypeof":163}],180:[function(require,module,exports){
+},{"../misc":186,"./ApiMessage":178,"setprototypeof":164}],181:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -14452,7 +14541,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":178,"./client":179}],181:[function(require,module,exports){
+},{"./Server":179,"./client":180}],182:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -14536,7 +14625,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":182,"./core/sip":183,"buffer":2,"setprototypeof":163}],182:[function(require,module,exports){
+},{"./core/sdp":183,"./core/sip":184,"buffer":2,"setprototypeof":164}],183:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -14652,7 +14741,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],183:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15043,7 +15132,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],184:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -15055,7 +15144,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":176,"./api":180,"./core":181,"./misc":185}],185:[function(require,module,exports){
+},{"./Socket":177,"./api":181,"./core":182,"./misc":186}],186:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15294,4 +15383,4 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":181,"buffer":2}]},{},[14]);
+},{"./core":182,"buffer":2}]},{},[14]);

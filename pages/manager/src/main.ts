@@ -18,11 +18,13 @@ if (!ArrayBuffer.isView) {
 
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import { UiController } from "./UiController";
+import { UiController, Action } from "./UiController";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
 declare const __dirname: any;
+declare const Buffer: any;
 
 $(document).ready(async () => {
 
@@ -36,8 +38,30 @@ $(document).ready(async () => {
 
     connection.connect();
 
+    const action: Action | undefined = (() => {
+
+        const type = getURLParameter("action") as Action["type"] | undefined;
+
+        if (!type) {
+            return undefined;
+        }
+
+        switch (type) {
+            case "CREATE_CONTACT": return {
+                type,
+                "number": Buffer.from(
+                    getURLParameter("number_as_hex"),
+                    "hex"
+                ).toString("utf8")!,
+                "imsi": getURLParameter("imsi")!
+            };
+        }
+
+    })();
+
     const uiController = new UiController(
-        await remoteApiCaller.getUsableUserSims()
+        await remoteApiCaller.getUsableUserSims(),
+        action
     );
 
     $("#page-payload").html("").append(uiController.structure);

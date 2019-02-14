@@ -1,4 +1,3 @@
-
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
@@ -9,6 +8,7 @@ import { UiButtonBar } from "./UiButtonBar";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiSimRow } from "./UiSimRow";
 import { UiShareSim } from "./UiShareSim";
+import { phoneNumber } from "phone-number";
 
 declare const require: (path: string) => any;
 
@@ -17,6 +17,12 @@ const html = loadUiClassHtml(
     "UiController"
 );
 
+export type Action = {
+    type: "CREATE_CONTACT";
+    imsi: string;
+    number: phoneNumber;
+};
+
 export class UiController {
 
     public readonly structure = html.structure.clone();
@@ -24,9 +30,9 @@ export class UiController {
     private readonly uiButtonBar = new UiButtonBar();
 
     private readonly uiShareSim = new UiShareSim(
-        (()=>{
+        (() => {
 
-            const evt = new SyncEvent<{ 
+            const evt = new SyncEvent<{
                 userSim: types.UserSim.Owned;
                 email: string;
             }>();
@@ -107,9 +113,9 @@ export class UiController {
 
                 }
 
-                const uiPhonebook= this.uiPhonebooks.find( ui=> ui.userSim === userSim )
+                const uiPhonebook = this.uiPhonebooks.find(ui => ui.userSim === userSim)
 
-                if( !!uiPhonebook ){
+                if (!!uiPhonebook) {
                     uiPhonebook.updateButtons();
                 }
 
@@ -118,7 +124,7 @@ export class UiController {
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
         for (const evt of [
-            localApiHandlers.evtContactCreatedOrUpdated, 
+            localApiHandlers.evtContactCreatedOrUpdated,
             localApiHandlers.evtContactDeleted
         ]) {
 
@@ -174,7 +180,10 @@ export class UiController {
 
     }
 
-    constructor(userSims: types.UserSim.Usable[]) {
+    constructor(
+        userSims: types.UserSim.Usable[],
+        private readonly action?: Action
+    ) {
 
         this.setState("NO SIM");
 
@@ -195,6 +204,30 @@ export class UiController {
         localApiHandlers.evtSimPermissionLost.attachOnce(
             userSim => this.removeUserSim(userSim)
         );
+
+        if (!!action) {
+
+            switch (action.type) {
+                case "CREATE_CONTACT": {
+
+                    const userSim = userSims.find(
+                        ({ sim }) => sim.imsi === action.imsi
+                    )!;
+
+
+                    const uiSimRow = this.uiSimRows.find(
+                        uiSimRow => uiSimRow.userSim === userSim
+                    )!;
+
+                    uiSimRow.structure.click();
+
+                    this.uiButtonBar.evtClickContacts.post();
+
+                } break;
+            }
+
+        }
+
 
     }
 
@@ -320,7 +353,17 @@ export class UiController {
 
             }
 
-            uiPhonebook.showModal();
+            if (!this.action) {
+
+                uiPhonebook.showModal();
+
+            } else if (this.action.type === "CREATE_CONTACT") {
+
+                await uiPhonebook.interact_createContact(this.action.number);
+
+                window.location.href = "semasim://main";
+
+            }
 
         });
 
