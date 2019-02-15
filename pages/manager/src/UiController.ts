@@ -21,7 +21,12 @@ export type Action = {
     type: "CREATE_CONTACT";
     imsi: string;
     number: phoneNumber;
+} | {
+    type: "UPDATE_CONTACT_NAME" | "DELETE_CONTACT";
+    number: phoneNumber;
 };
+
+const backToAppUrl= "semasim://main";
 
 export class UiController {
 
@@ -181,8 +186,8 @@ export class UiController {
     }
 
     constructor(
-        userSims: types.UserSim.Usable[],
-        private readonly action?: Action
+        private userSims: types.UserSim.Usable[],
+        private action?: Action
     ) {
 
         this.setState("NO SIM");
@@ -205,29 +210,119 @@ export class UiController {
             userSim => this.removeUserSim(userSim)
         );
 
-        if (!!action) {
+        this.handleAction();
+
+    }
+
+    private async handleAction() {
+
+        if (!this.action) {
+            return;
+        }
+
+        const action = this.action;
+
+        const userSim: types.UserSim | undefined = await (async () => {
 
             switch (action.type) {
-                case "CREATE_CONTACT": {
+                case "UPDATE_CONTACT_NAME":
+                case "DELETE_CONTACT": {
 
-                    const userSim = userSims.find(
+                    await UiPhonebook.fetchPhoneNumberUtilityScript();
+
+                    const userSims = this.userSims
+                        .filter(
+                            ({ phonebook }) => !!phonebook.find(
+                                ({ number_raw }) => phoneNumber.areSame(action.number, number_raw)
+                            )
+                        );
+
+                        const prettyNumber= phoneNumber.prettyPrint(action.number);
+
+                    if (userSims.length === 0) {
+
+                        await new Promise(resolve =>
+                            bootbox_custom.alert(
+                                [
+                                    `${prettyNumber} is not saved in any of your SIM phonebook.`,
+                                    "Use the android contacts native feature to edit contact stored in your phone."
+                                ].join("<br>"),
+                                () => resolve()
+                            )
+                        );
+
+                        return undefined;
+                    } else if (userSims.length === 1) {
+                        return userSims.pop();
+                    }
+
+                    const index = await new Promise<number | null>(
+                        resolve => bootbox_custom.prompt({
+                            "title": `${prettyNumber} is present in ${userSims.length}, select phonebook to edit.`,
+                            "inputType": "select",
+                            "inputOptions": userSims.map(userSim => ({
+                                "text": `${userSim.friendlyName} ${userSim.isOnline ? "" : "( offline )"}`,
+                                "value": userSims.indexOf(userSim)
+                            })),
+                            "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
+                        })
+                    );
+
+                    if (index === null) {
+
+                        await new Promise(resolve =>
+                            bootbox_custom.alert(
+                                "No SIM selected, aborting.",
+                                () => resolve()
+                            )
+                        );
+
+                        return undefined;
+
+                    }
+
+                    return userSims[index];
+
+                }
+                case "CREATE_CONTACT":
+                    return this.userSims.find(
                         ({ sim }) => sim.imsi === action.imsi
-                    )!;
-
-
-                    const uiSimRow = this.uiSimRows.find(
-                        uiSimRow => uiSimRow.userSim === userSim
-                    )!;
-
-                    uiSimRow.structure.click();
-
-                    this.uiButtonBar.evtClickContacts.post();
-
-                } break;
+                    );
             }
+
+        })();
+
+        if (!userSim) {
+
+            window.location.href = backToAppUrl;
+
+            return;
 
         }
 
+        if (!userSim.isOnline) {
+
+            await new Promise(resolve =>
+                bootbox_custom.alert(
+                    `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
+                    () => resolve()
+                )
+            );
+
+            window.location.href = backToAppUrl;
+
+            return;
+
+        }
+
+        const uiSimRow = this.uiSimRows.find(
+            uiSimRow => uiSimRow.userSim === userSim
+        )!;
+
+        uiSimRow.structure.click();
+
+        //NOTE: Spaghetti code continue in evtClickContact handler....
+        this.uiButtonBar.evtClickContacts.post();
 
     }
 
@@ -350,20 +445,43 @@ export class UiController {
 
                 uiPhonebook = await this.initUiPhonebook(userSim);
 
-
             }
+
 
             if (!this.action) {
 
                 uiPhonebook.showModal();
 
-            } else if (this.action.type === "CREATE_CONTACT") {
+            } else {
 
-                await uiPhonebook.interact_createContact(this.action.number);
+                let pr: Promise<void>;
 
-                window.location.href = "semasim://main";
+                switch (this.action.type) {
+                    case "CREATE_CONTACT":
+                        pr = uiPhonebook.interact_createContact(
+                            this.action.number
+                        );
+                        break;
+                    case "UPDATE_CONTACT_NAME":
+                        pr = uiPhonebook.interact_updateContact(
+                            this.action.number
+                        );
+                        break;
+                    case "DELETE_CONTACT":
+                        pr = uiPhonebook.interact_deleteContacts(
+                            this.action.number
+                        );
+                        break;
+                }
+
+                this.action = undefined;
+
+                await pr!;
+
+                window.location.href = backToAppUrl;
 
             }
+
 
         });
 

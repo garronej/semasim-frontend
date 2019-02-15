@@ -3004,10 +3004,13 @@ var UiButtonBar_1 = require("./UiButtonBar");
 var UiPhonebook_1 = require("./UiPhonebook");
 var UiSimRow_1 = require("./UiSimRow");
 var UiShareSim_1 = require("./UiShareSim");
+var phone_number_1 = require("phone-number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
+var backToAppUrl = "semasim://main";
 var UiController = /** @class */ (function () {
     function UiController(userSims, action) {
         var _this = this;
+        this.userSims = userSims;
         this.action = action;
         this.structure = html.structure.clone();
         this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
@@ -3034,21 +3037,7 @@ var UiController = /** @class */ (function () {
         }
         remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
         localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
-        if (!!action) {
-            switch (action.type) {
-                case "CREATE_CONTACT":
-                    {
-                        var userSim_1 = userSims.find(function (_a) {
-                            var sim = _a.sim;
-                            return sim.imsi === action.imsi;
-                        });
-                        var uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim_1; });
-                        uiSimRow.structure.click();
-                        this.uiButtonBar.evtClickContacts.post();
-                    }
-                    break;
-            }
-        }
+        this.handleAction();
     }
     UiController.prototype.setState = function (placeholder) {
         switch (placeholder) {
@@ -3141,6 +3130,107 @@ var UiController = /** @class */ (function () {
             });
         });
     };
+    UiController.prototype.handleAction = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var action, userSim, uiSimRow;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.action) {
+                            return [2 /*return*/];
+                        }
+                        action = this.action;
+                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var _a, userSims_1, prettyNumber_1, index;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            _a = action.type;
+                                            switch (_a) {
+                                                case "UPDATE_CONTACT_NAME": return [3 /*break*/, 1];
+                                                case "DELETE_CONTACT": return [3 /*break*/, 1];
+                                                case "CREATE_CONTACT": return [3 /*break*/, 9];
+                                            }
+                                            return [3 /*break*/, 10];
+                                        case 1: return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
+                                        case 2:
+                                            _b.sent();
+                                            userSims_1 = this.userSims
+                                                .filter(function (_a) {
+                                                var phonebook = _a.phonebook;
+                                                return !!phonebook.find(function (_a) {
+                                                    var number_raw = _a.number_raw;
+                                                    return phone_number_1.phoneNumber.areSame(action.number, number_raw);
+                                                });
+                                            });
+                                            prettyNumber_1 = phone_number_1.phoneNumber.prettyPrint(action.number);
+                                            if (!(userSims_1.length === 0)) return [3 /*break*/, 4];
+                                            return [4 /*yield*/, new Promise(function (resolve) {
+                                                    return bootbox_custom.alert([
+                                                        prettyNumber_1 + " is not saved in any of your SIM phonebook.",
+                                                        "Use the android contacts native feature to edit contact stored in your phone."
+                                                    ].join("<br>"), function () { return resolve(); });
+                                                })];
+                                        case 3:
+                                            _b.sent();
+                                            return [2 /*return*/, undefined];
+                                        case 4:
+                                            if (userSims_1.length === 1) {
+                                                return [2 /*return*/, userSims_1.pop()];
+                                            }
+                                            _b.label = 5;
+                                        case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                                                "title": prettyNumber_1 + " is present in " + userSims_1.length + ", select phonebook to edit.",
+                                                "inputType": "select",
+                                                "inputOptions": userSims_1.map(function (userSim) { return ({
+                                                    "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
+                                                    "value": userSims_1.indexOf(userSim)
+                                                }); }),
+                                                "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
+                                            }); })];
+                                        case 6:
+                                            index = _b.sent();
+                                            if (!(index === null)) return [3 /*break*/, 8];
+                                            return [4 /*yield*/, new Promise(function (resolve) {
+                                                    return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
+                                                })];
+                                        case 7:
+                                            _b.sent();
+                                            return [2 /*return*/, undefined];
+                                        case 8: return [2 /*return*/, userSims_1[index]];
+                                        case 9: return [2 /*return*/, this.userSims.find(function (_a) {
+                                                var sim = _a.sim;
+                                                return sim.imsi === action.imsi;
+                                            })];
+                                        case 10: return [2 /*return*/];
+                                    }
+                                });
+                            }); })()];
+                    case 1:
+                        userSim = _a.sent();
+                        if (!userSim) {
+                            window.location.href = backToAppUrl;
+                            return [2 /*return*/];
+                        }
+                        if (!!userSim.isOnline) return [3 /*break*/, 3];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
+                            })];
+                    case 2:
+                        _a.sent();
+                        window.location.href = backToAppUrl;
+                        return [2 /*return*/];
+                    case 3:
+                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
+                        uiSimRow.structure.click();
+                        //NOTE: Spaghetti code continue in evtClickContact handler....
+                        this.uiButtonBar.evtClickContacts.post();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     UiController.prototype.getSelectedUiSimRow = function (notUiSimRow) {
         return this.uiSimRows.find(function (uiSimRow) { return uiSimRow !== notUiSimRow && uiSimRow.isSelected; });
     };
@@ -3213,7 +3303,7 @@ var UiController = /** @class */ (function () {
             }
         });
         this.uiButtonBar.evtClickContacts.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, uiPhonebook;
+            var userSim, uiPhonebook, pr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -3229,11 +3319,23 @@ var UiController = /** @class */ (function () {
                         uiPhonebook.showModal();
                         return [3 /*break*/, 5];
                     case 3:
-                        if (!(this.action.type === "CREATE_CONTACT")) return [3 /*break*/, 5];
-                        return [4 /*yield*/, uiPhonebook.interact_createContact(this.action.number)];
+                        pr = void 0;
+                        switch (this.action.type) {
+                            case "CREATE_CONTACT":
+                                pr = uiPhonebook.interact_createContact(this.action.number);
+                                break;
+                            case "UPDATE_CONTACT_NAME":
+                                pr = uiPhonebook.interact_updateContact(this.action.number);
+                                break;
+                            case "DELETE_CONTACT":
+                                pr = uiPhonebook.interact_deleteContacts(this.action.number);
+                                break;
+                        }
+                        this.action = undefined;
+                        return [4 /*yield*/, pr];
                     case 4:
                         _a.sent();
-                        window.location.href = "semasim://main";
+                        window.location.href = backToAppUrl;
                         _a.label = 5;
                     case 5: return [2 /*return*/];
                 }
@@ -3369,7 +3471,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/types":141,"../templates/UiController.html":128,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"ts-events-extended":126}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/types":141,"../templates/UiController.html":128,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":119,"ts-events-extended":126}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -3455,87 +3557,8 @@ var UiPhonebook = /** @class */ (function () {
         this.updateSearch();
         this.updateButtons();
         this.buttonClose.on("click", function () { return _this.hideModal(); });
-        this.buttonDelete.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var contacts, isConfirmed, _i, contacts_1, contact;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contacts = Array.from(this.uiContacts.values())
-                            .filter(function (uiContact) { return uiContact.isSelected; })
-                            .map(function (uiContact) { return uiContact.contact; });
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.confirm({
-                                    "size": "small",
-                                    "message": [
-                                        "Confirm deletion of",
-                                        contacts.map(function (_a) {
-                                            var name = _a.name;
-                                            return name;
-                                        }).join(" "),
-                                        "from SIM's internal storage ?"
-                                    ].join(" "),
-                                    "callback": function (result) { return resolve(result); }
-                                });
-                            })];
-                    case 1:
-                        isConfirmed = _a.sent();
-                        if (!isConfirmed) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Deleting contacts...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickDeleteContacts.post({
-                                    contacts: contacts,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 2:
-                        _a.sent();
-                        for (_i = 0, contacts_1 = contacts; _i < contacts_1.length; _i++) {
-                            contact = contacts_1[_i];
-                            this.notifyContactChanged(contact);
-                        }
-                        this.updateButtons();
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-        this.buttonEdit.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var contact, newName;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contact = Array.from(this.uiContacts.values())
-                            .find(function (uiContact) { return uiContact.isSelected; }).contact;
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "New contact name",
-                                "value": contact.name || "",
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 1:
-                        newName = _a.sent();
-                        if (!newName || contact.name === newName) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Updating contact name ...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    newName: newName,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 2:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.notifyContactChanged(contact);
-                        return [2 /*return*/];
-                }
-            });
-        }); });
+        this.buttonDelete.on("click", function () { return _this.interact_deleteContacts(); });
+        this.buttonEdit.on("click", function () { return _this.interact_updateContact(); });
         this.buttonCreateContact.on("click", function () { return _this.interact_createContact(); });
     }
     /** Fetch phone number utils, need to be called before instantiating objects */
@@ -3545,10 +3568,8 @@ var UiPhonebook = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.assert(!this.isPhoneNumberUtilityScriptLoaded);
-                        //TODO do not block here.
                         return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil("//web." + connection_1.baseDomain + "/plugins/ui/intl-tel-input/js/utils.js")];
                     case 1:
-                        //TODO do not block here.
                         _a.sent();
                         this.isPhoneNumberUtilityScriptLoaded = true;
                         return [2 /*return*/];
@@ -3568,10 +3589,12 @@ var UiPhonebook = /** @class */ (function () {
         var selectedCount = Array.from(this.uiContacts.values())
             .filter(function (uiContact) { return uiContact.isSelected; }).length;
         if (selectedCount === 0) {
+            this.buttonCreateContact.show();
             this.buttonDelete.hide();
             this.buttonEdit.hide();
         }
         else {
+            this.buttonCreateContact.hide();
             if (selectedCount === 1) {
                 this.buttonEdit.show();
             }
@@ -3748,7 +3771,7 @@ var UiPhonebook = /** @class */ (function () {
                             return phone_number_1.phoneNumber.areSame(number, number_raw);
                         });
                         return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "contact name for " + phone_number_1.phoneNumber.prettyPrint(number),
+                                "title": "Create contact " + phone_number_1.phoneNumber.prettyPrint(number) + " in " + _this.userSim.friendlyName + " internal memory",
                                 "value": !!contact ? contact.name : "New contact",
                                 "callback": function (result) { return resolve(result); },
                             }); })];
@@ -3757,7 +3780,15 @@ var UiPhonebook = /** @class */ (function () {
                         if (!name) {
                             return [2 /*return*/];
                         }
-                        if (!!contact) return [3 /*break*/, 5];
+                        if (!!this.userSim.isOnline) return [3 /*break*/, 5];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("Can't proceed, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
+                            })];
+                    case 4:
+                        _b.sent();
+                        return [2 /*return*/];
+                    case 5:
+                        if (!!contact) return [3 /*break*/, 7];
                         bootbox_custom.loading("Creating contact...");
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return _this.evtClickCreateContact.post({
@@ -3766,11 +3797,11 @@ var UiPhonebook = /** @class */ (function () {
                                     "onSubmitted": function (contact) { return resolve(contact); }
                                 });
                             })];
-                    case 4:
+                    case 6:
                         contact_1 = _b.sent();
                         this.createUiContact(contact_1);
-                        return [3 /*break*/, 7];
-                    case 5:
+                        return [3 /*break*/, 9];
+                    case 7:
                         if (contact.name === name) {
                             return [2 /*return*/];
                         }
@@ -3782,12 +3813,132 @@ var UiPhonebook = /** @class */ (function () {
                                     "onSubmitted": function () { return resolve(); }
                                 });
                             })];
-                    case 6:
+                    case 8:
                         _b.sent();
                         this.notifyContactChanged(contact);
-                        _b.label = 7;
-                    case 7:
+                        _b.label = 9;
+                    case 9:
                         bootbox_custom.dismissLoading();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UiPhonebook.prototype.interact_deleteContacts = function (provided_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var contacts, isConfirmed, _i, contacts_1, contact;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        contacts = (function () {
+                            if (provided_number !== undefined) {
+                                var contact = _this.userSim.phonebook.find(function (_a) {
+                                    var number_raw = _a.number_raw;
+                                    return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
+                                });
+                                return [contact];
+                            }
+                            else {
+                                return Array.from(_this.uiContacts.values())
+                                    .filter(function (uiContact) { return uiContact.isSelected; })
+                                    .map(function (uiContact) { return uiContact.contact; });
+                            }
+                        })();
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.confirm({
+                                    "size": "small",
+                                    "message": [
+                                        "Are you sure you want to delete",
+                                        contacts.map(function (_a) {
+                                            var name = _a.name;
+                                            return name;
+                                        }).join(" "),
+                                        "from " + _this.userSim.friendlyName + " internal storage ?"
+                                    ].join(" "),
+                                    "callback": function (result) { return resolve(result); }
+                                });
+                            })];
+                    case 1:
+                        isConfirmed = _a.sent();
+                        if (!isConfirmed) {
+                            return [2 /*return*/];
+                        }
+                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("Can't delete, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
+                            })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                    case 3:
+                        bootbox_custom.loading("Deleting contacts...");
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return _this.evtClickDeleteContacts.post({
+                                    contacts: contacts,
+                                    "onSubmitted": function () { return resolve(); }
+                                });
+                            })];
+                    case 4:
+                        _a.sent();
+                        for (_i = 0, contacts_1 = contacts; _i < contacts_1.length; _i++) {
+                            contact = contacts_1[_i];
+                            this.notifyContactChanged(contact);
+                        }
+                        this.updateButtons();
+                        bootbox_custom.dismissLoading();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UiPhonebook.prototype.interact_updateContact = function (provided_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var contact, prettyNumber, newName;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        contact = provided_number !== undefined ?
+                            this.userSim.phonebook.find(function (_a) {
+                                var number_raw = _a.number_raw;
+                                return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
+                            }) :
+                            Array.from(this.uiContacts.values())
+                                .find(function (uiContact) { return uiContact.isSelected; }).contact;
+                        prettyNumber = phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(contact.number_raw, !!this.userSim.sim.country ?
+                            this.userSim.sim.country.iso :
+                            undefined));
+                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                                "title": "New contact name for " + prettyNumber + " stored in " + _this.userSim.friendlyName,
+                                "value": contact.name,
+                                "callback": function (result) { return resolve(result); },
+                            }); })];
+                    case 1:
+                        newName = _a.sent();
+                        if (!newName || contact.name === newName) {
+                            return [2 /*return*/];
+                        }
+                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("Can't update, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
+                            })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                    case 3:
+                        bootbox_custom.loading("Updating contact name ...");
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return _this.evtClickUpdateContactName.post({
+                                    contact: contact,
+                                    newName: newName,
+                                    "onSubmitted": function () { return resolve(); }
+                                });
+                            })];
+                    case 4:
+                        _a.sent();
+                        bootbox_custom.dismissLoading();
+                        this.notifyContactChanged(contact);
                         return [2 /*return*/];
                 }
             });
@@ -4314,10 +4465,17 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     if (!type) {
                         return undefined;
                     }
+                    var getNumber = function () { return Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"); };
                     switch (type) {
+                        case "UPDATE_CONTACT_NAME":
+                        case "DELETE_CONTACT":
+                            return {
+                                type: type,
+                                "number": getNumber()
+                            };
                         case "CREATE_CONTACT": return {
                             type: type,
-                            "number": Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"),
+                            "number": getNumber(),
                             "imsi": getURLParameter_1.getURLParameter("imsi")
                         };
                     }

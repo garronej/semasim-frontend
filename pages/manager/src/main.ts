@@ -46,13 +46,21 @@ $(document).ready(async () => {
             return undefined;
         }
 
+        const getNumber = () => Buffer.from(
+            getURLParameter("number_as_hex"),
+            "hex"
+        ).toString("utf8")!;
+
         switch (type) {
+            case "UPDATE_CONTACT_NAME":
+            case "DELETE_CONTACT":
+                return {
+                    type,
+                    "number": getNumber()
+                }
             case "CREATE_CONTACT": return {
                 type,
-                "number": Buffer.from(
-                    getURLParameter("number_as_hex"),
-                    "hex"
-                ).toString("utf8")!,
+                "number": getNumber(),
                 "imsi": getURLParameter("imsi")!
             };
         }

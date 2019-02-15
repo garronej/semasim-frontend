@@ -53,7 +53,6 @@ export class UiPhonebook {
 
         console.assert(!this.isPhoneNumberUtilityScriptLoaded);
 
-        //TODO do not block here.
         await phoneNumber.remoteLoadUtil(
             `//web.${baseDomain}/plugins/ui/intl-tel-input/js/utils.js`
         );
@@ -100,83 +99,9 @@ export class UiPhonebook {
 
         this.buttonClose.on("click", () => this.hideModal());
 
-        this.buttonDelete.on("click", async () => {
+        this.buttonDelete.on("click", () => this.interact_deleteContacts());
 
-            const contacts = Array.from(this.uiContacts.values())
-                .filter(uiContact => uiContact.isSelected)
-                .map(uiContact => uiContact.contact);
-            
-            const isConfirmed= await new Promise<boolean>(resolve =>
-                bootbox_custom.confirm({
-                    "size": "small",
-                    "message": [
-                        "Confirm deletion of",
-                        contacts.map(({ name }) => name).join(" "),
-                        "from SIM's internal storage ?"
-                    ].join(" "),
-                    "callback": result => resolve(result)
-                })
-            );
-
-            if( !isConfirmed ){
-                return;
-            }
-
-            bootbox_custom.loading("Deleting contacts...");
-
-            await new Promise(resolve =>
-                this.evtClickDeleteContacts.post({
-                    contacts,
-                    "onSubmitted": () => resolve()
-                })
-            );
-
-            for (const contact of contacts) {
-
-                this.notifyContactChanged(contact);
-
-            }
-
-            this.updateButtons();
-
-            bootbox_custom.dismissLoading();
-
-        });
-
-        this.buttonEdit.on("click", async () => {
-
-            const contact = Array.from(this.uiContacts.values())
-                .find(uiContact => uiContact.isSelected)!.contact;
-
-
-            const newName = await new Promise<string | null>(
-                resolve => bootbox_custom.prompt({
-                    "title": `New contact name`,
-                    "value": contact.name || "",
-                    "callback": result => resolve(result),
-                })
-            );
-
-            if (!newName || contact.name === newName) {
-                return;
-            }
-
-            bootbox_custom.loading("Updating contact name ...");
-
-            await new Promise(resolve =>
-                this.evtClickUpdateContactName.post({
-                    contact,
-                    newName,
-                    "onSubmitted": () => resolve()
-                })
-            );
-
-            bootbox_custom.dismissLoading();
-
-            this.notifyContactChanged(contact);
-
-
-        });
+        this.buttonEdit.on("click", ()=> this.interact_updateContact());
 
         this.buttonCreateContact.on("click", () => this.interact_createContact());
 
@@ -186,8 +111,6 @@ export class UiPhonebook {
     //TODO: Make sure contact ref is kept.
     /** mapped by types.UserSim.Contact */
     private readonly uiContacts = new Map<types.UserSim.Contact, UiContact>();
-
-
 
     /** to call (outside of the class) when sim online status change */
     public updateButtons() {
@@ -199,16 +122,18 @@ export class UiPhonebook {
             this.buttonEdit
         ].forEach(button => button.prop("disabled", !this.userSim.isOnline));
 
-
         const selectedCount = Array.from(this.uiContacts.values())
             .filter(uiContact => uiContact.isSelected).length;
 
         if (selectedCount === 0) {
 
+            this.buttonCreateContact.show();
             this.buttonDelete.hide();
             this.buttonEdit.hide();
 
         } else {
+
+            this.buttonCreateContact.hide();
 
             if (selectedCount === 1) {
 
@@ -467,7 +392,7 @@ export class UiPhonebook {
 
         const name = await new Promise<string | null>(
             resolve => bootbox_custom.prompt({
-                "title": `contact name for ${phoneNumber.prettyPrint(number)}`,
+                "title": `Create contact ${phoneNumber.prettyPrint(number)} in ${this.userSim.friendlyName} internal memory`,
                 "value": !!contact ? contact.name : "New contact",
                 "callback": result => resolve(result),
             })
@@ -475,6 +400,19 @@ export class UiPhonebook {
 
         if (!name) {
             return;
+        }
+
+        if( !this.userSim.isOnline ){
+
+            await new Promise(resolve=> 
+                bootbox_custom.alert(
+                    `Can't proceed, ${this.userSim.friendlyName} no longer online`,
+                    ()=> resolve()
+                )
+            );
+
+            return;
+
         }
 
         if (!contact) {
@@ -517,7 +455,145 @@ export class UiPhonebook {
 
     }
 
+    public async interact_deleteContacts(provided_number?: phoneNumber) {
 
+        const contacts: types.UserSim.Contact[] = (() => {
+
+            if (provided_number !== undefined) {
+
+                const contact = this.userSim.phonebook.find(
+                    ({ number_raw }) => phoneNumber.areSame(
+                        provided_number,
+                        number_raw
+                    )
+                )!;
+
+                return [contact];
+
+            } else {
+
+                return Array.from(this.uiContacts.values())
+                    .filter(uiContact => uiContact.isSelected)
+                    .map(uiContact => uiContact.contact)
+                    ;
+
+            }
+
+        })();
+
+        const isConfirmed = await new Promise<boolean>(resolve =>
+            bootbox_custom.confirm({
+                "size": "small",
+                "message": [
+                    "Are you sure you want to delete",
+                    contacts.map(({ name }) => name).join(" "),
+                    `from ${this.userSim.friendlyName} internal storage ?`
+                ].join(" "),
+                "callback": result => resolve(result)
+            })
+        );
+
+        if (!isConfirmed) {
+            return;
+        }
+
+        if( !this.userSim.isOnline ){
+
+            await new Promise(resolve=> 
+                bootbox_custom.alert(
+                    `Can't delete, ${this.userSim.friendlyName} no longer online`,
+                    ()=> resolve()
+                )
+            );
+
+            return;
+
+        }
+
+        bootbox_custom.loading("Deleting contacts...");
+
+        await new Promise(resolve =>
+            this.evtClickDeleteContacts.post({
+                contacts,
+                "onSubmitted": () => resolve()
+            })
+        );
+
+        for (const contact of contacts) {
+
+            this.notifyContactChanged(contact);
+
+        }
+
+        this.updateButtons();
+
+        bootbox_custom.dismissLoading();
+
+    }
+
+    public async interact_updateContact(provided_number?: phoneNumber) {
+
+        const contact = provided_number !== undefined ?
+            this.userSim.phonebook.find(
+                ({ number_raw }) => phoneNumber.areSame(
+                    provided_number,
+                    number_raw
+                )
+            )! :
+            Array.from(this.uiContacts.values())
+                .find(uiContact => uiContact.isSelected)!.contact
+            ;
+
+
+        const prettyNumber = phoneNumber.prettyPrint(
+            phoneNumber.build(
+                contact.number_raw,
+                !!this.userSim.sim.country ?
+                    this.userSim.sim.country.iso :
+                    undefined
+            )
+        );
+
+        const newName = await new Promise<string | null>(
+            resolve => bootbox_custom.prompt({
+                "title": `New contact name for ${prettyNumber} stored in ${this.userSim.friendlyName}`,
+                "value": contact.name,
+                "callback": result => resolve(result),
+            })
+        );
+
+        if (!newName || contact.name === newName) {
+            return;
+        }
+
+        if( !this.userSim.isOnline ){
+
+            await new Promise(resolve=> 
+                bootbox_custom.alert(
+                    `Can't update, ${this.userSim.friendlyName} no longer online`,
+                    ()=> resolve()
+                )
+            );
+
+            return;
+
+        }
+
+        bootbox_custom.loading("Updating contact name ...");
+
+        await new Promise(resolve =>
+            this.evtClickUpdateContactName.post({
+                contact,
+                newName,
+                "onSubmitted": () => resolve()
+            })
+        );
+
+        bootbox_custom.dismissLoading();
+
+        this.notifyContactChanged(contact);
+
+    }
 
 
 }
