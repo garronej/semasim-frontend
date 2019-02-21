@@ -4002,7 +4002,6 @@ var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-console.log("op");
 $.validator.addMethod("validateTelInput", function (value, element) {
     try {
         phone_number_1.phoneNumber.build(value, $(element).intlTelInput("getSelectedCountryData").iso2, "MUST BE DIALABLE");
@@ -4365,7 +4364,7 @@ var UiWebphoneController = /** @class */ (function () {
         this.userSim = userSim;
         this.wdInstance = wdInstance;
         this.structure = html.structure.clone();
-        this.uiConversations = new Map();
+        this._uiConversations = new Map();
         this.ua = new Ua_1.Ua(userSim);
         this.uiVoiceCall = new UiVoiceCall_1.UiVoiceCall(userSim);
         this.uiHeader = new UiHeader_1.UiHeader(userSim);
@@ -4394,7 +4393,7 @@ var UiWebphoneController = /** @class */ (function () {
         }, function (_a) {
             var contact = _a.contact;
             return __awaiter(_this, void 0, void 0, function () {
-                var wdChat, isUpdated, uiConversation;
+                var wdChat, isUpdated;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -4406,7 +4405,7 @@ var UiWebphoneController = /** @class */ (function () {
                             return [4 /*yield*/, remoteApiCaller.newWdChat(this.wdInstance, phone_number_1.phoneNumber.build(contact.number_raw, this.userSim.sim.country ? this.userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
                         case 1:
                             wdChat = _b.sent();
-                            this.initUiConversation(wdChat);
+                            this.getOrCreateUiConversation(wdChat);
                             return [3 /*break*/, 4];
                         case 2: return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
                         case 3:
@@ -4414,9 +4413,9 @@ var UiWebphoneController = /** @class */ (function () {
                             if (!isUpdated) {
                                 return [2 /*return*/];
                             }
-                            uiConversation = this.uiConversations.get(wdChat);
                             this.uiPhonebook.notifyContactChanged(wdChat);
-                            uiConversation.notifyContactNameUpdated();
+                            this.getOrCreateUiConversation(wdChat)
+                                .notifyContactNameUpdated();
                             _b.label = 4;
                         case 4: return [2 /*return*/];
                     }
@@ -4429,7 +4428,7 @@ var UiWebphoneController = /** @class */ (function () {
         }, function (_a) {
             var contact = _a.contact;
             return __awaiter(_this, void 0, void 0, function () {
-                var wdChat, isUpdated, uiConversation;
+                var wdChat, isUpdated;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -4443,9 +4442,9 @@ var UiWebphoneController = /** @class */ (function () {
                             if (!isUpdated) {
                                 return [2 /*return*/];
                             }
-                            uiConversation = this.uiConversations.get(wdChat);
                             this.uiPhonebook.notifyContactChanged(wdChat);
-                            uiConversation.notifyContactNameUpdated();
+                            this.getOrCreateUiConversation(wdChat)
+                                .notifyContactNameUpdated();
                             return [2 /*return*/];
                     }
                 });
@@ -4472,7 +4471,7 @@ var UiWebphoneController = /** @class */ (function () {
             var e_1, _a;
             _this.uiHeader.setIsOnline(isRegistered);
             try {
-                for (var _b = __values(_this.uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var uiConversation = _c.value;
                     uiConversation.setReadonly(!isRegistered);
                 }
@@ -4549,7 +4548,7 @@ var UiWebphoneController = /** @class */ (function () {
                             wdMessage = _b.sent();
                             onProcessed();
                             if (!!wdMessage) {
-                                this.uiConversations.get(wdChat).newMessage(wdMessage);
+                                this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
                                 this.uiPhonebook.notifyContactChanged(wdChat);
                             }
                             return [2 /*return*/];
@@ -4623,7 +4622,7 @@ var UiWebphoneController = /** @class */ (function () {
                         if (action === "SMS") {
                             return [2 /*return*/];
                         }
-                        uiConversation = this.uiConversations.get(wdChat);
+                        uiConversation = this.getOrCreateUiConversation(wdChat);
                         switch (action) {
                             case "CALL":
                                 uiConversation.evtVoiceCall.post();
@@ -4648,22 +4647,21 @@ var UiWebphoneController = /** @class */ (function () {
         this.uiPhonebook.evtContactSelected.attach(function (_a) {
             var wdChatPrev = _a.wdChatPrev, wdChat = _a.wdChat;
             if (wdChatPrev) {
-                _this.uiConversations.get(wdChatPrev).unselect();
+                _this.getOrCreateUiConversation(wdChatPrev).unselect();
             }
-            var uiConversation = _this.uiConversations.get(wdChat);
-            if (!uiConversation) {
-                uiConversation = _this.initUiConversation(wdChat);
-            }
-            uiConversation.setSelected();
+            _this.getOrCreateUiConversation(wdChat).setSelected();
         });
     };
-    UiWebphoneController.prototype.initUiConversation = function (wdChat) {
+    UiWebphoneController.prototype.getOrCreateUiConversation = function (wdChat) {
         var _this = this;
+        if (this._uiConversations.has(wdChat)) {
+            return this._uiConversations.get(wdChat);
+        }
         var uiConversation = new UiConversation_1.UiConversation(this.userSim, wdChat);
         if (this.ua.isRegistered) {
             uiConversation.setReadonly(false);
         }
-        this.uiConversations.set(wdChat, uiConversation);
+        this._uiConversations.set(wdChat, uiConversation);
         this.structure.find("div.id_colRight").append(uiConversation.structure);
         uiConversation.evtChecked.attach(function () { return __awaiter(_this, void 0, void 0, function () {
             var isUpdated;
@@ -4830,7 +4828,7 @@ var UiWebphoneController = /** @class */ (function () {
                         bootbox_custom.dismissLoading();
                         this.uiPhonebook.notifyContactChanged(wdChat);
                         uiConversation.structure.detach();
-                        this.uiConversations.delete(wdChat);
+                        this._uiConversations.delete(wdChat);
                         this.uiPhonebook.triggerClickOnLastSeenChat();
                         return [2 /*return*/];
                 }

@@ -28,7 +28,6 @@ export class UiWebphoneController {
     private readonly uiHeader: UiHeader;
     private readonly uiQuickAction: UiQuickAction;
     private readonly uiPhonebook: UiPhonebook;
-    private readonly uiConversations = new Map<wd.Chat, UiConversation>();
 
     private readonly ua: Ua;
 
@@ -72,7 +71,6 @@ export class UiWebphoneController {
                 //TODO: Terminate UA.
                 this.structure.detach();
 
-
             }
         );
 
@@ -96,7 +94,7 @@ export class UiWebphoneController {
                         contact.mem_index !== undefined ? contact.mem_index : null
                     );
 
-                    this.initUiConversation(wdChat);
+                    this.getOrCreateUiConversation(wdChat);
 
                 } else {
 
@@ -109,11 +107,12 @@ export class UiWebphoneController {
                         return;
                     }
 
-                    const uiConversation = this.uiConversations.get(wdChat)!;
 
                     this.uiPhonebook.notifyContactChanged(wdChat);
 
-                    uiConversation.notifyContactNameUpdated();
+                    this.getOrCreateUiConversation(wdChat)
+                        .notifyContactNameUpdated()
+                        ;
 
                 }
 
@@ -138,11 +137,12 @@ export class UiWebphoneController {
                     return;
                 }
 
-                const uiConversation = this.uiConversations.get(wdChat)!;
 
                 this.uiPhonebook.notifyContactChanged(wdChat);
 
-                uiConversation.notifyContactNameUpdated();
+                this.getOrCreateUiConversation(wdChat)
+                .notifyContactNameUpdated()
+                ;
 
             }
         );
@@ -178,7 +178,7 @@ export class UiWebphoneController {
 
             this.uiHeader.setIsOnline(isRegistered);
 
-            for (const uiConversation of this.uiConversations.values()) {
+            for (const uiConversation of this._uiConversations.values()) {
 
                 uiConversation.setReadonly(!isRegistered);
 
@@ -262,7 +262,7 @@ export class UiWebphoneController {
 
                 if (!!wdMessage) {
 
-                    this.uiConversations.get(wdChat)!.newMessage(wdMessage);
+                    this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
 
                     this.uiPhonebook.notifyContactChanged(wdChat);
 
@@ -356,7 +356,7 @@ export class UiWebphoneController {
                 return;
             }
 
-            const uiConversation = this.uiConversations.get(wdChat)!;
+            const uiConversation = this.getOrCreateUiConversation(wdChat);
 
             switch (action) {
                 case "CALL": uiConversation.evtVoiceCall.post(); break;
@@ -384,24 +384,24 @@ export class UiWebphoneController {
 
                 if (wdChatPrev) {
 
-                    this.uiConversations.get(wdChatPrev)!.unselect();
+                    this.getOrCreateUiConversation(wdChatPrev).unselect();
 
                 }
 
-                let uiConversation = this.uiConversations.get(wdChat);
-
-                if( !uiConversation ){
-                    uiConversation = this.initUiConversation(wdChat);
-                }
-
-                uiConversation.setSelected();
+                this.getOrCreateUiConversation(wdChat).setSelected();
 
             }
         );
 
     }
 
-    private initUiConversation(wdChat: wd.Chat): UiConversation {
+    private readonly _uiConversations = new Map<wd.Chat, UiConversation>();
+
+    private getOrCreateUiConversation(wdChat: wd.Chat): UiConversation {
+
+        if( this._uiConversations.has(wdChat) ){
+            return this._uiConversations.get(wdChat)!;
+        }
 
         const uiConversation = new UiConversation(this.userSim, wdChat);
 
@@ -409,7 +409,7 @@ export class UiWebphoneController {
             uiConversation.setReadonly(false);
         }
 
-        this.uiConversations.set(wdChat, uiConversation);
+        this._uiConversations.set(wdChat, uiConversation);
 
         this.structure.find("div.id_colRight").append(uiConversation.structure);
 
@@ -630,7 +630,7 @@ export class UiWebphoneController {
 
             uiConversation.structure.detach();
 
-            this.uiConversations.delete(wdChat);
+            this._uiConversations.delete(wdChat);
 
             this.uiPhonebook.triggerClickOnLastSeenChat();
 

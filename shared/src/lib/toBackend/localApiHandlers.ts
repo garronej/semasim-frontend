@@ -677,7 +677,7 @@ export const iceServers: RTCIceServer[] = [
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async params => {
 
-            iceServers.pop()
+            iceServers.pop();
             iceServers.push(params);
 
             return undefined;

@@ -6,8 +6,6 @@ import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
 declare const require: any;
 
-console.log("op");
-
 $.validator.addMethod(
     "validateTelInput",
     (value, element) => {
