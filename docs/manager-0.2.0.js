@@ -3716,8 +3716,8 @@ var UiPhonebook = /** @class */ (function () {
                                         return __generator(this, function (_a) {
                                             switch (_a.label) {
                                                 case 0:
-                                                    if (result === undefined) {
-                                                        resolve(result);
+                                                    if (result === null) {
+                                                        resolve(undefined);
                                                         return [2 /*return*/];
                                                     }
                                                     number = phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2);

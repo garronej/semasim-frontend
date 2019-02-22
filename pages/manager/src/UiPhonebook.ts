@@ -311,8 +311,8 @@ export class UiPhonebook {
                     "size": "small",
                     "callback": async result => {
 
-                        if (result === undefined) {
-                            resolve(result);
+                        if (result === null) {
+                            resolve(undefined);
                             return;
                         }
 
