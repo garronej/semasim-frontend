@@ -62,7 +62,7 @@ const build_page = (target_module_dir_path, watch) => __awaiter(this, void 0, vo
             })()
         ].join("\n"), "utf8"));
     }
-    lib.tsc_browserify_minify(path.join(target_module_dir_path, "tsconfig.json"), path.join(target_module_dir_path, "dist", "main.js"), path.join(__dirname, "..", "..", "..", "docs", `${path.basename(target_module_dir_path)}-${page_version}.js`), watch);
+    lib.tsc_browserify_minify(path.join(target_module_dir_path, "tsconfig.json"), path.join(target_module_dir_path, "dist", "main.js"), path.join(__dirname, "..", "..", "..", "static.semasim.com", `${path.basename(target_module_dir_path)}-${page_version}.js`), watch);
 });
 function program_action_build_page(options) {
     return __awaiter(this, void 0, void 0, function* () {

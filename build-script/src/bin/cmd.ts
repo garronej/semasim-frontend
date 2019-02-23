@@ -95,7 +95,7 @@ const build_page = async (
         path.join(target_module_dir_path, "tsconfig.json"),
         path.join(target_module_dir_path, "dist", "main.js"),
         path.join(
-            __dirname, "..", "..", "..", "docs",
+            __dirname, "..", "..", "..", "static.semasim.com",
             `${path.basename(target_module_dir_path)}-${page_version}.js`
         ),
         watch
