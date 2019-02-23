@@ -1,2 +1,0 @@
-# semasim-frontend
-
