@@ -50,6 +50,7 @@ var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 var bootbox_custom = require("../tools/bootbox_custom");
+var Cookies = require("js-cookie");
 /** semasim.com or dev.semasim.com */
 exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 exports.url = "wss://web." + exports.baseDomain;
@@ -64,7 +65,7 @@ var socketCurrent = undefined;
 var userSims = undefined;
 //TODO: No need to export it.
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
-function connect(isReconnect) {
+function connect(requestTurnCred, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -76,6 +77,7 @@ function connect(isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
+    Cookies.set("requestTurnCred", "" + !!requestTurnCred);
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -190,7 +192,7 @@ function connect(isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect("RECONNECT");
+                    connect(requestTurnCred, "RECONNECT");
                     return [2 /*return*/];
             }
         });

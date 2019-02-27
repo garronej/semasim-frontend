@@ -5,19 +5,20 @@ import * as localApiHandlers from "./localApiHandlers";
 import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
 import * as bootbox_custom from "../tools/bootbox_custom";
+import * as Cookies from "js-cookie";
 
 /** semasim.com or dev.semasim.com */
-export const baseDomain= window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
+export const baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
 
 export const url = `wss://web.${baseDomain}`;
 
 const idString = "toBackend";
 
 const apiServer = new sip.api.Server(
-    localApiHandlers.handlers, 
+    localApiHandlers.handlers,
     sip.api.Server.getDefaultLogger({
         idString,
-        "log": baseDomain.substring(0, 3) === "dev" ? 
+        "log": baseDomain.substring(0, 3) === "dev" ?
             console.log.bind(console) : (() => { }),
         "hideKeepAlive": true
     })
@@ -30,16 +31,19 @@ let userSims: types.UserSim.Usable[] | undefined = undefined;
 //TODO: No need to export it.
 export const evtConnect = new SyncEvent<sip.Socket>();
 
-export function connect(isReconnect?: undefined |"RECONNECT") {
+export function connect(
+    requestTurnCred?: "REQUEST TURN CRED" | undefined,
+    isReconnect?: undefined | "RECONNECT"
+) {
 
     //We register 'offline' event only on the first call of connect()
-    if( socketCurrent === undefined ){
+    if (socketCurrent === undefined) {
 
         window.addEventListener("offline", () => {
 
             const socket = get();
 
-            if( socket instanceof Promise){
+            if (socket instanceof Promise) {
                 return;
             }
 
@@ -48,6 +52,8 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
         });
 
     }
+
+    Cookies.set("requestTurnCred", `${!!requestTurnCred}`);
 
     const socket = new sip.Socket(
         new WebSocket(url, "SIP"),
@@ -87,7 +93,7 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
     socket.evtConnect.attachOnce(() => {
 
-        if( !!isReconnect ){
+        if (!!isReconnect) {
 
             bootbox_custom.dismissLoading();
 
@@ -97,35 +103,35 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
             remoteApiCaller.getUsableUserSims().then(userSims_ => userSims = userSims_);
 
-        }else{
+        } else {
 
             remoteApiCaller.getUsableUserSims("STATELESS").then(userSims_ => {
 
-                for( const userSim_ of userSims_ ){
+                for (const userSim_ of userSims_) {
 
-                    const userSim= userSims!
+                    const userSim = userSims!
                         .find(({ sim }) => sim.imsi === userSim_.sim.imsi);
 
                     /*
                     By testing if digests are the same we cover 99% of the case
                     when the sim could have been modified while offline...good enough.
                     */
-                    if( 
-                        !userSim || 
-                        userSim.sim.storage.digest !== userSim_.sim.storage.digest 
-                    ){
+                    if (
+                        !userSim ||
+                        userSim.sim.storage.digest !== userSim_.sim.storage.digest
+                    ) {
 
                         location.reload();
 
                         return;
-                        
+
                     }
 
                     /*
                     If userSim is online we received a notification before having the 
                     response of the request... even possible?
                      */
-                    if(  userSim.isOnline ){
+                    if (userSim.isOnline) {
                         continue;
                     }
 
@@ -137,7 +143,7 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
                     userSim.gatewayLocation = userSim_.gatewayLocation;
 
-                    if( userSim.isOnline ){
+                    if (userSim.isOnline) {
 
                         localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
 
@@ -156,9 +162,9 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
 
     });
 
-    socket.evtClose.attachOnce( async () => {
+    socket.evtClose.attachOnce(async () => {
 
-        for( const userSim of userSims || [] ){
+        for (const userSim of userSims || []) {
 
             userSim.isOnline = false;
 
@@ -170,19 +176,19 @@ export function connect(isReconnect?: undefined |"RECONNECT") {
             return;
         }
 
-        if( socket.evtConnect.postCount === 1 ){
+        if (socket.evtConnect.postCount === 1) {
 
             bootbox_custom.loading("Reconnecting...");
 
         }
 
-        while( !navigator.onLine ){
+        while (!navigator.onLine) {
 
             await new Promise(resolve => setTimeout(resolve, 1000));
 
         }
 
-        connect("RECONNECT");
+        connect(requestTurnCred, "RECONNECT");
 
     });
 

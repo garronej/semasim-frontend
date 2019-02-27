@@ -27,7 +27,7 @@ $(document).ready(async () => {
 
 	});
 
-	connection.connect();
+	connection.connect("REQUEST TURN CRED");
 
 	$("#page-payload").html("");
 
