@@ -382,6 +382,17 @@ exports.deleteContact = (function () {
         });
     };
 })();
+/** Api only called once */
+exports.shouldAppendPromotionalMessage = (function () {
+    var methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
+    var cachedResponse = undefined;
+    return function () {
+        if (cachedResponse !== undefined) {
+            return cachedResponse;
+        }
+        return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
+    };
+})();
 //WebData sync things :
 exports.getUaInstanceIdAndEmail = (function () {
     var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;

@@ -449,6 +449,31 @@ export const deleteContact = (() => {
 
 })();
 
+/** Api only called once */
+export const shouldAppendPromotionalMessage = (() => {
+
+    const methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
+    type Params = apiDeclaration.shouldAppendPromotionalMessage.Params;
+    type Response = apiDeclaration.shouldAppendPromotionalMessage.Response;
+    
+    let cachedResponse: Response | undefined = undefined;
+
+    return function (
+    ): Promise<boolean> | boolean {
+
+        if( cachedResponse !== undefined ){
+            return cachedResponse;
+        }
+
+        return sendRequest<Params, Response>(
+            methodName,
+            undefined
+        ).then( response => cachedResponse = response );
+
+    };
+
+})();
+
 //WebData sync things :
 
 export const getUaInstanceIdAndEmail = (() => {

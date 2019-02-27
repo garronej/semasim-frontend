@@ -204,6 +204,16 @@ export namespace deleteContact {
 
 }
 
+export namespace shouldAppendPromotionalMessage {
+
+    export const methodName= "shouldAppendSenTWithSemasim";
+
+    export type Params = undefined;
+
+    export type Response = boolean;
+
+}
+
 //WebphoneData Sync things:
 
 export namespace getUaInstanceIdAndEmail {

@@ -195,7 +195,8 @@ export class Ua {
     public sendMessage(
         number: phoneNumber,
         text: string,
-        exactSendDate: Date
+        exactSendDate: Date,
+        appendPromotionalMessage: boolean
     ): Promise<void> {
 
         const extraHeaders = (() => {
@@ -204,8 +205,14 @@ export class Ua {
 
                 const bundledData: gwTypes.BundledData.ClientToServer.Message = {
                     "type": "MESSAGE",
-                    exactSendDate
+                    exactSendDate,
                 };
+
+                if( appendPromotionalMessage ){
+
+                    bundledData.appendPromotionalMessage= true;
+
+                }
 
                 return bundledData;
 

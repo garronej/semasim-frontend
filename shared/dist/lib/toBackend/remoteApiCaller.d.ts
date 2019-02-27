@@ -18,6 +18,8 @@ export declare const rejectSharingRequest: (userSim: types.UserSim._Base<types.S
 export declare const createContact: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>, name: string, number: string) => Promise<types.UserSim.Contact>;
 export declare const updateContactName: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>, contact: types.UserSim.Contact, newName: string) => Promise<void>;
 export declare const deleteContact: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>, contact: types.UserSim.Contact) => Promise<void>;
+/** Api only called once */
+export declare const shouldAppendPromotionalMessage: () => boolean | Promise<boolean>;
 export declare const getUaInstanceIdAndEmail: () => Promise<{
     uaInstanceId: string;
     email: string;

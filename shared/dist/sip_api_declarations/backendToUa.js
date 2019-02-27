@@ -54,6 +54,10 @@ var deleteContact;
 (function (deleteContact) {
     deleteContact.methodName = "deleteContact";
 })(deleteContact = exports.deleteContact || (exports.deleteContact = {}));
+var shouldAppendPromotionalMessage;
+(function (shouldAppendPromotionalMessage) {
+    shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
+})(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
 //WebphoneData Sync things:
 var getUaInstanceIdAndEmail;
 (function (getUaInstanceIdAndEmail) {

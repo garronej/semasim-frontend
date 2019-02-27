@@ -135,6 +135,11 @@ export declare namespace deleteContact {
         new_digest?: string;
     };
 }
+export declare namespace shouldAppendPromotionalMessage {
+    const methodName = "shouldAppendSenTWithSemasim";
+    type Params = undefined;
+    type Response = boolean;
+}
 export declare namespace getUaInstanceIdAndEmail {
     const methodName = "getUaInstanceIdAndEmail";
     type Params = undefined;

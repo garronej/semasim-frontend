@@ -451,7 +451,10 @@ export class UiWebphoneController {
                 try {
 
                     await this.ua.sendMessage(
-                        uiConversation.wdChat.contactNumber, text, exactSendDate
+                        uiConversation.wdChat.contactNumber, 
+                        text, 
+                        exactSendDate, 
+                        await remoteApiCaller.shouldAppendPromotionalMessage()
                     );
 
                 } catch (error) {
