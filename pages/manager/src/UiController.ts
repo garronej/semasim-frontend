@@ -2,7 +2,8 @@ import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
+import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";
 import { UiPhonebook } from "./UiPhonebook";
@@ -26,7 +27,6 @@ export type Action = {
     number: phoneNumber;
 };
 
-const backToAppUrl= "semasim://main";
 
 export class UiController {
 
@@ -477,6 +477,15 @@ export class UiController {
                 this.action = undefined;
 
                 await pr!;
+
+                //NOTE: Do not remove this feedback as it leave the time 
+                //to the push notification to land before we go back to app.
+                await new Promise(resolve =>
+                    bootbox_custom.alert(
+                        "Success",
+                        () => resolve()
+                    )
+                );
 
                 window.location.href = backToAppUrl;
 

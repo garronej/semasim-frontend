@@ -6,29 +6,34 @@ require("array.prototype.find").shim();
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiController } from "./UiController";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
 $(document).ready(async () => {
 
-  $("#logout").click(async () => {
+    $("#logout").click(async () => {
 
-    webApiCaller.logoutUser();
+        webApiCaller.logoutUser();
 
-    window.location.href = "/login";
+        window.location.href = "/login";
 
-  });
+    });
 
-  $("#footer").hide();
+    $("#footer").hide();
 
-  bootbox_custom.loading("Loading subscription infos");
+    bootbox_custom.loading("Loading subscription infos");
 
-  const subscriptionInfos = await webApiCaller.getSubscriptionInfos();
+    const subscriptionInfos = await webApiCaller.getSubscriptionInfos();
 
-  bootbox_custom.dismissLoading();
+    bootbox_custom.dismissLoading();
 
-  console.log(JSON.stringify(subscriptionInfos, null, 2));
+    console.log(JSON.stringify(subscriptionInfos, null, 2));
 
-  const uiController = new UiController(subscriptionInfos);
+    //TODO: Add an extra parameter for android.
+    //We might want to redirect to this page from the frontend.
+    const redirectToAndroidApp = !!getURLParameter("email_as_hex");
 
-  $("#page-payload").html("").append(uiController.structure);
+    const uiController = new UiController(subscriptionInfos, redirectToAndroidApp);
+
+    $("#page-payload").html("").append(uiController.structure);
 
 });

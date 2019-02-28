@@ -1,7 +1,7 @@
 //NOTE: Slimscroll must be loaded on the page.
 
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as types from "../../../shared/dist/lib/types";
 import { phoneNumber } from "phone-number";
 import wd = types.webphoneData;

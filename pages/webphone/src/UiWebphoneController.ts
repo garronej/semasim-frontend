@@ -6,7 +6,7 @@ import { UiVoiceCall } from "./UiVoiceCall";
 import { Ua } from "./Ua";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";

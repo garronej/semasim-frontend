@@ -1,4 +1,4 @@
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 
 declare const require: (path: string) => any;

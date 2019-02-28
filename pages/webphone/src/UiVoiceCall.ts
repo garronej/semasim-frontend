@@ -1,7 +1,7 @@
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 import { Ua } from "./Ua";
 import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";

@@ -1,7 +1,7 @@
 import * as types from "../../../shared/dist/lib/types";
 import { SyncEvent } from "ts-events-extended";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
 
 declare const require: any;

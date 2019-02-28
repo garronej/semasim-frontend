@@ -1,5 +1,6 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
+import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
@@ -28,7 +29,24 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    constructor(subscriptionInfos: types.SubscriptionInfos) {
+    private reloadOrRedirectToApp() {
+
+        if (this.shouldRedirectToAndroidApp) {
+
+            window.location.href = backToAppUrl;
+
+        } else {
+
+            location.reload();
+
+        }
+
+    }
+
+    constructor(
+        subscriptionInfos: types.SubscriptionInfos,
+        private readonly shouldRedirectToAndroidApp: boolean
+    ) {
 
         const uiDownloadButton = new UiDownloadButtons();
 
@@ -51,7 +69,7 @@ export class UiController {
             const evtSourceId = new SyncEvent<
                 { id: string; currency: string; } |
                 undefined
-                >();
+            >();
 
             const handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
@@ -140,7 +158,7 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                location.reload();
+                this.reloadOrRedirectToApp();
 
             });
 
@@ -210,14 +228,18 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                await new Promise<void>(
-                    resolve => bootbox_custom.alert(
-                        "You can now use the semasim Android application",
-                        () => resolve()
-                    )
-                );
+                if (!shouldRedirectToAndroidApp) {
 
-                location.reload();
+                    await new Promise<void>(
+                        resolve => bootbox_custom.alert(
+                            "You can now use the semasim Android application",
+                            () => resolve()
+                        )
+                    );
+
+                }
+
+                this.reloadOrRedirectToApp();
 
             });
 

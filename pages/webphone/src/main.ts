@@ -13,10 +13,6 @@ import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHa
 import * as types from "../../../shared/dist/lib/types";
 import * as DetectRTC from "detectrtc";
 
-			//alert(DetectRTC.isRtpDataChannelsSupported);
-
-//TODO: implement evtUp
-
 $(document).ready(async () => {
 
 	$("#logout").click(async () => {

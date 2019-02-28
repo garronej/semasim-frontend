@@ -1,6 +1,6 @@
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
-import { loadUiClassHtml } from "../../../shared/dist/lib/tools/loadUiClassHtml";
+import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 

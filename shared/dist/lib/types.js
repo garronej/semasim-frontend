@@ -10,6 +10,7 @@ var __values = (this && this.__values) || function (o) {
     };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var isAscendingAlphabeticalOrder_1 = require("./tools/isAscendingAlphabeticalOrder");
 var UserSim;
 (function (UserSim) {
     var Owned;
@@ -168,32 +169,13 @@ var webphoneData;
             if (!hasContactName(chat2)) {
                 return 1;
             }
-            return isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? 1 : -1;
+            return isAscendingAlphabeticalOrder_1.isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? 1 : -1;
         }
         else {
             return chat1.contactNumber < chat2.contactNumber ? -1 : 1;
         }
     }
     webphoneData.compareChat = compareChat;
-    function isAscendingAlphabeticalOrder(a, b) {
-        if (!a || !b) {
-            return a.length < b.length;
-        }
-        var getWeight = function (str) {
-            var val = str.charAt(0).toLowerCase().charCodeAt(0);
-            if (!(96 < val && val < 123)) {
-                return 123;
-            }
-            return val;
-        };
-        var vA = getWeight(a);
-        var vB = getWeight(b);
-        if (vA === vB) {
-            return isAscendingAlphabeticalOrder(a.substr(1), b.substr(1));
-        }
-        return vA < vB;
-    }
-    webphoneData.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
     function getUnreadMessagesCount(wdChat) {
         var count = 0;
         for (var i = wdChat.messages.length - 1; i >= 0; i--) {
