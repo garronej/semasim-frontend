@@ -11,7 +11,7 @@ if (!ArrayBuffer.isView) {
 
     Object.defineProperty(
         ArrayBuffer,
-        "isView", { "get": () => function isView() { return false; } }
+        "isView", { "value": function isView() { return false; } }
     );
 
 }

@@ -42,11 +42,11 @@ $(document).ready(async () => {
 
 
 	await Promise.all([
-		new Promise<void>(resolve=> DetectRTC.load(resolve)),
-	 	Ua.init(),
+		new Promise<void>(resolve => DetectRTC.load(resolve)),
+		Ua.init(),
 		...userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
-				.then(wdInstance => { wdInstances.set(userSim,wdInstance) })
+				.then(wdInstance => { wdInstances.set(userSim, wdInstance) })
 		),
 	]);
 

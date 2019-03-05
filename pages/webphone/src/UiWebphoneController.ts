@@ -239,13 +239,15 @@ export class UiWebphoneController {
 
                             }
                         }
+                        case "MMS NOTIFICATION": console.log(`WPA PUSH: ${bundledData.wapPushMessage}`);
                         case "CALL ANSWERED BY":
                         case "MISSED CALL": {
 
                             const message: wd.NoId<wd.Message.Incoming.Notification> = {
                                 "direction": "INCOMING",
                                 "isNotification": true,
-                                "time": bundledData.date.getTime(),
+                                "time": (bundledData.type === "MMS NOTIFICATION" ?
+                                    bundledData.pduDate : bundledData.date).getTime(),
                                 text
                             };
 
@@ -399,7 +401,7 @@ export class UiWebphoneController {
 
     private getOrCreateUiConversation(wdChat: wd.Chat): UiConversation {
 
-        if( this._uiConversations.has(wdChat) ){
+        if (this._uiConversations.has(wdChat)) {
             return this._uiConversations.get(wdChat)!;
         }
 
@@ -451,9 +453,9 @@ export class UiWebphoneController {
                 try {
 
                     await this.ua.sendMessage(
-                        uiConversation.wdChat.contactNumber, 
-                        text, 
-                        exactSendDate, 
+                        uiConversation.wdChat.contactNumber,
+                        text,
+                        exactSendDate,
                         await remoteApiCaller.shouldAppendPromotionalMessage()
                     );
 
