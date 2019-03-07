@@ -657,16 +657,40 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
 }
 
-export const iceServers: RTCIceServer[] = [
-    {
-        "urls": [
-            "stun:stun1.l.google.com:19302",
-            "stun:stun2.l.google.com:19302",
-            "stun:stun3.l.google.com:19302",
-            "stun:stun4.l.google.com:19302"
-        ]
-    }
-];
+const evtRTCIceEServer = new SyncEvent<{ 
+    rtcIceServer: RTCIceServer; 
+    socket: sipLibrary.Socket 
+}>();
+
+export const getRTCIceServer = (() => {
+
+    let current: RTCIceServer | undefined = undefined;
+
+    const evtUpdated= new VoidSyncEvent();
+
+    evtRTCIceEServer.attach(({ rtcIceServer, socket })=> {
+
+        socket.evtClose.attachOnce(()=> current = undefined );
+        
+        current= rtcIceServer;
+
+        evtUpdated.post();
+
+    });
+
+    return async function callee(): Promise<RTCIceServer> {
+
+        if( current !== undefined ){
+            return current;
+        }
+
+        await evtUpdated.waitFor();
+
+        return callee();
+
+    };
+
+})();
 
 {
 
@@ -675,10 +699,20 @@ export const iceServers: RTCIceServer[] = [
     type Response = apiDeclaration.notifyIceServer.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
-        "handler": async params => {
+        "handler": async (params, fromSocket) => {
 
-            iceServers.pop();
-            iceServers.push(params);
+            evtRTCIceEServer.post({
+                "rtcIceServer": params !== undefined ? params :
+                    ({
+                        "urls": [
+                            "stun:stun1.l.google.com:19302",
+                            "stun:stun2.l.google.com:19302",
+                            "stun:stun3.l.google.com:19302",
+                            "stun:stun4.l.google.com:19302"
+                        ]
+                    }),
+                "socket": fromSocket
+            });
 
             return undefined;
 

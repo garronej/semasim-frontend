@@ -23,4 +23,4 @@ export declare const evtSharedSimUnregistered: SyncEvent<{
     email: string;
 }>;
 export declare const evtOpenElsewhere: VoidSyncEvent;
-export declare const iceServers: RTCIceServer[];
+export declare const getRTCIceServer: () => Promise<RTCIceServer>;

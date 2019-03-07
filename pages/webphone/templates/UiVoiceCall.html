@@ -1,12 +1,5 @@
 <style>
 
-    .panel-title {
-        float: none;
-        text-align: center;
-        margin-right: 0px !important;
-        font-size: 14px !important;
-    }
-
     @keyframes ring {
         5%,
         45% {
@@ -30,44 +23,55 @@
         }
     }
 
-    .icon-ring {
+    .id_UiVoiceCall .icon-ring {
         animation-name: ring;
         animation-duration: 2s;
         animation-iteration-count: infinite;
     }
 
-
-    .modal {
+    .id_UiVoiceCall.modal {
         text-align: center;
         padding: 0!important;
     }
+    
+    /*
 
-    .modal:before {
+    NOTE: To center vertically but create 
+    big margin on small screens so commented.
+
+    .id_UiVoiceCall.modal:before {
         content: '';
         display: inline-block;
         height: 100%;
         vertical-align: middle;
         margin-right: -4px;
-        /* Adjusts for spacing */
     }
 
-    .modal-dialog {
+    .id_UiVoiceCall .modal-dialog {
         display: inline-block;
         text-align: left;
         vertical-align: middle;
     }
+    */
 
-    .id_numpad {
+    .id_UiVoiceCall .id_numpad {
         text-align: center;
         margin-top: 20px;
     }
 
-    .id_numpad .btn {
-    margin-bottom: 10px !important;
-    margin-right: 5px !important;
+    .id_UiVoiceCall .id_numpad .btn {
+        margin-bottom: 10px !important;
+        margin-right: 5px !important;
     }
 
+    .id_UiVoiceCall .st_flex {
+        display:flex;
+        justify-content:space-around;
+    }
 
+    .id_UiVoiceCall .st_flex > div {
+        width: 100%;
+    }
 
 </style>
 
@@ -79,28 +83,39 @@
                 <div class="panel panel-dark mb0">
                     <div class="panel-heading pt10">
                         <div class="row">
-                            <div class="col-sm-4 text-center">
-                                    <p><span class="id_me"></span></p>
-                                    <p><span class="id_me_under"></span></p>
+
+                            <div class="col-xs-12">
+
+                                <div class="st_flex">
+
+                                    <div class="text-center">
+                                            <p><span class="id_me"></span></p>
+                                            <p><span class="id_me_under"></span></p>
+                                    </div>
+                                    <div class="mt10" style="width: 10% !important; margin-right: 5px;">
+                                        <i class="sel_arrow-right l-arrows-right"></i>
+                                        <i class="sel_arrow-left l-arrows-left"></i>
+                                    </div>
+                                    <div class="text-center mt10" style="width: 10% !important;">
+                                        <span class="id_timer"></span>
+                                        <span class="id_icon-ring fa fa-phone icon-ring"></span>
+                                        <span class="id_icon-spin fa fa-spinner icon-spin"></span>
+                                        <span class="id_icon-hangup glyphicon glyphicon-phone-alt"></span>
+                                    </div>
+                                    <div class="mt10" style="width: 10% !important; margin-left: 5px;">
+                                        <i class="sel_arrow-right l-arrows-right"></i>
+                                        <i class="sel_arrow-left l-arrows-left"></i>
+                                    </div>
+                                    <div class="text-center">
+                                            <p><span class="id_contact"> <span></p>
+                                            <p><span class="id_contact_under"></span></p>
+                                    </div>
+
+
+                                </div>
+
                             </div>
-                            <div class="col-sm-1 mt10">
-                                <i class="sel_arrow-right l-arrows-right"></i>
-                                <i class="sel_arrow-left l-arrows-left"></i>
-                            </div>
-                            <div class="col-sm-2 text-center mt10">
-                                <span class="id_timer"></span>
-                                <span class="id_icon-ring fa fa-phone icon-ring"></span>
-                                <span class="id_icon-spin fa fa-spinner icon-spin"></span>
-                                <span class="id_icon-hangup glyphicon glyphicon-phone-alt"></span>
-                            </div>
-                            <div class="col-sm-1 mt10">
-                                <i class="sel_arrow-right l-arrows-right"></i>
-                                <i class="sel_arrow-left l-arrows-left"></i>
-                            </div>
-                            <div class="col-sm-4 text-center">
-                                    <p><span class="id_contact"> <span></p>
-                                    <p><span class="id_contact_under"></span></p>
-                            </div>
+
                         </div>
                     </div>
 

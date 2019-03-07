@@ -559,23 +559,50 @@ exports.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
-exports.iceServers = [
-    {
-        "urls": [
-            "stun:stun1.l.google.com:19302",
-            "stun:stun2.l.google.com:19302",
-            "stun:stun3.l.google.com:19302",
-            "stun:stun4.l.google.com:19302"
-        ]
-    }
-];
+var evtRTCIceEServer = new ts_events_extended_1.SyncEvent();
+exports.getRTCIceServer = (function () {
+    var current = undefined;
+    var evtUpdated = new ts_events_extended_1.VoidSyncEvent();
+    evtRTCIceEServer.attach(function (_a) {
+        var rtcIceServer = _a.rtcIceServer, socket = _a.socket;
+        socket.evtClose.attachOnce(function () { return current = undefined; });
+        current = rtcIceServer;
+        evtUpdated.post();
+    });
+    return function callee() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (current !== undefined) {
+                            return [2 /*return*/, current];
+                        }
+                        return [4 /*yield*/, evtUpdated.waitFor()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, callee()];
+                }
+            });
+        });
+    };
+})();
 {
     var methodName = apiDeclaration.notifyIceServer.methodName;
     var handler = {
-        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (params, fromSocket) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                exports.iceServers.pop();
-                exports.iceServers.push(params);
+                evtRTCIceEServer.post({
+                    "rtcIceServer": params !== undefined ? params :
+                        ({
+                            "urls": [
+                                "stun:stun1.l.google.com:19302",
+                                "stun:stun2.l.google.com:19302",
+                                "stun:stun3.l.google.com:19302",
+                                "stun:stun4.l.google.com:19302"
+                            ]
+                        }),
+                    "socket": fromSocket
+                });
                 return [2 /*return*/, undefined];
             });
         }); }

@@ -90,11 +90,12 @@ export declare namespace notifyLoggedFromOtherTab {
 }
 export declare namespace notifyIceServer {
     const methodName = "notifyIceServer";
+    /** Undefined when the turn server is not enabled */
     type Params = {
         urls: string[];
         username: string;
         credential: string;
         credentialType: "password";
-    };
+    } | undefined;
     type Response = undefined;
 }

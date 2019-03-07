@@ -63,8 +63,8 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
 }));
 var socketCurrent = undefined;
 var userSims = undefined;
-//TODO: No need to export it.
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
+/** Called from outside isReconnect should never be passed */
 function connect(requestTurnCred, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()

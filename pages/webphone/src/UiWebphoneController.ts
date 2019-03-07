@@ -12,6 +12,7 @@ import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHa
 import { phoneNumber } from "phone-number";
 import * as DetectRTC from "detectrtc";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 
 declare const require: any;
 
@@ -19,6 +20,12 @@ const html = loadUiClassHtml(
     require("../templates/UiWebphoneController.html"),
     "UiWebphoneController"
 );
+
+//TODO: Action does not need imsi as the selection is made in the main
+export type Action = {
+    type: "CALL";
+    number: phoneNumber;
+};
 
 export class UiWebphoneController {
 
@@ -33,7 +40,8 @@ export class UiWebphoneController {
 
     public constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance
+        public readonly wdInstance: wd.Instance,
+        action?: Action
     ) {
 
         this.ua = new Ua(userSim);
@@ -58,7 +66,23 @@ export class UiWebphoneController {
 
         $("body").data("dynamic").panels();
 
-        setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
+        setTimeout(() => {
+
+            if (!action) {
+
+                this.uiPhonebook.triggerClickOnLastSeenChat()
+
+            } else {
+
+                this.uiQuickAction.evtVoiceCall.post(action.number);
+
+                this.uiVoiceCall.evtModalClosed.attach(() =>
+                    window.location.href = backToAppUrl
+                );
+
+            }
+
+        }, 0);
 
     }
 
@@ -141,8 +165,8 @@ export class UiWebphoneController {
                 this.uiPhonebook.notifyContactChanged(wdChat);
 
                 this.getOrCreateUiConversation(wdChat)
-                .notifyContactNameUpdated()
-                ;
+                    .notifyContactNameUpdated()
+                    ;
 
             }
         );
@@ -223,13 +247,11 @@ export class UiWebphoneController {
                                     "time": bundledData.messageTowardGsm.date.getTime(),
                                     "direction": "OUTGOING",
                                     "text": bundledData.messageTowardGsm.text,
-                                    "sentBy": ((): wd.Message.Outgoing.StatusReportReceived["sentBy"] => {
-                                        if (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) {
-                                            return { "who": "USER" };
-                                        } else {
-                                            return { "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail };
-                                        }
-                                    })(),
+                                    "sentBy": ((): wd.Message.Outgoing.StatusReportReceived["sentBy"] =>
+                                        (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) ?
+                                            ({ "who": "USER" }) :
+                                            ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail })
+                                    )(),
                                     "status": "STATUS REPORT RECEIVED",
                                     "deliveredTime": bundledData.statusReport.isDelivered ?
                                         bundledData.statusReport.dischargeDate.getTime() : null
@@ -475,7 +497,7 @@ export class UiWebphoneController {
         );
 
         uiConversation.evtVoiceCall.attach(
-            () => {
+            async () => {
 
                 if (!DetectRTC.isRtpDataChannelsSupported) {
 
@@ -497,7 +519,7 @@ export class UiWebphoneController {
                 }
 
                 const { terminate, prTerminated, prNextState } =
-                    this.ua.placeOutgoingCall(wdChat.contactNumber);
+                    await this.ua.placeOutgoingCall(wdChat.contactNumber);
 
                 const { onTerminated, onRingback, prUserInput } =
                     this.uiVoiceCall.onOutgoing(wdChat);
@@ -534,7 +556,6 @@ export class UiWebphoneController {
 
             }
         );
-
 
         uiConversation.evtUpdateContact.attach(async () => {
 

@@ -47,9 +47,9 @@ $(document).ready(async () => {
         }
 
         const getNumber = () => Buffer.from(
-            getURLParameter("number_as_hex"),
+            getURLParameter("number_as_hex")!,
             "hex"
-        ).toString("utf8")!;
+        ).toString("utf8");
 
         switch (type) {
             case "UPDATE_CONTACT_NAME":

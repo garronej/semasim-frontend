@@ -4,7 +4,7 @@ require("es6-weak-map/implement");
 require("array.prototype.find").shim();
 
 import { Ua } from "./Ua";
-import { UiWebphoneController } from "./UiWebphoneController";
+import { UiWebphoneController, Action } from "./UiWebphoneController";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
@@ -12,6 +12,11 @@ import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types";
 import * as DetectRTC from "detectrtc";
+import { phoneNumber } from "phone-number";
+import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
+
+declare const Buffer: any;
 
 $(document).ready(async () => {
 
@@ -27,8 +32,92 @@ $(document).ready(async () => {
 
 	$("#page-payload").html("");
 
-	bootbox_custom.loading("Fetching contacts and SMS history", 0);
+	const action: (Action & { imsi: string; }) | undefined = (() => {
 
+		const type = getURLParameter("action") as Action["type"] | undefined;
+
+		if (!type) {
+			return undefined;
+		}
+
+		switch (type) {
+			case "CALL":
+				return {
+					type,
+					"number": Buffer.from(getURLParameter("number_as_hex"), "hex")
+						.toString("utf8"),
+					"imsi": getURLParameter("imsi")!
+				};
+		}
+
+	})();
+
+	if (!!action) {
+
+		bootbox_custom.loading(`Preparing call to ${phoneNumber.prettyPrint(action.number)}`, 0);
+
+		const userSim = await remoteApiCaller.getUsableUserSims()
+			.then(userSims => userSims.find(({ sim }) => sim.imsi === action.imsi)!);
+
+		if (!userSim.isOnline) {
+
+			await new Promise(resolve =>
+				bootbox_custom.alert(
+					`${userSim.friendlyName} is currently offline`,
+					() => resolve()
+				)
+			);
+
+			window.location.href = backToAppUrl;
+			return;
+
+
+		}
+
+		const [wdInstance] = await Promise.all([
+			remoteApiCaller
+				.getOrCreateWdInstance(userSim)
+				.then(wdInstance => wdInstance),
+			new Promise<void>(resolve => DetectRTC.load(async () => {
+
+				if (!DetectRTC.isRtpDataChannelsSupported) {
+
+					await new Promise(resolve =>
+						bootbox_custom.alert(
+							"Call not supported by this browser sorry. ( Try updating google chrome ) ",
+							() => resolve()
+						)
+					);
+
+					window.location.href = backToAppUrl;
+					return;
+
+				}
+
+				resolve();
+
+			})),
+			Ua.init()
+		]);
+
+		bootbox_custom.dismissLoading();
+
+		$("#page-payload").append(
+			(
+				new UiWebphoneController(
+					userSim,
+					wdInstance,
+					action
+				)
+			).structure
+		);
+
+		return;
+
+	}
+
+
+	bootbox_custom.loading("Fetching contacts and SMS history", 0);
 
 	const userSims = await remoteApiCaller.getUsableUserSims();
 
@@ -101,9 +190,8 @@ $(document).ready(async () => {
 		}
 	);
 
-	remoteApiCaller.evtUsableSim.attach(async userSim => {
-
-		$("#page-payload").append(
+	remoteApiCaller.evtUsableSim.attach(
+		async userSim => $("#page-payload").append(
 			(
 				new UiWebphoneController(
 					userSim,
@@ -112,9 +200,8 @@ $(document).ready(async () => {
 					)
 				)
 			).structure
-		);
-
-
-	});
+		)
+	);
 
 });
+

@@ -28,9 +28,9 @@ let socketCurrent: sip.Socket | undefined = undefined;
 
 let userSims: types.UserSim.Usable[] | undefined = undefined;
 
-//TODO: No need to export it.
 export const evtConnect = new SyncEvent<sip.Socket>();
 
+/** Called from outside isReconnect should never be passed */
 export function connect(
     requestTurnCred?: "REQUEST TURN CRED" | undefined,
     isReconnect?: undefined | "RECONNECT"
@@ -216,3 +216,4 @@ export function get(): sip.Socket | Promise<sip.Socket> {
     }
 
 }
+

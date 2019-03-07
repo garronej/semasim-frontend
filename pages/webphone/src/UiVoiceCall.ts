@@ -1,4 +1,4 @@
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
@@ -14,6 +14,8 @@ const html = loadUiClassHtml(
     "UiVoiceCall"
 );
 
+console.log("up");
+
 export class UiVoiceCall {
 
     private readonly structure = html.structure.clone();
@@ -22,6 +24,10 @@ export class UiVoiceCall {
 
     private readonly btnGreen= this.structure.find(".id_btn-green");
     private readonly btnRed= this.structure.find(".id_btn-red");
+
+    /** Only purpose is to have a hook to come back to 
+     * the Android app after the call is completed.  */
+    public readonly evtModalClosed= new VoidSyncEvent();
 
     private readonly evtBtnClick= new SyncEvent<"GREEN" | "RED">();
 
@@ -34,6 +40,9 @@ export class UiVoiceCall {
         private readonly userSim: types.UserSim.Usable
     ) {
 
+        //Debug only
+        window["uiVoiceCall"]= this;
+
         this.countryIso= userSim.sim.country?
             userSim.sim.country.iso : undefined;
 
@@ -45,7 +54,11 @@ export class UiVoiceCall {
             }
         );
 
-        this.hideModal = hide;
+        this.hideModal = async ()=> {
+            await hide();
+            this.evtModalClosed.post();
+        };
+
         this.showModal = show;
 
         this.structure.find("span.id_me").html(userSim.friendlyName);

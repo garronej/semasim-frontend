@@ -275,11 +275,11 @@ export class Ua {
             jsSipRtcSession.sendDTMF(signal, { duration })
         );
 
-        evtAccepted.attachOnce(() => {
+        evtAccepted.attachOnce(async () => {
 
             jsSipRtcSession.answer({
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": { "iceServers": localApiHandlers.iceServers }
+                "pcConfig": { "iceServers": [ await localApiHandlers.getRTCIceServer() ] }
             });
 
             (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
@@ -317,7 +317,7 @@ export class Ua {
 
     }
 
-    public placeOutgoingCall(number: phoneNumber): {
+    public async placeOutgoingCall(number: phoneNumber): Promise<{
         terminate(): void;
         prTerminated: Promise<void>;
         prNextState: Promise<{
@@ -327,7 +327,7 @@ export class Ua {
                 sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
             }>
         }>
-    } {
+    }> {
 
         const evtEstablished = new VoidSyncEvent();
         const evtTerminated = new VoidSyncEvent();
@@ -339,7 +339,7 @@ export class Ua {
             `sip:${number}@${connection.baseDomain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": { "iceServers": localApiHandlers.iceServers },
+                "pcConfig": { "iceServers": [ await localApiHandlers.getRTCIceServer() ] },
                 "eventHandlers": {
                     "connecting": function () {
 

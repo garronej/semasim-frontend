@@ -141,12 +141,13 @@ export namespace notifyIceServer {
 
     export const methodName = "notifyIceServer";
 
+    /** Undefined when the turn server is not enabled */
     export type Params = {
         urls: string[];
         username: string;
         credential: string;
         credentialType: "password";
-    };
+    } | undefined;
 
     export type Response = undefined;
 
