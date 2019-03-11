@@ -14,8 +14,6 @@ const html = loadUiClassHtml(
     "UiVoiceCall"
 );
 
-console.log("up");
-
 export class UiVoiceCall {
 
     private readonly structure = html.structure.clone();
@@ -293,7 +291,11 @@ export class UiVoiceCall {
 
         this.showModal();
 
-        ion.sound.stop("semasim_ringtone");
+        try{
+
+            ion.sound.stop("semasim_ringtone");
+
+        }catch{ }
 
         switch (state) {
             case "RINGING":

@@ -11,7 +11,6 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types";
-import * as DetectRTC from "detectrtc";
 import { phoneNumber } from "phone-number";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
@@ -78,25 +77,6 @@ $(document).ready(async () => {
 			remoteApiCaller
 				.getOrCreateWdInstance(userSim)
 				.then(wdInstance => wdInstance),
-			new Promise<void>(resolve => DetectRTC.load(async () => {
-
-				if (!DetectRTC.isRtpDataChannelsSupported) {
-
-					await new Promise(resolve =>
-						bootbox_custom.alert(
-							"Call not supported by this browser sorry. ( Try updating google chrome ) ",
-							() => resolve()
-						)
-					);
-
-					window.location.href = backToAppUrl;
-					return;
-
-				}
-
-				resolve();
-
-			})),
 			Ua.init()
 		]);
 
@@ -131,7 +111,7 @@ $(document).ready(async () => {
 
 
 	await Promise.all([
-		new Promise<void>(resolve => DetectRTC.load(resolve)),
+		//new Promise<void>(resolve => DetectRTC.load(resolve)),
 		Ua.init(),
 		...userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)

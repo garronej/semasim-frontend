@@ -269,6 +269,7 @@ export class Ua {
         const evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
         const evtEstablished = new VoidSyncEvent();
 
+
         evtRequestTerminate.attachOnce(() => jsSipRtcSession.terminate());
 
         evtDtmf.attach(({ signal, duration }) =>
@@ -277,9 +278,13 @@ export class Ua {
 
         evtAccepted.attachOnce(async () => {
 
+            const rtcIceServer = await localApiHandlers.getRTCIceServer();
+
+            jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
+
             jsSipRtcSession.answer({
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": { "iceServers": [ await localApiHandlers.getRTCIceServer() ] }
+                "pcConfig": { "iceServers": [ rtcIceServer ] }
             });
 
             (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
@@ -287,11 +292,13 @@ export class Ua {
 
         });
 
+
         jsSipRtcSession.once("confirmed", () => evtEstablished.post());
 
         jsSipRtcSession.once("ended", () => evtTerminated.post());
 
         jsSipRtcSession.once("failed", () => evtTerminated.post());
+        
 
         this.evtIncomingCall.post({
             "fromNumber": this.toPhoneNumber(request.from.uri.user),
@@ -335,12 +342,18 @@ export class Ua {
         const evtRequestTerminate = new VoidSyncEvent();
         const evtRingback = new VoidSyncEvent();
 
+        const rtcICEServer = await localApiHandlers.getRTCIceServer();
+
         this.jsSipUa.call(
             `sip:${number}@${connection.baseDomain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": { "iceServers": [ await localApiHandlers.getRTCIceServer() ] },
+                "pcConfig": {
+                    "iceServers": [ rtcICEServer ],
+                    "gatheringTimeoutAfterRelay": 700
+                },
                 "eventHandlers": {
+                    "icecandidate": newIceCandidateHandler(rtcICEServer),
                     "connecting": function () {
 
                         const jsSipRtcSession = this;
@@ -368,6 +381,7 @@ export class Ua {
                     },
                     "confirmed": () => evtEstablished.post(),
                     "ended": () => evtTerminated.post(),
+                    "failed": ()=> evtTerminated.post(),
                     "sending": ({ request }) =>
                         this.evtRingback.waitFor(callId => callId === request.call_id, 30000)
                             .then(() => evtRingback.post())
@@ -596,4 +610,170 @@ class JsSipSocket implements IjsSipSocket {
 
 }
 
+/** Let end gathering ICE candidates as quickly as possible. */
+function newIceCandidateHandler( rtcICEServer: RTCIceServer){
 
+        const isReady = newIceCandidateHandler.isReadyFactory(rtcICEServer);
+
+        let readyTimer: number | undefined = undefined;
+
+        return (data: { candidate: RTCIceCandidate, ready: ()=> void }) => {
+
+            const { candidate, ready }= data;
+
+            //console.log(candidate);
+
+            const readyState= isReady(candidate.candidate);
+
+            //console.log(readyState);
+
+            switch (readyState) {
+                case "NOT READY": return;
+                case "AT LEAST ONE RELAY CANDIDATE READY":
+                    if (readyTimer === undefined) {
+                        readyTimer = setTimeout(() => { 
+                            console.log("Timing out ice candidates gathering");
+                            ready(); 
+                        }, 300);
+                    }
+                    return;
+                case "ALL CANDIDATES READY":
+                    clearTimeout(readyTimer);
+                    ready();
+                    return;
+            }
+
+        };
+
+}
+
+namespace newIceCandidateHandler {
+
+    export function isReadyFactory(rtcICEServer: RTCIceServer) {
+
+        //console.log(JSON.stringify(rtcICEServer, null, 2));
+
+        const p = (() => {
+
+            const urls = typeof rtcICEServer.urls === "string" ?
+                [rtcICEServer.urls] : rtcICEServer.urls;;
+
+            return {
+                "isSrflxCandidateExpected": !!urls.find(url => !!url.match(/^stun/i)),
+                "isRelayCandidateExpected": !!urls.find(url => !!url.match(/^turn:/i)),
+                "isEncryptedRelayCandidateExpected": !!urls.find(url => !!url.match(/^turns:/i)),
+                "lines": new Array<string>()
+            };
+
+        })();
+
+        //console.log(JSON.stringify(p, null, 2));
+
+        return (
+            line: string
+        ): "ALL CANDIDATES READY" | "AT LEAST ONE RELAY CANDIDATE READY" | "NOT READY" => {
+
+            p.lines.push(line);
+
+            const isRtcpExcepted = !!p.lines
+                .map(line => parseLine(line))
+                .find(({ component }) => component === "RTCP")
+                ;
+
+            if (isFullyReady({ ...p, isRtcpExcepted })) {
+                return "ALL CANDIDATES READY";
+            }
+
+            return countRelayCandidatesReady(p.lines, isRtcpExcepted) >= 1 ?
+                "AT LEAST ONE RELAY CANDIDATE READY" : "NOT READY";
+
+        };
+
+    }
+
+    function parseLine(line: string): {
+        component: "RTP" | "RTCP";
+        priority: number;
+    } {
+
+        const match = line.match(/(1|2)\s+(?:udp|tcp)\s+([0-9]+)\s/i)!;
+
+        return {
+            "component": match[1] === "1" ? "RTP" : "RTCP",
+            "priority": parseInt(match[2])
+        }
+
+    }
+
+    function countRelayCandidatesReady(lines: string[], isRtcpExcepted: boolean): number {
+
+        const parsedLines = lines
+            .filter(line => !!line.match(/udp.+relay/i))
+            .map(parseLine);
+
+        const parsedRtpLines = parsedLines
+            .filter(({ component }) => component === "RTP");
+
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length;
+        }
+
+        const parsedRtcpLines = parsedLines
+            .filter(({ component }) => component === "RTCP");
+
+        return parsedRtpLines
+            .filter(({ priority: rtpPriority }) =>
+                !!parsedRtcpLines.find(({ priority }) => Math.abs(priority - rtpPriority) === 1)
+            )
+            .length
+            ;
+
+    }
+
+    function isSrflxCandidateReady(lines: string[], isRtcpExcepted: boolean): boolean {
+
+        const parsedLines = lines
+            .filter(line => !!line.match(/udp.+srflx/i))
+            .map(parseLine)
+            ;
+
+        const parsedRtpLines = parsedLines
+            .filter(({ component }) => component === "RTP");
+
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length !== 0;
+        }
+
+        const parsedRtcpLines = parsedLines
+            .filter(({ component }) => component === "RTCP");
+
+        return !!parsedRtpLines
+            .find(({ priority: rtpPriority }) =>
+                !!parsedRtcpLines.find(({ priority }) => Math.abs(priority - rtpPriority) === 1)
+            )
+            ;
+
+    }
+
+    function isFullyReady(p: {
+        lines: string[];
+        isSrflxCandidateExpected: boolean;
+        isRelayCandidateExpected: boolean;
+        isEncryptedRelayCandidateExpected: boolean;
+        isRtcpExcepted: boolean;
+    }): boolean {
+
+        return (
+            !p.isSrflxCandidateExpected ?
+                true :
+                isSrflxCandidateReady(p.lines, p.isRtcpExcepted)
+        ) && (
+                (p.isRelayCandidateExpected ? 1 : 0)
+                +
+                (p.isEncryptedRelayCandidateExpected ? 1 : 0)
+                <=
+                countRelayCandidatesReady(p.lines, p.isRtcpExcepted));
+
+    }
+
+}

@@ -10,7 +10,6 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
-import * as DetectRTC from "detectrtc";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 
@@ -499,6 +498,7 @@ export class UiWebphoneController {
         uiConversation.evtVoiceCall.attach(
             async () => {
 
+                /*
                 if (!DetectRTC.isRtpDataChannelsSupported) {
 
                     let message = "Call not supported by this browser.";
@@ -517,6 +517,7 @@ export class UiWebphoneController {
                     return;
 
                 }
+                */
 
                 const { terminate, prTerminated, prNextState } =
                     await this.ua.placeOutgoingCall(wdChat.contactNumber);
