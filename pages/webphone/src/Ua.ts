@@ -1,3 +1,5 @@
+//NOTE: Require jssip_compat loaded on the page.
+
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { phoneNumber } from "phone-number";
 import * as types from "../../../shared/dist/lib/types";
@@ -19,12 +21,6 @@ declare const Buffer: any;
 
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-
-/*
-const pcConfig: RTCConfiguration = {
-    "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
-};
-*/
 
 export class Ua {
 
@@ -477,6 +473,44 @@ class JsSipSocket implements IjsSipSocket {
 
     public readonly url: string = connection.url;
 
+    private sdpHacks(sipPacket: sip.Packet): sip.Packet {
+
+        if (sipPacket.headers["content-type"] !== "application/sdp") {
+            return sipPacket;
+        }
+
+        //NOTE: Sdp Hack for Mozilla
+        if (/firefox/i.test(navigator.userAgent)) {
+
+            console.log("Firefox SDP hack !");
+
+            const parsedSdp = sip.parseSdp(
+                sip.getPacketContent(sipPacket).toString("utf8")
+            );
+
+            const a= parsedSdp["m"][0]["a"];
+
+            if( !!a.find(v => /^mid:/i.test(v)) ){
+                return sipPacket;
+            }
+
+            parsedSdp["m"][0]["a"] = [...a, "mid:0"];
+
+            const modifiedSipPacket= sip.clonePacket(sipPacket);
+
+            sip.setPacketContent(
+                modifiedSipPacket,
+                sip.stringifySdp(parsedSdp)
+            );
+
+            return modifiedSipPacket;
+
+        }
+
+        return sipPacket;
+
+    }
+
     constructor(
         imsi: string,
         public readonly sip_uri: string
@@ -491,6 +525,8 @@ class JsSipSocket implements IjsSipSocket {
                     if (readImsi(sipPacket) !== imsi) {
                         return;
                     }
+
+                    sipPacket = this.sdpHacks(sipPacket);
 
                     this.evtSipPacket.post(sipPacket);
 
@@ -611,39 +647,39 @@ class JsSipSocket implements IjsSipSocket {
 }
 
 /** Let end gathering ICE candidates as quickly as possible. */
-function newIceCandidateHandler( rtcICEServer: RTCIceServer){
+function newIceCandidateHandler(rtcICEServer: RTCIceServer) {
 
-        const isReady = newIceCandidateHandler.isReadyFactory(rtcICEServer);
+    const isReady = newIceCandidateHandler.isReadyFactory(rtcICEServer);
 
-        let readyTimer: number | undefined = undefined;
+    let readyTimer: number | undefined = undefined;
 
-        return (data: { candidate: RTCIceCandidate, ready: ()=> void }) => {
+    return (data: { candidate: RTCIceCandidate, ready: () => void }) => {
 
-            const { candidate, ready }= data;
+        const { candidate, ready } = data;
 
-            //console.log(candidate);
+        //console.log(candidate);
 
-            const readyState= isReady(candidate.candidate);
+        const readyState = isReady(candidate.candidate);
 
-            //console.log(readyState);
+        //console.log(readyState);
 
-            switch (readyState) {
-                case "NOT READY": return;
-                case "AT LEAST ONE RELAY CANDIDATE READY":
-                    if (readyTimer === undefined) {
-                        readyTimer = setTimeout(() => { 
-                            console.log("Timing out ice candidates gathering");
-                            ready(); 
-                        }, 300);
-                    }
-                    return;
-                case "ALL CANDIDATES READY":
-                    clearTimeout(readyTimer);
-                    ready();
-                    return;
-            }
+        switch (readyState) {
+            case "NOT READY": return;
+            case "AT LEAST ONE RELAY CANDIDATE READY":
+                if (readyTimer === undefined) {
+                    readyTimer = setTimeout(() => {
+                        console.log("Timing out ice candidates gathering");
+                        ready();
+                    }, 300);
+                }
+                return;
+            case "ALL CANDIDATES READY":
+                clearTimeout(readyTimer);
+                ready();
+                return;
+        }
 
-        };
+    };
 
 }
 
