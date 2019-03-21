@@ -70,17 +70,25 @@ exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
     var prUsableUserSims = undefined;
     /**
+     *
+     * includeContacts is true by defaults.
+     *
      * The stateless argument is used to re fetch the userSim from the server regardless
      * of if it have been done previously already, it will return a new array.
      * If the 'stateless' argument is omitted then the returned value is static.
      * ( only one request is sent to the server )
+     *
+     * Note that if the method have already been called and called with
+     * stateless falsy includeContacts will not have any effect.
+     *
      */
-    return function (stateless) {
+    return function (includeContacts, stateless) {
+        if (includeContacts === void 0) { includeContacts = true; }
         if (stateless === void 0) { stateless = false; }
         if (!stateless && !!prUsableUserSims) {
             return prUsableUserSims;
         }
-        var prUsableUserSims_ = sendRequest(methodName, undefined);
+        var prUsableUserSims_ = sendRequest(methodName, { includeContacts: includeContacts });
         if (!!stateless) {
             return prUsableUserSims_;
         }
@@ -393,13 +401,13 @@ exports.shouldAppendPromotionalMessage = (function () {
         return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
     };
 })();
-//WebData sync things :
-exports.getUaInstanceIdAndEmail = (function () {
-    var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
+exports.getUaInstanceId = (function () {
+    var methodName = apiDeclaration.getUaInstanceId.methodName;
     return function () {
         return sendRequest(methodName, undefined);
     };
 })();
+//WebData sync things :
 exports.getOrCreateWdInstance = (function () {
     var methodName = apiDeclaration.getOrCreateInstance.methodName;
     function synchronizeUserSimAndWdInstance(userSim, wdInstance) {

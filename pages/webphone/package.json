@@ -1,5 +1,5 @@
 {
-  "version": "0.1.8",
+  "version": "0.1.10",
   "scripts": {
     "build": "node ../../build-script/dist/bin/cmd build_page"
   },
@@ -10,7 +10,6 @@
     "lessify": "^1.0.2",
     "moment": "^2.20.1",
     "phone-number": "github:garronej/phone-number",
-    "run-exclusive": "github:garronej/run-exclusive",
     "ts-events-extended": "github:garronej/ts-events-extended",
     "ts-sip": "github:garronej/ts-sip"
   },

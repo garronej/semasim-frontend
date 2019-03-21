@@ -58,11 +58,11 @@ var shouldAppendPromotionalMessage;
 (function (shouldAppendPromotionalMessage) {
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
+var getUaInstanceId;
+(function (getUaInstanceId) {
+    getUaInstanceId.methodName = "getUaCredentials";
+})(getUaInstanceId = exports.getUaInstanceId || (exports.getUaInstanceId = {}));
 //WebphoneData Sync things:
-var getUaInstanceIdAndEmail;
-(function (getUaInstanceIdAndEmail) {
-    getUaInstanceIdAndEmail.methodName = "getUaInstanceIdAndEmail";
-})(getUaInstanceIdAndEmail = exports.getUaInstanceIdAndEmail || (exports.getUaInstanceIdAndEmail = {}));
 var getOrCreateInstance;
 (function (getOrCreateInstance) {
     getOrCreateInstance.methodName = "getInstance";

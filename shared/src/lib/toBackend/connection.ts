@@ -32,7 +32,10 @@ export const evtConnect = new SyncEvent<sip.Socket>();
 
 /** Called from outside isReconnect should never be passed */
 export function connect(
-    requestTurnCred?: "REQUEST TURN CRED" | undefined,
+    sessionParams: {
+        requestTurnCred: boolean;
+        sessionType: "MAIN" | "AUXILIARY"
+    },
     isReconnect?: undefined | "RECONNECT"
 ) {
 
@@ -53,7 +56,8 @@ export function connect(
 
     }
 
-    Cookies.set("requestTurnCred", `${!!requestTurnCred}`);
+    Cookies.set("requestTurnCred", `${sessionParams.requestTurnCred}`);
+    Cookies.set("sessionType", sessionParams.sessionType);
 
     const socket = new sip.Socket(
         new WebSocket(url, "SIP"),
@@ -93,19 +97,31 @@ export function connect(
 
     socket.evtConnect.attachOnce(() => {
 
+        console.log(`Socket ${!!isReconnect?"re-":""}connected`);
+
         if (!!isReconnect) {
 
             bootbox_custom.dismissLoading();
 
         }
 
+
+        const includeContacts= (()=>{
+            switch(sessionParams.sessionType){
+                case "MAIN": return true;
+                case "AUXILIARY": return false;
+            }
+        })();
+
         if (userSims === undefined) {
 
-            remoteApiCaller.getUsableUserSims().then(userSims_ => userSims = userSims_);
+            remoteApiCaller.getUsableUserSims(includeContacts)
+                .then(userSims_ => userSims = userSims_);
 
         } else {
 
-            remoteApiCaller.getUsableUserSims("STATELESS").then(userSims_ => {
+            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                .then(userSims_ => {
 
                 for (const userSim_ of userSims_) {
 
@@ -164,6 +180,8 @@ export function connect(
 
     socket.evtClose.attachOnce(async () => {
 
+        console.log("Socket disconnected");
+
         for (const userSim of userSims || []) {
 
             userSim.isOnline = false;
@@ -188,7 +206,7 @@ export function connect(
 
         }
 
-        connect(requestTurnCred, "RECONNECT");
+        connect(sessionParams, "RECONNECT");
 
     });
 

@@ -3,7 +3,7 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { UiVoiceCall } from "./UiVoiceCall";
-import { Ua } from "./Ua";
+import { Ua } from "../../../shared/dist/lib/Ua";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
@@ -11,7 +11,6 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 
 declare const require: any;
 
@@ -20,11 +19,6 @@ const html = loadUiClassHtml(
     "UiWebphoneController"
 );
 
-//TODO: Action does not need imsi as the selection is made in the main
-export type Action = {
-    type: "CALL";
-    number: phoneNumber;
-};
 
 export class UiWebphoneController {
 
@@ -40,10 +34,9 @@ export class UiWebphoneController {
     public constructor(
         public readonly userSim: types.UserSim.Usable,
         public readonly wdInstance: wd.Instance,
-        action?: Action
     ) {
 
-        this.ua = new Ua(userSim);
+        this.ua = new Ua(userSim.sim.imsi, userSim.password);
 
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
@@ -65,23 +58,7 @@ export class UiWebphoneController {
 
         $("body").data("dynamic").panels();
 
-        setTimeout(() => {
-
-            if (!action) {
-
-                this.uiPhonebook.triggerClickOnLastSeenChat()
-
-            } else {
-
-                this.uiQuickAction.evtVoiceCall.post(action.number);
-
-                this.uiVoiceCall.evtModalClosed.attach(() =>
-                    window.location.href = backToAppUrl
-                );
-
-            }
-
-        }, 0);
+        setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
 
     }
 

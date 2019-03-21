@@ -23,20 +23,30 @@ export const getUsableUserSims = (() => {
     let prUsableUserSims: Promise<types.UserSim.Usable[]> | undefined = undefined;
 
     /** 
+     * 
+     * includeContacts is true by defaults.
+     * 
      * The stateless argument is used to re fetch the userSim from the server regardless
      * of if it have been done previously already, it will return a new array.
      * If the 'stateless' argument is omitted then the returned value is static. 
      * ( only one request is sent to the server )
+     * 
+     * Note that if the method have already been called and called with
+     * stateless falsy includeContacts will not have any effect.
+     * 
      */
-    return (stateless: false | "STATELESS" = false): Promise<types.UserSim.Usable[]> => {
+    return (
+        includeContacts: boolean = true,
+        stateless: false | "STATELESS" = false,
+    ): Promise<types.UserSim.Usable[]> => {
 
         if (!stateless && !!prUsableUserSims) {
             return prUsableUserSims;
         }
 
-        const prUsableUserSims_ =  sendRequest<Params, Response>(
+        const prUsableUserSims_ = sendRequest<Params, Response>(
             methodName,
-            undefined
+            { includeContacts }
         );
 
         if (!!stateless) {
@@ -455,34 +465,32 @@ export const shouldAppendPromotionalMessage = (() => {
     const methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
     type Params = apiDeclaration.shouldAppendPromotionalMessage.Params;
     type Response = apiDeclaration.shouldAppendPromotionalMessage.Response;
-    
+
     let cachedResponse: Response | undefined = undefined;
 
     return function (
     ): Promise<boolean> | boolean {
 
-        if( cachedResponse !== undefined ){
+        if (cachedResponse !== undefined) {
             return cachedResponse;
         }
 
         return sendRequest<Params, Response>(
             methodName,
             undefined
-        ).then( response => cachedResponse = response );
+        ).then(response => cachedResponse = response);
 
     };
 
 })();
 
-//WebData sync things :
+export const getUaInstanceId = (() => {
 
-export const getUaInstanceIdAndEmail = (() => {
+    const methodName = apiDeclaration.getUaInstanceId.methodName;
+    type Params = apiDeclaration.getUaInstanceId.Params;
+    type Response = apiDeclaration.getUaInstanceId.Response;
 
-    const methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
-    type Params = apiDeclaration.getUaInstanceIdAndEmail.Params;
-    type Response = apiDeclaration.getUaInstanceIdAndEmail.Response;
-
-    return function (): Promise<{ uaInstanceId: string; email: string; }> {
+    return (): Promise<Response> => {
 
         return sendRequest<Params, Response>(
             methodName,
@@ -491,7 +499,11 @@ export const getUaInstanceIdAndEmail = (() => {
 
     };
 
+
 })();
+
+//WebData sync things :
+
 
 export const getOrCreateWdInstance = (() => {
 
@@ -837,9 +849,9 @@ export async function newWdMessage<T extends (
     //NOTE: The type system does not handle it's edge case, need to cast.
     const message:
         wd.NoId<
-        wd.Message.Incoming |
-        wd.Message.Outgoing.Pending |
-        wd.Message.Outgoing.StatusReportReceived
+            wd.Message.Incoming |
+            wd.Message.Outgoing.Pending |
+            wd.Message.Outgoing.StatusReportReceived
         > = message_ as any;
 
     const isSameWdMessage = (

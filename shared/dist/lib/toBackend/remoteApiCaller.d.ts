@@ -1,11 +1,12 @@
 import { SyncEvent } from "ts-events-extended";
+import * as apiDeclaration from "../../sip_api_declarations/backendToUa";
 import { types as gwTypes } from "../../gateway";
 import * as types from "../types";
 import wd = types.webphoneData;
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export declare const evtUsableSim: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
-export declare const getUsableUserSims: (stateless?: false | "STATELESS") => Promise<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>[]>;
+export declare const getUsableUserSims: (includeContacts?: boolean, stateless?: false | "STATELESS") => Promise<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>[]>;
 export declare const unlockSim: (lockedDongle: dcTypes.Dongle.Locked, pin: string) => Promise<dcTypes.UnlockResult.Success | dcTypes.UnlockResult.Failed | undefined>;
 export declare const registerSim: (dongle: dcTypes.Dongle.Usable, friendlyName: string) => Promise<void>;
 export declare const unregisterSim: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<void>;
@@ -20,10 +21,7 @@ export declare const updateContactName: (userSim: types.UserSim._Base<types.SimO
 export declare const deleteContact: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>, contact: types.UserSim.Contact) => Promise<void>;
 /** Api only called once */
 export declare const shouldAppendPromotionalMessage: () => boolean | Promise<boolean>;
-export declare const getUaInstanceIdAndEmail: () => Promise<{
-    uaInstanceId: string;
-    email: string;
-}>;
+export declare const getUaInstanceId: () => Promise<apiDeclaration.getUaInstanceId.Response>;
 export declare const getOrCreateWdInstance: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<wd.Instance>;
 export declare const newWdChat: (wdInstance: wd.Instance, contactNumber: string, contactName: string, contactIndexInSim: number | null) => Promise<wd.Chat>;
 export declare const fetchOlderWdMessages: (wdChat: wd.Chat) => Promise<wd.Message[]>;

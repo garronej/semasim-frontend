@@ -65,7 +65,7 @@ var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 /** Called from outside isReconnect should never be passed */
-function connect(requestTurnCred, isReconnect) {
+function connect(sessionParams, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -77,7 +77,8 @@ function connect(requestTurnCred, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + !!requestTurnCred);
+    Cookies.set("requestTurnCred", "" + sessionParams.requestTurnCred);
+    Cookies.set("sessionType", sessionParams.sessionType);
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -101,14 +102,23 @@ function connect(requestTurnCred, isReconnect) {
     }, console.log.bind(console));
     socketCurrent = socket;
     socket.evtConnect.attachOnce(function () {
+        console.log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
+        var includeContacts = (function () {
+            switch (sessionParams.sessionType) {
+                case "MAIN": return true;
+                case "AUXILIARY": return false;
+            }
+        })();
         if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
+            remoteApiCaller.getUsableUserSims(includeContacts)
+                .then(function (userSims_) { return userSims = userSims_; });
         }
         else {
-            remoteApiCaller.getUsableUserSims("STATELESS").then(function (userSims_) {
+            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                .then(function (userSims_) {
                 var e_1, _a;
                 var _loop_1 = function (userSim_) {
                     var userSim = userSims
@@ -164,6 +174,7 @@ function connect(requestTurnCred, isReconnect) {
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
+                    console.log("Socket disconnected");
                     try {
                         for (_b = __values(userSims || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                             userSim = _c.value;
@@ -192,7 +203,7 @@ function connect(requestTurnCred, isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect(requestTurnCred, "RECONNECT");
+                    connect(sessionParams, "RECONNECT");
                     return [2 /*return*/];
             }
         });

@@ -3,19 +3,14 @@ require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
 
-import { Ua } from "./Ua";
-import { UiWebphoneController, Action } from "./UiWebphoneController";
+import { Ua } from "../../../shared/dist/lib/Ua";
+import { UiWebphoneController } from "./UiWebphoneController";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types";
-import { phoneNumber } from "phone-number";
-import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
-import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
-
-declare const Buffer: any;
 
 $(document).ready(async () => {
 
@@ -27,75 +22,14 @@ $(document).ready(async () => {
 
 	});
 
-	connection.connect("REQUEST TURN CRED");
+	const sessionType= "MAIN";
+
+	connection.connect({ 
+		sessionType,
+		"requestTurnCred": true 
+	});
 
 	$("#page-payload").html("");
-
-	const action: (Action & { imsi: string; }) | undefined = (() => {
-
-		const type = getURLParameter("action") as Action["type"] | undefined;
-
-		if (!type) {
-			return undefined;
-		}
-
-		switch (type) {
-			case "CALL":
-				return {
-					type,
-					"number": Buffer.from(getURLParameter("number_as_hex"), "hex")
-						.toString("utf8"),
-					"imsi": getURLParameter("imsi")!
-				};
-		}
-
-	})();
-
-	if (!!action) {
-
-		bootbox_custom.loading(`Preparing call to ${phoneNumber.prettyPrint(action.number)}`, 0);
-
-		const userSim = await remoteApiCaller.getUsableUserSims()
-			.then(userSims => userSims.find(({ sim }) => sim.imsi === action.imsi)!);
-
-		if (!userSim.isOnline) {
-
-			await new Promise(resolve =>
-				bootbox_custom.alert(
-					`${userSim.friendlyName} is currently offline`,
-					() => resolve()
-				)
-			);
-
-			window.location.href = backToAppUrl;
-			return;
-
-
-		}
-
-		const [wdInstance] = await Promise.all([
-			remoteApiCaller
-				.getOrCreateWdInstance(userSim)
-				.then(wdInstance => wdInstance),
-			Ua.init()
-		]);
-
-		bootbox_custom.dismissLoading();
-
-		$("#page-payload").append(
-			(
-				new UiWebphoneController(
-					userSim,
-					wdInstance,
-					action
-				)
-			).structure
-		);
-
-		return;
-
-	}
-
 
 	bootbox_custom.loading("Fetching contacts and SMS history", 0);
 
@@ -109,10 +43,9 @@ $(document).ready(async () => {
 
 	const wdInstances = new Map<types.UserSim, types.webphoneData.Instance>();
 
-
 	await Promise.all([
-		//new Promise<void>(resolve => DetectRTC.load(resolve)),
-		Ua.init(),
+		remoteApiCaller.getUaInstanceId()
+			.then(({ uaInstanceId, email }) => Ua.setUaInstanceId(uaInstanceId, email)),
 		...userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
 				.then(wdInstance => { wdInstances.set(userSim, wdInstance) })

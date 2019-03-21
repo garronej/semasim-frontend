@@ -1,10 +1,12 @@
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
+//NOTE: Require ion sound loaded on the page.
+
+import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import wd = types.webphoneData;
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
-import { Ua } from "./Ua";
 import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
+type DtmFSignal = import("../../../shared/dist/lib/Ua").Ua.DtmFSignal;
 
 declare const ion: any;
 declare const require: any;
@@ -20,44 +22,41 @@ export class UiVoiceCall {
 
     private readonly countryIso: string | undefined;
 
-    private readonly btnGreen= this.structure.find(".id_btn-green");
-    private readonly btnRed= this.structure.find(".id_btn-red");
+    private readonly btnGreen = this.structure.find(".id_btn-green");
+    private readonly btnRed = this.structure.find(".id_btn-red");
 
-    /** Only purpose is to have a hook to come back to 
-     * the Android app after the call is completed.  */
-    public readonly evtModalClosed= new VoidSyncEvent();
+    private readonly evtBtnClick = new SyncEvent<"GREEN" | "RED">();
 
-    private readonly evtBtnClick= new SyncEvent<"GREEN" | "RED">();
+    private readonly evtNumpadDtmf = new SyncEvent<{ signal: DtmFSignal; duration: number }>();
 
-    private readonly evtNumpadDtmf= new SyncEvent<{ signal: Ua.DtmFSignal; duration: number }>();
-
-    private readonly hideModal: ()=> Promise<void>;
-    private readonly showModal: ()=> Promise<void>;
+    private readonly hideModal: () => Promise<void>;
+    private readonly showModal: () => Promise<void>;
 
     constructor(
         private readonly userSim: types.UserSim.Usable
     ) {
 
         //Debug only
-        window["uiVoiceCall"]= this;
+        window["uiVoiceCall"] = this;
 
-        this.countryIso= userSim.sim.country?
+        this.countryIso = userSim.sim.country ?
             userSim.sim.country.iso : undefined;
 
-        const { hide, show } = modal_stack.add(
-            this.structure, 
-            {
-                "keyboard": false,
-                "backdrop": "static"
-            }
-        );
+        {
 
-        this.hideModal = async ()=> {
-            await hide();
-            this.evtModalClosed.post();
-        };
+            const { hide, show } = modal_stack.add(
+                this.structure,
+                {
+                    "keyboard": false,
+                    "backdrop": "static"
+                }
+            );
 
-        this.showModal = show;
+            this.hideModal = hide;
+
+            this.showModal = show;
+
+        }
 
         this.structure.find("span.id_me").html(userSim.friendlyName);
 
@@ -86,7 +85,7 @@ export class UiVoiceCall {
 
         for (let i = 0; i <= 11; i++) {
 
-            let signal: Ua.DtmFSignal = (i <= 9) ? `${i}` : (i === 10) ? "*" : "#" as any;
+            const signal: DtmFSignal = (i <= 9) ? `${i}` : (i === 10) ? "*" : "#" as any;
 
             this.structure
                 .find("button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal)))
@@ -291,11 +290,11 @@ export class UiVoiceCall {
 
         this.showModal();
 
-        try{
+        try {
 
             ion.sound.stop("semasim_ringtone");
 
-        }catch{ }
+        } catch{ }
 
         switch (state) {
             case "RINGING":
@@ -343,7 +342,7 @@ export namespace UiVoiceCall {
 
         export type Dtmf = {
             userAction: "DTMF";
-            signal: Ua.DtmFSignal;
+            signal: DtmFSignal;
             duration: number;
         };
 

@@ -7,6 +7,7 @@
     "chan-dongle-extended-client": "garronej/chan-dongle-extended-client"
   },
   "devDependencies": {
+    "run-exclusive": "github:garronej/run-exclusive",
     "@types/bootstrap": "3.3.28",
     "@types/jquery": "2.0.48",
     "js-cookie": "^2.2.0",

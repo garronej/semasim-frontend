@@ -7,7 +7,7 @@ export namespace getUsableUserSims {
 
     export const methodName = "getUsableUserSims";
 
-    export type Params = undefined;
+    export type Params = { includeContacts: boolean; };
 
     export type Response = types.UserSim.Usable[];
 
@@ -214,11 +214,9 @@ export namespace shouldAppendPromotionalMessage {
 
 }
 
-//WebphoneData Sync things:
+export namespace getUaInstanceId {
 
-export namespace getUaInstanceIdAndEmail {
-
-    export const methodName = "getUaInstanceIdAndEmail";
+    export const methodName = "getUaCredentials";
 
     export type Params = undefined;
 
@@ -229,6 +227,7 @@ export namespace getUaInstanceIdAndEmail {
 
 }
 
+//WebphoneData Sync things:
 
 export namespace getOrCreateInstance {
 

@@ -3,7 +3,9 @@ import { types as dcTypes } from "chan-dongle-extended-client";
 import wd = types.webphoneData;
 export declare namespace getUsableUserSims {
     const methodName = "getUsableUserSims";
-    type Params = undefined;
+    type Params = {
+        includeContacts: boolean;
+    };
     type Response = types.UserSim.Usable[];
 }
 export declare namespace unlockSim {
@@ -140,8 +142,8 @@ export declare namespace shouldAppendPromotionalMessage {
     type Params = undefined;
     type Response = boolean;
 }
-export declare namespace getUaInstanceIdAndEmail {
-    const methodName = "getUaInstanceIdAndEmail";
+export declare namespace getUaInstanceId {
+    const methodName = "getUaCredentials";
     type Params = undefined;
     type Response = {
         uaInstanceId: string;

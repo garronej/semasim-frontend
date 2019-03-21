@@ -1,20 +1,18 @@
 //NOTE: Require jssip_compat loaded on the page.
 
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import { phoneNumber } from "phone-number";
-import * as types from "../../../shared/dist/lib/types";
 import {
     types as gwTypes,
     extractBundledDataFromHeaders,
     smuggleBundledDataInHeaders,
     urlSafeB64,
     readImsi
-} from "../../../shared/dist/gateway";
+} from "../gateway";
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
-import * as connection from "../../../shared/dist/lib/toBackend/connection";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
-import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
+import * as connection from "./toBackend/connection";
+import * as localApiHandlers from "./toBackend/localApiHandlers";
+type phoneNumber = import("phone-number").phoneNumber;
 
 declare const JsSIP: any;
 declare const Buffer: any;
@@ -28,13 +26,9 @@ export class Ua {
     public static instanceId: string;
 
     /** Must be called in webphone.ts */
-    public static async init(): Promise<void> {
-
-        const { email, uaInstanceId } = await remoteApiCaller.getUaInstanceIdAndEmail();
-
+    public static setUaInstanceId(uaInstanceId: string, email: string): void {
         this.email = email;
         this.instanceId = uaInstanceId;
-
     }
 
     /** post isRegistered */
@@ -47,24 +41,23 @@ export class Ua {
     private readonly jsSipSocket: JsSipSocket;
 
     constructor(
-        public readonly userSim: types.UserSim.Usable
+        imsi: string,
+        sipPassword: string,
+        disabledMessage: false | "DISABLE MESSAGES" = false
     ) {
-
-        const { imsi } = userSim.sim;
 
         const uri = `sip:${imsi}-webRTC@${connection.baseDomain}`;
 
         this.jsSipSocket = new JsSipSocket(imsi, uri);
 
-        //TODO: Try to find a way to put it outside the uri itself.
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,
             "authorization_user": imsi,
-            "password": this.userSim.password,
+            "password": sipPassword,
             "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)![1],
             "register": false,
-            "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}`,
+            "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}${!disabledMessage ? "" : ";no_messages"}`,
             "register_expires": 345600
         });
 
@@ -151,7 +144,7 @@ export class Ua {
 
         })()) as gwTypes.BundledData.ServerToClient;
 
-        const fromNumber = this.toPhoneNumber(request.from.uri.user);
+        const fromNumber = request.from.uri.user;
 
         if (bundledData.type === "RINGBACK") {
 
@@ -204,9 +197,9 @@ export class Ua {
                     exactSendDate,
                 };
 
-                if( appendPromotionalMessage ){
+                if (appendPromotionalMessage) {
 
-                    bundledData.appendPromotionalMessage= true;
+                    bundledData.appendPromotionalMessage = true;
 
                 }
 
@@ -280,7 +273,7 @@ export class Ua {
 
             jsSipRtcSession.answer({
                 "mediaConstraints": { "audio": true, "video": false },
-                "pcConfig": { "iceServers": [ rtcIceServer ] }
+                "pcConfig": { "iceServers": [rtcIceServer] }
             });
 
             (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
@@ -294,10 +287,10 @@ export class Ua {
         jsSipRtcSession.once("ended", () => evtTerminated.post());
 
         jsSipRtcSession.once("failed", () => evtTerminated.post());
-        
+
 
         this.evtIncomingCall.post({
-            "fromNumber": this.toPhoneNumber(request.from.uri.user),
+            "fromNumber": request.from.uri.user,
             "terminate": () => evtRequestTerminate.post(),
             "prTerminated": Promise.race([
                 evtRequestTerminate.waitFor(),
@@ -345,7 +338,7 @@ export class Ua {
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 "pcConfig": {
-                    "iceServers": [ rtcICEServer ],
+                    "iceServers": [rtcICEServer],
                     "gatheringTimeoutAfterRelay": 700
                 },
                 "eventHandlers": {
@@ -377,7 +370,7 @@ export class Ua {
                     },
                     "confirmed": () => evtEstablished.post(),
                     "ended": () => evtTerminated.post(),
-                    "failed": ()=> evtTerminated.post(),
+                    "failed": () => evtTerminated.post(),
                     "sending": ({ request }) =>
                         this.evtRingback.waitFor(callId => callId === request.call_id, 30000)
                             .then(() => evtRingback.post())
@@ -422,16 +415,6 @@ export class Ua {
 
     }
 
-    /** convert raw number in phoneNumber */
-    private toPhoneNumber(number: string): phoneNumber {
-        return phoneNumber.build(
-            number,
-            this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
-        );
-    }
-
-
-
 }
 
 export namespace Ua {
@@ -443,10 +426,13 @@ export namespace Ua {
 
 function playAudioStream(stream: MediaStream) {
 
-    $("<audio>", { "autoplay": "" }).get(0)["srcObject"] = stream;
+    const audio = document.createElement("audio");
+
+    audio.autoplay = true;
+
+    audio.srcObject = stream;
 
 }
-
 
 /** The socket interface that jsSIP UA take as constructor parameter  */
 interface IjsSipSocket {
@@ -488,15 +474,15 @@ class JsSipSocket implements IjsSipSocket {
                 sip.getPacketContent(sipPacket).toString("utf8")
             );
 
-            const a= parsedSdp["m"][0]["a"];
+            const a = parsedSdp["m"][0]["a"];
 
-            if( !!a.find(v => /^mid:/i.test(v)) ){
+            if (!!a.find(v => /^mid:/i.test(v))) {
                 return sipPacket;
             }
 
             parsedSdp["m"][0]["a"] = [...a, "mid:0"];
 
-            const modifiedSipPacket= sip.clonePacket(sipPacket);
+            const modifiedSipPacket = sip.clonePacket(sipPacket);
 
             sip.setPacketContent(
                 modifiedSipPacket,
@@ -661,7 +647,7 @@ function newIceCandidateHandler(rtcICEServer: RTCIceServer) {
 
         const readyState = isReady(candidate.candidate);
 
-        //console.log(readyState);
+        console.log(readyState);
 
         switch (readyState) {
             case "NOT READY": return;
