@@ -4,129 +4,151 @@ import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandler from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+import { VoidSyncEvent } from "ts-events-extended";
 
 declare const Buffer: any;
 
 declare const androidEventHandlers: {
-	onOutgoingCallTerminated(): void;
-	onOutgoingCallStateRingback(): void;
-	onOutgoingCallStateEstablished(): void;
-	onError(message: string): void;
+	/** Always called no matter what */
+	onCallTerminated(errorMessage?: string): void;
+	onRingback(): void;
+	onEstablished(): void;
 	onReady(): void;
+
 };
 
-window.onerror = (msg, url, linenumber) => {
-	androidEventHandlers.onError(msg + '\n' + url + ':' + linenumber);
+window.onerror = (msg, url, lineNumber) => {
+	androidEventHandlers.onCallTerminated(`${msg}\n'${url}:${lineNumber}`);
 	return false;
 };
 
 if ("onPossiblyUnhandledRejection" in Promise) {
 
-	(Promise as any).onPossiblyUnhandledRejection((error) => {
-		androidEventHandlers.onError(error.message + " " + error.stack);
+	(Promise as any).onPossiblyUnhandledRejection( error => {
+		androidEventHandlers.onCallTerminated(error.message + " " + error.stack);
 	});
 
 }
 
+const evtAcceptIncomingCall = new VoidSyncEvent();
+
+const readEmailFromUrl = () => Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8");
+
+/** 
+ * Never resolve and call onCallTerminated if anything goes wrong.
+ * The returned ua is registering.
+*/
+async function initUa(uaInstanceId: string, email: string, imsi: string): Promise<Ua> {
+
+	//NOTE: UA does not receive the live update on sim online state.
+	localApiHandler.evtSimIsOnlineStatusChange.attachOnce(
+		isOnline => !isOnline,
+		() => androidEventHandlers.onCallTerminated("Socket disconnected")
+	);
+
+	const [userSim] = await Promise.all([
+		remoteApiCaller.getUsableUserSims(false)
+			.then(userSims => userSims.find(({ sim }) => sim.imsi === imsi)!)
+	]);
+
+	Ua.setUaInstanceId(uaInstanceId, email);
+
+	if (!userSim.isOnline) {
+
+		androidEventHandlers.onCallTerminated("Sim is offline");
+		await new Promise(_resolve => { });
+
+	}
+
+	const ua = new Ua(userSim.sim.imsi, userSim.password, "DISABLE MESSAGES");
+
+	ua.register();
+
+	ua.evtRegistrationStateChanged.attachOnce(
+		isRegistered => !isRegistered,
+		() => androidEventHandlers.onCallTerminated("UA unregistered")
+	);
+
+	ua.evtRegistrationStateChanged.waitFor( 6000)
+		.catch(() => androidEventHandlers.onCallTerminated("UA failed to register"));
+
+	return ua;
+
+}
+
 const exposedToAndroid = {
-	"placeOutgoingCall": async (imsi: string, number: string, uaInstanceId: string) => {
-		//Assume androidEventHandles.onReady() have been called.
+	/** Assume androidEventHandles.onReady() have been called  */
+	"placeOutgoingCall": async (uaInstanceId: string, imsi: string, number: string) => {
 
-		console.log("placeOutgoingCall" + JSON.stringify({ imsi, number }, null, 2));
+		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
-		localApiHandler.evtSimIsOnlineStatusChange.attachOnce(
-			isOnline => !isOnline,
-			() => androidEventHandlers.onError(`Sim no longer online or socket disconnected`)
-		);
+		ua.evtIncomingCall.attach(({ terminate }) => terminate());
 
-		const [userSim] = await Promise.all([
-			remoteApiCaller.getUsableUserSims(false)
-				.then(userSims => userSims.find(({ sim }) => sim.imsi === imsi)!)
-		]);
+		await ua.evtRegistrationStateChanged.waitFor();
 
-		Ua.setUaInstanceId(
-			uaInstanceId,
-			Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8") 
-		);
+		const { terminate, prTerminated, prNextState } = await ua.placeOutgoingCall(number);
 
-		if (!userSim.isOnline) {
+		exposedToAndroid.terminateCall = () => terminate();
 
-			androidEventHandlers.onError("Sim is offline");
-			return;
-
-		}
-
-		const ua = new Ua(userSim.sim.imsi, userSim.password, "DISABLE MESSAGES");
-
-		ua.evtIncomingCall.attach(
-			async ({ terminate }) => terminate()
-		);
-
-		ua.register();
-
-		ua.evtRegistrationStateChanged.attachOnce(
-			isRegistered => !isRegistered,
-			() => androidEventHandlers.onError("UA unregistered")
-		);
-
-		try {
-
-			await ua.evtRegistrationStateChanged.waitFor(
-				isRegistered => isRegistered,
-				6000
-			);
-
-		} catch{
-
-			androidEventHandlers.onError("UA failed to register");
-			return;
-
-		}
-
-		console.log("About to place outgoing call");
-
-		const { terminate, prTerminated, prNextState } =
-			await ua.placeOutgoingCall(number);
-
-		console.log("Outgoing call placed");
-
-		exposedToAndroid.outgoingCallTerminate = () => terminate();
-
-		prTerminated.then(() => androidEventHandlers.onOutgoingCallTerminated());
+		prTerminated.then(() => androidEventHandlers.onCallTerminated());
 
 		prNextState.then(({ prNextState }) => {
 
-			console.log("Ringing");
-
-			androidEventHandlers.onOutgoingCallStateRingback();
+			androidEventHandlers.onRingback();
 
 			prNextState.then(({ sendDtmf }) => {
 
-				exposedToAndroid.outgoingCallSendDtmf = (signal: string, duration: number) =>
-					sendDtmf(signal as Ua.DtmFSignal, duration)
+				exposedToAndroid.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
 
-				androidEventHandlers.onOutgoingCallStateEstablished();
+				androidEventHandlers.onEstablished();
 
 			});
 
 		});
 
 	},
-	"outgoingCallSendDtmf": (signal: string, duration: number) => {
-		androidEventHandlers.onError("outgoingCallSendDtmf cant be called now");
-	},
-	"outgoingCallTerminate": () => {
-		androidEventHandlers.onOutgoingCallTerminated();
-	}
+	/** Assume androidEventHandles.onReady() have been called  */
+	"getReadyToAcceptIncomingCall": async (uaInstanceId: string, imsi: string, number: string) => {
 
+		const ua= await initUa(uaInstanceId, readEmailFromUrl(), imsi);
+
+		const { terminate, prTerminated, onAccepted } =
+			await ua.evtIncomingCall.waitFor(
+				({ fromNumber }) => fromNumber === number,
+				7000
+			).catch(() => {
+
+				androidEventHandlers.onCallTerminated("Call missed");
+
+				return new Promise(_resolve => { });
+
+			});
+
+		exposedToAndroid.terminateCall = () => terminate();
+		prTerminated.then(() => androidEventHandlers.onCallTerminated());
+
+		if (evtAcceptIncomingCall.postCount === 0) {
+			await evtAcceptIncomingCall.waitFor();
+		}
+
+		const { sendDtmf } = await onAccepted();
+
+		exposedToAndroid.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
+
+		androidEventHandlers.onEstablished();
+
+	},
+	"sendDtmf": (signal: Ua.DtmFSignal, duration: number) => androidEventHandlers.onCallTerminated("never"),
+	"terminateCall": () => androidEventHandlers.onCallTerminated(),
+	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
 window["exposedToAndroid"] = exposedToAndroid
 
 document.addEventListener("DOMContentLoaded", () => {
-	connection.connect({ 
-		"sessionType": "AUXILIARY", 
-		"requestTurnCred": true 
+	connection.connect({
+		"sessionType": "AUXILIARY",
+		"requestTurnCred": true
 	});
 	androidEventHandlers.onReady();
 });
