@@ -502,43 +502,40 @@ class JsSipSocket implements IjsSipSocket {
         public readonly sip_uri: string
     ) {
 
-        (async () => {
 
-            const onBackedSocketConnect = (backendSocket: sip.Socket) => {
+        const onBackedSocketConnect = (backendSocket: sip.Socket) => {
 
-                const onSipPacket = (sipPacket: sip.Packet) => {
+            const onSipPacket = (sipPacket: sip.Packet) => {
 
-                    if (readImsi(sipPacket) !== imsi) {
-                        return;
-                    }
-
-                    sipPacket = this.sdpHacks(sipPacket);
-
-                    this.evtSipPacket.post(sipPacket);
-
-                    this.ondata(
-                        sip.toData(sipPacket).toString("utf8")
-                    );
-
+                if (readImsi(sipPacket) !== imsi) {
+                    return;
                 }
 
-                backendSocket.evtRequest.attach(onSipPacket);
-                backendSocket.evtResponse.attach(onSipPacket);
+                sipPacket = this.sdpHacks(sipPacket);
 
-            };
+                this.evtSipPacket.post(sipPacket);
 
-            connection.evtConnect.attach(socket => onBackedSocketConnect(socket));
-
-            const socket = connection.get();
-
-            if (!(socket instanceof Promise)) {
-
-                onBackedSocketConnect(socket);
+                this.ondata(
+                    sip.toData(sipPacket).toString("utf8")
+                );
 
             }
 
+            backendSocket.evtRequest.attach(onSipPacket);
+            backendSocket.evtResponse.attach(onSipPacket);
 
-        })();
+        };
+
+        connection.evtConnect.attach(socket => onBackedSocketConnect(socket));
+
+        const socket = connection.get();
+
+        if (!(socket instanceof Promise)) {
+
+            onBackedSocketConnect(socket);
+
+        }
+
 
     }
 

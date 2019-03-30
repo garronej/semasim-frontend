@@ -40,6 +40,11 @@ const readEmailFromUrl = () => Buffer.from(getURLParameter("email_as_hex"), "hex
 */
 async function initUa(uaInstanceId: string, email: string, imsi: string): Promise<Ua> {
 
+	connection.connect({
+		"requestTurnCred": true,
+		uaInstanceId
+	});
+
 	//NOTE: UA does not receive the live update on sim online state.
 	localApiHandler.evtSimIsOnlineStatusChange.attachOnce(
 		isOnline => !isOnline,
@@ -149,11 +154,4 @@ const exposedToAndroid = {
 
 window["exposedToAndroid"] = exposedToAndroid
 
-document.addEventListener("DOMContentLoaded", () => {
-	connection.connect({
-		"sessionType": "AUXILIARY",
-		"requestTurnCred": true
-	});
-	androidEventHandlers.onReady();
-});
-
+document.addEventListener("DOMContentLoaded", () => androidEventHandlers.onReady());

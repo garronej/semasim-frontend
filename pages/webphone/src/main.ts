@@ -22,12 +22,8 @@ $(document).ready(async () => {
 
 	});
 
-	const sessionType= "MAIN";
 
-	connection.connect({ 
-		sessionType,
-		"requestTurnCred": true 
-	});
+	connection.connect({ "requestTurnCred": true });
 
 	$("#page-payload").html("");
 

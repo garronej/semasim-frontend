@@ -64,8 +64,18 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
 var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
-/** Called from outside isReconnect should never be passed */
-function connect(sessionParams, isReconnect) {
+/**
+ * Pass uaInstanceId to connect as an auxiliary connection of the user account.
+ * - Multiple auxiliary connection can be established at the same time.
+ * - On the contrary only one main connection can be active at the same time for a given user account )
+ * - Auxiliary connections does not receive most of the events defined in localApiHandler.
+ *   But will receive notifyIceServer ( if requestTurnCred === true ).
+ * - Auxiliary connections will not receive phonebook entries
+ * ( userSims will appear as if they had no contacts stored )
+ *
+ * Called from outside isReconnect should never be passed.
+ *  */
+function connect(connectionParams, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -77,8 +87,13 @@ function connect(sessionParams, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + sessionParams.requestTurnCred);
-    Cookies.set("sessionType", sessionParams.sessionType);
+    Cookies.set("requestTurnCred", "" + connectionParams.requestTurnCred);
+    {
+        var uaInstanceId = connectionParams.uaInstanceId;
+        if (uaInstanceId !== undefined) {
+            Cookies.set("uaInstanceId", "" + uaInstanceId);
+        }
+    }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -106,12 +121,7 @@ function connect(sessionParams, isReconnect) {
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
-        var includeContacts = (function () {
-            switch (sessionParams.sessionType) {
-                case "MAIN": return true;
-                case "AUXILIARY": return false;
-            }
-        })();
+        var includeContacts = connectionParams.uaInstanceId === undefined;
         if (userSims === undefined) {
             remoteApiCaller.getUsableUserSims(includeContacts)
                 .then(function (userSims_) { return userSims = userSims_; });
@@ -203,7 +213,7 @@ function connect(sessionParams, isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect(sessionParams, "RECONNECT");
+                    connect(connectionParams, "RECONNECT");
                     return [2 /*return*/];
             }
         });

@@ -36,10 +36,7 @@ $(document).ready(async () => {
 
     });
 
-    connection.connect({ 
-        "sessionType": "MAIN", 
-        "requestTurnCred": false 
-    });
+    connection.connect({ "requestTurnCred": false });
 
     const action: Action | undefined = (() => {
 

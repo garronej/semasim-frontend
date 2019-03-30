@@ -30,11 +30,21 @@ let userSims: types.UserSim.Usable[] | undefined = undefined;
 
 export const evtConnect = new SyncEvent<sip.Socket>();
 
-/** Called from outside isReconnect should never be passed */
+/** 
+ * Pass uaInstanceId to connect as an auxiliary connection of the user account.
+ * - Multiple auxiliary connection can be established at the same time.
+ * - On the contrary only one main connection can be active at the same time for a given user account )
+ * - Auxiliary connections does not receive most of the events defined in localApiHandler.
+ *   But will receive notifyIceServer ( if requestTurnCred === true ).
+ * - Auxiliary connections will not receive phonebook entries 
+ * ( userSims will appear as if they had no contacts stored )
+ * 
+ * Called from outside isReconnect should never be passed.
+ *  */
 export function connect(
-    sessionParams: {
+    connectionParams: {
         requestTurnCred: boolean;
-        sessionType: "MAIN" | "AUXILIARY"
+        uaInstanceId?: string;
     },
     isReconnect?: undefined | "RECONNECT"
 ) {
@@ -56,8 +66,17 @@ export function connect(
 
     }
 
-    Cookies.set("requestTurnCred", `${sessionParams.requestTurnCred}`);
-    Cookies.set("sessionType", sessionParams.sessionType);
+    Cookies.set("requestTurnCred", `${connectionParams.requestTurnCred}`);
+
+    {
+
+        const { uaInstanceId } = connectionParams;
+
+        if (uaInstanceId !== undefined) {
+            Cookies.set("uaInstanceId", `${uaInstanceId}`);
+        }
+
+    }
 
     const socket = new sip.Socket(
         new WebSocket(url, "SIP"),
@@ -97,7 +116,7 @@ export function connect(
 
     socket.evtConnect.attachOnce(() => {
 
-        console.log(`Socket ${!!isReconnect?"re-":""}connected`);
+        console.log(`Socket ${!!isReconnect ? "re-" : ""}connected`);
 
         if (!!isReconnect) {
 
@@ -105,13 +124,7 @@ export function connect(
 
         }
 
-
-        const includeContacts= (()=>{
-            switch(sessionParams.sessionType){
-                case "MAIN": return true;
-                case "AUXILIARY": return false;
-            }
-        })();
+        const includeContacts = connectionParams.uaInstanceId === undefined;
 
         if (userSims === undefined) {
 
@@ -123,53 +136,53 @@ export function connect(
             remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
                 .then(userSims_ => {
 
-                for (const userSim_ of userSims_) {
+                    for (const userSim_ of userSims_) {
 
-                    const userSim = userSims!
-                        .find(({ sim }) => sim.imsi === userSim_.sim.imsi);
+                        const userSim = userSims!
+                            .find(({ sim }) => sim.imsi === userSim_.sim.imsi);
 
-                    /*
-                    By testing if digests are the same we cover 99% of the case
-                    when the sim could have been modified while offline...good enough.
-                    */
-                    if (
-                        !userSim ||
-                        userSim.sim.storage.digest !== userSim_.sim.storage.digest
-                    ) {
+                        /*
+                        By testing if digests are the same we cover 99% of the case
+                        when the sim could have been modified while offline...good enough.
+                        */
+                        if (
+                            !userSim ||
+                            userSim.sim.storage.digest !== userSim_.sim.storage.digest
+                        ) {
 
-                        location.reload();
+                            location.reload();
 
-                        return;
+                            return;
+
+                        }
+
+                        /*
+                        If userSim is online we received a notification before having the 
+                        response of the request... even possible?
+                         */
+                        if (userSim.isOnline) {
+                            continue;
+                        }
+
+                        userSim.isOnline = userSim_.isOnline;
+
+                        userSim.password = userSim_.password;
+
+                        userSim.dongle = userSim_.dongle;
+
+                        userSim.gatewayLocation = userSim_.gatewayLocation;
+
+                        if (userSim.isOnline) {
+
+                            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
+
+                        }
+
 
                     }
 
-                    /*
-                    If userSim is online we received a notification before having the 
-                    response of the request... even possible?
-                     */
-                    if (userSim.isOnline) {
-                        continue;
-                    }
 
-                    userSim.isOnline = userSim_.isOnline;
-
-                    userSim.password = userSim_.password;
-
-                    userSim.dongle = userSim_.dongle;
-
-                    userSim.gatewayLocation = userSim_.gatewayLocation;
-
-                    if (userSim.isOnline) {
-
-                        localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-
-                    }
-
-
-                }
-
-
-            });
+                });
 
 
         }
@@ -206,7 +219,7 @@ export function connect(
 
         }
 
-        connect(sessionParams, "RECONNECT");
+        connect(connectionParams, "RECONNECT");
 
     });
 

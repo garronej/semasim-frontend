@@ -374,30 +374,23 @@ var JsSipSocket = /** @class */ (function () {
         this.via_transport = "WSS";
         this.url = connection.url;
         this.messageOkDelays = new Map();
-        (function () { return __awaiter(_this, void 0, void 0, function () {
-            var onBackedSocketConnect, socket;
-            var _this = this;
-            return __generator(this, function (_a) {
-                onBackedSocketConnect = function (backendSocket) {
-                    var onSipPacket = function (sipPacket) {
-                        if (gateway_1.readImsi(sipPacket) !== imsi) {
-                            return;
-                        }
-                        sipPacket = _this.sdpHacks(sipPacket);
-                        _this.evtSipPacket.post(sipPacket);
-                        _this.ondata(sip.toData(sipPacket).toString("utf8"));
-                    };
-                    backendSocket.evtRequest.attach(onSipPacket);
-                    backendSocket.evtResponse.attach(onSipPacket);
-                };
-                connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
-                socket = connection.get();
-                if (!(socket instanceof Promise)) {
-                    onBackedSocketConnect(socket);
+        var onBackedSocketConnect = function (backendSocket) {
+            var onSipPacket = function (sipPacket) {
+                if (gateway_1.readImsi(sipPacket) !== imsi) {
+                    return;
                 }
-                return [2 /*return*/];
-            });
-        }); })();
+                sipPacket = _this.sdpHacks(sipPacket);
+                _this.evtSipPacket.post(sipPacket);
+                _this.ondata(sip.toData(sipPacket).toString("utf8"));
+            };
+            backendSocket.evtRequest.attach(onSipPacket);
+            backendSocket.evtResponse.attach(onSipPacket);
+        };
+        connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
+        var socket = connection.get();
+        if (!(socket instanceof Promise)) {
+            onBackedSocketConnect(socket);
+        }
     }
     JsSipSocket.prototype.sdpHacks = function (sipPacket) {
         if (sipPacket.headers["content-type"] !== "application/sdp") {
