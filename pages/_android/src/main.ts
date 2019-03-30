@@ -10,7 +10,7 @@ declare const Buffer: any;
 
 declare const androidEventHandlers: {
 	/** Always called no matter what */
-	onCallTerminated(errorMessage?: string): void;
+	onCallTerminated(errorMessage: string | null): void;
 	onRingback(): void;
 	onEstablished(): void;
 	onReady(): void;
@@ -90,7 +90,7 @@ const exposedToAndroid = {
 
 		exposedToAndroid.terminateCall = () => terminate();
 
-		prTerminated.then(() => androidEventHandlers.onCallTerminated());
+		prTerminated.then(() => androidEventHandlers.onCallTerminated(null));
 
 		prNextState.then(({ prNextState }) => {
 
@@ -110,22 +110,26 @@ const exposedToAndroid = {
 	/** Assume androidEventHandles.onReady() have been called  */
 	"getReadyToAcceptIncomingCall": async (uaInstanceId: string, imsi: string, number: string) => {
 
-		const ua= await initUa(uaInstanceId, readEmailFromUrl(), imsi);
+		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
-		const { terminate, prTerminated, onAccepted } =
-			await ua.evtIncomingCall.waitFor(
-				({ fromNumber }) => fromNumber === number,
-				7000
-			).catch(() => {
+		const wrap = await ua.evtIncomingCall.waitFor(
+			({ fromNumber }) => fromNumber === number,
+			7000
+		).catch(() => undefined);
 
-				androidEventHandlers.onCallTerminated("Call missed");
+		if (wrap === undefined) {
 
-				return new Promise(_resolve => { });
+			androidEventHandlers.onCallTerminated("Call missed");
 
-			});
+			return;
 
-		exposedToAndroid.terminateCall = () => terminate();
-		prTerminated.then(() => androidEventHandlers.onCallTerminated());
+		}
+
+		const { terminate, prTerminated, onAccepted } = wrap;
+
+		exposedToAndroid.terminateCall = () => terminate()
+
+		prTerminated.then(() => androidEventHandlers.onCallTerminated(null));
 
 		if (evtAcceptIncomingCall.postCount === 0) {
 			await evtAcceptIncomingCall.waitFor();
@@ -139,7 +143,7 @@ const exposedToAndroid = {
 
 	},
 	"sendDtmf": (signal: Ua.DtmFSignal, duration: number) => androidEventHandlers.onCallTerminated("never"),
-	"terminateCall": () => androidEventHandlers.onCallTerminated(),
+	"terminateCall": () => androidEventHandlers.onCallTerminated(null),
 	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
