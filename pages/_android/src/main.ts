@@ -13,8 +13,6 @@ declare const androidEventHandlers: {
 	onCallTerminated(errorMessage: string | null): void;
 	onRingback(): void;
 	onEstablished(): void;
-	onReady(): void;
-
 };
 
 window.onerror = (msg, url, lineNumber) => {
@@ -155,4 +153,3 @@ const exposedToAndroid = {
 
 window["exposedToAndroid"] = exposedToAndroid
 
-document.addEventListener("DOMContentLoaded", () => androidEventHandlers.onReady());
