@@ -1,5 +1,5 @@
 <% if( assets_root === "/" ){ %>
-<script src="//cdn.jsdelivr.net/npm/bluebird@3.5.3/js/browser/bluebird.js"></script>
+<script src="<%-assets_root%>js/libs/bluebird_3.5.3/bluebird.js"></script>
 <script>
     Promise.config({ warnings: false });
     window.onerror = function(msg, url, linenumber) {
@@ -12,5 +12,5 @@
     });
 </script>
 <% }else{ %>
-<script src="//cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="<%-assets_root%>js/libs/es6-promise_v4/es6-promise.auto.min.js"></script>
 <% } %>

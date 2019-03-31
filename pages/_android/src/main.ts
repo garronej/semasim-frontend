@@ -152,6 +152,7 @@ const exposedToAndroid = {
 	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
+
 window["exposedToAndroid"] = exposedToAndroid
 
 document.addEventListener("DOMContentLoaded", () => androidEventHandlers.onReady());
