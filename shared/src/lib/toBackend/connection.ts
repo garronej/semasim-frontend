@@ -72,8 +72,12 @@ export function connect(
 
         const { uaInstanceId } = connectionParams;
 
-        if (uaInstanceId !== undefined) {
-            Cookies.set("uaInstanceId", `${uaInstanceId}`);
+        const key= "uaInstanceId";
+
+        if( uaInstanceId !== undefined ){
+            Cookies.set(key, uaInstanceId);
+        }else{
+            Cookies.remove(key);
         }
 
     }
