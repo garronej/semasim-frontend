@@ -1,7 +1,7 @@
 <% if( section === "top" ) { %>
 
 <!-- .page-navbar -->
-<div id="header" class="page-navbar">
+<div id="header" class="page-navbar" <%-`${isWebView?'style="visibility: hidden;"':''}`%>>
     <!-- .navbar-brand -->
     <a href="/" class="navbar-brand hidden-xs hidden-sm">
         <img src="<%-assets_root%>img/logo@2x.png" width="191" height="48" class="logo hidden-xs" alt="Dynamic logo">

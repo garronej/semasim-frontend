@@ -150,6 +150,5 @@ const exposedToAndroid = {
 	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
-
 window["exposedToAndroid"] = exposedToAndroid
 
