@@ -24,9 +24,8 @@ const version= "0.1.7";
     <%- include("/include_jquery.ejs"); %>
     <script src="<%-assets_root%>js/bootstrap/bootstrap.min.js"></script>
     <script src="<%-assets_root%>plugins/ui/bootbox/bootbox.min.js"></script>
-    
-    <!-- jsSIP -->
-    <script src="<%-assets_root%>js/libs/jssip_compat/jssip<%-assets_root==='/'?'':'.min';%>.js"></script>
+
+    <%- include("/jssip.ejs"); %>
     
     <!-- Page code -->
     <%- include("/page_script.ejs", {"page":"_android", version }); %>

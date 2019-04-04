@@ -73,7 +73,7 @@ const version= "0.1.12";
     <script src="<%-assets_root%>js/main.js"></script>
     
     <!-- jsSIP -->
-    <script src="<%-assets_root%>js/libs/jssip_compat/jssip<%-assets_root==='/'?'':'.min';%>.js"></script>
+    <%- include("/jssip.ejs"); %>
     
     <!-- intlTelInput -->
     <script src="<%-assets_root%>plugins/ui/intl-tel-input/js/utils.js"></script>
@@ -88,15 +88,17 @@ const version= "0.1.12";
     
     <!-- title-notifier -->
     <script src="<%-assets_root%>plugins/ui/title-notifier/title_notifier.js"></script>
+
     <!-- ion-sound -->
     <script src="<%-assets_root%>plugins/misc/ion-sound/js/ion.sound<%-assets_root==='/'?'':'.min';%>.js"></script>
-    
+
     <script>
         ion.sound({
             "sounds": [
                 { "name": "water_droplet" },
                 { "name": "button_tiny" },
-                { "name": "semasim_ringtone" }
+                { "name": "semasim_ringtone" },
+                { "name": "loading" }
             ],
             "volume": 0.5,
             "path": "<%-assets_root%>plugins/misc/ion-sound/sounds/",

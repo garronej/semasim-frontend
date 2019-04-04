@@ -292,7 +292,9 @@ export class UiVoiceCall {
 
         try {
 
-            ion.sound.stop("semasim_ringtone");
+            for (const soundName of ["semasim_ringtone", "loading"]) {
+                ion.sound.stop(soundName);
+            }
 
         } catch{ }
 
@@ -313,6 +315,7 @@ export class UiVoiceCall {
                 spanTimer["timer"]("start");
                 break;
             case "LOADING":
+                ion.sound.play("loading", { "loop": true });
                 this.btnRed.removeClass("hide").html("Cancel");
                 this.structure.find(".id_icon-spin").removeClass("hide");
                 break;
