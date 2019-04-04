@@ -23,7 +23,7 @@ const version= "0.2.4";
 
     <%- include("/favicon.ejs"); %>
 
-    <%- include("/stary_sky/style.ejs"); %>
+    <%- include("/starry_sky.ejs", { "component": "style" }); %>
 
 </head>
 
@@ -31,7 +31,7 @@ const version= "0.2.4";
 
     <%- include("/outdated.ejs"); %>
 
-    <%- include("/stary_sky/struct.ejs"); %>
+    <%- include("/starry_sky.ejs", { "component": "structure" }); %>
 
     <%- include("/layout.ejs", { "section": "top", "page": "manager" }); %>
 
@@ -59,6 +59,8 @@ const version= "0.2.4";
     <!-- Javascripts -->
 
     <%- include("/debug.ejs"); %>
+
+    <%- include("/starry_sky.ejs", { "component": "script" }); %>
 
     <!-- Important javascript libs(put in all pages) -->
     <%- include("/include_jquery.ejs"); %>
@@ -89,9 +91,8 @@ const version= "0.2.4";
     <script src="<%-assets_root%>js/jquery.dynamic.js"></script>
     <script src="<%-assets_root%>js/main.js"></script>
 
-    <%- include("/page_script.ejs", { "page": "manager", version }); %>
 
-    <%- include("/stary_sky/script.ejs"); %>
+    <%- include("/page_script.ejs", { "page": "manager", version }); %>
 
 </body>
 </html>
