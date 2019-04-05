@@ -515,12 +515,15 @@ export class UiController {
 
 }
 
-
 /** Interact only if more than one SIM holds the phone number */
 async function interact_getUserSimContainingNumber(
     userSims: types.UserSim.Usable[],
     number: phoneNumber
 ): Promise<types.UserSim.Usable | undefined> {
+
+    if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
+        await UiPhonebook.fetchPhoneNumberUtilityScript();
+    }
 
     const userSimsContainingNumber = userSims
         .filter(
@@ -530,32 +533,13 @@ async function interact_getUserSimContainingNumber(
         )
         ;
 
-    const getPrettyNumber = (() => {
-
-        let prettyNumber: string | undefined = undefined;
-
-        return async () => {
-
-            if (prettyNumber !== undefined) {
-                return prettyNumber;
-            }
-
-            if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
-                await UiPhonebook.fetchPhoneNumberUtilityScript();
-            }
-
-            return prettyNumber = phoneNumber.prettyPrint(number);
-
-        };
-
-    })();
 
     if (userSimsContainingNumber.length === 0) {
 
-        await new Promise(async resolve =>
+        await new Promise(resolve =>
             bootbox_custom.alert(
                 [
-                    `${await getPrettyNumber()} is not saved in any of your SIM phonebook.`,
+                    `${phoneNumber.prettyPrint(number)} is not saved in any of your SIM phonebook.`,
                     "Use the android contacts native feature to edit contact stored in your phone."
                 ].join("<br>"),
                 () => resolve()
@@ -568,8 +552,8 @@ async function interact_getUserSimContainingNumber(
     }
 
     const index = await new Promise<number | null>(
-        async resolve => bootbox_custom.prompt({
-            "title": `${await getPrettyNumber()} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
+        resolve => bootbox_custom.prompt({
+            "title": `${phoneNumber.prettyPrint(number)} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
             "inputType": "select",
             "inputOptions": userSimsContainingNumber.map(userSim => ({
                 "text": `${userSim.friendlyName} ${userSim.isOnline ? "" : "( offline )"}`,

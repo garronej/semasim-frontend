@@ -16,6 +16,14 @@ if (!ArrayBuffer.isView) {
 
 }
 
+if (typeof String.prototype.startsWith != 'function') {
+
+    String.prototype.startsWith = function startsWith(str){
+      return this.indexOf(str) === 0;
+    };
+
+}
+
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
