@@ -18,13 +18,69 @@ if (!ArrayBuffer.isView) {
 
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import { UiController, Action } from "./UiController";
+import { UiController } from "./UiController";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
-import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 
 declare const __dirname: any;
-declare const Buffer: any;
+
+declare const androidEventHandlers: {
+    onDone(errorMessage: string | null): void;
+};
+
+//TODO: See if defined
+if( typeof androidEventHandlers !== "undefined" ){
+
+    window.onerror = (msg, url, lineNumber) => {
+        androidEventHandlers.onDone(`${msg}\n'${url}:${lineNumber}`);
+        return false;
+    };
+
+    if ("onPossiblyUnhandledRejection" in Promise) {
+
+        (Promise as any).onPossiblyUnhandledRejection(error => {
+            androidEventHandlers.onDone(error.message + " " + error.stack);
+        });
+
+    }
+
+}
+
+
+let resolvePrUiController: (uiController: UiController) => void;
+
+window["exposedToAndroid"] = (() => {
+
+    const prUiController = new Promise<UiController>(resolve => resolvePrUiController = resolve);
+
+    return {
+        "createContact": async (imsi: string, number: string) => {
+
+            await (await prUiController).interact_createContact(imsi, number);
+
+            try{ androidEventHandlers.onDone(null); }catch{}
+
+        },
+        "updateContactName": async (number: string) => {
+
+            await (await prUiController).interact_updateContactName(number);
+
+            try{ androidEventHandlers.onDone(null); }catch{}
+
+        },
+        "deleteContact": async (number: string) => {
+
+            await (await prUiController).interact_deleteContact(number);
+
+            try{ androidEventHandlers.onDone(null); }catch{}
+
+        }
+    };
+
+})();
+
+
+
 
 $(document).ready(async () => {
 
@@ -38,42 +94,13 @@ $(document).ready(async () => {
 
     connection.connect({ "requestTurnCred": false });
 
-    const action: Action | undefined = (() => {
-
-        const type = getURLParameter("action") as Action["type"] | undefined;
-
-        if (!type) {
-            return undefined;
-        }
-
-        const getNumber = () => Buffer.from(
-            getURLParameter("number_as_hex")!,
-            "hex"
-        ).toString("utf8");
-
-        switch (type) {
-            case "UPDATE_CONTACT_NAME":
-            case "DELETE_CONTACT":
-                return {
-                    type,
-                    "number": getNumber()
-                }
-            case "CREATE_CONTACT": return {
-                type,
-                "number": getNumber(),
-                "imsi": getURLParameter("imsi")!
-            };
-        }
-
-    })();
-
     const uiController = new UiController(
-        await remoteApiCaller.getUsableUserSims(),
-        action
+        await remoteApiCaller.getUsableUserSims()
     );
 
-    $("#page-payload").html("").append(uiController.structure);
+    resolvePrUiController(uiController);
 
+    $("#page-payload").html("").append(uiController.structure);
 
     $("#register-new-sim")
         .removeClass("hidden")
@@ -82,6 +109,7 @@ $(document).ready(async () => {
                 require("fs").readFileSync(__dirname + "/../res/1.txt", "utf8")
                     .replace(/\n/g, "<br>")
             )
-        );
+        )
+        ;
 
 });

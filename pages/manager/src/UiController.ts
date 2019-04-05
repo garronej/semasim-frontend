@@ -3,7 +3,6 @@ import * as types from "../../../shared/dist/lib/types";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";
 import { UiPhonebook } from "./UiPhonebook";
@@ -17,16 +16,6 @@ const html = loadUiClassHtml(
     require("../templates/UiController.html"),
     "UiController"
 );
-
-export type Action = {
-    type: "CREATE_CONTACT";
-    imsi: string;
-    number: phoneNumber;
-} | {
-    type: "UPDATE_CONTACT_NAME" | "DELETE_CONTACT";
-    number: phoneNumber;
-};
-
 
 export class UiController {
 
@@ -185,10 +174,7 @@ export class UiController {
 
     }
 
-    constructor(
-        private userSims: types.UserSim.Usable[],
-        private action?: Action
-    ) {
+    constructor(private userSims: types.UserSim.Usable[]) {
 
         this.setState("NO SIM");
 
@@ -209,120 +195,6 @@ export class UiController {
         localApiHandlers.evtSimPermissionLost.attachOnce(
             userSim => this.removeUserSim(userSim)
         );
-
-        this.handleAction();
-
-    }
-
-    private async handleAction() {
-
-        if (!this.action) {
-            return;
-        }
-
-        const action = this.action;
-
-        const userSim: types.UserSim | undefined = await (async () => {
-
-            switch (action.type) {
-                case "UPDATE_CONTACT_NAME":
-                case "DELETE_CONTACT": {
-
-                    await UiPhonebook.fetchPhoneNumberUtilityScript();
-
-                    const userSims = this.userSims
-                        .filter(
-                            ({ phonebook }) => !!phonebook.find(
-                                ({ number_raw }) => phoneNumber.areSame(action.number, number_raw)
-                            )
-                        );
-
-                        const prettyNumber= phoneNumber.prettyPrint(action.number);
-
-                    if (userSims.length === 0) {
-
-                        await new Promise(resolve =>
-                            bootbox_custom.alert(
-                                [
-                                    `${prettyNumber} is not saved in any of your SIM phonebook.`,
-                                    "Use the android contacts native feature to edit contact stored in your phone."
-                                ].join("<br>"),
-                                () => resolve()
-                            )
-                        );
-
-                        return undefined;
-                    } else if (userSims.length === 1) {
-                        return userSims.pop();
-                    }
-
-                    const index = await new Promise<number | null>(
-                        resolve => bootbox_custom.prompt({
-                            "title": `${prettyNumber} is present in ${userSims.length}, select phonebook to edit.`,
-                            "inputType": "select",
-                            "inputOptions": userSims.map(userSim => ({
-                                "text": `${userSim.friendlyName} ${userSim.isOnline ? "" : "( offline )"}`,
-                                "value": userSims.indexOf(userSim)
-                            })),
-                            "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
-                        })
-                    );
-
-                    if (index === null) {
-
-                        await new Promise(resolve =>
-                            bootbox_custom.alert(
-                                "No SIM selected, aborting.",
-                                () => resolve()
-                            )
-                        );
-
-                        return undefined;
-
-                    }
-
-                    return userSims[index];
-
-                }
-                case "CREATE_CONTACT":
-                    return this.userSims.find(
-                        ({ sim }) => sim.imsi === action.imsi
-                    );
-            }
-
-        })();
-
-        if (!userSim) {
-
-            window.location.href = backToAppUrl;
-
-            return;
-
-        }
-
-        if (!userSim.isOnline) {
-
-            await new Promise(resolve =>
-                bootbox_custom.alert(
-                    `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
-                    () => resolve()
-                )
-            );
-
-            window.location.href = backToAppUrl;
-
-            return;
-
-        }
-
-        const uiSimRow = this.uiSimRows.find(
-            uiSimRow => uiSimRow.userSim === userSim
-        )!;
-
-        uiSimRow.structure.click();
-
-        //NOTE: Spaghetti code continue in evtClickContact handler....
-        this.uiButtonBar.evtClickContacts.post();
 
     }
 
@@ -437,60 +309,12 @@ export class UiController {
 
             const { userSim } = this.getSelectedUiSimRow();
 
-            let uiPhonebook = this.uiPhonebooks.find(
+            const uiPhonebook = this.uiPhonebooks.find(
                 uiPhonebook => uiPhonebook.userSim === userSim
-            );
-
-            if (!uiPhonebook) {
-
-                uiPhonebook = await this.initUiPhonebook(userSim);
-
-            }
+            ) || await this.initUiPhonebook(userSim);
 
 
-            if (!this.action) {
-
-                uiPhonebook.showModal();
-
-            } else {
-
-                let pr: Promise<void>;
-
-                switch (this.action.type) {
-                    case "CREATE_CONTACT":
-                        pr = uiPhonebook.interact_createContact(
-                            this.action.number
-                        );
-                        break;
-                    case "UPDATE_CONTACT_NAME":
-                        pr = uiPhonebook.interact_updateContact(
-                            this.action.number
-                        );
-                        break;
-                    case "DELETE_CONTACT":
-                        pr = uiPhonebook.interact_deleteContacts(
-                            this.action.number
-                        );
-                        break;
-                }
-
-                this.action = undefined;
-
-                await pr!;
-
-                //NOTE: Do not remove this feedback as it leave the time 
-                //to the push notification to land before we go back to app.
-                await new Promise(resolve =>
-                    bootbox_custom.alert(
-                        "Success",
-                        () => resolve()
-                    )
-                );
-
-                window.location.href = backToAppUrl;
-
-            }
-
+            uiPhonebook.showModal();
 
         });
 
@@ -621,7 +445,146 @@ export class UiController {
 
     }
 
+    public interact_updateContactName( number: phoneNumber) {
+        return this.interact_({ "type": "UPDATE_CONTACT_NAME", number });
+    }
+
+    public interact_deleteContact( number: phoneNumber) {
+        return this.interact_({ "type": "DELETE_CONTACT", number });
+    }
+
+    public interact_createContact(imsi: string, number: phoneNumber){
+        return this.interact_({ "type": "CREATE_CONTACT", imsi, number });
+    }
+
+    private async interact_(action: {
+        type: "CREATE_CONTACT";
+        imsi: string;
+        number: phoneNumber;
+    } | {
+        type: "UPDATE_CONTACT_NAME" | "DELETE_CONTACT";
+        number: phoneNumber;
+    }) {
+
+        const userSim = "imsi" in action ?
+            this.userSims.find(
+                ({ sim }) => sim.imsi === action.imsi
+            ) : await interact_getUserSimContainingNumber(
+                this.userSims,
+                action.number
+            );
+
+        if (!userSim) {
+
+            await new Promise(resolve =>
+                bootbox_custom.alert(
+                    "No SIM selected, aborting.",
+                    () => resolve()
+                )
+            );
+
+            return;
+
+        }
+
+        if (!userSim.isOnline) {
+
+            await new Promise(resolve =>
+                bootbox_custom.alert(
+                    `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
+                    () => resolve()
+                )
+            );
+
+            return;
+
+        }
+
+        const uiPhonebook = this.uiPhonebooks.find(
+            uiPhonebook => uiPhonebook.userSim === userSim
+        ) || await this.initUiPhonebook(userSim);
+
+        switch (action.type) {
+            case "CREATE_CONTACT": await uiPhonebook.interact_createContact(action.number); break;
+            case "DELETE_CONTACT": await uiPhonebook.interact_deleteContacts(action.number); break;
+            case "UPDATE_CONTACT_NAME": await uiPhonebook.interact_updateContact(action.number); break;
+        }
+
+    }
+
 
 }
 
 
+/** Interact only if more than one SIM holds the phone number */
+async function interact_getUserSimContainingNumber(
+    userSims: types.UserSim.Usable[],
+    number: phoneNumber
+): Promise<types.UserSim.Usable | undefined> {
+
+    const userSimsContainingNumber = userSims
+        .filter(
+            ({ phonebook }) => !!phonebook.find(
+                ({ number_raw }) => phoneNumber.areSame(number, number_raw)
+            )
+        )
+        ;
+
+    const getPrettyNumber = (() => {
+
+        let prettyNumber: string | undefined = undefined;
+
+        return async () => {
+
+            if (prettyNumber !== undefined) {
+                return prettyNumber;
+            }
+
+            if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
+                await UiPhonebook.fetchPhoneNumberUtilityScript();
+            }
+
+            return prettyNumber = phoneNumber.prettyPrint(number);
+
+        };
+
+    })();
+
+    if (userSimsContainingNumber.length === 0) {
+
+        await new Promise(async resolve =>
+            bootbox_custom.alert(
+                [
+                    `${await getPrettyNumber()} is not saved in any of your SIM phonebook.`,
+                    "Use the android contacts native feature to edit contact stored in your phone."
+                ].join("<br>"),
+                () => resolve()
+            )
+        );
+
+        return undefined;
+    } else if (userSimsContainingNumber.length === 1) {
+        return userSimsContainingNumber.pop();
+    }
+
+    const index = await new Promise<number | null>(
+        async resolve => bootbox_custom.prompt({
+            "title": `${await getPrettyNumber()} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
+            "inputType": "select",
+            "inputOptions": userSimsContainingNumber.map(userSim => ({
+                "text": `${userSim.friendlyName} ${userSim.isOnline ? "" : "( offline )"}`,
+                "value": userSimsContainingNumber.indexOf(userSim)
+            })),
+            "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
+        })
+    );
+
+    if (index === null) {
+
+        return undefined;
+
+    }
+
+    return userSimsContainingNumber[index];
+
+}
