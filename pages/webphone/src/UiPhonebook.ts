@@ -208,7 +208,7 @@ class UiContact {
                 var selection = window.getSelection();
 
                 //Do not trigger click if text selected.
-                if (selection.toString().length !== 0) {
+                if (selection !== null && selection.toString().length !== 0) {
                     return;
                 }
 
@@ -222,8 +222,13 @@ class UiContact {
                 const selection = window.getSelection();
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
-                selection.removeAllRanges();
-                selection.addRange(range);
+
+                if( selection !== null ){
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                }
 
             });
 

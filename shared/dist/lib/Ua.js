@@ -77,8 +77,8 @@ var localApiHandlers = require("./toBackend/localApiHandlers");
 JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
     function Ua(imsi, sipPassword, disabledMessage) {
-        if (disabledMessage === void 0) { disabledMessage = false; }
         var _this = this;
+        if (disabledMessage === void 0) { disabledMessage = false; }
         /** post isRegistered */
         this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
         this.evtRingback = new ts_events_extended_1.SyncEvent();

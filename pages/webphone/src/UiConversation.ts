@@ -96,8 +96,13 @@ export class UiConversation {
                 const selection = window.getSelection();
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
-                selection.removeAllRanges();
-                selection.addRange(range);
+
+                if( selection !== null ){
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                }
 
             });
 

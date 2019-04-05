@@ -102,7 +102,7 @@ export class UiPhonebook {
 
         this.buttonDelete.on("click", () => this.interact_deleteContacts());
 
-        this.buttonEdit.on("click", ()=> this.interact_updateContact());
+        this.buttonEdit.on("click", () => this.interact_updateContact());
 
         this.buttonCreateContact.on("click", () => this.interact_createContact());
 
@@ -403,12 +403,12 @@ export class UiPhonebook {
             return;
         }
 
-        if( !this.userSim.isOnline ){
+        if (!this.userSim.isOnline) {
 
-            await new Promise(resolve=> 
+            await new Promise(resolve =>
                 bootbox_custom.alert(
                     `Can't proceed, ${this.userSim.friendlyName} no longer online`,
-                    ()=> resolve()
+                    () => resolve()
                 )
             );
 
@@ -498,12 +498,12 @@ export class UiPhonebook {
             return;
         }
 
-        if( !this.userSim.isOnline ){
+        if (!this.userSim.isOnline) {
 
-            await new Promise(resolve=> 
+            await new Promise(resolve =>
                 bootbox_custom.alert(
                     `Can't delete, ${this.userSim.friendlyName} no longer online`,
-                    ()=> resolve()
+                    () => resolve()
                 )
             );
 
@@ -567,12 +567,12 @@ export class UiPhonebook {
             return;
         }
 
-        if( !this.userSim.isOnline ){
+        if (!this.userSim.isOnline) {
 
-            await new Promise(resolve=> 
+            await new Promise(resolve =>
                 bootbox_custom.alert(
                     `Can't update, ${this.userSim.friendlyName} no longer online`,
-                    ()=> resolve()
+                    () => resolve()
                 )
             );
 
@@ -614,10 +614,10 @@ class UiContact {
         this.structure
             .on("click", () => {
 
-                var selection = window.getSelection();
+                const selection = window.getSelection();
 
                 //Do not trigger click if text selected.
-                if (selection.toString().length !== 0) {
+                if (selection !== null && selection.toString().length !== 0) {
                     return;
                 }
 
@@ -628,11 +628,19 @@ class UiContact {
             .on("dblclick", e => {
                 e.preventDefault();  //cancel system double-click event
 
-                const selection = window.getSelection();
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
-                selection.removeAllRanges();
-                selection.addRange(range);
+
+
+                const selection = window.getSelection();
+
+                if (selection !== null) {
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                }
+
 
             });
 

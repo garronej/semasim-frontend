@@ -7,7 +7,7 @@ import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export declare const evtUsableSim: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const getUsableUserSims: (includeContacts?: boolean, stateless?: false | "STATELESS") => Promise<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>[]>;
-export declare const unlockSim: (lockedDongle: dcTypes.Dongle.Locked, pin: string) => Promise<dcTypes.UnlockResult.Success | dcTypes.UnlockResult.Failed | undefined>;
+export declare const unlockSim: (lockedDongle: dcTypes.Dongle.Locked, pin: string) => Promise<apiDeclaration.unlockSim.Response>;
 export declare const registerSim: (dongle: dcTypes.Dongle.Usable, friendlyName: string) => Promise<void>;
 export declare const unregisterSim: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<void>;
 export declare const rebootDongle: (userSim: types.Online<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>) => Promise<void>;
