@@ -525,6 +525,8 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
             await remoteApiCaller.rejectSharingRequest(userSim);
 
+            bootbox_custom.dismissLoading();
+
             return undefined;
 
         }
