@@ -2,9 +2,14 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { requestRenewPassword } from "./requestRenewPassword";
+import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 declare const Buffer: any;
 declare const Cookies: any;
+
+declare const androidEventHandlers: {
+    onDone(email?: string, password?: string): void;
+};
 
 function setHandlers() {
 
@@ -55,10 +60,11 @@ function setHandlers() {
 		if (!$(this).valid()) return;
 
 		const email = ($("#email").val() as string).toLowerCase();
+		const password = $("#password").val();
 
 		const resp = await webApiCaller.loginUser(
 			email,
-			$("#password").val()
+			password
 		);
 
 		if (resp.status !== "SUCCESS") {
@@ -72,7 +78,15 @@ function setHandlers() {
 
 				Cookies.set("email", email);
 
-				window.location.href = `/manager`;
+				if( typeof androidEventHandlers !== "undefined" ){
+
+					androidEventHandlers.onDone(email, password);
+
+				}else{
+
+					window.location.href = "/manager";
+
+				}
 
 				break;
 			case "NO SUCH ACCOUNT":

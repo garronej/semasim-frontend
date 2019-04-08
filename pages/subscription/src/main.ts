@@ -2,11 +2,15 @@ declare const require: (path: string) => any;
 require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
+import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiController } from "./UiController";
-import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+
+declare const androidEventHandlers: {
+    onDone(email?: string, password?: string): void;
+};
 
 $(document).ready(async () => {
 
@@ -24,15 +28,35 @@ $(document).ready(async () => {
 
     const subscriptionInfos = await webApiCaller.getSubscriptionInfos();
 
+    if (
+        typeof androidEventHandlers !== "undefined" &&
+        (subscriptionInfos.customerStatus === "EXEMPTED" || !!subscriptionInfos.subscription)
+    ) {
+
+        androidEventHandlers.onDone();
+
+        return;
+
+    }
+
     bootbox_custom.dismissLoading();
 
-    console.log(JSON.stringify(subscriptionInfos, null, 2));
+    const uiController = new UiController(
+        subscriptionInfos,
+        () => {
 
-    //TODO: Add an extra parameter for android.
-    //We might want to redirect to this page from the frontend.
-    const redirectToAndroidApp = !!getURLParameter("email_as_hex");
+            if (typeof androidEventHandlers !== "undefined") {
 
-    const uiController = new UiController(subscriptionInfos, redirectToAndroidApp);
+                androidEventHandlers.onDone();
+
+            } else {
+
+                location.reload();
+
+            }
+
+        }
+    );
 
     $("#page-payload").html("").append(uiController.structure);
 

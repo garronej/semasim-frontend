@@ -356,9 +356,10 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                         }); })];
                 case 5:
                     friendlyNameSubmitted = _a.sent();
-                    if (friendlyNameSubmitted) {
-                        friendlyName = friendlyNameSubmitted;
+                    if (!friendlyNameSubmitted) {
+                        return [2 /*return*/];
                     }
+                    friendlyName = friendlyNameSubmitted;
                     bootbox_custom.loading("Registering SIM...");
                     return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName)];
                 case 6:
@@ -465,6 +466,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
                     return [4 /*yield*/, remoteApiCaller.rejectSharingRequest(userSim)];
                 case 2:
                     _a.sent();
+                    bootbox_custom.dismissLoading();
                     return [2 /*return*/, undefined];
                 case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                         "title": "Friendly name for this sim?",
@@ -473,12 +475,18 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
                     }); })];
                 case 4:
                     friendlyNameSubmitted = _a.sent();
-                    if (friendlyNameSubmitted) {
-                        userSim.friendlyName = friendlyNameSubmitted;
-                    }
+                    if (!!friendlyNameSubmitted) return [3 /*break*/, 6];
+                    bootbox_custom.loading("Rejecting SIM sharing request...");
+                    return [4 /*yield*/, remoteApiCaller.rejectSharingRequest(userSim)];
+                case 5:
+                    _a.sent();
+                    bootbox_custom.dismissLoading();
+                    return [2 /*return*/, undefined];
+                case 6:
+                    userSim.friendlyName = friendlyNameSubmitted;
                     bootbox_custom.loading("Accepting SIM sharing request...");
                     return [4 /*yield*/, remoteApiCaller.acceptSharingRequest(userSim, userSim.friendlyName)];
-                case 5:
+                case 7:
                     _a.sent();
                     bootbox_custom.dismissLoading();
                     return [2 /*return*/];

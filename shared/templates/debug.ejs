@@ -1,16 +1,35 @@
 <% if( assets_root === "/" ){ %>
+
 <script src="<%-assets_root%>js/libs/bluebird_3.5.3/bluebird.js"></script>
+
 <script>
-    Promise.config({ warnings: false });
-    window.onerror = function(msg, url, linenumber) {
-        alert(msg+'\n'+url+':'+linenumber);
-        return false;
-    };
-    Promise.onPossiblyUnhandledRejection(function(error){
-        alert(error.message + " " + error.stack);
-        throw error;
+
+    Promise.config({ "warnings": false });
+
+	var resolvePrErrorMessage;
+	var prErrorMessage = new Promise(function(resolve) { 
+        resolvePrErrorMessage = resolve; 
     });
+
+	window.onerror = function(msg, url, lineNumber) {
+		resolvePrErrorMessage([ msg + "\n" + url + ":" + lineNumber ]);
+		return false;
+	};
+
+	Promise.onPossiblyUnhandledRejection(function(error) {
+		resolvePrErrorMessage([ error.message + " " + error.stack, error]);
+	});
+
+	prErrorMessage.then(function(args) { 
+		var errorMessage= args[0];
+		var error= args[1];
+        console.log(errorMessage);
+        alert(errorMessage);
+        if( error ) {
+			setTimeout(function(){ throw error; },0);
+        }
+    });
+
 </script>
-<% }else{ %>
-<script src="<%-assets_root%>js/libs/es6-promise_v4/es6-promise.auto.min.js"></script>
+
 <% } %>

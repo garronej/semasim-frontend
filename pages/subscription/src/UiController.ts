@@ -1,6 +1,5 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { backToAppUrl } from "../../../shared/dist/lib/backToAndroidAppUrl";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
@@ -29,30 +28,15 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    private reloadOrRedirectToApp() {
-
-        if (this.shouldRedirectToAndroidApp) {
-
-            window.location.href = backToAppUrl;
-
-        } else {
-
-            location.reload();
-
-        }
-
-    }
-
     constructor(
         subscriptionInfos: types.SubscriptionInfos,
-        private readonly shouldRedirectToAndroidApp: boolean
+        private readonly onDone: ()=> void
     ) {
 
         const uiDownloadButton = new UiDownloadButtons();
 
         this.structure.find(".id_placeholder_UiDownloadButtons")
             .append(uiDownloadButton.structure);
-
 
         if (subscriptionInfos.customerStatus === "EXEMPTED") {
 
@@ -158,7 +142,7 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                this.reloadOrRedirectToApp();
+                this.onDone();
 
             });
 
@@ -228,18 +212,7 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                if (!shouldRedirectToAndroidApp) {
-
-                    await new Promise<void>(
-                        resolve => bootbox_custom.alert(
-                            "You can now use the semasim Android application",
-                            () => resolve()
-                        )
-                    );
-
-                }
-
-                this.reloadOrRedirectToApp();
+                this.onDone();
 
             });
 

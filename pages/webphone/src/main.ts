@@ -2,6 +2,7 @@ declare const require: (path: string) => any;
 require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
+import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 import { Ua } from "../../../shared/dist/lib/Ua";
 import { UiWebphoneController } from "./UiWebphoneController";

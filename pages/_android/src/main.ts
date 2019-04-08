@@ -10,21 +10,28 @@ declare const Buffer: any;
 
 declare const androidEventHandlers: {
 	/** Always called no matter what */
-	onCallTerminated(errorMessage: string | null): void;
+	onCallTerminated(errorMessage: null | string): void;
 	onRingback(): void;
 	onEstablished(): void;
 };
 
-window.onerror = (msg, url, lineNumber) => {
-	androidEventHandlers.onCallTerminated(`${msg}\n'${url}:${lineNumber}`);
-	return false;
-};
+{
 
-if ("onPossiblyUnhandledRejection" in Promise) {
+	let resolvePrErrorMessage: (errorMessage: string) => void;
+	const prErrorMessage = new Promise<string>(resolve => resolvePrErrorMessage = resolve);
 
-	(Promise as any).onPossiblyUnhandledRejection( error => {
-		androidEventHandlers.onCallTerminated(error.message + " " + error.stack);
+	window.onerror = (msg, url, lineNumber) => {
+		resolvePrErrorMessage(`${msg}\n'${url}:${lineNumber}`);
+		return false;
+	};
+
+	(Promise as any).onPossiblyUnhandledRejection(error => {
+		resolvePrErrorMessage(error.message + " " + error.stack);
 	});
+
+	prErrorMessage.then(errorMessage => 
+		androidEventHandlers.onCallTerminated(errorMessage)
+	);
 
 }
 
@@ -72,7 +79,7 @@ async function initUa(uaInstanceId: string, email: string, imsi: string): Promis
 		() => androidEventHandlers.onCallTerminated("UA unregistered")
 	);
 
-	ua.evtRegistrationStateChanged.waitFor( 6000)
+	ua.evtRegistrationStateChanged.waitFor(6000)
 		.catch(() => androidEventHandlers.onCallTerminated("UA failed to register"));
 
 	return ua;

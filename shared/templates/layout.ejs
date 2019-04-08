@@ -1,7 +1,7 @@
 <% if( section === "top" ) { %>
 
 <!-- .page-navbar -->
-<div id="header" class="page-navbar" <%-`${isWebView?'style="visibility: hidden;"':''}`%>>
+<div id="header" class="page-navbar" <%-isWebView?'style="visibility: hidden;"':''%>>
     <!-- .navbar-brand -->
     <a href="/" class="navbar-brand hidden-xs hidden-sm">
         <img src="<%-assets_root%>img/logo@2x.png" width="191" height="48" class="logo hidden-xs" alt="Dynamic logo">
@@ -92,12 +92,12 @@
     </aside>
     <!-- / page-sidebar -->
     <!-- .page-content -->
-    <div class="page-content sidebar-page right-sidebar-page clearfix">
+    <div class="page-content sidebar-page right-sidebar-page clearfix"<%-isWebView?'style="padding-top: 0px !important;"':''%>>
 
         <!-- .page-content-wrapper -->
         <div class="page-content-wrapper">
             <!-- Start .page-content-inner -->
-            <div class="page-content-inner">
+            <div class="page-content-inner"<%-isWebView?'style="padding: 5px !important;"':''%>>
 
 <% }else if( section === "bottom" ) { %>
 

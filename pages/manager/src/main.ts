@@ -7,22 +7,7 @@ require("es6-weak-map/implement");
 require("array.prototype.find").shim();
 if (!Array.from) Array.from = require('array-from');
 
-if (!ArrayBuffer.isView) {
-
-    Object.defineProperty(
-        ArrayBuffer,
-        "isView", { "value": function isView() { return false; } }
-    );
-
-}
-
-if (typeof String.prototype.startsWith != 'function') {
-
-    String.prototype.startsWith = function startsWith(str){
-      return this.indexOf(str) === 0;
-    };
-
-}
+import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";

@@ -398,9 +398,11 @@ export const evtContactDeleted = new SyncEvent<{
             })
         );
 
-        if (friendlyNameSubmitted) {
-            friendlyName = friendlyNameSubmitted;
+        if (!friendlyNameSubmitted) {
+            return;
         }
+
+        friendlyName = friendlyNameSubmitted;
 
         bootbox_custom.loading("Registering SIM...");
 
@@ -531,7 +533,7 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
         }
 
-        //TODO: max length for friendly name
+        //TODO: max length for friendly name, should only have ok button
         let friendlyNameSubmitted = await new Promise<string | null>(
             resolve => bootbox_custom.prompt({
                 "title": "Friendly name for this sim?",
@@ -540,9 +542,19 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
             })
         );
 
-        if (friendlyNameSubmitted) {
-            userSim.friendlyName = friendlyNameSubmitted;
+        if (!friendlyNameSubmitted) {
+
+            bootbox_custom.loading("Rejecting SIM sharing request...");
+
+            await remoteApiCaller.rejectSharingRequest(userSim);
+
+            bootbox_custom.dismissLoading();
+
+            return undefined;
+
         }
+
+        userSim.friendlyName = friendlyNameSubmitted;
 
         bootbox_custom.loading("Accepting SIM sharing request...");
 

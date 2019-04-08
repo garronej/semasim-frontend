@@ -1,6 +1,7 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 declare const Buffer: any;
 declare const Cookies: any;
