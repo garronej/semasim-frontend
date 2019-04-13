@@ -73,6 +73,7 @@ var sip = require("ts-sip");
 var runExclusive = require("run-exclusive");
 var connection = require("./toBackend/connection");
 var localApiHandlers = require("./toBackend/localApiHandlers");
+var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
@@ -92,7 +93,7 @@ var Ua = /** @class */ (function () {
         });
         /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
-        var uri = "sip:" + imsi + "-webRTC@" + connection.baseDomain;
+        var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
         this.jsSipSocket = new JsSipSocket(imsi, uri);
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
@@ -187,7 +188,7 @@ var Ua = /** @class */ (function () {
             }
             return out;
         })();
-        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + connection.baseDomain, text, {
+        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + env_1.baseDomain, text, {
             "contentType": "text/plain; charset=UTF-8",
             extraHeaders: extraHeaders,
             "eventHandlers": {
@@ -274,7 +275,7 @@ var Ua = /** @class */ (function () {
                         return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
                     case 1:
                         rtcICEServer = _a.sent();
-                        this.jsSipUa.call("sip:" + number + "@" + connection.baseDomain, {
+                        this.jsSipUa.call("sip:" + number + "@" + env_1.baseDomain, {
                             "mediaConstraints": { "audio": true, "video": false },
                             "pcConfig": {
                                 "iceServers": [rtcICEServer],

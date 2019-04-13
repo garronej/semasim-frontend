@@ -12,6 +12,7 @@ import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "./toBackend/connection";
 import * as localApiHandlers from "./toBackend/localApiHandlers";
+import { baseDomain } from "./env";
 type phoneNumber = import("phone-number").phoneNumber;
 
 declare const JsSIP: any;
@@ -46,7 +47,7 @@ export class Ua {
         disabledMessage: false | "DISABLE MESSAGES" = false
     ) {
 
-        const uri = `sip:${imsi}-webRTC@${connection.baseDomain}`;
+        const uri = `sip:${imsi}-webRTC@${baseDomain}`;
 
         this.jsSipSocket = new JsSipSocket(imsi, uri);
 
@@ -221,7 +222,7 @@ export class Ua {
 
         return new Promise<void>(
             (resolve, reject) => this.jsSipUa.sendMessage(
-                `sip:${number}@${connection.baseDomain}`,
+                `sip:${number}@${baseDomain}`,
                 text,
                 {
                     "contentType": "text/plain; charset=UTF-8",
@@ -334,7 +335,7 @@ export class Ua {
         const rtcICEServer = await localApiHandlers.getRTCIceServer();
 
         this.jsSipUa.call(
-            `sip:${number}@${connection.baseDomain}`,
+            `sip:${number}@${baseDomain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 "pcConfig": {

@@ -1,7 +1,7 @@
 //NOTE: Slimscroll must be loaded on the page.
 
 import * as types from "../../../shared/dist/lib/types";
-import { baseDomain } from "../../../shared/dist/lib/toBackend/connection";
+import { assetsRoot } from "../../../shared/dist/lib/env";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
@@ -55,7 +55,7 @@ export class UiPhonebook {
         console.assert(!this.isPhoneNumberUtilityScriptLoaded);
 
         await phoneNumber.remoteLoadUtil(
-            `//web.${baseDomain}/plugins/ui/intl-tel-input/js/utils.js`
+            `${assetsRoot}plugins/ui/intl-tel-input/js/utils.js`
         );
 
         this.isPhoneNumberUtilityScriptLoaded = true;

@@ -6,9 +6,7 @@ import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
 import * as bootbox_custom from "../tools/bootbox_custom";
 import * as Cookies from "js-cookie";
-
-/** semasim.com or dev.semasim.com */
-export const baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
+import { baseDomain, isProd } from "../env";
 
 export const url = `wss://web.${baseDomain}`;
 
@@ -18,8 +16,7 @@ const apiServer = new sip.api.Server(
     localApiHandlers.handlers,
     sip.api.Server.getDefaultLogger({
         idString,
-        "log": baseDomain.substring(0, 3) === "dev" ?
-            console.log.bind(console) : (() => { }),
+        "log": isProd ? (() => { }) : console.log.bind(console),
         "hideKeepAlive": true
     })
 );

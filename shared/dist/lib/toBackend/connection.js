@@ -51,14 +51,12 @@ var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 var bootbox_custom = require("../tools/bootbox_custom");
 var Cookies = require("js-cookie");
-/** semasim.com or dev.semasim.com */
-exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
-exports.url = "wss://web." + exports.baseDomain;
+var env_1 = require("../env");
+exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": exports.baseDomain.substring(0, 3) === "dev" ?
-        console.log.bind(console) : (function () { }),
+    "log": env_1.isProd ? (function () { }) : console.log.bind(console),
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
@@ -99,7 +97,7 @@ function connect(connectionParams, isReconnect) {
         }
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": "web." + exports.baseDomain,
+        "remoteAddress": "web." + env_1.baseDomain,
         "remotePort": 443
     }, 20000);
     apiServer.startListening(socket);

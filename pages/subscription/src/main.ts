@@ -22,8 +22,6 @@ $(document).ready(async () => {
 
     });
 
-    $("#footer").hide();
-
     bootbox_custom.loading("Loading subscription infos");
 
     const subscriptionInfos = await webApiCaller.getSubscriptionInfos();

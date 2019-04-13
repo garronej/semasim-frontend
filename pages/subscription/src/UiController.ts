@@ -28,6 +28,7 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
+    //TODO: Refactor using the event emitter design pattern.
     constructor(
         subscriptionInfos: types.SubscriptionInfos,
         private readonly onDone: ()=> void
@@ -88,7 +89,7 @@ export class UiController {
 
             return () => {
 
-                handler.open()
+                handler.open();
 
                 return evtSourceId.waitFor();
 
