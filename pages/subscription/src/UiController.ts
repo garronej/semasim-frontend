@@ -3,7 +3,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
-import { getCountryCurrency } from "../../../shared/dist/lib/currency";
+import { getCountryCurrency } from "../../../shared/dist/lib/tools/currency";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { assetsRoot } from "../../../shared/dist/lib/env";
 
