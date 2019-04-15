@@ -3,6 +3,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { UiCart } from "./UiCart";
 import { UiProduct } from "./UiProduct";
 import { products } from "./productListing";
+import { UiShipTo } from "./UiShipTo";
 
 declare const require: (path: string) => any;
 
@@ -20,16 +21,28 @@ export class UiController {
         const currency = "eur";
         const shipToCountryIso = "fr";
 
+        const uiShipTo = new UiShipTo(shipToCountryIso);
+
+        //We break the rules of our framework here by inserting outside of the ui structure...
+        $(".navbar-right").prepend(uiShipTo.structure);
+
         const uiShoppingBag = new UiCart(currency, shipToCountryIso);
 
-        this.structure.find(".id_container")
-            .append(uiShoppingBag.structure);
+        uiShipTo.evtChange.attach(
+            shipToCountryIso => uiShoppingBag.updateLocals({ shipToCountryIso })
+        );
+
+        this.structure.find(".id_container").append(uiShoppingBag.structure);
 
         for (const product of products) {
 
             const uiProduct = new UiProduct(product, currency, shipToCountryIso);
 
-            uiProduct.evtUserClickAddToCart.attach(() =>{
+            uiShipTo.evtChange.attach(
+                shipToCountryIso => uiProduct.updateLocals({ shipToCountryIso })
+            );
+
+            uiProduct.evtUserClickAddToCart.attach(() => {
 
                 uiShoppingBag.addProduct(product);
 

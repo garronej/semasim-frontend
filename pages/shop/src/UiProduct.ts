@@ -120,11 +120,19 @@ export class UiProduct {
         const { currency, shipToCountryIso } = locals;
 
         if (currency !== undefined) {
+
             this.currency = currency;
+
         }
 
         if (shipToCountryIso !== undefined) {
+
+            const $divFlag= this.structure.find(".id_flag");
+
+            $divFlag.removeClass(this.shipToCountryIso);
             this.shipToCountryIso = shipToCountryIso;
+            $divFlag.addClass(this.shipToCountryIso);
+
         }
 
         this.updatePrice();
@@ -133,7 +141,7 @@ export class UiProduct {
 
     private updatePrice() {
 
-        const priceStr =
+        this.structure.find(".id_product_price").text(
             types.Price.prettyPrint(
                 types.Price.addition(
                     this.product.price,
@@ -147,21 +155,11 @@ export class UiProduct {
                 ),
                 this.currency,
                 convertFromEuro
-            );
-
-        this.structure.find(".id_product_price").text(priceStr);
-
-        this.structure.find(".id_delivery_price").text(
-            types.Price.prettyPrint(
-                { "eur": 0 },
-                this.currency,
-                convertFromEuro
             )
         );
 
-        this.structure.find(".id_cart_total").text(priceStr);
-
     }
+
 
 
 }
