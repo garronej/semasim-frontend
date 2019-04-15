@@ -3,8 +3,9 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
-import { currencyByCountry } from "../../../shared/dist/lib/currencyByCountry";
+import { getCountryCurrency } from "../../../shared/dist/lib/currency";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+import { assetsRoot } from "../../../shared/dist/lib/env";
 
 import { UiMySubscription } from "./UiMySubscription";
 import { UiSubscribe } from "./UiSubscribe";
@@ -58,7 +59,7 @@ export class UiController {
 
             const handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
-                "image": "/img/shop.png",
+                "image": `${assetsRoot}img/shop.png`,
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
@@ -70,7 +71,7 @@ export class UiController {
                 "panelLabel": "ok",
                 "source": source => {
 
-                    let currency = currencyByCountry[source.card.country.toLowerCase()];
+                    let currency = getCountryCurrency(source.card.country.toLowerCase());
 
                     if (!(currency in pricingByCurrency)) {
 
