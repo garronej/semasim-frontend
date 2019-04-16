@@ -25,6 +25,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";

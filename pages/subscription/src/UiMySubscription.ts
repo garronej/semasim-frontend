@@ -2,6 +2,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import * as moment from "moment";
+import * as currencyLib from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
 
@@ -44,7 +45,12 @@ export class UiMySubscription {
 
             this.structure.find(".payment-next").show();
 
-            this.structure.find(".id_amount").text((amount/100).toLocaleString(undefined,{"style":"currency","currency":s.currency}));
+            this.structure.find(".id_amount").text(
+                currencyLib.prettyPrint(
+                    amount,
+                    s.currency
+                )
+            );
 
             this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
             this.structure.find("button").html("Cancel subscription");

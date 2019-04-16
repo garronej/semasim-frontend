@@ -2,7 +2,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "./types";
 import { estimateShipping } from "./shipping";
-import { convertFromEuro } from "../../../shared/dist/lib/tools/changeRates";
+import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
 

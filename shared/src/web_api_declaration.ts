@@ -91,6 +91,26 @@ export namespace renewPassword {
 
 }
 
+export namespace guessCountryIso {
+
+    export const methodName = "guess-country-iso";
+
+    export type Params = undefined;
+
+    export type Response = string | undefined;
+
+}
+
+export namespace getChangesRates {
+
+    export const methodName= "get-changes-rates";
+
+    export type Params = undefined;
+
+    export type Response= { [currency: string]: number; };
+
+}
+
 export namespace getSubscriptionInfos {
 
     export const methodName = "get-subscription-infos";
@@ -120,4 +140,5 @@ export namespace unsubscribe {
     export type Response = undefined;
 
 }
+
 

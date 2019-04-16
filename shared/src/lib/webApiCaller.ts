@@ -121,6 +121,38 @@ export function renewPassword(
 
 }
 
+export function guessCountryIso() {
+
+    const methodName = apiDeclaration.guessCountryIso.methodName;
+    type Params = apiDeclaration.guessCountryIso.Params;
+    type Response = apiDeclaration.guessCountryIso.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        undefined
+    );
+
+}
+
+export namespace guessCountryIso {
+
+    export let cacheOut: string | undefined = undefined;
+
+}
+
+export function getChangesRates() {
+
+    const methodName = apiDeclaration.getChangesRates.methodName;
+    type Params = apiDeclaration.getChangesRates.Params;
+    type Response = apiDeclaration.getChangesRates.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        undefined
+    );
+
+}
+
 export function getSubscriptionInfos() {
 
     const methodName = apiDeclaration.getSubscriptionInfos.methodName;
@@ -133,7 +165,6 @@ export function getSubscriptionInfos() {
     );
 
 }
-
 
 export async function subscribeOrUpdateSource(sourceId?: string) {
 
@@ -160,29 +191,3 @@ export async function unsubscribe() {
     );
 
 }
-
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
-
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
-}
-*/

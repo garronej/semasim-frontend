@@ -59,6 +59,18 @@ export declare namespace renewPassword {
     /** return false if the token have expired */
     type Response = boolean;
 }
+export declare namespace guessCountryIso {
+    const methodName = "guess-country-iso";
+    type Params = undefined;
+    type Response = string | undefined;
+}
+export declare namespace getChangesRates {
+    const methodName = "get-changes-rates";
+    type Params = undefined;
+    type Response = {
+        [currency: string]: number;
+    };
+}
 export declare namespace getSubscriptionInfos {
     const methodName = "get-subscription-infos";
     type Params = undefined;

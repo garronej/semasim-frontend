@@ -4,7 +4,7 @@ import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "./types";
 import { assetsRoot } from "../../../shared/dist/lib/env";
 import { estimateShipping } from "./shipping";
-import { convertFromEuro } from "../../../shared/dist/lib/tools/changeRates";
+import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
 

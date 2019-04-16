@@ -1,3 +1,6 @@
+
+import * as currencyLib from "../../../shared/dist/lib/tools/currency";
+
 export type Footprint= "FLAT" | "VOLUME";
 
 /**
@@ -48,28 +51,6 @@ export type ConvertFromEuro = (euroAmount: number, currencyTo: string) => number
 export type Price = { "eur": number; } & { [currency: string]: number; };
 
 export namespace Price {
-
-    /*
-    export const getZero: () => Price = (() => {
-
-        const zero: Price = (() => {
-
-            const out: Price = { "eur": 0 };
-
-            for (const iso in currencyByCountry) {
-
-                out[currencyByCountry[iso]] = 0;
-
-            }
-
-            return out;
-
-        })();
-
-        return () => ({ ...zero });
-
-    })();
-    */
 
     /** 
      * Out of place.
@@ -163,16 +144,13 @@ export namespace Price {
         convertFromEuro: ConvertFromEuro
     ): string {
 
-        return (getAmountInCurrency(
-            price,
-            currency,
-            convertFromEuro
-        ) / 100).toLocaleString(
-            undefined,
-            {
-                "style": "currency",
-                currency
-            }
+        return currencyLib.prettyPrint(
+            getAmountInCurrency(
+                price,
+                currency,
+                convertFromEuro
+            ),
+            currency
         );
 
     }

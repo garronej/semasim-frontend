@@ -9,7 +9,6 @@ export declare namespace SubscriptionInfos {
         pricingByCurrency: {
             [currency: string]: number;
         };
-        defaultCurrency: string;
         source?: SubscriptionInfos.Source;
         subscription?: SubscriptionInfos.Subscription;
         due?: SubscriptionInfos.Due;

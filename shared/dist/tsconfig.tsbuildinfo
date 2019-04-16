@@ -134,12 +134,12 @@
         "signature": "95cc9117b53cd9a7642c26950cd4e2a254adfc1260b7388e964aac65610a1df4"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types.ts": {
-        "version": "be853ac1f887de8e5aa28a0839e9185759c09c4da0fe995658fff859d3e2df93",
-        "signature": "2876a3a52b49206cf5670e752b1c26c0d26f93d05e83b5e1d0d358ba484494d6"
+        "version": "715425d0213acabd039854377af169a40395fb5183624a58dc30680d38130624",
+        "signature": "e8e7cc323bec438ad94c9a1bd889eff9facf934832457c6cd4313109a4d8b6c0"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts": {
-        "version": "c1ca43b15e612fe562c48d507bdbe9ed0c8c00706cf59be65b27690639a5aff7",
-        "signature": "6039869458961453fc1b3f422842df529b9e166f9e455050a11ea750d9d6f474"
+        "version": "8e24ef45499f8581daf25934bfd71c772afd4c9a75c595e52b7d477c64a24e21",
+        "signature": "ce83e0e5f07716c9a082c89b8cb0cbf6d975b5a68a78838a30d327a2a0a0a04c"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-events-extended/dist/lib/index.d.ts": {
         "version": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45",
@@ -217,10 +217,6 @@
         "version": "0d2d518930ff9766633614ab5f0db4f086502ed1a5f50ddef858da5da6486150",
         "signature": "f3ffadfe8946dde4f5f6368b02b1d558bde357e49d2c2c85b59151fe2318b2e5"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/currencybycountry.ts": {
-        "version": "f1e227cae5534951dd2918251d91228ac71e3349d04c5f324c698969c8f65a1a",
-        "signature": "2d08d446119bbb827f68d3ac05d227cf5a2c0b3b15e466627c1006530359e7b1"
-      },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/loaduiclasshtml.ts": {
         "version": "1d17b6a126a59ac665fa30a36c9b200f02a9fe5bec3827dcbb9de667980f531e",
         "signature": "89073745c2b49a8ecff039468cbc321a1021e7a34cc3f29d7d4c1d6d643e99c4"
@@ -230,12 +226,12 @@
         "signature": "c5b52409ab13729e63743505f73f148d598f14ed04616615ad0f66bc53946c8e"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts": {
-        "version": "b73f67bb1b0c7c7817bbf6da452d596cb06b06b19fb9776160912a15cee78947",
-        "signature": "b1bba1096c36570e53da91c4569133aef5cd4e828aa4d406c4005895ba243c0c"
+        "version": "c64236385ee937f6a44aef9e318cb73091502cb926d5f91be290aac6780b88a7",
+        "signature": "516ec8bcb0c0a3b1b96574bbd68b3e6b9f4b57fcc5c0f89eb4a8506bcbe7d2e5"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/changerates.ts": {
-        "version": "b8625b3d43c5f5872df179e23eb5ce5c6115a9f292843ef4351a1ca916ac2a18",
-        "signature": "757dcb0c0cc5b84f98f6c902be93e5b08f45472be687a4097df9bfa25e4e6326"
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/currency.ts": {
+        "version": "4778e45cf7c7fae4d83c6fbfcea09f73fbffc1b951c4f09ee4e9fd5c073002d6",
+        "signature": "2b4cea0cb722f82c93c78e8fc8b4657118e9c561de1574b94ff3e3d81fb70889"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/geturlparameter.ts": {
         "version": "a52c5750e1c8f3f611757dfd58625aa255f7aa8a594adbd4c9372f4ac4278366",
@@ -565,8 +561,8 @@
         "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts"
       ],
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts"
+        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts",
+        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types.ts"
       ],
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts": [
         "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts"
@@ -627,7 +623,6 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/currencybycountry.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/loaduiclasshtml.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts",
@@ -635,7 +630,7 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/standalonepolyfills.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/changerates.ts"
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/currency.ts"
     ]
   },
   "version": "3.4.1"

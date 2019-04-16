@@ -11,7 +11,6 @@ export namespace SubscriptionInfos {
         customerStatus: "REGULAR";
         stripePublicApiKey: string;
         pricingByCurrency: { [currency: string]: number; };
-        defaultCurrency: string;
         source?: SubscriptionInfos.Source;
         subscription?: SubscriptionInfos.Subscription;
         due?: SubscriptionInfos.Due;

@@ -6,7 +6,7 @@ import "../../../shared/dist/lib/tools/standalonePolyfills";
 
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
-import { convertFromEuro } from "../../../shared/dist/lib/tools/changeRates";
+import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 $(document).ready(async () => {
 
@@ -18,9 +18,14 @@ $(document).ready(async () => {
 
     });
 
-    await convertFromEuro.fetchChangesRates();
+    const [ changesRates, guessedCountryIso ] = await Promise.all([
+        webApiCaller.getChangesRates(),
+        webApiCaller.guessCountryIso()
+    ]);
 
-    const uiController = new UiController();
+    convertFromEuro.changeRates= changesRates;
+
+    const uiController = new UiController(guessedCountryIso);
 
     $("#page-payload").html("").append(uiController.structure);
 

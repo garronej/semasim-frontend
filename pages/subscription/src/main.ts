@@ -24,7 +24,11 @@ $(document).ready(async () => {
 
     bootbox_custom.loading("Loading subscription infos");
 
-    const subscriptionInfos = await webApiCaller.getSubscriptionInfos();
+
+    const [subscriptionInfos, guessedCountryIso] = await Promise.all([
+        webApiCaller.getSubscriptionInfos(),
+        webApiCaller.guessCountryIso()
+    ]);
 
     if (
         typeof androidEventHandlers !== "undefined" &&
@@ -41,20 +45,22 @@ $(document).ready(async () => {
 
     const uiController = new UiController(
         subscriptionInfos,
-        () => {
+        guessedCountryIso
+    );
 
-            if (typeof androidEventHandlers !== "undefined") {
+    uiController.evtDone.attachOnce(() => {
 
-                androidEventHandlers.onDone();
+        if (typeof androidEventHandlers !== "undefined") {
 
-            } else {
+            androidEventHandlers.onDone();
 
-                location.reload();
+        } else {
 
-            }
+            location.reload();
 
         }
-    );
+
+    });
 
     $("#page-payload").html("").append(uiController.structure);
 

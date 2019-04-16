@@ -1,9 +1,9 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
-import { getCountryCurrency } from "../../../shared/dist/lib/tools/currency";
+import * as currencyLib from "../../../shared/dist/lib/tools/currency";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { assetsRoot } from "../../../shared/dist/lib/env";
 
@@ -29,10 +29,11 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    //TODO: Refactor using the event emitter design pattern.
+    public readonly evtDone = new VoidSyncEvent();
+
     constructor(
         subscriptionInfos: types.SubscriptionInfos,
-        private readonly onDone: ()=> void
+        guessedCountryIso: string | undefined
     ) {
 
         const uiDownloadButton = new UiDownloadButtons();
@@ -68,20 +69,14 @@ export class UiController {
                     Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8"),
                 "description": "Android app access",
                 "zipCode": true,
-                "panelLabel": "ok",
-                "source": source => {
-
-                    let currency = getCountryCurrency(source.card.country.toLowerCase());
-
-                    if (!(currency in pricingByCurrency)) {
-
-                        currency = "usd";
-
-                    }
-
-                    evtSourceId.post({ "id": source.id, currency });
-
-                },
+                "panelLabel": "ok", //TODO: Display the price here, show the dialog only if other currency.
+                "source": source => evtSourceId.post({
+                    "id": source.id,
+                    "currency": currencyLib.getCardCurrency(
+                        source.card,
+                        pricingByCurrency
+                    )
+                }),
                 "closed": () => evtSourceId.post(undefined)
             });
 
@@ -144,7 +139,7 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                this.onDone();
+                this.evtDone.post();
 
             });
 
@@ -157,9 +152,17 @@ export class UiController {
 
             uiDownloadButton.structure.hide();
 
+            let defaultCurrency = guessedCountryIso !== undefined ?
+                currencyLib.getCountryCurrency(guessedCountryIso) :
+                "eur";
+
+            if (!(defaultCurrency in pricingByCurrency)) {
+                defaultCurrency = "eur";
+            }
+
             const uiSubscribe = new UiSubscribe(
-                subscriptionInfos.defaultCurrency,
-                pricingByCurrency[subscriptionInfos.defaultCurrency]
+                defaultCurrency,
+                pricingByCurrency[defaultCurrency]
             );
 
             uiSubscribe.evtRequestSubscribe.attach(async () => {
@@ -186,16 +189,16 @@ export class UiController {
 
                 }
 
+
+                //TODO: only display if currency was guessed wrong.
                 const shouldProceed = await new Promise<boolean>(
                     resolve => bootbox_custom.confirm({
                         "title": "Enable subscription",
                         "message": [
                             `Confirm subscription for `,
-                            (
-                                pricingByCurrency[currency] / 100
-                            ).toLocaleString(
-                                undefined,
-                                { "style": "currency", "currency": currency }
+                            currencyLib.prettyPrint(
+                                pricingByCurrency[currency], 
+                                currency
                             ),
                             `/Month`
                         ].join(""),
@@ -214,7 +217,7 @@ export class UiController {
 
                 bootbox_custom.dismissLoading();
 
-                this.onDone();
+                this.evtDone.post();
 
             });
 

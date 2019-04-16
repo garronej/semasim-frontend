@@ -1,5 +1,6 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as types from "../../../shared/dist/lib/types";
+import * as currencyLib from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
 
@@ -14,8 +15,9 @@ export class UiNegativeBalanceWarning {
 
     constructor(due: types.SubscriptionInfos.Due) {
 
+
         this.structure.find(".id_val")
-        .text((due.value/100).toLocaleString(undefined,{"style":"currency","currency":due.currency}))
+            .text(currencyLib.prettyPrint(due.value, due.currency))
             ;
 
     }

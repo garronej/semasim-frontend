@@ -1,5 +1,6 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
+import * as currencyLib from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
 
@@ -17,7 +18,7 @@ export class UiSubscribe {
     constructor(currency: string, amount: number) {
 
         this.structure.find(".id_amount").text(
-            (amount / 100).toLocaleString(undefined, { "style": "currency", currency })
+            currencyLib.prettyPrint(amount, currency)
         );
 
         this.structure.find("button")
