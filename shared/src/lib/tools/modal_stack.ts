@@ -27,6 +27,7 @@ export function add(
         "show": () => new Promise<void>(async resolve => {
 
             if (stack.indexOf(modal) >= 0) {
+                resolve();
                 return;
             }
 
@@ -90,14 +91,15 @@ export function add(
 
             }
 
-            modal.modal("show");
-
             modal.one("shown.bs.modal", () => resolve());
+
+            modal.modal("show");
 
         }),
         "hide": () => new Promise<void>(resolve => {
 
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
 
