@@ -18,14 +18,22 @@ $(document).ready(async () => {
 
     });
 
-    const [ changesRates, guessedCountryIso ] = await Promise.all([
+    const [ 
+        changesRates, 
+        { 
+            location: countryIsoFromLocation, 
+            language: countryIsoForLanguage 
+        } 
+    ] = await Promise.all([
         webApiCaller.getChangesRates(),
-        webApiCaller.guessCountryIso()
+        webApiCaller.getCountryIso()
     ]);
 
     convertFromEuro.changeRates= changesRates;
 
-    const uiController = new UiController(guessedCountryIso);
+    console.log({ countryIsoForLanguage, countryIsoFromLocation });
+
+    const uiController = new UiController(countryIsoFromLocation || countryIsoForLanguage);
 
     $("#page-payload").html("").append(uiController.structure);
 

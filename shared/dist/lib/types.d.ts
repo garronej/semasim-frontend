@@ -212,3 +212,64 @@ export declare namespace webphoneData {
     function compareChat(chat1: Chat, chat2: Chat): -1 | 0 | 1;
     function getUnreadMessagesCount(wdChat: Chat): number;
 }
+export declare namespace shop {
+    type Footprint = "FLAT" | "VOLUME";
+    /**
+     * images: w/h = 1.5 & w >= 445px
+     * cart image: w/h = 1.5 & h >= 80px
+     */
+    type Product = {
+        name: string;
+        shortDescription: string;
+        description: string;
+        cartImageUrl: string;
+        imageUrls: string[];
+        price: Price;
+        footprint: Footprint;
+    };
+    type Cart = Cart.Entry[];
+    namespace Cart {
+        type Entry = {
+            product: Product;
+            quantity: number;
+        };
+        function getPrice(cart: Cart, convertFromEuro: ConvertFromEuro): Price;
+        function getOverallFootprint(cart: Cart): Footprint;
+    }
+    type ConvertFromEuro = (euroAmount: number, currencyTo: string) => number;
+    type Price = {
+        "eur": number;
+    } & {
+        [currency: string]: number;
+    };
+    namespace Price {
+        /**
+         * Out of place.
+         * If the amount for a currency is defined in one object
+         * but not in the other the undefined amount will be
+         * computed from the rateChange
+         *
+         */
+        function binaryOperation(price1: Price, price2: Price, op: (amount1: number, amount2: number) => number, convertFromEuro: ConvertFromEuro): Price;
+        function operation(price: Price, op: (amount: number) => number): Price;
+        function addition(price1: Price, price2: Price, convertFromEuro: ConvertFromEuro): Price;
+        /**
+         * return the amount of a price in a given currency.
+         * If the amount for the currency is not defined in
+         * the price object it will be computer from the
+         * euro amount.
+         * */
+        function getAmountInCurrency(price: Price, currency: string, convertFromEuro: ConvertFromEuro): number;
+        function prettyPrint(price: Price, currency: string, convertFromEuro: ConvertFromEuro): string;
+    }
+    type ShippingFormData = {
+        firstName: string;
+        lastName: string;
+        addressComponents: {
+            long_name: string;
+            short_name: string;
+            types: string[];
+        }[];
+        addressExtra: string | undefined;
+    };
+}

@@ -6,7 +6,7 @@ export declare function logoutUser(): Promise<undefined>;
 /** Return true if email has account */
 export declare function sendRenewPasswordEmail(email: string): Promise<boolean>;
 export declare function renewPassword(email: string, newPassword: string, token: string): Promise<boolean>;
-export declare function guessCountryIso(): Promise<string | undefined>;
+export declare function getCountryIso(): Promise<apiDeclaration.getCountryIso.Response>;
 export declare namespace guessCountryIso {
     let cacheOut: string | undefined;
 }
@@ -14,3 +14,4 @@ export declare function getChangesRates(): Promise<apiDeclaration.getChangesRate
 export declare function getSubscriptionInfos(): Promise<import("./types").SubscriptionInfos>;
 export declare function subscribeOrUpdateSource(sourceId?: string): Promise<void>;
 export declare function unsubscribe(): Promise<void>;
+export declare function createStripeCheckoutSession(cart: import("./types").shop.Cart, shippingFormData: import("./types").shop.ShippingFormData, currency: string): Promise<apiDeclaration.createStripeCheckoutSession.Response>;

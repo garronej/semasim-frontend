@@ -17,6 +17,7 @@ export declare namespace getCountryCurrency {
         [countryIso: string]: string;
     };
 }
+/** Must define convertFromEuro.changeRate first */
 export declare function convertFromEuro(euroAmount: number, currencyTo: string): number;
 export declare namespace convertFromEuro {
     let changeRates: {

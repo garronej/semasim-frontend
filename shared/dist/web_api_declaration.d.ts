@@ -59,10 +59,13 @@ export declare namespace renewPassword {
     /** return false if the token have expired */
     type Response = boolean;
 }
-export declare namespace guessCountryIso {
+export declare namespace getCountryIso {
     const methodName = "guess-country-iso";
     type Params = undefined;
-    type Response = string | undefined;
+    type Response = {
+        language: string | undefined;
+        location: string | undefined;
+    };
 }
 export declare namespace getChangesRates {
     const methodName = "get-changes-rates";
@@ -87,4 +90,20 @@ export declare namespace unsubscribe {
     const methodName = "unsubscribe";
     type Params = undefined;
     type Response = undefined;
+}
+export declare namespace createStripeCheckoutSession {
+    const methodName = "create-stripe-checkout-session";
+    type Params = {
+        cartDescription: {
+            productName: string;
+            quantity: number;
+        }[];
+        shippingFormData: import("./lib/types").shop.ShippingFormData;
+        currency: string;
+    };
+    /** the checkout session id */
+    type Response = {
+        stripePublicApiKey: string;
+        checkoutSessionId: string;
+    };
 }

@@ -3,6 +3,7 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as currencyLib from "../../../shared/dist/lib/tools/currency";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 
 declare const require: any;
 
@@ -74,14 +75,14 @@ export class UiCurrency {
 
         });
 
-        //NOTE: Preventing dropdown to close.
+        //NOTE: Preventing dropdown from closing.
         {
 
             let target: Element;
 
             $("body").on("click", e => { target = e.target });
 
-            this.structure.on('hide.bs.dropdown', () => {
+            this.structure.on("hide.bs.dropdown", () => {
 
                 if (this.structure.find("a").is(target)) {
                     return true;
@@ -105,7 +106,7 @@ export class UiCurrency {
 
     }
 
-    private currency!: string;
+    public currency!: string;
 
     public change(currency: string) {
 
@@ -116,6 +117,47 @@ export class UiCurrency {
         );
 
         this.evtChange.post(currency);
+
+    }
+
+    public async interact_getCurrency(): Promise<string> {
+
+        const doChange= await new Promise<boolean>(resolve =>
+            bootbox_custom.dialog({
+                "title": "Currency",
+                "message": `Pay in ${currencyLib.data[this.currency].name} ?`,
+                "closeButton": false,
+                "buttons": [
+                    {
+                        "label": `Yes, pay in ${currencyLib.data[this.currency].symbol}`,
+                        "className": "btn-success",
+                        "callback": () => resolve(false)
+                    },
+                    {
+                        "label": "No, pay with an other currency",
+                        "className": 'btn-warning',
+                        "callback":  () => resolve(true)
+                    },
+
+                ]
+            })
+        );
+
+        if( !doChange ){
+            return this.currency;
+        }
+
+        this.structure.one("shown.bs.dropdown", 
+            () => this.structure.find("select")["select2"]("open")
+        );
+
+        this.structure.find("a").trigger("click");
+
+        await new Promise<void>(resolve=>
+            this.structure.one("hide.bs.dropdown", () => resolve())
+        );
+
+        return this.currency;
 
     }
 

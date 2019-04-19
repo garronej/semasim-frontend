@@ -1,3 +1,5 @@
+//NOTE: Imply Cookie manager and StripeCheckout loaded on the page.
+
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";

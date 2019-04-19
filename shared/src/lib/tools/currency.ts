@@ -78,6 +78,7 @@ export namespace getCountryCurrency {
 
 }
 
+/** Must define convertFromEuro.changeRate first */
 export function convertFromEuro(euroAmount: number, currencyTo: string) {
 
     const changeRates = convertFromEuro.changeRates;
@@ -86,7 +87,7 @@ export function convertFromEuro(euroAmount: number, currencyTo: string) {
         throw new Error("Changes rates have not been defined");
     }
 
-    return euroAmount * changeRates[currencyTo];
+    return Math.round(euroAmount * changeRates[currencyTo]);
 
 }
 

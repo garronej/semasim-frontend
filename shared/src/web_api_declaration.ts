@@ -1,6 +1,7 @@
 
 export const apiPath = "api";
 
+
 export namespace registerUser {
 
     export const methodName = "register-user";
@@ -91,13 +92,16 @@ export namespace renewPassword {
 
 }
 
-export namespace guessCountryIso {
+export namespace getCountryIso {
 
     export const methodName = "guess-country-iso";
 
     export type Params = undefined;
 
-    export type Response = string | undefined;
+    export type Response = {
+        language: string | undefined;
+        location: string | undefined;
+    };
 
 }
 
@@ -138,6 +142,24 @@ export namespace unsubscribe {
     export type Params = undefined;
 
     export type Response = undefined;
+
+}
+
+export namespace createStripeCheckoutSession {
+
+    export const methodName = "create-stripe-checkout-session";
+
+    export type Params= {
+        cartDescription: { productName: string; quantity: number; }[];
+        shippingFormData: import("./lib/types").shop.ShippingFormData;
+        currency: string;
+    };
+
+    /** the checkout session id */
+    export type Response= {
+        stripePublicApiKey: string;
+        checkoutSessionId: string;
+    };
 
 }
 

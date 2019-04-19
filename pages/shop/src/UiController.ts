@@ -2,10 +2,17 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { UiCart } from "./UiCart";
 import { UiProduct } from "./UiProduct";
-import { products } from "./productListing";
+import { getProducts } from "../../../shared/dist/lib/shopProducts";
+import * as env from "../../../shared/dist/lib/env";
 import { UiShipTo } from "./UiShipTo";
 import { getCountryCurrency } from "../../../shared/dist/lib/tools/currency";
 import { UiCurrency } from "./UiCurrency";
+import { UiShippingForm } from "./UiShippingForm";
+import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as types from "../../../shared/dist/lib/types";
+
+declare const Stripe: any;
 
 declare const require: (path: string) => any;
 
@@ -18,20 +25,20 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    constructor(guessedCountryIso: string | undefined) {
+    constructor(defaultCountryIso: string | undefined) {
 
-        if( guessedCountryIso === undefined ){
+        if (defaultCountryIso === undefined) {
             //TODO: change to "fr"
-            guessedCountryIso= "us";
+            defaultCountryIso = "us";
         }
 
-        const currency = getCountryCurrency(guessedCountryIso);
+        const currency = getCountryCurrency(defaultCountryIso);
 
-        const uiCurrency= new UiCurrency(currency);
+        const uiCurrency = new UiCurrency(currency);
 
         $(".navbar-right").prepend(uiCurrency.structure);
 
-        const uiShipTo = new UiShipTo(guessedCountryIso);
+        const uiShipTo = new UiShipTo(defaultCountryIso);
 
         uiShipTo.evtChange.attach(
             shipToCountryIso => uiCurrency.change(
@@ -42,23 +49,47 @@ export class UiController {
         //We break the rules of our framework here by inserting outside of the ui structure...
         $(".navbar-right").prepend(uiShipTo.structure);
 
+        const uiCart = new UiCart(currency, defaultCountryIso);
 
-        const uiShoppingBag = new UiCart(currency, guessedCountryIso);
+        {
+
+            const uiShippingAddress = new UiShippingForm();
+
+            uiCart.evtUserClickCheckout.attach(
+                async () => {
+
+                    const shippingFormData = await uiShippingAddress.interact_getAddress();
+
+                    if( shippingFormData === undefined ){
+                        return;
+                    }
+
+                    const currency = await uiCurrency.interact_getCurrency();
+
+                    this.interact_checkout(
+                        uiCart.getCart(),
+                        shippingFormData,
+                        currency
+                    );
+
+                }
+            );
+
+        }
 
         uiCurrency.evtChange.attach(
-            currency => uiShoppingBag.updateLocals({ currency })
+            currency => uiCart.updateLocals({ currency })
         );
 
         uiShipTo.evtChange.attach(
-            shipToCountryIso => uiShoppingBag.updateLocals({ shipToCountryIso })
+            shipToCountryIso => uiCart.updateLocals({ shipToCountryIso })
         );
 
+        this.structure.find(".id_container").append(uiCart.structure);
 
-        this.structure.find(".id_container").append(uiShoppingBag.structure);
+        for (const product of getProducts(env.assetsRoot)) {
 
-        for (const product of products) {
-
-            const uiProduct = new UiProduct(product, currency, guessedCountryIso);
+            const uiProduct = new UiProduct(product, currency, defaultCountryIso);
 
             uiCurrency.evtChange.attach(
                 currency => uiProduct.updateLocals({ currency })
@@ -70,7 +101,7 @@ export class UiController {
 
             uiProduct.evtUserClickAddToCart.attach(() => {
 
-                uiShoppingBag.addProduct(product);
+                uiCart.addProduct(product);
 
                 $("html, body").animate({ "scrollTop": 0 }, "slow");
 
@@ -81,6 +112,35 @@ export class UiController {
 
         }
 
+
+    }
+
+    private async interact_checkout(
+        cart: types.shop.Cart, 
+        shippingFormData: types.shop.ShippingFormData,
+        currency: string
+    ) {
+
+        bootbox_custom.loading("Redirecting to payment page");
+
+        const {
+            stripePublicApiKey,
+            checkoutSessionId: sessionId
+        } = await webApiCaller.createStripeCheckoutSession(
+            cart,
+            shippingFormData,
+            currency
+        );
+
+        const stripe = Stripe(stripePublicApiKey);
+
+        stripe.redirectToCheckout({ sessionId })
+            .then(result => {
+
+                if (!!result.error) {
+                    alert(result.error.message);
+                }
+            });
 
     }
 

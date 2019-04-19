@@ -52,6 +52,9 @@ export class UiShareSim {
     }
 
     /** 
+     * 
+     * TODO: Refactor: use a method why using an event ??
+     * 
      * The evt argument should post be posted whenever.
      * -An user accept a sharing request.
      * -An user reject a sharing request.

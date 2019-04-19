@@ -89,11 +89,12 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
-function guessCountryIso() {
-    var methodName = apiDeclaration.guessCountryIso.methodName;
+function getCountryIso() {
+    var methodName = apiDeclaration.getCountryIso.methodName;
     return sendRequest(methodName, undefined);
 }
-exports.guessCountryIso = guessCountryIso;
+exports.getCountryIso = getCountryIso;
+var guessCountryIso;
 (function (guessCountryIso) {
     guessCountryIso.cacheOut = undefined;
 })(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
@@ -139,3 +140,15 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
+function createStripeCheckoutSession(cart, shippingFormData, currency) {
+    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    return sendRequest(methodName, {
+        "cartDescription": cart.map(function (_a) {
+            var product = _a.product, quantity = _a.quantity;
+            return ({ "productName": product.name, quantity: quantity });
+        }),
+        shippingFormData: shippingFormData,
+        currency: currency
+    });
+}
+exports.createStripeCheckoutSession = createStripeCheckoutSession;

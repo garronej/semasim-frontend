@@ -121,11 +121,11 @@ export function renewPassword(
 
 }
 
-export function guessCountryIso() {
+export function getCountryIso() {
 
-    const methodName = apiDeclaration.guessCountryIso.methodName;
-    type Params = apiDeclaration.guessCountryIso.Params;
-    type Response = apiDeclaration.guessCountryIso.Response;
+    const methodName = apiDeclaration.getCountryIso.methodName;
+    type Params = apiDeclaration.getCountryIso.Params;
+    type Response = apiDeclaration.getCountryIso.Response;
 
     return sendRequest<Params, Response>(
         methodName,
@@ -188,6 +188,29 @@ export async function unsubscribe() {
     await sendRequest<Params, Response>(
         methodName,
         undefined
+    );
+
+}
+
+export function createStripeCheckoutSession(
+    cart: import("./types").shop.Cart,
+    shippingFormData: import("./types").shop.ShippingFormData,
+    currency: string
+) {
+
+    const methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    type Params = apiDeclaration.createStripeCheckoutSession.Params;
+    type Response = apiDeclaration.createStripeCheckoutSession.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        {
+            "cartDescription": cart.map(
+                ({ product, quantity }) => ({ "productName": product.name, quantity })
+            ),
+            shippingFormData,
+            currency
+        }
     );
 
 }

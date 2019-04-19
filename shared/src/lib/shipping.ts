@@ -1,10 +1,8 @@
 
-import * as types from "./types";
-
 //TODO: move
 export function estimateShipping(
     destinationCountryIso: string,
-    footprint: types.Footprint
+    footprint: import("./types").shop.Footprint
 ): {
     isTracked: Boolean;
     delay: number | [number, number];

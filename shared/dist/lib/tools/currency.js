@@ -76,12 +76,13 @@ exports.getCountryCurrency = getCountryCurrency;
 (function (getCountryCurrency) {
     getCountryCurrency.cache = {};
 })(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+/** Must define convertFromEuro.changeRate first */
 function convertFromEuro(euroAmount, currencyTo) {
     var changeRates = convertFromEuro.changeRates;
     if (changeRates === undefined) {
         throw new Error("Changes rates have not been defined");
     }
-    return euroAmount * changeRates[currencyTo];
+    return Math.round(euroAmount * changeRates[currencyTo]);
 }
 exports.convertFromEuro = convertFromEuro;
 (function (convertFromEuro) {

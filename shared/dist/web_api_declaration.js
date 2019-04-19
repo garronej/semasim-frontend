@@ -25,10 +25,10 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
-var guessCountryIso;
-(function (guessCountryIso) {
-    guessCountryIso.methodName = "guess-country-iso";
-})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getCountryIso;
+(function (getCountryIso) {
+    getCountryIso.methodName = "guess-country-iso";
+})(getCountryIso = exports.getCountryIso || (exports.getCountryIso = {}));
 var getChangesRates;
 (function (getChangesRates) {
     getChangesRates.methodName = "get-changes-rates";
@@ -45,3 +45,7 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSession;
+(function (createStripeCheckoutSession) {
+    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
+})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));

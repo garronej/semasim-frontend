@@ -1,7 +1,7 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as types from "./types";
-import { estimateShipping } from "./shipping";
+import * as types from "../../../shared/dist/lib/types";
+import { estimateShipping } from "../../../shared/dist/lib/shipping";
 import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
@@ -33,7 +33,7 @@ export class UiProduct {
 
 
     constructor(
-        public readonly product: types.Product,
+        public readonly product: types.shop.Product,
         currency: string,
         shipToCountryIso: string
     ) {
@@ -142,8 +142,8 @@ export class UiProduct {
     private updatePrice() {
 
         this.structure.find(".id_product_price").text(
-            types.Price.prettyPrint(
-                types.Price.addition(
+            types.shop.Price.prettyPrint(
+                types.shop.Price.addition(
                     this.product.price,
                     {
                         "eur": estimateShipping(

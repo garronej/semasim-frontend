@@ -24,6 +24,9 @@ export class UiShipTo {
 
     };
 
+    //NOTE: Safe to access, set at creation.
+    public shipToCountryIso= "";
+
     constructor(shipToCountryIso: string) {
 
         this.structure.one("show.bs.dropdown", () => 
@@ -57,13 +60,11 @@ export class UiShipTo {
 
     }
 
-    private shipToCountryIso: string | undefined = undefined;
-
     private change(shipToCountryIso: string) {
 
         const $divFlag = this.structure.find(".id_flag");
 
-        if (this.shipToCountryIso !== undefined) {
+        if (this.shipToCountryIso !== "") {
 
             $divFlag.removeClass(this.shipToCountryIso);
 
