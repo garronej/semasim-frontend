@@ -1,7 +1,6 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
-import { estimateShipping } from "../../../shared/dist/lib/shipping";
 import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
@@ -29,13 +28,10 @@ export class UiProduct {
     public readonly evtUserClickAddToCart = new VoidSyncEvent();
 
     private currency!: string;
-    private shipToCountryIso!: string;
-
 
     constructor(
         public readonly product: types.shop.Product,
-        currency: string,
-        shipToCountryIso: string
+        currency: string
     ) {
 
         {
@@ -111,48 +107,24 @@ export class UiProduct {
             .on("click", () => this.evtUserClickAddToCart.post())
             ;
 
-        this.updateLocals({ currency, shipToCountryIso });
+        this.updateCurrency( currency );
 
     }
 
-    public updateLocals(locals: { currency?: string; shipToCountryIso?: string; }) {
+    public updateCurrency( currency: string ){
 
-        const { currency, shipToCountryIso } = locals;
-
-        if (currency !== undefined) {
-
-            this.currency = currency;
-
-        }
-
-        if (shipToCountryIso !== undefined) {
-
-            const $divFlag= this.structure.find(".id_flag");
-
-            $divFlag.removeClass(this.shipToCountryIso);
-            this.shipToCountryIso = shipToCountryIso;
-            $divFlag.addClass(this.shipToCountryIso);
-
-        }
+        this.currency = currency;
 
         this.updatePrice();
 
     }
 
+
     private updatePrice() {
 
         this.structure.find(".id_product_price").text(
             types.shop.Price.prettyPrint(
-                types.shop.Price.addition(
-                    this.product.price,
-                    {
-                        "eur": estimateShipping(
-                            this.shipToCountryIso,
-                            this.product.footprint
-                        ).eurAmount
-                    },
-                    convertFromEuro
-                ),
+                this.product.price,
                 this.currency,
                 convertFromEuro
             )

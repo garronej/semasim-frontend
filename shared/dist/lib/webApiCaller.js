@@ -94,10 +94,6 @@ function getCountryIso() {
     return sendRequest(methodName, undefined);
 }
 exports.getCountryIso = getCountryIso;
-var guessCountryIso;
-(function (guessCountryIso) {
-    guessCountryIso.cacheOut = undefined;
-})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
 function getChangesRates() {
     var methodName = apiDeclaration.getChangesRates.methodName;
     return sendRequest(methodName, undefined);
@@ -152,3 +148,8 @@ function createStripeCheckoutSession(cart, shippingFormData, currency) {
     });
 }
 exports.createStripeCheckoutSession = createStripeCheckoutSession;
+function getOrders() {
+    var methodName = apiDeclaration.getOrders.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getOrders = getOrders;

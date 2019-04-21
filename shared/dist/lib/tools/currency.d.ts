@@ -17,12 +17,16 @@ export declare namespace getCountryCurrency {
         [countryIso: string]: string;
     };
 }
-/** Must define convertFromEuro.changeRate first */
+/** Must define convertFromEuro.changeRates first */
 export declare function convertFromEuro(euroAmount: number, currencyTo: string): number;
 export declare namespace convertFromEuro {
-    let changeRates: {
+    type ChangeRates = {
         [currency: string]: number;
-    } | undefined;
+    };
+    function setChangeRates(changeRates: ChangeRates): void;
+    function getChangeRates(): ChangeRates;
+    function setChangeRatesFetchMethod(fetchChangeRates: () => Promise<ChangeRates>, ttl: number): void;
+    function refreshChangeRates(): Promise<void>;
 }
 /**
  * get currency of stripe card,

@@ -485,6 +485,7 @@ export namespace shop {
         imageUrls: string[];
         price: Price;
         footprint: Footprint;
+        weight: number;
     };
 
 
@@ -513,6 +514,14 @@ export namespace shop {
         export function getOverallFootprint(cart: Cart): Footprint {
             return !!cart.find(({ product }) => product.footprint === "VOLUME") ? "VOLUME" : "FLAT";
         }
+
+        export function getOverallWeight(cart: Cart): number {
+            return cart.reduce(
+                (out, { product: { weight }, quantity }) => out + weight * quantity,
+                0
+            );
+        }
+
 
     }
 
@@ -637,6 +646,53 @@ export namespace shop {
         }[];
         addressExtra: string | undefined;
     };
+
+    export namespace ShippingFormData {
+
+        export function toStripeShippingInformation(
+            shippingFormData: ShippingFormData,
+            carrier: string
+        ): StripeShippingInformation {
+
+            const get = (key: string) => {
+
+                const component = shippingFormData.addressComponents
+                    .find(({ types: [type] }) => type === key);
+
+                return component !== undefined ? component["long_name"] : undefined;
+
+            };
+
+            return {
+                "name": `${shippingFormData.firstName} ${shippingFormData.lastName}`,
+                "address": {
+                    "line1": `${get("street_number")} ${get("route")}`,
+                    "line2": shippingFormData.addressExtra,
+                    "postal_code": get("postal_code") || "",
+                    "city": get("locality") || "",
+                    "state": get("administrative_area_level_1") || "",
+                    "country": get("country") || ""
+                },
+                carrier,
+            };
+
+        }
+
+    }
+
+    export type StripeShippingInformation = {
+        name: string;
+        address: {
+            line1: string;
+            line2?: string;
+            postal_code: string;
+            city: string;
+            state: string;
+            country: string;
+        },
+        carrier: string;
+    };
+
 
 }
 

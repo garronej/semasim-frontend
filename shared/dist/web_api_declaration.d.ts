@@ -101,9 +101,26 @@ export declare namespace createStripeCheckoutSession {
         shippingFormData: import("./lib/types").shop.ShippingFormData;
         currency: string;
     };
-    /** the checkout session id */
     type Response = {
         stripePublicApiKey: string;
         checkoutSessionId: string;
     };
+}
+export declare namespace getOrders {
+    const methodName = "get-orders";
+    type Params = undefined;
+    type Response = {
+        date: Date;
+        orderCart: {
+            orderProduct: {
+                name: string;
+                description: string;
+                cartImageUrl: string;
+            };
+            quantity: number;
+        }[];
+        isShipped: boolean;
+        trackingUrl: string | undefined;
+        stripeShippingInformation: import("./lib/types").shop.StripeShippingInformation;
+    }[];
 }

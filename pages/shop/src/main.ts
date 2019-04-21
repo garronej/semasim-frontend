@@ -29,7 +29,7 @@ $(document).ready(async () => {
         webApiCaller.getCountryIso()
     ]);
 
-    convertFromEuro.changeRates= changesRates;
+    convertFromEuro.setChangeRates(changesRates);
 
     console.log({ countryIsoForLanguage, countryIsoFromLocation });
 

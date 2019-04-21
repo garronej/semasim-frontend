@@ -18,8 +18,9 @@ export function getProducts(assetsRoot: string): import("./types").shop.Product[
                 `${assetsRoot}img/sample-shop-items/e180_1.png`,
                 `${assetsRoot}img/sample-shop-items/adapter.jpg`
             ],
-            "price": { "eur": 2800 },
-            "footprint": "FLAT"
+            "price": { "eur": 1490 },
+            "footprint": "FLAT",
+            "weight": 35
         },
         {
             "name": "Sim adapter",
@@ -27,8 +28,9 @@ export function getProducts(assetsRoot: string): import("./types").shop.Product[
             "description": "Adapter to put a nano or micro sim in the SIM's dongle",
             "cartImageUrl": `${assetsRoot}img/sample-shop-items/adapter_cart.jpg`,
             "imageUrls": [`${assetsRoot}img/sample-shop-items/adapter.jpg`],
-            "price": { "eur": 300 },
-            "footprint": "FLAT"
+            "price": { "eur": 290 },
+            "footprint": "FLAT",
+            "weight": 10
         },
         {
             "name": "Semasim Gateway",
@@ -43,8 +45,9 @@ export function getProducts(assetsRoot: string): import("./types").shop.Product[
             "imageUrls": [
                 `${assetsRoot}img/sample-shop-items/raspberry.jpg`
             ],
-            "price": { "eur": 11000 },
-            "footprint": "VOLUME"
+            "price": { "eur": 5900 },
+            "footprint": "FLAT",
+            "weight": 150
         }
     ];
 };

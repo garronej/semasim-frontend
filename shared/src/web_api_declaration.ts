@@ -155,11 +155,34 @@ export namespace createStripeCheckoutSession {
         currency: string;
     };
 
-    /** the checkout session id */
     export type Response= {
         stripePublicApiKey: string;
         checkoutSessionId: string;
     };
+
+}
+
+export namespace getOrders {
+
+    export const methodName = "get-orders";
+
+    export type Params = undefined;
+
+    export type Response = {
+        date: Date;
+        orderCart: {
+            orderProduct: {
+                name: string;
+                description: string;
+                cartImageUrl: string;
+            };
+            quantity: number;
+        }[];
+        isShipped: boolean;
+        trackingUrl: string | undefined;
+        stripeShippingInformation: import("./lib/types").shop.StripeShippingInformation;
+    }[];
+
 
 }
 

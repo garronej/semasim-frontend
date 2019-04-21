@@ -49,3 +49,7 @@ var createStripeCheckoutSession;
 (function (createStripeCheckoutSession) {
     createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
 })(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var getOrders;
+(function (getOrders) {
+    getOrders.methodName = "get-orders";
+})(getOrders = exports.getOrders || (exports.getOrders = {}));

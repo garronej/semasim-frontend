@@ -3,7 +3,7 @@ import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types";
 import { assetsRoot } from "../../../shared/dist/lib/env";
-import { estimateShipping } from "../../../shared/dist/lib/shipping";
+import { solve as solveShipping } from "../../../shared/dist/lib/shipping";
 import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
 
 declare const require: (path: string) => any;
@@ -45,19 +45,23 @@ export class UiCart {
 
     public updateLocals(locals: { currency?: string; shipToCountryIso?: string; }) {
 
-        const { currency, shipToCountryIso }= locals;
+        const { currency, shipToCountryIso } = locals;
 
-        if( currency !== undefined ){
+        if (currency !== undefined) {
             this.currency = currency;
+
+            for (const uiShoppingBagEntry of this.uiCartEntries) {
+                uiShoppingBagEntry.updateCurrency(currency);
+            }
+
         }
 
-        if( shipToCountryIso !== undefined ){
+        if (shipToCountryIso !== undefined) {
+
             this.shipToCountryIso = shipToCountryIso;
+
         }
 
-        for (const uiShoppingBagEntry of this.uiCartEntries) {
-            uiShoppingBagEntry.updateLocals({ currency, shipToCountryIso});
-        }
 
         this.updateTotal();
 
@@ -72,32 +76,31 @@ export class UiCart {
         } else {
             this.structure.show();
         }
-        
-        //TODO: Do something with shipping, offer extra
-        const shipping = estimateShipping(
-            this.shipToCountryIso, 
-            types.shop.Cart.getOverallFootprint(cart)
+
+        const shipping = solveShipping(
+            this.shipToCountryIso,
+            types.shop.Cart.getOverallFootprint(cart),
+            types.shop.Cart.getOverallWeight(cart)
         );
 
-        const displayedCartPrice = types.shop.Price.addition(
-            types.shop.Cart.getPrice(cart, convertFromEuro),
-            { "eur": shipping.eurAmount },
+        const cartPrice = types.shop.Cart.getPrice(
+            cart,
             convertFromEuro
         );
 
-        const displayedShippingPrice = { "eur": 0 };
+        console.log("TODO: display delay ", shipping.delay);
 
-        this.structure.find(".id_goods_price").text(
+        this.structure.find(".id_cart_price").text(
             types.shop.Price.prettyPrint(
-                displayedCartPrice,
+                cartPrice,
                 this.currency,
                 convertFromEuro
             )
         );
 
-        this.structure.find(".id_delivery_price").text(
+        this.structure.find(".id_shipping_price").text(
             types.shop.Price.prettyPrint(
-                displayedShippingPrice,
+                { "eur": shipping.eurAmount },
                 this.currency,
                 convertFromEuro
             )
@@ -106,8 +109,8 @@ export class UiCart {
         this.structure.find(".id_cart_total").text(
             types.shop.Price.prettyPrint(
                 types.shop.Price.addition(
-                    displayedCartPrice,
-                    displayedShippingPrice,
+                    cartPrice,
+                    { "eur": shipping.eurAmount },
                     convertFromEuro
                 ),
                 this.currency,
@@ -137,8 +140,7 @@ export class UiCart {
 
         const uiCartEntry = new UiCartEntry(
             { product, "quantity": 1 },
-            this.currency,
-            this.shipToCountryIso
+            this.currency
         );
 
         this.uiCartEntries.push(uiCartEntry);
@@ -178,7 +180,6 @@ class UiCartEntry {
 
 
     private currency!: string;
-    private shipToCountryIso!: string
 
     public simulatePlusClick() {
         this.structure.find(".plus-btn").trigger("click");
@@ -186,8 +187,7 @@ class UiCartEntry {
 
     constructor(
         public readonly cartEntry: types.shop.Cart.Entry,
-        currency: string,
-        shipToCountryIso: string
+        currency: string
     ) {
 
         this.structure.find(".delete-btn").css(
@@ -247,43 +247,26 @@ class UiCartEntry {
 
         this.structure.find(".delete-btn").one("click", () => this.evtUserClickDelete.post());
 
-        this.updateLocals({ currency, shipToCountryIso });
+        this.updateCurrency(currency);
 
     }
 
+    public updateCurrency(currency: string) {
 
-    public updateLocals(locals: { currency?: string; shipToCountryIso?: string; }) {
-
-        const { currency, shipToCountryIso } = locals;
-
-        if (currency !== undefined) {
-            this.currency = currency;
-        }
-
-        if (shipToCountryIso !== undefined) {
-            this.shipToCountryIso = shipToCountryIso;
-        }
+        this.currency = currency;
 
         this.updateDisplayedPrice();
 
     }
 
+
     private updateDisplayedPrice() {
 
         this.structure.find(".total-price").html(
             types.shop.Price.prettyPrint(
-                types.shop.Price.addition(
-                    types.shop.Price.operation(
-                        this.cartEntry.product.price,
-                        amount => amount * this.cartEntry.quantity
-                    ),
-                    {
-                        "eur": estimateShipping(
-                            this.shipToCountryIso,
-                            this.cartEntry.product.footprint
-                        ).eurAmount
-                    },
-                    convertFromEuro
+                types.shop.Price.operation(
+                    this.cartEntry.product.price,
+                    amount => amount * this.cartEntry.quantity
                 ),
                 this.currency,
                 convertFromEuro

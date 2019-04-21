@@ -226,6 +226,7 @@ export declare namespace shop {
         imageUrls: string[];
         price: Price;
         footprint: Footprint;
+        weight: number;
     };
     type Cart = Cart.Entry[];
     namespace Cart {
@@ -235,6 +236,7 @@ export declare namespace shop {
         };
         function getPrice(cart: Cart, convertFromEuro: ConvertFromEuro): Price;
         function getOverallFootprint(cart: Cart): Footprint;
+        function getOverallWeight(cart: Cart): number;
     }
     type ConvertFromEuro = (euroAmount: number, currencyTo: string) => number;
     type Price = {
@@ -271,5 +273,20 @@ export declare namespace shop {
             types: string[];
         }[];
         addressExtra: string | undefined;
+    };
+    namespace ShippingFormData {
+        function toStripeShippingInformation(shippingFormData: ShippingFormData, carrier: string): StripeShippingInformation;
+    }
+    type StripeShippingInformation = {
+        name: string;
+        address: {
+            line1: string;
+            line2?: string;
+            postal_code: string;
+            city: string;
+            state: string;
+            country: string;
+        };
+        carrier: string;
     };
 }

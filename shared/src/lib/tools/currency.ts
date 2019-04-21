@@ -78,25 +78,73 @@ export namespace getCountryCurrency {
 
 }
 
-/** Must define convertFromEuro.changeRate first */
+/** Must define convertFromEuro.changeRates first */
 export function convertFromEuro(euroAmount: number, currencyTo: string) {
-
-    const changeRates = convertFromEuro.changeRates;
-
-    if (changeRates === undefined) {
-        throw new Error("Changes rates have not been defined");
-    }
-
-    return Math.round(euroAmount * changeRates[currencyTo]);
-
+    return Math.round(euroAmount * convertFromEuro.getChangeRates()[currencyTo]);
 }
 
 export namespace convertFromEuro {
 
-    export let changeRates: { [currency: string]: number } | undefined = undefined;
+    export type ChangeRates= { [currency: string]: number };
+
+    let changeRates_: ChangeRates | undefined = undefined;
+
+    let lastUpdateDate: Date= new Date(0);
+
+    export function setChangeRates(changeRates: ChangeRates){
+        lastUpdateDate= new Date();
+        changeRates_ = changeRates;
+    }
+
+    export function getChangeRates(): ChangeRates {
+
+        if( changeRates_ === undefined ){
+            throw new Error("Change rates not defined");
+        }
+
+        return changeRates_;
+
+    }
+
+    let updater: { 
+        fetchChangeRates: ()=> Promise<ChangeRates>; 
+        ttl: number 
+    } | undefined = undefined;
+
+    export function setChangeRatesFetchMethod(
+        fetchChangeRates: ()=> Promise<ChangeRates>,
+        ttl: number
+    ){
+        updater = { fetchChangeRates, ttl };
+    }
+
+    export async function refreshChangeRates() {
+
+        if (updater === undefined) {
+            throw new Error("No method for updating rates changes have been defined");
+        }
+
+        if (Date.now() - lastUpdateDate.getTime() < updater.ttl) {
+            return;
+        }
+
+        try {
+
+            setChangeRates(
+                await updater.fetchChangeRates()
+            );
+
+        } catch (error) {
+
+            if (lastUpdateDate.getTime() === 0) {
+                throw error;
+            }
+
+        }
+
+    }
 
 }
-
 
 /** 
  * get currency of stripe card, 

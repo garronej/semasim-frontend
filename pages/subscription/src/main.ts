@@ -24,10 +24,15 @@ $(document).ready(async () => {
 
     bootbox_custom.loading("Loading subscription infos");
 
-
-    const [subscriptionInfos, guessedCountryIso] = await Promise.all([
+    const [
+        subscriptionInfos, 
+        { 
+            location: countryIsoFromLocation, 
+            language: countryIsoForLanguage 
+        } 
+    ] = await Promise.all([
         webApiCaller.getSubscriptionInfos(),
-        webApiCaller.guessCountryIso()
+        webApiCaller.getCountryIso()
     ]);
 
     if (
@@ -45,7 +50,7 @@ $(document).ready(async () => {
 
     const uiController = new UiController(
         subscriptionInfos,
-        guessedCountryIso
+        countryIsoFromLocation || countryIsoForLanguage
     );
 
     uiController.evtDone.attachOnce(() => {

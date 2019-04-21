@@ -89,14 +89,10 @@ export class UiController {
 
         for (const product of getProducts(env.assetsRoot)) {
 
-            const uiProduct = new UiProduct(product, currency, defaultCountryIso);
+            const uiProduct = new UiProduct(product, currency);
 
             uiCurrency.evtChange.attach(
-                currency => uiProduct.updateLocals({ currency })
-            );
-
-            uiShipTo.evtChange.attach(
-                shipToCountryIso => uiProduct.updateLocals({ shipToCountryIso })
+                currency => uiProduct.updateCurrency(currency)
             );
 
             uiProduct.evtUserClickAddToCart.attach(() => {

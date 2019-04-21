@@ -247,6 +247,13 @@ var shop;
             }) ? "VOLUME" : "FLAT";
         }
         Cart.getOverallFootprint = getOverallFootprint;
+        function getOverallWeight(cart) {
+            return cart.reduce(function (out, _a) {
+                var weight = _a.product.weight, quantity = _a.quantity;
+                return out + weight * quantity;
+            }, 0);
+        }
+        Cart.getOverallWeight = getOverallWeight;
     })(Cart = shop.Cart || (shop.Cart = {}));
     var Price;
     (function (Price) {
@@ -326,4 +333,30 @@ var shop;
         Price.prettyPrint = prettyPrint;
     })(Price = shop.Price || (shop.Price = {}));
     ;
+    var ShippingFormData;
+    (function (ShippingFormData) {
+        function toStripeShippingInformation(shippingFormData, carrier) {
+            var get = function (key) {
+                var component = shippingFormData.addressComponents
+                    .find(function (_a) {
+                    var _b = __read(_a.types, 1), type = _b[0];
+                    return type === key;
+                });
+                return component !== undefined ? component["long_name"] : undefined;
+            };
+            return {
+                "name": shippingFormData.firstName + " " + shippingFormData.lastName,
+                "address": {
+                    "line1": get("street_number") + " " + get("route"),
+                    "line2": shippingFormData.addressExtra,
+                    "postal_code": get("postal_code") || "",
+                    "city": get("locality") || "",
+                    "state": get("administrative_area_level_1") || "",
+                    "country": get("country") || ""
+                },
+                carrier: carrier,
+            };
+        }
+        ShippingFormData.toStripeShippingInformation = toStripeShippingInformation;
+    })(ShippingFormData = shop.ShippingFormData || (shop.ShippingFormData = {}));
 })(shop = exports.shop || (exports.shop = {}));

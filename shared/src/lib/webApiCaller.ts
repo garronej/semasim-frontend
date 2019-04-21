@@ -134,12 +134,6 @@ export function getCountryIso() {
 
 }
 
-export namespace guessCountryIso {
-
-    export let cacheOut: string | undefined = undefined;
-
-}
-
 export function getChangesRates() {
 
     const methodName = apiDeclaration.getChangesRates.methodName;
@@ -211,6 +205,19 @@ export function createStripeCheckoutSession(
             shippingFormData,
             currency
         }
+    );
+
+}
+
+export function getOrders(){
+
+    const methodName = apiDeclaration.getOrders.methodName;
+    type Params = apiDeclaration.getOrders.Params;
+    type Response = apiDeclaration.getOrders.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        undefined
     );
 
 }
