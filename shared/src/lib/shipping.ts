@@ -24,7 +24,7 @@ function getZone(destinationCountryIso: string) {
             return "Metropolitan France, Andorra et Monaco";
         }
 
-        if ([...getZone.om1, ...getZone.om2].indexOf(destinationCountryIso)) {
+        if ([...getZone.om1, ...getZone.om2].indexOf(destinationCountryIso) >= 0 ) {
             return "DOM";
         }
 
@@ -39,7 +39,7 @@ function getZone(destinationCountryIso: string) {
         if ([
             "no", "by", "hu​", "md", "ua", "dz",
             "ly", "ma", "eh", "mr", "tn"
-        ].indexOf(destinationCountryIso) > 0) {
+        ].indexOf(destinationCountryIso) >= 0) {
             return "Eastern Europe - Maghreb - Norway";
         }
 
@@ -50,7 +50,6 @@ function getZone(destinationCountryIso: string) {
     console.log(`getZone(${destinationCountryIso}) -> ${out}`);
 
     return out;
-
 
 }
 
