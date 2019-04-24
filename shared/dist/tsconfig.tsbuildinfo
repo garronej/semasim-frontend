@@ -226,11 +226,11 @@
         "signature": "89073745c2b49a8ecff039468cbc321a1021e7a34cc3f29d7d4c1d6d643e99c4"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shipping.ts": {
-        "version": "42024a4db296cd861f956b9d09f6fdb5fea63e8f6e7fe66c8b7d892b13cadca1",
+        "version": "fb253b4622c650387b9bbaa421f0daad8d58851eb76117fd7d0fe000792ce993",
         "signature": "8007d3aac92384cb6e5b38a52ed8114c7cdcc706aebf9fdadb2bfd30b93c1788"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts": {
-        "version": "426492419c37550327fab75389675e5107a07222da77ee8df15f7f7cdda842e9",
+        "version": "b7ac8c1fa4ce6b4226fcfeafff6df26cf8c42011437d42bf062d3f35edd2bdbb",
         "signature": "c092dd873dfe541d977e926de32fcb37c9bea40661e151866ae22186c4a531db"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts": {
@@ -278,8 +278,7 @@
       "strictFunctionTypes": true,
       "resolveJsonModule": true,
       "incremental": true,
-      "project": "C:\\Users\\joseph\\Dropbox\\shell\\semasim\\frontend\\shared\\tsconfig.json",
-      "watch": true,
+      "project": "./tsconfig.json",
       "configFilePath": "C:/Users/joseph/Dropbox/shell/semasim/frontend/shared/tsconfig.json"
     },
     "referencedMap": {
@@ -642,14 +641,14 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/loaduiclasshtml.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/geturlparameter.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/standalonepolyfills.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shipping.ts"
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shipping.ts",
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts"
     ]
   },
   "version": "3.4.1"
