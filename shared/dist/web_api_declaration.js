@@ -45,10 +45,14 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
-var createStripeCheckoutSession;
-(function (createStripeCheckoutSession) {
-    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
-})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var createStripeCheckoutSessionForShop;
+(function (createStripeCheckoutSessionForShop) {
+    createStripeCheckoutSessionForShop.methodName = "create-stripe-checkout-session-for-shop";
+})(createStripeCheckoutSessionForShop = exports.createStripeCheckoutSessionForShop || (exports.createStripeCheckoutSessionForShop = {}));
+var createStripeCheckoutSessionForSubscription;
+(function (createStripeCheckoutSessionForSubscription) {
+    createStripeCheckoutSessionForSubscription.methodName = "create-stripe-checkout-session-for-subscription";
+})(createStripeCheckoutSessionForSubscription = exports.createStripeCheckoutSessionForSubscription || (exports.createStripeCheckoutSessionForSubscription = {}));
 var getOrders;
 (function (getOrders) {
     getOrders.methodName = "get-orders";

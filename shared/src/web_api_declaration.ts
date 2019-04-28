@@ -145,14 +145,33 @@ export namespace unsubscribe {
 
 }
 
-export namespace createStripeCheckoutSession {
+export namespace createStripeCheckoutSessionForShop {
 
-    export const methodName = "create-stripe-checkout-session";
+    export const methodName = "create-stripe-checkout-session-for-shop";
 
     export type Params= {
         cartDescription: { productName: string; quantity: number; }[];
         shippingFormData: import("./lib/types").shop.ShippingFormData;
         currency: string;
+        success_url: string;
+        cancel_url: string;
+    };
+
+    export type Response= {
+        stripePublicApiKey: string;
+        checkoutSessionId: string;
+    };
+
+}
+
+export namespace createStripeCheckoutSessionForSubscription {
+
+    export const methodName = "create-stripe-checkout-session-for-subscription";
+
+    export type Params= { 
+        currency: string; 
+        success_url: string;
+        cancel_url: string;
     };
 
     export type Response= {

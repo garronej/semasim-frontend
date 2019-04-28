@@ -186,30 +186,58 @@ export async function unsubscribe() {
 
 }
 
-export function createStripeCheckoutSession(
+export function createStripeCheckoutSessionForShop(
     cart: import("./types").shop.Cart,
     shippingFormData: import("./types").shop.ShippingFormData,
-    currency: string
+    currency: string,
+    success_url: string,
+    cancel_url: string
 ) {
 
-    const methodName = apiDeclaration.createStripeCheckoutSession.methodName;
-    type Params = apiDeclaration.createStripeCheckoutSession.Params;
-    type Response = apiDeclaration.createStripeCheckoutSession.Response;
+    const methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
+    type Params = apiDeclaration.createStripeCheckoutSessionForShop.Params;
+    type Response = apiDeclaration.createStripeCheckoutSessionForShop.Response;
 
     return sendRequest<Params, Response>(
         methodName,
         {
             "cartDescription": cart.map(
-                ({ product, quantity }) => ({ "productName": product.name, quantity })
+                ({ product, quantity }) => ({
+                    "productName": product.name,
+                    quantity
+                })
             ),
             shippingFormData,
-            currency
+            currency,
+            success_url,
+            cancel_url
         }
     );
 
 }
 
-export function getOrders(){
+export function createStripeCheckoutSessionForSubscription(
+    currency: string,
+    success_url: string,
+    cancel_url: string
+) {
+
+    const methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
+    type Params = apiDeclaration.createStripeCheckoutSessionForSubscription.Params;
+    type Response = apiDeclaration.createStripeCheckoutSessionForSubscription.Response;
+
+    return sendRequest<Params, Response>(
+        methodName,
+        {
+            currency,
+            success_url,
+            cancel_url
+        }
+    );
+
+}
+
+export function getOrders() {
 
     const methodName = apiDeclaration.getOrders.methodName;
     type Params = apiDeclaration.getOrders.Params;

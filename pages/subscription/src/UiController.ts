@@ -17,6 +17,7 @@ import { UiNegativeBalanceWarning } from "./UiNegativeBalanceWarning";
 
 declare const require: (path: string) => any;
 declare const StripeCheckout: any;
+declare const Stripe: any;
 declare const Cookies: any;
 declare const Buffer: any;
 
@@ -33,10 +34,41 @@ export class UiController {
 
     public readonly evtDone = new VoidSyncEvent();
 
+    private async interact_checkout(
+        currency: string
+    ) {
+
+        bootbox_custom.loading("Redirecting to payment page");
+
+        const url = window.location.href.split("?")[0];
+
+        const {
+            stripePublicApiKey,
+            checkoutSessionId: sessionId
+        } = await webApiCaller.createStripeCheckoutSessionForSubscription(
+            currency,
+            `${url}?success=true`, 
+            `${url}?success=false`
+        );
+
+        const stripe = Stripe(stripePublicApiKey);
+
+        stripe.redirectToCheckout({ sessionId })
+            .then(result => {
+
+                if (!!result.error) {
+                    alert(result.error.message);
+                }
+            });
+
+    }
+
     constructor(
         subscriptionInfos: types.SubscriptionInfos,
         guessedCountryIso: string | undefined
     ) {
+
+        console.log(JSON.stringify(subscriptionInfos, null, 2));
 
         const uiDownloadButton = new UiDownloadButtons();
 
@@ -168,6 +200,15 @@ export class UiController {
             );
 
             uiSubscribe.evtRequestSubscribe.attach(async () => {
+
+                if( 1 === 1 ){
+
+                    this.interact_checkout("eur");
+
+                }
+
+                console.log("we should not be here");
+
 
                 let newSourceId: string | undefined = undefined;
                 let currency: string;

@@ -91,8 +91,8 @@ export declare namespace unsubscribe {
     type Params = undefined;
     type Response = undefined;
 }
-export declare namespace createStripeCheckoutSession {
-    const methodName = "create-stripe-checkout-session";
+export declare namespace createStripeCheckoutSessionForShop {
+    const methodName = "create-stripe-checkout-session-for-shop";
     type Params = {
         cartDescription: {
             productName: string;
@@ -100,6 +100,20 @@ export declare namespace createStripeCheckoutSession {
         }[];
         shippingFormData: import("./lib/types").shop.ShippingFormData;
         currency: string;
+        success_url: string;
+        cancel_url: string;
+    };
+    type Response = {
+        stripePublicApiKey: string;
+        checkoutSessionId: string;
+    };
+}
+export declare namespace createStripeCheckoutSessionForSubscription {
+    const methodName = "create-stripe-checkout-session-for-subscription";
+    type Params = {
+        currency: string;
+        success_url: string;
+        cancel_url: string;
     };
     type Response = {
         stripePublicApiKey: string;

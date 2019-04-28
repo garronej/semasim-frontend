@@ -119,13 +119,17 @@ export class UiController {
 
         bootbox_custom.loading("Redirecting to payment page");
 
+        const url = window.location.href.split("?")[0];
+
         const {
             stripePublicApiKey,
             checkoutSessionId: sessionId
-        } = await webApiCaller.createStripeCheckoutSession(
+        } = await webApiCaller.createStripeCheckoutSessionForShop(
             cart,
             shippingFormData,
-            currency
+            currency,
+            `${url}?success=true`, 
+            `${url}?success=false`
         );
 
         const stripe = Stripe(stripePublicApiKey);
@@ -136,6 +140,7 @@ export class UiController {
                 if (!!result.error) {
                     alert(result.error.message);
                 }
+
             });
 
     }

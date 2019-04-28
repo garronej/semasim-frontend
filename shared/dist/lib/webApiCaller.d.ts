@@ -11,7 +11,8 @@ export declare function getChangesRates(): Promise<apiDeclaration.getChangesRate
 export declare function getSubscriptionInfos(): Promise<import("./types").SubscriptionInfos>;
 export declare function subscribeOrUpdateSource(sourceId?: string): Promise<void>;
 export declare function unsubscribe(): Promise<void>;
-export declare function createStripeCheckoutSession(cart: import("./types").shop.Cart, shippingFormData: import("./types").shop.ShippingFormData, currency: string): Promise<apiDeclaration.createStripeCheckoutSession.Response>;
+export declare function createStripeCheckoutSessionForShop(cart: import("./types").shop.Cart, shippingFormData: import("./types").shop.ShippingFormData, currency: string, success_url: string, cancel_url: string): Promise<apiDeclaration.createStripeCheckoutSessionForShop.Response>;
+export declare function createStripeCheckoutSessionForSubscription(currency: string, success_url: string, cancel_url: string): Promise<apiDeclaration.createStripeCheckoutSessionForSubscription.Response>;
 export declare function getOrders(): Promise<{
     date: Date;
     orderCart: {
