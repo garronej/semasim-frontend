@@ -90,7 +90,7 @@ const version= "0.1.15";
     <script src="<%-assets_root%>plugins/ui/title-notifier/title_notifier.js"></script>
 
     <!-- ion-sound -->
-    <script src="<%-assets_root%>plugins/misc/ion-sound/js/ion.sound<%-assets_root==='/'?'':'.min';%>.js"></script>
+    <script src="<%-assets_root%>plugins/misc/ion-sound/js/ion.sound<%-!isDevEnv && !isWebView ?'.min':'';%>.js"></script>
 
     <script>
         ion.sound({

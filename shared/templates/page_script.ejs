@@ -1,1 +1,2 @@
-<script src="<%- `${assets_root}${page}-${version}${assets_root==='/'?'':'.min'}.js`; %>"></script>
+
+<script src="<%- `${assets_root}${page}-${version}${!isDevEnv && !isWebView?'.min':''}.js`; %>"></script>

@@ -4,4 +4,4 @@ export const baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)
 
 export const assetsRoot: string = window["assets_root"];
 
-export const isProd= assetsRoot !== "/";
+export const isDevEnv: boolean = window["isDevEnv"];

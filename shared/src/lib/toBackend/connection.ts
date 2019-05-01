@@ -6,7 +6,7 @@ import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types";
 import * as bootbox_custom from "../tools/bootbox_custom";
 import * as Cookies from "js-cookie";
-import { baseDomain, isProd } from "../env";
+import { baseDomain, isDevEnv  } from "../env";
 
 export const url = `wss://web.${baseDomain}`;
 
@@ -16,7 +16,7 @@ const apiServer = new sip.api.Server(
     localApiHandlers.handlers,
     sip.api.Server.getDefaultLogger({
         idString,
-        "log": isProd ? (() => { }) : console.log.bind(console),
+        "log": isDevEnv ? console.log.bind(console) : (() => { }),
         "hideKeepAlive": true
     })
 );

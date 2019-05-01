@@ -210,11 +210,11 @@
         "signature": "b149a363ae1f974d99bb973bf6af041cdf52cc3a833b1281898eebeb4ea5f704"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts": {
-        "version": "97fa4622c42f2e520b68bdcea62ec90f0737fbf4074decbb5974811aec2ce31b",
-        "signature": "8311feb85e46559208f5c5c54f3f680dfd1a273844493803c9c5b636358787b5"
+        "version": "6d13207aca75b824eec6e6006bb6c8a1e0fe3f3a7cad61e99a9fbae8f20b7d8c",
+        "signature": "126d93eaf9297b5d714736cf8c637c8936778c4e5eb8ed429f841a2b3a5435bf"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts": {
-        "version": "39966d2e70d831655ad76e769a2ad43750d8b67f9d2e956e014e5feaf0fb9762",
+        "version": "b638274f32dd7e40c1b3dfb6e30322b09b3bb1479740a9f792a5cf1aa9f77211",
         "signature": "52a3622e77079ee7076d1c81358e14651b1097e19918315472d47a27f159a63c"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts": {
