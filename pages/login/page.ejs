@@ -3,6 +3,10 @@
 const version= "0.1.6";
 %>
 
+<%
+const assets_root_for_logo= isWebView ? "/" : assets_root;
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,7 +28,7 @@ const version= "0.1.6";
             <!-- Start .panel -->
             <div class="panel-heading">
                 <h4 class="panel-title text-center">
-                    <img id="logo" src="<%-assets_root%>img/logo-dark.png" alt="Dynamic logo">
+                    <img id="logo" src="<%-assets_root_for_logo%>img/logo-dark.png" alt="Dynamic logo">
                 </h4>
             </div>
             <div class="panel-body">
