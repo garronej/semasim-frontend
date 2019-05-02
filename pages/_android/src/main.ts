@@ -122,22 +122,34 @@ const exposedToAndroid = {
 
 		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
-		const wrap = await ua.evtIncomingCall.waitFor(
-			({ fromNumber }) => fromNumber === number,
-			7000
-		).catch(() => undefined);
+		const evtCallReceived = new VoidSyncEvent();
 
-		if (wrap === undefined) {
+		ua.evtRegistrationStateChanged
+			.waitFor(7000)
+			.catch(() => false)
+			.then(isRegistered => {
 
-			androidEventHandlers.onCallTerminated("Call missed");
+				if (!isRegistered) {
 
-			return;
+					androidEventHandlers.onCallTerminated("UA registration attempt failed");
 
-		}
+				} else if (evtCallReceived.postCount === 0) {
 
-		const { terminate, prTerminated, onAccepted } = wrap;
+					evtCallReceived.waitFor(1500).catch(() =>
+						androidEventHandlers.onCallTerminated("Call missed !")
+					);
 
-		exposedToAndroid.terminateCall = () => terminate()
+				}
+
+			});
+
+		const { terminate, prTerminated, onAccepted } = await ua.evtIncomingCall.waitFor(
+			({ fromNumber }) => fromNumber === number
+		);
+
+		evtCallReceived.post();
+
+		exposedToAndroid.terminateCall = () => terminate();
 
 		prTerminated.then(() => androidEventHandlers.onCallTerminated(null));
 
