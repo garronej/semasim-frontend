@@ -125,7 +125,7 @@ const exposedToAndroid = {
 		const evtCallReceived = new VoidSyncEvent();
 
 		ua.evtRegistrationStateChanged.attachOnce(
-			isRegistered => !!isRegistered,
+			isRegistered => isRegistered,
 			() => {
 
 				if (evtCallReceived.postCount === 0) {
