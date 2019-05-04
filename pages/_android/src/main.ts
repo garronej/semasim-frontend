@@ -124,24 +124,20 @@ const exposedToAndroid = {
 
 		const evtCallReceived = new VoidSyncEvent();
 
-		ua.evtRegistrationStateChanged
-			.waitFor(7000)
-			.catch(() => false)
-			.then(isRegistered => {
+		ua.evtRegistrationStateChanged.attachOnce(
+			isRegistered => !!isRegistered,
+			() => {
 
-				if (!isRegistered) {
+				if (evtCallReceived.postCount === 0) {
 
-					androidEventHandlers.onCallTerminated("UA registration attempt failed");
-
-				} else if (evtCallReceived.postCount === 0) {
-
-					evtCallReceived.waitFor(1500).catch(() =>
-						androidEventHandlers.onCallTerminated("Call missed !")
-					);
+					evtCallReceived.waitFor(1500)
+						.catch(() => androidEventHandlers.onCallTerminated("Call missed"))
+						;
 
 				}
 
-			});
+			}
+		);
 
 		const { terminate, prTerminated, onAccepted } = await ua.evtIncomingCall.waitFor(
 			({ fromNumber }) => fromNumber === number
