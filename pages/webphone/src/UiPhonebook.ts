@@ -101,7 +101,7 @@ export class UiPhonebook {
 
     }
 
-    private placeUiContact(uiContact: UiContact){
+    private placeUiContact(uiContact: UiContact) {
 
         const getUiContactFromStructure = (li_elem: HTMLElement): UiContact => {
 
@@ -122,11 +122,11 @@ export class UiPhonebook {
 
         const lis = this.structure.find("ul li");
 
-        for( let i= 0; i< lis.length; i++){
+        for (let i = 0; i < lis.length; i++) {
 
             const uiContact_i = getUiContactFromStructure(lis.get(i));
 
-            if( wd.compareChat(uiContact.wdChat, uiContact_i.wdChat) >= 0 ){
+            if (wd.compareChat(uiContact.wdChat, uiContact_i.wdChat) >= 0) {
 
 
                 uiContact.structure.insertBefore(uiContact_i.structure);
@@ -182,6 +182,8 @@ export class UiPhonebook {
 
         }
 
+        this.updateSearch();
+
     }
 
     public triggerContactClick(wdChat: wd.Chat) {
@@ -223,7 +225,7 @@ class UiContact {
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
 
-                if( selection !== null ){
+                if (selection !== null) {
 
                     selection.removeAllRanges();
                     selection.addRange(range);
