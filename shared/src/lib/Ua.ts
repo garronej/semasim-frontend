@@ -277,8 +277,10 @@ export class Ua {
                 "pcConfig": { "iceServers": [rtcIceServer] }
             });
 
-            (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
-                ({ streams: [stream] }) => playAudioStream(stream);
+            (jsSipRtcSession.connection as RTCPeerConnection).addEventListener(
+                "track",
+                ({ streams: [stream] }) => playAudioStream(stream)
+            );
 
         });
 
@@ -339,8 +341,7 @@ export class Ua {
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 "pcConfig": {
-                    "iceServers": [rtcICEServer],
-                    "gatheringTimeoutAfterRelay": 700
+                    "iceServers": [rtcICEServer]
                 },
                 "eventHandlers": {
                     "icecandidate": newIceCandidateHandler(rtcICEServer),
@@ -364,9 +365,10 @@ export class Ua {
                             jsSipRtcSession.sendDTMF(signal, { duration })
                         );
 
-
-                        (jsSipRtcSession.connection as RTCPeerConnection).ontrack =
-                            ({ streams: [stream] }) => playAudioStream(stream);
+                        (jsSipRtcSession.connection as RTCPeerConnection).addEventListener(
+                            "track",
+                            ({ streams: [stream] }) => playAudioStream(stream)
+                        );
 
                     },
                     "confirmed": () => evtEstablished.post(),
