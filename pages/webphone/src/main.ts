@@ -12,6 +12,15 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types";
+import * as observer from "../../../shared/dist/lib/tools/observer";
+import * as pjSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
+
+pjSipWebRTCIsolation.useAlternativeWebRTCImplementation(
+	pjSipWebRTCIsolation.localApi
+);
+
+observer.observeWebRTC();
+
 
 $(document).ready(async () => {
 
@@ -22,7 +31,6 @@ $(document).ready(async () => {
 		window.location.href = "/login";
 
 	});
-
 
 	connection.connect({ "requestTurnCred": true });
 

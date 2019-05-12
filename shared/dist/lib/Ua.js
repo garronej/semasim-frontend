@@ -224,11 +224,10 @@ var Ua = /** @class */ (function () {
                             "mediaConstraints": { "audio": true, "video": false },
                             "pcConfig": { "iceServers": [rtcIceServer] }
                         });
-                        jsSipRtcSession.connection.ontrack =
-                            function (_a) {
-                                var _b = __read(_a.streams, 1), stream = _b[0];
-                                return playAudioStream(stream);
-                            };
+                        jsSipRtcSession.connection.addEventListener("track", function (_a) {
+                            var _b = __read(_a.streams, 1), stream = _b[0];
+                            return playAudioStream(stream);
+                        });
                         return [2 /*return*/];
                 }
             });
@@ -278,8 +277,7 @@ var Ua = /** @class */ (function () {
                         this.jsSipUa.call("sip:" + number + "@" + env_1.baseDomain, {
                             "mediaConstraints": { "audio": true, "video": false },
                             "pcConfig": {
-                                "iceServers": [rtcICEServer],
-                                "gatheringTimeoutAfterRelay": 700
+                                "iceServers": [rtcICEServer]
                             },
                             "eventHandlers": {
                                 "icecandidate": newIceCandidateHandler(rtcICEServer),
@@ -294,11 +292,10 @@ var Ua = /** @class */ (function () {
                                         var signal = _a.signal, duration = _a.duration;
                                         return jsSipRtcSession.sendDTMF(signal, { duration: duration });
                                     });
-                                    jsSipRtcSession.connection.ontrack =
-                                        function (_a) {
-                                            var _b = __read(_a.streams, 1), stream = _b[0];
-                                            return playAudioStream(stream);
-                                        };
+                                    jsSipRtcSession.connection.addEventListener("track", function (_a) {
+                                        var _b = __read(_a.streams, 1), stream = _b[0];
+                                        return playAudioStream(stream);
+                                    });
                                 },
                                 "confirmed": function () { return evtEstablished.post(); },
                                 "ended": function () { return evtTerminated.post(); },

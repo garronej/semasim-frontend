@@ -7,7 +7,7 @@ import "../../../shared/dist/lib/tools/standalonePolyfills";
 declare const Buffer: any;
 declare const Cookies: any;
 
-declare const androidEventHandlers: {
+declare const apiExposedByHost: {
     onDone(email?: string, password?: string): void;
 };
 
@@ -78,9 +78,9 @@ function setHandlers() {
 
 				Cookies.set("email", email);
 
-				if( typeof androidEventHandlers !== "undefined" ){
+				if( typeof apiExposedByHost !== "undefined" ){
 
-					androidEventHandlers.onDone(email, password);
+					apiExposedByHost.onDone(email, password);
 
 				}else{
 

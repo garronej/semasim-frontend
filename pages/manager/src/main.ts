@@ -17,22 +17,22 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 
 declare const __dirname: any;
 
-declare const androidEventHandlers: {
+declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;
 };
 
 //TODO: See if defined
-if( typeof androidEventHandlers !== "undefined" ){
+if( typeof apiExposedByHost !== "undefined" ){
 
     window.onerror = (msg, url, lineNumber) => {
-        androidEventHandlers.onDone(`${msg}\n'${url}:${lineNumber}`);
+        apiExposedByHost.onDone(`${msg}\n'${url}:${lineNumber}`);
         return false;
     };
 
     if ("onPossiblyUnhandledRejection" in Promise) {
 
         (Promise as any).onPossiblyUnhandledRejection(error => {
-            androidEventHandlers.onDone(error.message + " " + error.stack);
+            apiExposedByHost.onDone(error.message + " " + error.stack);
         });
 
     }
@@ -42,7 +42,7 @@ if( typeof androidEventHandlers !== "undefined" ){
 
 let resolvePrUiController: (uiController: UiController) => void;
 
-window["exposedToAndroid"] = (() => {
+window["apiExposedToHost"] = (() => {
 
     const prUiController = new Promise<UiController>(resolve => resolvePrUiController = resolve);
 
@@ -51,21 +51,21 @@ window["exposedToAndroid"] = (() => {
 
             await (await prUiController).interact_createContact(imsi, number);
 
-            try{ androidEventHandlers.onDone(null); }catch{}
+            try{ apiExposedByHost.onDone(null); }catch{}
 
         },
         "updateContactName": async (number: string) => {
 
             await (await prUiController).interact_updateContactName(number);
 
-            try{ androidEventHandlers.onDone(null); }catch{}
+            try{ apiExposedByHost.onDone(null); }catch{}
 
         },
         "deleteContact": async (number: string) => {
 
             await (await prUiController).interact_deleteContact(number);
 
-            try{ androidEventHandlers.onDone(null); }catch{}
+            try{ apiExposedByHost.onDone(null); }catch{}
 
         }
     };

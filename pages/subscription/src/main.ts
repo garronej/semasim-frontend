@@ -8,7 +8,7 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
 import { UiController } from "./UiController";
 
-declare const androidEventHandlers: {
+declare const apiExposedByHost: {
     onDone(email?: string, password?: string): void;
 };
 
@@ -36,11 +36,11 @@ $(document).ready(async () => {
     ]);
 
     if (
-        typeof androidEventHandlers !== "undefined" &&
+        typeof apiExposedByHost !== "undefined" &&
         (subscriptionInfos.customerStatus === "EXEMPTED" || !!subscriptionInfos.subscription)
     ) {
 
-        androidEventHandlers.onDone();
+        apiExposedByHost.onDone();
 
         return;
 
@@ -55,9 +55,9 @@ $(document).ready(async () => {
 
     uiController.evtDone.attachOnce(() => {
 
-        if (typeof androidEventHandlers !== "undefined") {
+        if (typeof apiExposedByHost !== "undefined") {
 
-            androidEventHandlers.onDone();
+            apiExposedByHost.onDone();
 
         } else {
 

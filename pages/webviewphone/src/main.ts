@@ -5,15 +5,57 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import * as localApiHandler from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { VoidSyncEvent } from "ts-events-extended";
+import * as jsSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
+import * as observer from "../../../shared/dist/lib/tools/observer";
 
 declare const Buffer: any;
 
-declare const androidEventHandlers: {
-	/** Always called no matter what */
+declare const apiExposedByHost: jsSipWebRTCIsolation.Api.Methods & {
 	onCallTerminated(errorMessage: null | string): void;
 	onRingback(): void;
 	onEstablished(): void;
 };
+
+{
+
+	//const { onCallTerminated }= apiExposedByHost;
+
+	apiExposedByHost["onCallTerminated"]= errorMessage=> {
+
+		console.log({ errorMessage });
+
+		console.log("Doing nothing, debugging...");
+
+	};
+
+}
+
+observer.observeObjectProperty(navigator.mediaDevices, "getUserMedia");
+observer.observeObjectProperty(window, "RTCPeerConnection");
+
+console.log(
+	JSON.stringify(
+		Object.getOwnPropertyNames(apiExposedByHost),
+		null,
+		2
+	)
+);
+
+
+let webRTCListeners: jsSipWebRTCIsolation.Api.Listeners;
+
+jsSipWebRTCIsolation.useAlternativeWebRTCImplementation(
+	(() => {
+
+		const webRTCApi: jsSipWebRTCIsolation.Api = {
+			"methods": apiExposedByHost,
+			"setListeners": listeners => webRTCListeners = listeners
+		};
+
+		return webRTCApi;
+
+	})()
+);
 
 {
 
@@ -26,11 +68,11 @@ declare const androidEventHandlers: {
 	};
 
 	(Promise as any).onPossiblyUnhandledRejection(error => {
-		resolvePrErrorMessage(error.message + " " + error.stack);
+		resolvePrErrorMessage(`${error.message} ${error.stack}`);
 	});
 
-	prErrorMessage.then(errorMessage => 
-		androidEventHandlers.onCallTerminated(errorMessage)
+	prErrorMessage.then(errorMessage =>
+		apiExposedByHost.onCallTerminated(errorMessage)
 	);
 
 }
@@ -53,7 +95,7 @@ async function initUa(uaInstanceId: string, email: string, imsi: string): Promis
 	//NOTE: UA does not receive the live update on sim online state.
 	localApiHandler.evtSimIsOnlineStatusChange.attachOnce(
 		isOnline => !isOnline,
-		() => androidEventHandlers.onCallTerminated("Socket disconnected")
+		() => apiExposedByHost.onCallTerminated("Socket disconnected")
 	);
 
 	const [userSim] = await Promise.all([
@@ -65,7 +107,7 @@ async function initUa(uaInstanceId: string, email: string, imsi: string): Promis
 
 	if (!userSim.isOnline) {
 
-		androidEventHandlers.onCallTerminated("Sim is offline");
+		apiExposedByHost.onCallTerminated("Sim is offline");
 		await new Promise(_resolve => { });
 
 	}
@@ -76,19 +118,33 @@ async function initUa(uaInstanceId: string, email: string, imsi: string): Promis
 
 	ua.evtRegistrationStateChanged.attachOnce(
 		isRegistered => !isRegistered,
-		() => androidEventHandlers.onCallTerminated("UA unregistered")
+		() => apiExposedByHost.onCallTerminated("UA unregistered")
 	);
 
 	ua.evtRegistrationStateChanged.waitFor(6000)
-		.catch(() => androidEventHandlers.onCallTerminated("UA failed to register"));
+		.catch(() => apiExposedByHost.onCallTerminated("UA failed to register"));
 
 	return ua;
 
 }
 
-const exposedToAndroid = {
-	/** Assume androidEventHandles.onReady() have been called  */
-	"placeOutgoingCall": async (uaInstanceId: string, imsi: string, number: string) => {
+
+
+const apiExposedToHost: jsSipWebRTCIsolation.Api.Listeners & {
+	placeOutgoingCall(uaInstanceId: string, imsi: string, number: string): void;
+	getReadyToAcceptIncomingCall(uaInstanceId: string, imsi: string, number: string): void;
+	sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+	terminateCall(): void;
+	acceptIncomingCall(): void;
+} = {
+	...webRTCListeners!,
+	"placeOutgoingCall": async (uaInstanceId, imsi, number) => {
+
+		console.log("waiting...");
+
+		await new Promise(resolve => setTimeout(resolve,5000));
+
+		console.log("go!");
 
 		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
@@ -98,19 +154,19 @@ const exposedToAndroid = {
 
 		const { terminate, prTerminated, prNextState } = await ua.placeOutgoingCall(number);
 
-		exposedToAndroid.terminateCall = () => terminate();
+		apiExposedToHost.terminateCall = () => terminate();
 
-		prTerminated.then(() => androidEventHandlers.onCallTerminated(null));
+		prTerminated.then(() => apiExposedByHost.onCallTerminated(null));
 
 		prNextState.then(({ prNextState }) => {
 
-			androidEventHandlers.onRingback();
+			apiExposedByHost.onRingback();
 
 			prNextState.then(({ sendDtmf }) => {
 
-				exposedToAndroid.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
+				apiExposedToHost.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
 
-				androidEventHandlers.onEstablished();
+				apiExposedByHost.onEstablished();
 
 			});
 
@@ -118,7 +174,7 @@ const exposedToAndroid = {
 
 	},
 	/** Assume androidEventHandles.onReady() have been called  */
-	"getReadyToAcceptIncomingCall": async (uaInstanceId: string, imsi: string, number: string) => {
+	"getReadyToAcceptIncomingCall": async (uaInstanceId, imsi, number) => {
 
 		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
@@ -131,7 +187,7 @@ const exposedToAndroid = {
 				if (evtCallReceived.postCount === 0) {
 
 					evtCallReceived.waitFor(1500)
-						.catch(() => androidEventHandlers.onCallTerminated("Call missed"))
+						.catch(() => apiExposedByHost.onCallTerminated("Call missed"))
 						;
 
 				}
@@ -145,9 +201,9 @@ const exposedToAndroid = {
 
 		evtCallReceived.post();
 
-		exposedToAndroid.terminateCall = () => terminate();
+		apiExposedToHost.terminateCall = () => terminate();
 
-		prTerminated.then(() => androidEventHandlers.onCallTerminated(null));
+		prTerminated.then(() => apiExposedByHost.onCallTerminated(null));
 
 		if (evtAcceptIncomingCall.postCount === 0) {
 			await evtAcceptIncomingCall.waitFor();
@@ -155,15 +211,15 @@ const exposedToAndroid = {
 
 		const { sendDtmf } = await onAccepted();
 
-		exposedToAndroid.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
+		apiExposedToHost.sendDtmf = (signal, duration) => sendDtmf(signal, duration);
 
-		androidEventHandlers.onEstablished();
+		apiExposedByHost.onEstablished();
 
 	},
-	"sendDtmf": (signal: Ua.DtmFSignal, duration: number) => androidEventHandlers.onCallTerminated("never"),
-	"terminateCall": () => androidEventHandlers.onCallTerminated(null),
+	"sendDtmf": () => apiExposedByHost.onCallTerminated("never"),
+	"terminateCall": () => apiExposedByHost.onCallTerminated(null),
 	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
-window["exposedToAndroid"] = exposedToAndroid;
+window["apiExposedToHost"] = apiExposedToHost;
 
