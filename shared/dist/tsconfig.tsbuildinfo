@@ -246,12 +246,12 @@
         "signature": "4f5b55748e3972a91f59eb150f3b7b873f5514221e62c86e3bf2933aac782132"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/observer.ts": {
-        "version": "bd918ee8469f07b6d306c425961d64ae1cc0897e4fa1a9a560728688ca8afba2",
+        "version": "4138f50aaf96ea647535aadca85d4e28e3c24692dbb60960064c732c161b534c",
         "signature": "fadf587d7ab511035cb97b526517c9af0125b0ab7c7edb280292e20da36a5218"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/pjsipwebrtcisolation.ts": {
-        "version": "13108a3e87748a87cc277385bf10c6fe8326cbb7d0c7c1b819d4524eed9ad78f",
-        "signature": "1bfc2ea9e560d8ff4e54bbed4410e2693d5bd37b9042a364200345fe8b90bbcc"
+        "version": "dbd04ed63d151412e81b1b0d98d878fe502816b6e2d1d282091c432f92e88f08",
+        "signature": "ba9a23eedb390d1395260bb410ea1c753c957767220c138873b00af90b9c3d38"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/standalonepolyfills.ts": {
         "version": "6d91bb3afcc80b7f6e2238ae9895f8c963e0a9dee9fae4e1fdd9c4eb3fdd5a2a",
@@ -658,11 +658,11 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/geturlparameter.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/observer.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/pjsipwebrtcisolation.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/standalonepolyfills.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts"
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts",
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tools/observer.ts"
     ]
   },
   "version": "3.4.1"

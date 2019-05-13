@@ -24,7 +24,12 @@ export namespace Api {
         stopMediaStreamTrack(
             mediaStreamRef: number
         ): void;
-        /** return RtcSessionDescriptionInit serialized ( string )*/
+        /** return RtcSessionDescriptionInit */
+        createAnswerForRTCPeerConnection(
+            rtcPeerConnectionRef: number,
+            callRef: number
+        ): void;
+        /** return RtcSessionDescriptionInit */
         createOfferForRTCPeerConnection(
             rtcPeerConnectionRef: number,
             callRef: number
@@ -60,7 +65,7 @@ export namespace Api {
         ): void;
         onMethodReturn(
             callRef: number,
-            out: string | null
+            out: string | undefined
         ): void;
     };
 
@@ -68,11 +73,15 @@ export namespace Api {
 
 export function useAlternativeWebRTCImplementation(api: Api) {
 
-    console.log("Using alternative WebRTC implementation");
+    console.log("Using alternative WebRTC implementation !");
 
     const getCounter = (() => {
 
-        let counter = 0;
+        let counter = (()=>{
+            const min= -2147483000;
+            const max= 1147483000;
+            return Math.floor(Math.random() * (max - min)) + min;
+        })();
 
         return () => counter++;
 
@@ -96,7 +105,7 @@ export function useAlternativeWebRTCImplementation(api: Api) {
 
     const evtMethodReturn = new SyncEvent<{
         callRef: number;
-        out: string | null;
+        out: string | undefined;
     }>();
 
     api.setListeners({
@@ -129,7 +138,7 @@ export function useAlternativeWebRTCImplementation(api: Api) {
         ) => evtMethodReturn.post({ callRef, out })
     });
 
-    const refByMediaStream = new WeakMap<Object, number>();
+    const refByMediaStream = new WeakMap<MediaStream, number>();
 
     const getUserMediaProxy = async function getUserMedia(mediaStreamConstraints: MediaStreamConstraints): Promise<MediaStream> {
 
@@ -149,35 +158,20 @@ export function useAlternativeWebRTCImplementation(api: Api) {
 
         }
 
-        const mediaStreamProxy = (() => {
-
-            const getTracks: () => MediaStreamTrack[] = () => {
-
-                const mediaStreamTrackProxy = (() => {
-
-                    const stop: () => void = () =>
-                        api.methods.stopMediaStreamTrack(mediaStreamRef);
-
-                    return { stop };
-
-                })();
-
-                return [mediaStreamTrackProxy as MediaStreamTrack];
-
-            };
-
-            const wrap = { getTracks };
-
-            return Object.setPrototypeOf(
-                wrap,
-                { "constructor": function MediaStream() { } }
-            ) as typeof wrap;
-
-        })();
+        const mediaStreamProxy: MediaStream = Object.setPrototypeOf(
+            {
+                "getTracks": (): MediaStreamTrack[] => [
+                    ({
+                        "stop": (): void => api.methods.stopMediaStreamTrack(mediaStreamRef)
+                    }) as any
+                ]
+            },
+            { "constructor": function MediaStream() { } }
+        );
 
         refByMediaStream.set(mediaStreamProxy, mediaStreamRef);
 
-        return mediaStreamProxy as any;
+        return mediaStreamProxy;
 
     };
 
@@ -222,7 +216,22 @@ export function useAlternativeWebRTCImplementation(api: Api) {
             })()
         );
 
-        const rtcPeerConnectionProxy = {
+        const rtcPeerConnectionProxy= {
+            "createAnswer": async (_options?: RTCOfferOptions): Promise<RTCSessionDescriptionInit> => {
+
+                const ref = getCounter();
+
+                api.methods.createAnswerForRTCPeerConnection(rtcPeerConnectionRef, ref);
+
+                const { out: rtcSessionDescriptionInitJson } = await evtMethodReturn.waitFor(({ callRef }) => callRef === ref);
+
+                //NOTE: We could just JSON.parse, as the return type is *Init
+                return new RTCSessionDescription(
+                    JSON.parse(rtcSessionDescriptionInitJson!)
+                );
+
+
+            },
             "createOffer": async (_options?: RTCOfferOptions): Promise<RTCSessionDescriptionInit> => {
 
                 const ref = getCounter();
@@ -231,14 +240,7 @@ export function useAlternativeWebRTCImplementation(api: Api) {
 
                 const { out: rtcSessionDescriptionInitJson } = await evtMethodReturn.waitFor(({ callRef }) => callRef === ref);
 
-                //NOTE: Just to help debug, RTCSessionDescriptionInit is not a class, just a type.
-                /*
-                return Object.setPrototypeOf(
-                    JSON.parse(rtcSessionDescriptionInitJson!),
-                    { "constructor": function RTCSessionDescriptionInit() { } }
-                );
-                */
-
+                //NOTE: We could just JSON.parse, as the return type is *Init
                 return new RTCSessionDescription(
                     JSON.parse(rtcSessionDescriptionInitJson!)
                 );
@@ -358,17 +360,17 @@ export function useAlternativeWebRTCImplementation(api: Api) {
                 refByMediaStream.get(mediaStream)!
             ),
             "close": (): void => api.methods.closeRTCPeerConnection(rtcPeerConnectionRef)
-        };
+        } as any as RTCPeerConnection;
 
         for (const propertyName of Object.keys(properties)) {
 
             Object.defineProperty(
                 rtcPeerConnectionProxy,
                 propertyName,
-                { 
-                    "get": () => properties[propertyName], 
-                    "enumerable": true, 
-                    "configurable": true 
+                {
+                    "get": () => properties[propertyName],
+                    "enumerable": true,
+                    "configurable": true
                 }
             );
 
@@ -377,7 +379,7 @@ export function useAlternativeWebRTCImplementation(api: Api) {
         return Object.setPrototypeOf(
             rtcPeerConnectionProxy,
             { "constructor": RTCPeerConnection }
-        ) as any;
+        );
 
     };
 
@@ -404,7 +406,7 @@ export const localApi: Api = (() => {
                 JSON.parse(mediaStreamConstraintsJson)
             ).then(mediaStream => {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, null);
+                listeners.onMethodReturn(callRef, undefined);
             }),
         "createRTCPeerConnection": (rtcPeerConnectionRef, rtcConfigurationJson) => {
 
@@ -472,21 +474,36 @@ export const localApi: Api = (() => {
             mediaStreamTrack.stop();
 
         },
-        "createOfferForRTCPeerConnection": (rtcPeerConnectionRef, callRef) =>
-            rtcPeerConnectionByRef.get(rtcPeerConnectionRef)!
-                .createOffer()
+        ...(() => {
+
+            const createXForRTCPeerConnection = (
+                xIs: "ANSWER" | "OFFER",
+                rtcPeerConnectionRef: number,
+                callRef: number
+            ) => rtcPeerConnectionByRef.get(rtcPeerConnectionRef)!
+            [xIs === "ANSWER" ? "createAnswer" : "createOffer"]()
                 .then(rtcSessionDescriptionInit => listeners.onMethodReturn(
                     callRef,
                     JSON.stringify(rtcSessionDescriptionInit)
-                )),
+                ));
+
+            const createAnswerForRTCPeerConnection: Api.Methods["createAnswerForRTCPeerConnection"] =
+                (rtcPeerConnectionRef, callRef) => createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef);
+
+            const createOfferForRTCPeerConnection: Api.Methods["createOfferForRTCPeerConnection"] =
+                (rtcPeerConnectionRef, callRef) => createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef);
+
+            return { createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection };
+
+        })(),
         "setLocalDescriptionOfRTCPeerConnection": (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) =>
             rtcPeerConnectionByRef.get(rtcPeerConnectionRef)!
                 .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(() => listeners.onMethodReturn(callRef, null)),
+                .then(() => listeners.onMethodReturn(callRef, undefined)),
         "setRemoteDescriptionOfRTCPeerConnection": (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) =>
             rtcPeerConnectionByRef.get(rtcPeerConnectionRef)!
                 .setRemoteDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(() => listeners.onMethodReturn(callRef, null))
+                .then(() => listeners.onMethodReturn(callRef, undefined))
         ,
         "closeRTCPeerConnection": rtcPeerConnectionRef =>
             rtcPeerConnectionByRef.get(rtcPeerConnectionRef)!

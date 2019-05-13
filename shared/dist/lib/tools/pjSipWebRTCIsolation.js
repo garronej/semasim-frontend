@@ -74,9 +74,13 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 function useAlternativeWebRTCImplementation(api) {
-    console.log("Using alternative WebRTC implementation");
+    console.log("Using alternative WebRTC implementation !");
     var getCounter = (function () {
-        var counter = 0;
+        var counter = (function () {
+            var min = -2147483000;
+            var max = 1147483000;
+            return Math.floor(Math.random() * (max - min)) + min;
+        })();
         return function () { return counter++; };
     })();
     var evtIcecandidate = new ts_events_extended_1.SyncEvent();
@@ -115,19 +119,13 @@ function useAlternativeWebRTCImplementation(api) {
                             })];
                     case 1:
                         _a.sent();
-                        mediaStreamProxy = (function () {
-                            var getTracks = function () {
-                                var mediaStreamTrackProxy = (function () {
-                                    var stop = function () {
-                                        return api.methods.stopMediaStreamTrack(mediaStreamRef);
-                                    };
-                                    return { stop: stop };
-                                })();
-                                return [mediaStreamTrackProxy];
-                            };
-                            var wrap = { getTracks: getTracks };
-                            return Object.setPrototypeOf(wrap, { "constructor": function MediaStream() { } });
-                        })();
+                        mediaStreamProxy = Object.setPrototypeOf({
+                            "getTracks": function () { return [
+                                ({
+                                    "stop": function () { return api.methods.stopMediaStreamTrack(mediaStreamRef); }
+                                })
+                            ]; }
+                        }, { "constructor": function MediaStream() { } });
                         refByMediaStream.set(mediaStreamProxy, mediaStreamRef);
                         return [2 /*return*/, mediaStreamProxy];
                 }
@@ -171,7 +169,24 @@ function useAlternativeWebRTCImplementation(api) {
                     new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
             })();
         });
-        var rtcPeerConnectionProxy = __assign({ "createOffer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+        var rtcPeerConnectionProxy = __assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+                var ref, rtcSessionDescriptionInitJson;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            ref = getCounter();
+                            api.methods.createAnswerForRTCPeerConnection(rtcPeerConnectionRef, ref);
+                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
+                                    var callRef = _a.callRef;
+                                    return callRef === ref;
+                                })];
+                        case 1:
+                            rtcSessionDescriptionInitJson = (_a.sent()).out;
+                            //NOTE: We could just JSON.parse, as the return type is *Init
+                            return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
+                    }
+                });
+            }); }, "createOffer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
                 var ref, rtcSessionDescriptionInitJson;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -184,13 +199,7 @@ function useAlternativeWebRTCImplementation(api) {
                                 })];
                         case 1:
                             rtcSessionDescriptionInitJson = (_a.sent()).out;
-                            //NOTE: Just to help debug, RTCSessionDescriptionInit is not a class, just a type.
-                            /*
-                            return Object.setPrototypeOf(
-                                JSON.parse(rtcSessionDescriptionInitJson!),
-                                { "constructor": function RTCSessionDescriptionInit() { } }
-                            );
-                            */
+                            //NOTE: We could just JSON.parse, as the return type is *Init
                             return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
                     }
                 });
@@ -313,14 +322,12 @@ exports.localApi = (function () {
     var mediaStreamByRef = new Map();
     var rtcPeerConnectionByRef = new Map();
     var listeners;
-    var methods = {
-        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
+    var methods = __assign({ "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
             return getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, null);
+                listeners.onMethodReturn(callRef, undefined);
             });
-        },
-        "createRTCPeerConnection": function (rtcPeerConnectionRef, rtcConfigurationJson) {
+        }, "createRTCPeerConnection": function (rtcPeerConnectionRef, rtcConfigurationJson) {
             var rtcPeerConnection = new RTCPeerConnectionBackup((function () {
                 var rtcConfiguration = JSON.parse(rtcConfigurationJson);
                 return rtcConfiguration;
@@ -335,36 +342,31 @@ exports.localApi = (function () {
                 audio.srcObject = stream;
             });
             rtcPeerConnectionByRef.set(rtcPeerConnectionRef, rtcPeerConnection);
-        },
-        "addStreamToRTCPeerConnection": function (rtcPeerConnectionRef, mediaStreamRef) {
+        }, "addStreamToRTCPeerConnection": function (rtcPeerConnectionRef, mediaStreamRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)["addStream"](mediaStreamByRef.get(mediaStreamRef));
-        },
-        "stopMediaStreamTrack": function (mediaStreamRef) {
+        }, "stopMediaStreamTrack": function (mediaStreamRef) {
             var _a = __read(mediaStreamByRef.get(mediaStreamRef).getTracks(), 1), mediaStreamTrack = _a[0];
             if (mediaStreamTrack === undefined) {
                 return;
             }
             mediaStreamTrack.stop();
-        },
-        "createOfferForRTCPeerConnection": function (rtcPeerConnectionRef, callRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
-                .createOffer()
-                .then(function (rtcSessionDescriptionInit) { return listeners.onMethodReturn(callRef, JSON.stringify(rtcSessionDescriptionInit)); });
-        },
-        "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+        } }, (function () {
+        var createXForRTCPeerConnection = function (xIs, rtcPeerConnectionRef, callRef) { return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)[xIs === "ANSWER" ? "createAnswer" : "createOffer"]()
+            .then(function (rtcSessionDescriptionInit) { return listeners.onMethodReturn(callRef, JSON.stringify(rtcSessionDescriptionInit)); }); };
+        var createAnswerForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef); };
+        var createOfferForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef); };
+        return { createAnswerForRTCPeerConnection: createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection: createOfferForRTCPeerConnection };
+    })(), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, null); });
-        },
-        "setRemoteDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
+        }, "setRemoteDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setRemoteDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, null); });
-        },
-        "closeRTCPeerConnection": function (rtcPeerConnectionRef) {
+                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
+        }, "closeRTCPeerConnection": function (rtcPeerConnectionRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .close();
-        }
-    };
+        } });
     return { methods: methods, "setListeners": function (listeners_) { return listeners = listeners_; } };
 })();

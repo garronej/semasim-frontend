@@ -8,7 +8,9 @@ export declare namespace Api {
         createRTCPeerConnection(rtcPeerConnectionRef: number, rtcConfigurationJson: string): void;
         addStreamToRTCPeerConnection(rtcPeerConnectionRef: number, mediaStreamRef: number): void;
         stopMediaStreamTrack(mediaStreamRef: number): void;
-        /** return RtcSessionDescriptionInit serialized ( string )*/
+        /** return RtcSessionDescriptionInit */
+        createAnswerForRTCPeerConnection(rtcPeerConnectionRef: number, callRef: number): void;
+        /** return RtcSessionDescriptionInit */
         createOfferForRTCPeerConnection(rtcPeerConnectionRef: number, callRef: number): void;
         setLocalDescriptionOfRTCPeerConnection(rtcPeerConnectionRef: number, rtcSessionDescriptionInitJson: string, callRef: number): void;
         setRemoteDescriptionOfRTCPeerConnection(rtcPeerConnectionRef: number, rtcSessionDescriptionInitJson: string, callRef: number): any;
@@ -18,7 +20,7 @@ export declare namespace Api {
         onIceconnectionstatechange(rtcPeerConnectionRef: number, iceConnectionState: RTCIceConnectionState): void;
         onIcecandidate(rtcPeerConnectionRef: number, rtcIceCandidateInitOrNullJson: string, localDescriptionRTCSessionDescriptionInitOrNullJson: string): void;
         onSignalingstatechange(rtcPeerConnectionRef: number, rtcSignalingState: RTCSignalingState): void;
-        onMethodReturn(callRef: number, out: string | null): void;
+        onMethodReturn(callRef: number, out: string | undefined): void;
     };
 }
 export declare function useAlternativeWebRTCImplementation(api: Api): void;

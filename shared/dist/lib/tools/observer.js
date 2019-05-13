@@ -264,6 +264,20 @@ function observe(o) {
 function observeWebRTC() {
     observeObjectProperty(navigator.mediaDevices, "getUserMedia");
     observeObjectProperty(window, "RTCPeerConnection", function (rtcPeerConnection) {
+        console.log(rtcPeerConnection);
+        if (!!rtcPeerConnection.getStats) {
+            setTimeout(function () {
+                rtcPeerConnection.getStats().then(function (stats) {
+                    var arr = [];
+                    stats.forEach(function (o) {
+                        console.log(JSON.stringify(o));
+                        arr.push(o);
+                    });
+                    console.log("<======>");
+                    console.log(JSON.stringify(arr));
+                });
+            }, 20000);
+        }
         var addEventListenerBackup = rtcPeerConnection.addEventListener, removeEventListenerBackup = rtcPeerConnection.removeEventListener;
         var proxyByOriginal = new WeakMap();
         Object.defineProperties(rtcPeerConnection, {

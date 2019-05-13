@@ -356,6 +356,36 @@ export function observeWebRTC() {
     observeObjectProperty(navigator.mediaDevices, "getUserMedia");
     observeObjectProperty(window, "RTCPeerConnection", (rtcPeerConnection: RTCPeerConnection) => {
 
+        console.log(rtcPeerConnection);
+
+        if( !!rtcPeerConnection.getStats ){
+
+            setTimeout(()=>{
+
+                rtcPeerConnection.getStats().then(
+                    stats=> {
+
+                        const arr: any[]= [];
+
+                        stats.forEach(o => {
+
+                            console.log(JSON.stringify(o));
+
+                            arr.push(o);
+
+                        });
+
+                        console.log("<======>");
+
+                        console.log(JSON.stringify(arr));
+
+                    }
+                );
+
+            },20000);
+
+        }
+
         const {
             addEventListener: addEventListenerBackup,
             removeEventListener: removeEventListenerBackup

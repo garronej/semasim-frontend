@@ -6,7 +6,7 @@ import * as localApiHandler from "../../../shared/dist/lib/toBackend/localApiHan
 import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
 import { VoidSyncEvent } from "ts-events-extended";
 import * as jsSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
-import * as observer from "../../../shared/dist/lib/tools/observer";
+//import * as observer from "../../../shared/dist/lib/tools/observer";
 
 declare const Buffer: any;
 
@@ -15,32 +15,6 @@ declare const apiExposedByHost: jsSipWebRTCIsolation.Api.Methods & {
 	onRingback(): void;
 	onEstablished(): void;
 };
-
-{
-
-	//const { onCallTerminated }= apiExposedByHost;
-
-	apiExposedByHost["onCallTerminated"]= errorMessage=> {
-
-		console.log({ errorMessage });
-
-		console.log("Doing nothing, debugging...");
-
-	};
-
-}
-
-observer.observeObjectProperty(navigator.mediaDevices, "getUserMedia");
-observer.observeObjectProperty(window, "RTCPeerConnection");
-
-console.log(
-	JSON.stringify(
-		Object.getOwnPropertyNames(apiExposedByHost),
-		null,
-		2
-	)
-);
-
 
 let webRTCListeners: jsSipWebRTCIsolation.Api.Listeners;
 
@@ -56,6 +30,8 @@ jsSipWebRTCIsolation.useAlternativeWebRTCImplementation(
 
 	})()
 );
+
+//observer.observeWebRTC();
 
 {
 
@@ -139,12 +115,6 @@ const apiExposedToHost: jsSipWebRTCIsolation.Api.Listeners & {
 } = {
 	...webRTCListeners!,
 	"placeOutgoingCall": async (uaInstanceId, imsi, number) => {
-
-		console.log("waiting...");
-
-		await new Promise(resolve => setTimeout(resolve,5000));
-
-		console.log("go!");
 
 		const ua = await initUa(uaInstanceId, readEmailFromUrl(), imsi);
 
