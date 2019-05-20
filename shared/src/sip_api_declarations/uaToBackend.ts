@@ -1,5 +1,5 @@
 
-import * as types from "../lib/types";
+import * as types from "../lib/types/userSim";
 
 export namespace notifySimOffline {
 

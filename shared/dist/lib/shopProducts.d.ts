@@ -1,1 +1,1 @@
-export declare function getProducts(assetsRoot: string): import("./types").shop.Product[];
+export declare function getProducts(assetsRoot: string): import("./types/shop").Product[];

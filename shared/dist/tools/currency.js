@@ -45,7 +45,7 @@ var __values = (this && this.__values) || function (o) {
     };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.data = require("../../../res/currency.json");
+exports.data = require("../../res/currency.json");
 function isValidCountryIso(countryIso) {
     //NOTE: Avoid loading if we do not need
     if (isValidCountryIso.countryIsoRecord === undefined) {

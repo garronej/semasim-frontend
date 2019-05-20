@@ -1,6 +1,6 @@
-import * as types from "../lib/types";
+import * as types from "../lib/types/userSim";
+import * as wd from "../lib/types/webphoneData/types";
 import { types as dcTypes } from "chan-dongle-extended-client";
-import wd = types.webphoneData;
 export declare namespace getUsableUserSims {
     const methodName = "getUsableUserSims";
     type Params = {
@@ -157,16 +157,16 @@ export declare namespace getOrCreateInstance {
     };
     type Response = {
         instance_id: number;
-        chats: wd.Chat[];
+        chats: wd.Chat<"ENCRYPTED">[];
     };
 }
 export declare namespace newChat {
     const methodName = "newChat";
     type Params = {
         instance_id: number;
-        contactNumber: string;
-        contactName: string;
-        contactIndexInSim: number | null;
+        contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
+        contactName: wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
     type Response = {
         chat_id: number;
@@ -179,14 +179,14 @@ export declare namespace fetchOlderMessages {
         olderThanMessageId: number;
     };
     /** Message are sorted from the older to the newest */
-    type Response = wd.Message[];
+    type Response = wd.Message<"ENCRYPTED">[];
 }
 export declare namespace updateChat {
     const methodName = "updateChat";
     type Params = {
         chat_id: number;
-        contactIndexInSim?: number | null;
-        contactName?: string;
+        contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactName?: wd.Chat<"ENCRYPTED">["contactName"];
         idOfLastMessageSeen?: number | null;
     };
     type Response = undefined;
@@ -202,7 +202,7 @@ export declare namespace newMessage {
     const methodName = "newMessage";
     type Params = {
         chat_id: number;
-        message: wd.NoId<wd.Message.Incoming | wd.Message.Outgoing.Pending | wd.Message.Outgoing.StatusReportReceived>;
+        message: wd.NoId<wd.Message.Incoming<"ENCRYPTED"> | wd.Message.Outgoing.Pending<"ENCRYPTED"> | wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">>;
     };
     type Response = {
         message_id: number;

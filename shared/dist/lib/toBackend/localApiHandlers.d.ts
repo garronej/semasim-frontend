@@ -1,6 +1,6 @@
 import * as sipLibrary from "ts-sip";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as types from "../types";
+import * as types from "../types/userSim";
 export declare const handlers: sipLibrary.api.Server.Handlers;
 export declare const evtSimIsOnlineStatusChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 /** posted when a user that share the SIM created or updated a contact. */

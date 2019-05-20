@@ -45,7 +45,7 @@ function sendRequest(methodName, params) {
             return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
                     "url": "/" + apiDeclaration.apiPath + "/" + methodName,
                     "method": "POST",
-                    "contentType": "application/json; charset=UTF-8",
+                    //"contentType": "application/json; charset=UTF-8",
                     "data": JSON_CUSTOM.stringify(params),
                     "dataType": "text",
                     "statusCode": {

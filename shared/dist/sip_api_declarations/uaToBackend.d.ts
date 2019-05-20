@@ -1,4 +1,4 @@
-import * as types from "../lib/types";
+import * as types from "../lib/types/userSim";
 export declare namespace notifySimOffline {
     const methodName = "notifySimOffline";
     type Params = {

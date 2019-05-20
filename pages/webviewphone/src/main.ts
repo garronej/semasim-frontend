@@ -3,10 +3,9 @@ import { Ua } from "../../../shared/dist/lib/Ua";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandler from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import { getURLParameter } from "../../../shared/dist/lib/tools/getURLParameter";
+import { getURLParameter } from "../../../shared/dist/tools/getURLParameter";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as jsSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
-//import * as observer from "../../../shared/dist/lib/tools/observer";
+import * as jsSipWebRTCIsolation from "../../../shared/dist/tools/pjSipWebRTCIsolation";
 
 declare const Buffer: any;
 
@@ -18,40 +17,43 @@ declare const apiExposedByHost: jsSipWebRTCIsolation.Api.Methods & {
 
 let webRTCListeners: jsSipWebRTCIsolation.Api.Listeners;
 
-jsSipWebRTCIsolation.useAlternativeWebRTCImplementation(
-	(() => {
+if (typeof apiExposedByHost !== "undefined") {
 
-		const webRTCApi: jsSipWebRTCIsolation.Api = {
-			"methods": apiExposedByHost,
-			"setListeners": listeners => webRTCListeners = listeners
-		};
+	jsSipWebRTCIsolation.useAlternativeWebRTCImplementation(
+		(() => {
 
-		return webRTCApi;
+			const webRTCApi: jsSipWebRTCIsolation.Api = {
+				"methods": apiExposedByHost,
+				"setListeners": listeners => webRTCListeners = listeners
+			};
 
-	})()
-);
+			return webRTCApi;
 
-//observer.observeWebRTC();
-
-{
-
-	let resolvePrErrorMessage: (errorMessage: string) => void;
-	const prErrorMessage = new Promise<string>(resolve => resolvePrErrorMessage = resolve);
-
-	window.onerror = (msg, url, lineNumber) => {
-		resolvePrErrorMessage(`${msg}\n'${url}:${lineNumber}`);
-		return false;
-	};
-
-	(Promise as any).onPossiblyUnhandledRejection(error => {
-		resolvePrErrorMessage(`${error.message} ${error.stack}`);
-	});
-
-	prErrorMessage.then(errorMessage =>
-		apiExposedByHost.onCallTerminated(errorMessage)
+		})()
 	);
 
+	{
+
+		let resolvePrErrorMessage: (errorMessage: string) => void;
+		const prErrorMessage = new Promise<string>(resolve => resolvePrErrorMessage = resolve);
+
+		window.onerror = (msg, url, lineNumber) => {
+			resolvePrErrorMessage(`${msg}\n'${url}:${lineNumber}`);
+			return false;
+		};
+
+		(Promise as any).onPossiblyUnhandledRejection(error => {
+			resolvePrErrorMessage(`${error.message} ${error.stack}`);
+		});
+
+		prErrorMessage.then(errorMessage =>
+			apiExposedByHost.onCallTerminated(errorMessage)
+		);
+
+	}
+
 }
+
 
 const evtAcceptIncomingCall = new VoidSyncEvent();
 

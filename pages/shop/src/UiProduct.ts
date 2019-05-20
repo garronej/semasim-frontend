@@ -1,7 +1,7 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types";
-import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
+import * as types from "../../../shared/dist/lib/types/shop";
+import { convertFromEuro } from "../../../shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 
@@ -30,7 +30,7 @@ export class UiProduct {
     private currency!: string;
 
     constructor(
-        public readonly product: types.shop.Product,
+        public readonly product: types.Product,
         currency: string
     ) {
 
@@ -123,7 +123,7 @@ export class UiProduct {
     private updatePrice() {
 
         this.structure.find(".id_product_price").text(
-            types.shop.Price.prettyPrint(
+            types.Price.prettyPrint(
                 this.product.price,
                 this.currency,
                 convertFromEuro

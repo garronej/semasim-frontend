@@ -4,13 +4,13 @@ import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { UiVoiceCall } from "./UiVoiceCall";
 import { Ua } from "../../../shared/dist/lib/Ua";
-import * as types from "../../../shared/dist/lib/types";
-import wd = types.webphoneData;
+import * as types from "../../../shared/dist/lib/types/userSim";
+import * as wd from "../../../shared/dist/lib/types/webphoneData/types";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 
 declare const require: any;
 
@@ -33,7 +33,7 @@ export class UiWebphoneController {
 
     public constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance,
+        public readonly wdInstance: wd.Instance<"PLAIN">,
     ) {
 
         this.ua = new Ua(userSim.sim.imsi, userSim.password);
@@ -191,12 +191,12 @@ export class UiWebphoneController {
 
                 const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
-                const prWdMessage: Promise<Exclude<wd.Message, wd.Message.Outgoing.Pending> | undefined> = (() => {
+                const prWdMessage: Promise<Exclude<wd.Message<"PLAIN">, wd.Message.Outgoing.Pending<"PLAIN">> | undefined> = (() => {
 
                     switch (bundledData.type) {
                         case "MESSAGE": {
 
-                            const message: wd.NoId<wd.Message.Incoming.Text> = {
+                            const message: wd.NoId<wd.Message.Incoming.Text<"PLAIN">> = {
                                 "direction": "INCOMING",
                                 "isNotification": false,
                                 "time": bundledData.pduDate.getTime(),
@@ -219,11 +219,11 @@ export class UiWebphoneController {
 
                             } else {
 
-                                const message: wd.NoId<wd.Message.Outgoing.StatusReportReceived> = {
+                                const message: wd.NoId<wd.Message.Outgoing.StatusReportReceived<"PLAIN">> = {
                                     "time": bundledData.messageTowardGsm.date.getTime(),
                                     "direction": "OUTGOING",
                                     "text": bundledData.messageTowardGsm.text,
-                                    "sentBy": ((): wd.Message.Outgoing.StatusReportReceived["sentBy"] =>
+                                    "sentBy": ((): wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =>
                                         (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) ?
                                             ({ "who": "USER" }) :
                                             ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail })
@@ -241,7 +241,7 @@ export class UiWebphoneController {
                         case "CALL ANSWERED BY":
                         case "MISSED CALL": {
 
-                            const message: wd.NoId<wd.Message.Incoming.Notification> = {
+                            const message: wd.NoId<wd.Message.Incoming.Notification<"PLAIN">> = {
                                 "direction": "INCOMING",
                                 "isNotification": true,
                                 "time": (bundledData.type === "MMS NOTIFICATION" ?
@@ -395,9 +395,9 @@ export class UiWebphoneController {
 
     }
 
-    private readonly _uiConversations = new Map<wd.Chat, UiConversation>();
+    private readonly _uiConversations = new Map<wd.Chat<"PLAIN">, UiConversation>();
 
-    private getOrCreateUiConversation(wdChat: wd.Chat): UiConversation {
+    private getOrCreateUiConversation(wdChat: wd.Chat<"PLAIN">): UiConversation {
 
         if (this._uiConversations.has(wdChat)) {
             return this._uiConversations.get(wdChat)!;
@@ -434,7 +434,7 @@ export class UiWebphoneController {
                     uiConversation.wdChat,
                     (() => {
 
-                        const message: wd.NoId<wd.Message.Outgoing.Pending> = {
+                        const message: wd.NoId<wd.Message.Outgoing.Pending<"PLAIN">> = {
                             "time": exactSendDate.getTime(),
                             "direction": "OUTGOING",
                             "status": "PENDING",
@@ -649,7 +649,7 @@ export class UiWebphoneController {
 
     }
 
-    private async getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<wd.Chat> {
+    private async getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<wd.Chat<"PLAIN">> {
 
         let wdChat = this.wdInstance.chats.find(
             ({ contactNumber }) => contactNumber === number

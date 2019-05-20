@@ -121,7 +121,7 @@ export namespace getSubscriptionInfos {
 
     export type Params = undefined;
 
-    export type Response = import("./lib/types").SubscriptionInfos;
+    export type Response = import("./lib/types/subscription").SubscriptionInfos;
 
 }
 
@@ -151,7 +151,7 @@ export namespace createStripeCheckoutSessionForShop {
 
     export type Params= {
         cartDescription: { productName: string; quantity: number; }[];
-        shippingFormData: import("./lib/types").shop.ShippingFormData;
+        shippingFormData: import("./lib/types/shop").ShippingFormData;
         currency: string;
         success_url: string;
         cancel_url: string;
@@ -199,7 +199,7 @@ export namespace getOrders {
         }[];
         isShipped: boolean;
         trackingUrl: string | undefined;
-        stripeShippingInformation: import("./lib/types").shop.StripeShippingInformation;
+        stripeShippingInformation: import("./lib/types/shop").StripeShippingInformation;
     }[];
 
 

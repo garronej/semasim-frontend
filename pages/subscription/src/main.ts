@@ -2,10 +2,10 @@ declare const require: (path: string) => any;
 require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
-import "../../../shared/dist/lib/tools/standalonePolyfills";
+import "../../../shared/dist/tools/standalonePolyfills";
 
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { UiController } from "./UiController";
 
 declare const apiExposedByHost: {

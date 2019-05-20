@@ -63,6 +63,7 @@ function browserify(entry_point_file_path, dst_file_path, watch) {
         }
     });
 }
+exports.browserify = browserify;
 function minify(file_path, watch) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("minify");

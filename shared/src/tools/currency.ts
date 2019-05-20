@@ -7,7 +7,7 @@ export const data: {
         name: string; 
         countriesIso: string[] 
     }; 
-}= require("../../../res/currency.json");
+}= require("../../res/currency.json");
 
 export function isValidCountryIso(countryIso: string): boolean {
 

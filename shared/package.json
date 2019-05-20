@@ -1,17 +1,20 @@
 {
   "name": "frontend-shared",
   "scripts": {
-    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json"
+    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
+    "build_test": "npm run tsc && node ./dist/bin/browserify-tests.js"
   },
   "dependencies": {
     "chan-dongle-extended-client": "garronej/chan-dongle-extended-client"
   },
   "devDependencies": {
-    "run-exclusive": "github:garronej/run-exclusive",
     "@types/bootstrap": "3.3.28",
     "@types/jquery": "2.0.48",
+    "aes-js": "3.1.2",
     "js-cookie": "^2.2.0",
     "phone-number": "github:garronej/phone-number",
+    "run-exclusive": "github:garronej/run-exclusive",
+    "scryptsy": "^2.0.0",
     "transfer-tools": "garronej/transfer-tools",
     "ts-events-extended": "github:garronej/ts-events-extended",
     "ts-sip": "github:garronej/ts-sip",

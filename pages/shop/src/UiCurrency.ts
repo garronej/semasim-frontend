@@ -2,8 +2,8 @@
 
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as currencyLib from "../../../shared/dist/lib/tools/currency";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as currencyLib from "../../../shared/dist/tools/currency";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 
 declare const require: any;
 

@@ -2,12 +2,12 @@
 import * as apiDeclaration from "../../sip_api_declarations/uaToBackend";
 import * as sipLibrary from "ts-sip";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as types from "../types";
+import * as types from "../types/userSim";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import * as remoteApiCaller from "./remoteApiCaller";
 
 //NOTE: Global JS deps.
-import * as bootbox_custom from "../tools/bootbox_custom";
+import * as bootbox_custom from "../../tools/bootbox_custom";
 
 export const handlers: sipLibrary.api.Server.Handlers = {};
 

@@ -1,10 +1,10 @@
 
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/shop";
 import { assetsRoot } from "../../../shared/dist/lib/env";
 import { solve as solveShipping } from "../../../shared/dist/lib/shipping";
-import { convertFromEuro } from "../../../shared/dist/lib/tools/currency";
+import { convertFromEuro } from "../../../shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 
@@ -36,7 +36,7 @@ export class UiCart {
 
     }
 
-    public getCart(): types.shop.Cart {
+    public getCart(): types.Cart {
         return this.uiCartEntries
             .map(({ cartEntry }) => cartEntry)
             ;
@@ -79,11 +79,11 @@ export class UiCart {
 
         const shipping = solveShipping(
             this.shipToCountryIso,
-            types.shop.Cart.getOverallFootprint(cart),
-            types.shop.Cart.getOverallWeight(cart)
+            types.Cart.getOverallFootprint(cart),
+            types.Cart.getOverallWeight(cart)
         );
 
-        const cartPrice = types.shop.Cart.getPrice(
+        const cartPrice = types.Cart.getPrice(
             cart,
             convertFromEuro
         );
@@ -91,7 +91,7 @@ export class UiCart {
         console.log("TODO: display delay ", shipping.delay);
 
         this.structure.find(".id_cart_price").text(
-            types.shop.Price.prettyPrint(
+            types.Price.prettyPrint(
                 cartPrice,
                 this.currency,
                 convertFromEuro
@@ -99,7 +99,7 @@ export class UiCart {
         );
 
         this.structure.find(".id_shipping_price").text(
-            types.shop.Price.prettyPrint(
+            types.Price.prettyPrint(
                 { "eur": shipping.eurAmount },
                 this.currency,
                 convertFromEuro
@@ -107,8 +107,8 @@ export class UiCart {
         );
 
         this.structure.find(".id_cart_total").text(
-            types.shop.Price.prettyPrint(
-                types.shop.Price.addition(
+            types.Price.prettyPrint(
+                types.Price.addition(
                     cartPrice,
                     { "eur": shipping.eurAmount },
                     convertFromEuro
@@ -120,7 +120,7 @@ export class UiCart {
 
     }
 
-    public addProduct(product: types.shop.Product) {
+    public addProduct(product: types.Product) {
 
         {
 
@@ -186,7 +186,7 @@ class UiCartEntry {
     }
 
     constructor(
-        public readonly cartEntry: types.shop.Cart.Entry,
+        public readonly cartEntry: types.Cart.Entry,
         currency: string
     ) {
 
@@ -263,8 +263,8 @@ class UiCartEntry {
     private updateDisplayedPrice() {
 
         this.structure.find(".total-price").html(
-            types.shop.Price.prettyPrint(
-                types.shop.Price.operation(
+            types.Price.prettyPrint(
+                types.Price.operation(
                     this.cartEntry.product.price,
                     amount => amount * this.cartEntry.quantity
                 ),

@@ -1,9 +1,9 @@
 import { SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/userSim";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiSimRow } from "./UiSimRow";

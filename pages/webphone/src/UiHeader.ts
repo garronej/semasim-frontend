@@ -1,7 +1,7 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/userSim";
 
 declare const require: any;
 

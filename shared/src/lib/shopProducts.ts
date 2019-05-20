@@ -1,6 +1,6 @@
 
 
-export function getProducts(assetsRoot: string): import("./types").shop.Product[] {
+export function getProducts(assetsRoot: string): import("./types/shop").Product[] {
     return [
         {
             "name": "Semasim Gateway v1.0",

@@ -13,7 +13,7 @@ async function sendRequest<Params, Response>(
         resolve => (window["$"] as JQueryStatic).ajax({
             "url": `/${apiDeclaration.apiPath}/${methodName}`,
             "method": "POST",
-            "contentType": "application/json; charset=UTF-8",
+            //"contentType": "application/json; charset=UTF-8",
             "data": JSON_CUSTOM.stringify(params),
             "dataType": "text",
             "statusCode": {
@@ -187,8 +187,8 @@ export async function unsubscribe() {
 }
 
 export function createStripeCheckoutSessionForShop(
-    cart: import("./types").shop.Cart,
-    shippingFormData: import("./types").shop.ShippingFormData,
+    cart: import("./types/shop").Cart,
+    shippingFormData: import("./types/shop").ShippingFormData,
     currency: string,
     success_url: string,
     cancel_url: string

@@ -5,12 +5,12 @@ import { UiProduct } from "./UiProduct";
 import { getProducts } from "../../../shared/dist/lib/shopProducts";
 import * as env from "../../../shared/dist/lib/env";
 import { UiShipTo } from "./UiShipTo";
-import { getCountryCurrency } from "../../../shared/dist/lib/tools/currency";
+import { getCountryCurrency } from "../../../shared/dist/tools/currency";
 import { UiCurrency } from "./UiCurrency";
 import { UiShippingForm } from "./UiShippingForm";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/shop";
 
 declare const Stripe: any;
 
@@ -112,8 +112,8 @@ export class UiController {
     }
 
     private async interact_checkout(
-        cart: types.shop.Cart, 
-        shippingFormData: types.shop.ShippingFormData,
+        cart: types.Cart, 
+        shippingFormData: types.ShippingFormData,
         currency: string
     ) {
 

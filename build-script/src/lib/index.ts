@@ -69,7 +69,7 @@ export async function tsc(
 
 }
 
-async function browserify(
+export async function browserify(
     entry_point_file_path: string,
     dst_file_path: string,
     watch?: undefined | "WATCH"

@@ -1,11 +1,11 @@
 //NOTE: Slimscroll must be loaded on the page.
 
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/userSim";
 import { assetsRoot } from "../../../shared/dist/lib/env";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
-import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
-import { isAscendingAlphabeticalOrder } from "../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import * as modal_stack from "../../../shared/dist/tools/modal_stack";
+import { isAscendingAlphabeticalOrder } from "../../../shared/dist/tools/isAscendingAlphabeticalOrder";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 

@@ -2,8 +2,8 @@
 
 import { VoidSyncEvent } from "ts-events-extended";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as modal_stack from "../../../shared/dist/lib/tools/modal_stack";
-import * as types from "../../../shared/dist/lib/types";
+import * as modal_stack from "../../../shared/dist/tools/modal_stack";
+import * as types from "../../../shared/dist/lib/types/shop";
 
 declare const google: any;
 declare const require: any;
@@ -102,11 +102,11 @@ export class UiShippingForm {
 
     }
 
-    public async interact_getAddress(): Promise<types.shop.ShippingFormData | undefined> {
+    public async interact_getAddress(): Promise<types.ShippingFormData | undefined> {
 
-        let resolvePrOut: (shippingFormData: types.shop.ShippingFormData | undefined) => void;
+        let resolvePrOut: (shippingFormData: types.ShippingFormData | undefined) => void;
 
-        const prOut = new Promise<types.shop.ShippingFormData | undefined>(
+        const prOut = new Promise<types.ShippingFormData | undefined>(
             resolve => resolvePrOut = resolve
         );
 

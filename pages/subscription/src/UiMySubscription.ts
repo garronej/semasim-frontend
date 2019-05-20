@@ -1,8 +1,8 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/subscription";
 import * as moment from "moment";
-import * as currencyLib from "../../../shared/dist/lib/tools/currency";
+import * as currencyLib from "../../../shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 

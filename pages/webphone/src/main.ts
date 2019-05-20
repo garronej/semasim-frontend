@@ -2,16 +2,18 @@ declare const require: (path: string) => any;
 require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
-import "../../../shared/dist/lib/tools/standalonePolyfills";
+import "../../../shared/dist/tools/standalonePolyfills";
 
 import { Ua } from "../../../shared/dist/lib/Ua";
 import { UiWebphoneController } from "./UiWebphoneController";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as bootbox_custom from "../../../shared/dist/lib/tools/bootbox_custom";
+import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/userSim";
+import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
+import * as aes from "../../../shared/dist/tools/crypto/aes";
 //import * as observer from "../../../shared/dist/lib/tools/observer";
 //import * as pjSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
 
@@ -33,6 +35,12 @@ $(document).ready(async () => {
 
 	});
 
+	remoteApiCaller.setEncryptorDecryptor(
+		aes.encryptorDecryptorFactory(
+			await aes.generateTestKey()
+		)
+	);
+
 	connection.connect({ "requestTurnCred": true });
 
 	$("#page-payload").html("");
@@ -47,7 +55,7 @@ $(document).ready(async () => {
 
 	}
 
-	const wdInstances = new Map<types.UserSim, types.webphoneData.Instance>();
+	const wdInstances = new Map<types.UserSim, wd.Instance<"PLAIN">>();
 
 	await Promise.all([
 		remoteApiCaller.getUaInstanceId()
@@ -67,7 +75,7 @@ $(document).ready(async () => {
 			}
 
 			const [c1, c2] = [s1, s2].map(userSim =>
-				types.webphoneData.getChatWithLatestActivity(
+				wd.getChatWithLatestActivity(
 					wdInstances.get(userSim)!
 				)
 			);
@@ -80,7 +88,7 @@ $(document).ready(async () => {
 				return 0;
 			}
 
-			return types.webphoneData.compareChat(c1, c2!);
+			return wd.compareChat(c1, c2!);
 
 		})
 		.reverse()

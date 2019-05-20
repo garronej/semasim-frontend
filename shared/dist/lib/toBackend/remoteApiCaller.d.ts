@@ -1,9 +1,10 @@
 import { SyncEvent } from "ts-events-extended";
 import * as apiDeclaration from "../../sip_api_declarations/backendToUa";
 import { types as gwTypes } from "../../gateway";
-import * as types from "../types";
-import wd = types.webphoneData;
+import * as types from "../types/userSim";
+import * as wd from "../types/webphoneData/logic";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
+import * as cryptoLib from "../../tools/crypto/library";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export declare const evtUsableSim: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const getUsableUserSims: (includeContacts?: boolean, stateless?: false | "STATELESS") => Promise<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>[]>;
@@ -22,9 +23,11 @@ export declare const deleteContact: (userSim: types.UserSim._Base<types.SimOwner
 /** Api only called once */
 export declare const shouldAppendPromotionalMessage: () => boolean | Promise<boolean>;
 export declare const getUaInstanceId: () => Promise<apiDeclaration.getUaInstanceId.Response>;
-export declare const getOrCreateWdInstance: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<wd.Instance>;
-export declare const newWdChat: (wdInstance: wd.Instance, contactNumber: string, contactName: string, contactIndexInSim: number | null) => Promise<wd.Chat>;
-export declare const fetchOlderWdMessages: (wdChat: wd.Chat) => Promise<wd.Message[]>;
+/** Must be called prior any wd related API call */
+export declare function setEncryptorDecryptor(encryptorDecryptor1: cryptoLib.EncryptorDecryptor): void;
+export declare const getOrCreateWdInstance: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<wd.Instance<"PLAIN">>;
+export declare const newWdChat: (wdInstance: wd.Instance<"PLAIN">, contactNumber: string, contactName: string, contactIndexInSim: number | null) => Promise<wd.Chat<"PLAIN">>;
+export declare const fetchOlderWdMessages: (wdChat: wd.Chat<"PLAIN">) => Promise<wd.Message<"PLAIN">[]>;
 /**
  *
  * If same as before the request won't be sent
@@ -32,7 +35,7 @@ export declare const fetchOlderWdMessages: (wdChat: wd.Chat) => Promise<wd.Messa
  * return true if update was performed
  *
  * */
-export declare function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat): Promise<boolean>;
+export declare function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat<"PLAIN">): Promise<boolean>;
 /**
  *
  * If same as before the request won't be sent
@@ -40,11 +43,11 @@ export declare function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat): Promis
  * return true if update was performed
  *
  * */
-export declare function updateWdChatContactInfos(wdChat: wd.Chat, contactName: string, contactIndexInSim: number | null): Promise<boolean>;
-export declare const destroyWdChat: (wdInstance: wd.Instance, wdChat: wd.Chat) => Promise<void>;
+export declare function updateWdChatContactInfos(wdChat: wd.Chat<"PLAIN">, contactName: string, contactIndexInSim: number | null): Promise<boolean>;
+export declare const destroyWdChat: (wdInstance: wd.Instance<"PLAIN">, wdChat: wd.Chat<"PLAIN">) => Promise<void>;
 /** Return undefined when the INCOMING message have been received already */
-export declare function newWdMessage<T extends wd.Message.Outgoing.Pending>(wdChat: wd.Chat, message: wd.NoId<T>): Promise<T>;
-export declare function newWdMessage<T extends wd.Message.Incoming | wd.Message.Outgoing.StatusReportReceived>(wdChat: wd.Chat, message: wd.NoId<T>): Promise<T | undefined>;
-export declare function notifyUaFailedToSendMessage(wdChat: wd.Chat, wdMessage: wd.Message.Outgoing.Pending): Promise<wd.Message.Outgoing.SendReportReceived>;
-export declare function notifySendReportReceived(wdChat: wd.Chat, sendReportBundledData: gwTypes.BundledData.ServerToClient.SendReport): Promise<wd.Message.Outgoing.SendReportReceived | undefined>;
-export declare const notifyStatusReportReceived: (wdChat: wd.Chat, statusReportBundledData: gwTypes.BundledData.ServerToClient.StatusReport) => Promise<wd.Message.Outgoing.StatusReportReceived.SentByUser | undefined>;
+export declare function newWdMessage<T extends wd.Message.Outgoing.Pending<"PLAIN">>(wdChat: wd.Chat<"PLAIN">, message: wd.NoId<T>): Promise<T>;
+export declare function newWdMessage<T extends wd.Message.Incoming<"PLAIN"> | wd.Message.Outgoing.StatusReportReceived<"PLAIN">>(wdChat: wd.Chat<"PLAIN">, message: wd.NoId<T>): Promise<T | undefined>;
+export declare function notifyUaFailedToSendMessage(wdChat: wd.Chat<"PLAIN">, wdMessage: wd.Message.Outgoing.Pending<"PLAIN">): Promise<wd.Message.Outgoing.SendReportReceived<"PLAIN">>;
+export declare function notifySendReportReceived(wdChat: wd.Chat<"PLAIN">, sendReportBundledData: gwTypes.BundledData.ServerToClient.SendReport): Promise<wd.Message.Outgoing.SendReportReceived<"PLAIN"> | undefined>;
+export declare const notifyStatusReportReceived: (wdChat: wd.Chat<"PLAIN">, statusReportBundledData: gwTypes.BundledData.ServerToClient.StatusReport) => Promise<wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN"> | undefined>;

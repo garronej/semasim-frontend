@@ -1,7 +1,7 @@
 
-import * as types  from "../lib/types"
+import * as types  from "../lib/types/userSim"
+import * as wd from "../lib/types/webphoneData/types";
 import { types as dcTypes } from "chan-dongle-extended-client";
-import wd = types.webphoneData;
 
 export namespace getUsableUserSims {
 
@@ -237,7 +237,7 @@ export namespace getOrCreateInstance {
 
     export type Response = {
         instance_id: number;
-        chats: wd.Chat[];
+        chats: wd.Chat<"ENCRYPTED">[];
     };
 
 }
@@ -248,9 +248,9 @@ export namespace newChat {
 
     export type Params = {
         instance_id: number;
-        contactNumber: string;
-        contactName: string;
-        contactIndexInSim: number | null;
+        contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
+        contactName: wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
 
     export type Response = { chat_id: number; };
@@ -267,7 +267,7 @@ export namespace fetchOlderMessages {
     };
 
     /** Message are sorted from the older to the newest */
-    export type Response = wd.Message[];
+    export type Response = wd.Message<"ENCRYPTED">[];
 
 }
 
@@ -277,8 +277,8 @@ export namespace updateChat {
 
     export type Params = {
         chat_id: number;
-        contactIndexInSim?: number | null;
-        contactName?: string;
+        contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactName?: wd.Chat<"ENCRYPTED">["contactName"];
         idOfLastMessageSeen?: number | null; /* id_ of last message not send by user */
     };
 
@@ -303,15 +303,16 @@ export namespace newMessage {
     export type Params = {
         chat_id: number;
         message: wd.NoId<
-        wd.Message.Incoming |
-        wd.Message.Outgoing.Pending |
-        wd.Message.Outgoing.StatusReportReceived
+            wd.Message.Incoming<"ENCRYPTED"> |
+            wd.Message.Outgoing.Pending<"ENCRYPTED"> |
+            wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">
         >;
     };
 
     export type Response = { message_id: number; };
 
 }
+
 
 export namespace notifySendReportReceived {
 

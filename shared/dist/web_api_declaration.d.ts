@@ -77,7 +77,7 @@ export declare namespace getChangesRates {
 export declare namespace getSubscriptionInfos {
     const methodName = "get-subscription-infos";
     type Params = undefined;
-    type Response = import("./lib/types").SubscriptionInfos;
+    type Response = import("./lib/types/subscription").SubscriptionInfos;
 }
 export declare namespace subscribeOrUpdateSource {
     const methodName = "subscribe-or-update-source";
@@ -98,7 +98,7 @@ export declare namespace createStripeCheckoutSessionForShop {
             productName: string;
             quantity: number;
         }[];
-        shippingFormData: import("./lib/types").shop.ShippingFormData;
+        shippingFormData: import("./lib/types/shop").ShippingFormData;
         currency: string;
         success_url: string;
         cancel_url: string;
@@ -135,6 +135,6 @@ export declare namespace getOrders {
         }[];
         isShipped: boolean;
         trackingUrl: string | undefined;
-        stripeShippingInformation: import("./lib/types").shop.StripeShippingInformation;
+        stripeShippingInformation: import("./lib/types/shop").StripeShippingInformation;
     }[];
 }

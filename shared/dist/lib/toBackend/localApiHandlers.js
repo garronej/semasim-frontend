@@ -41,7 +41,7 @@ var ts_events_extended_1 = require("ts-events-extended");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
 var remoteApiCaller = require("./remoteApiCaller");
 //NOTE: Global JS deps.
-var bootbox_custom = require("../tools/bootbox_custom");
+var bootbox_custom = require("../../tools/bootbox_custom");
 exports.handlers = {};
 exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
 {

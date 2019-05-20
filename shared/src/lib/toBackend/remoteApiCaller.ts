@@ -5,9 +5,10 @@ import * as apiDeclaration from "../../sip_api_declarations/backendToUa";
 import * as connection from "./connection";
 import { types as gwTypes } from "../../gateway";
 import { phoneNumber } from "phone-number";
-import * as types from "../types";
-import wd = types.webphoneData;
+import * as types from "../types/userSim";
+import * as wd from "../types/webphoneData/logic"
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
+import * as cryptoLib from "../../tools/crypto/library";
 
 
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
@@ -505,6 +506,16 @@ export const getUaInstanceId = (() => {
 //WebData sync things :
 
 
+
+let encryptorDecryptor: cryptoLib.EncryptorDecryptor;
+
+
+/** Must be called prior any wd related API call */
+export function setEncryptorDecryptor(encryptorDecryptor1: cryptoLib.EncryptorDecryptor){
+    encryptorDecryptor= encryptorDecryptor1;
+}
+
+
 export const getOrCreateWdInstance = (() => {
 
     const methodName = apiDeclaration.getOrCreateInstance.methodName;
@@ -513,7 +524,7 @@ export const getOrCreateWdInstance = (() => {
 
     async function synchronizeUserSimAndWdInstance(
         userSim: types.UserSim.Usable,
-        wdInstance: wd.Instance
+        wdInstance: wd.Instance<"PLAIN">
     ): Promise<void> {
 
         const wdChatWhoseContactNoLongerInPhonebook = new Set(wdInstance.chats);
@@ -562,7 +573,7 @@ export const getOrCreateWdInstance = (() => {
 
     return async function (
         userSim: types.UserSim.Usable
-    ): Promise<wd.Instance> {
+    ): Promise<wd.Instance<"PLAIN">> {
 
         const { imsi } = userSim.sim;
 
@@ -571,10 +582,10 @@ export const getOrCreateWdInstance = (() => {
             { imsi }
         );
 
-        const wdInstance: wd.Instance = {
+        const wdInstance: wd.Instance<"PLAIN"> = {
             "id_": instance_id,
             imsi,
-            chats
+            "chats": chats.map(chat=> wd.decryptChat(encryptorDecryptor, chat))
         };
 
         await synchronizeUserSimAndWdInstance(userSim, wdInstance);
@@ -593,23 +604,25 @@ export const newWdChat = (() => {
     type Response = apiDeclaration.newChat.Response;
 
     return async function (
-        wdInstance: wd.Instance,
+        wdInstance: wd.Instance<"PLAIN">,
         contactNumber: phoneNumber,
         contactName: string,
         contactIndexInSim: number | null
-    ): Promise<wd.Chat> {
+    ): Promise<wd.Chat<"PLAIN">> {
+
+        const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
 
         const { chat_id } = await sendRequest<Params, Response>(
             methodName,
             {
                 "instance_id": wdInstance.id_,
-                contactNumber,
-                contactName,
-                contactIndexInSim
+                "contactNumber": { "encrypted_string": stringifyThenEncrypt<string>(contactNumber) },
+                "contactName": { "encrypted_string": stringifyThenEncrypt<string>(contactName) },
+                "contactIndexInSim": { "encrypted_number_or_null": stringifyThenEncrypt<number | null>(contactIndexInSim) }
             }
         );
 
-        const wdChat: wd.Chat = {
+        const wdChat: wd.Chat<"PLAIN"> = {
             "id_": chat_id,
             contactNumber,
             contactName,
@@ -634,8 +647,8 @@ export const fetchOlderWdMessages = (() => {
     type Response = apiDeclaration.fetchOlderMessages.Response;
 
     return async function (
-        wdChat: wd.Chat
-    ): Promise<wd.Message[]> {
+        wdChat: wd.Chat<"PLAIN">
+    ): Promise<wd.Message<"PLAIN">[]> {
 
         const lastMessage = wdChat.messages.slice(-1).pop();
 
@@ -645,12 +658,14 @@ export const fetchOlderWdMessages = (() => {
 
         const olderThanMessageId = wdChat.messages[0].id_;
 
-        let olderWdMessages = await sendRequest<Params, Response>(
+        let olderWdMessages = (await sendRequest<Params, Response>(
             methodName,
             {
                 "chat_id": wdChat.id_,
                 olderThanMessageId
             }
+        )).map( encryptedOlderMessage => 
+            wd.decryptMessage(encryptorDecryptor, encryptedOlderMessage)
         );
 
         const set = new Set(wdChat.messages.map(({ id_ }) => id_));
@@ -694,7 +709,7 @@ export const fetchOlderWdMessages = (() => {
  * return true if update was performed
  * 
  * */
-export async function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat): Promise<boolean> {
+export async function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat<"PLAIN">): Promise<boolean> {
 
     let message_id: number | undefined = undefined;
 
@@ -733,7 +748,7 @@ export async function updateWdChatIdOfLastMessageSeen(wdChat: wd.Chat): Promise<
  * 
  * */
 export function updateWdChatContactInfos(
-    wdChat: wd.Chat,
+    wdChat: wd.Chat<"PLAIN">,
     contactName: string,
     contactIndexInSim: number | null
 ): Promise<boolean> {
@@ -762,13 +777,15 @@ const updateWdChat = (() => {
      * 
      * */
     return async function (
-        wdChat: wd.Chat,
-        fields: Partial<Pick<wd.Chat, "contactName" | "contactIndexInSim" | "idOfLastMessageSeen">>
+        wdChat: wd.Chat<"PLAIN">,
+        fields: Partial<Pick<wd.Chat<"PLAIN">, "contactName" | "contactIndexInSim" | "idOfLastMessageSeen">>
     ): Promise<boolean> {
+
+        const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
 
         const params: Params = { "chat_id": wdChat.id_ };
 
-        for (const key in fields) {
+        for (const key of Object.keys(fields) as (keyof typeof fields)[]) {
 
             const value = fields[key];
 
@@ -776,7 +793,17 @@ const updateWdChat = (() => {
                 continue;
             }
 
-            params[key] = value;
+            params[key] = (()=>{
+                switch(key){
+                    case "contactName": return { 
+                        "encrypted_string": stringifyThenEncrypt<string>(value as string)
+                    };
+                    case "contactIndexInSim": return { 
+                        "encrypted_number_or_null": stringifyThenEncrypt<number | null>(value as number | null) 
+                    };
+                    case "idOfLastMessageSeen": return value as number;
+                }
+            })();
 
         }
 
@@ -789,11 +816,9 @@ const updateWdChat = (() => {
             params
         );
 
-        delete params.chat_id;
+        for (const key in fields) {
 
-        for (const key in params) {
-
-            wdChat[key] = params[key];
+            wdChat[key] = fields[key];
 
         }
 
@@ -811,8 +836,8 @@ export const destroyWdChat = (() => {
     type Response = apiDeclaration.destroyChat.Response;
 
     return async function (
-        wdInstance: wd.Instance,
-        wdChat: wd.Chat
+        wdInstance: wd.Instance<"PLAIN">,
+        wdChat: wd.Chat<"PLAIN">
     ): Promise<void> {
 
         await sendRequest<Params, Response>(
@@ -829,33 +854,33 @@ export const destroyWdChat = (() => {
 
 
 /** Return undefined when the INCOMING message have been received already */
-export async function newWdMessage<T extends wd.Message.Outgoing.Pending>(
-    wdChat: wd.Chat,
+export async function newWdMessage<T extends wd.Message.Outgoing.Pending<"PLAIN">>(
+    wdChat: wd.Chat<"PLAIN">,
     message: wd.NoId<T>
 ): Promise<T>;
-export async function newWdMessage<T extends wd.Message.Incoming | wd.Message.Outgoing.StatusReportReceived>(
-    wdChat: wd.Chat,
+export async function newWdMessage<T extends wd.Message.Incoming<"PLAIN"> | wd.Message.Outgoing.StatusReportReceived<"PLAIN">>(
+    wdChat: wd.Chat<"PLAIN">,
     message: wd.NoId<T>
 ): Promise<T | undefined>;
 export async function newWdMessage<T extends (
-    wd.Message.Incoming |
-    wd.Message.Outgoing.Pending |
-    wd.Message.Outgoing.StatusReportReceived
+    wd.Message.Incoming<"PLAIN"> |
+    wd.Message.Outgoing.Pending<"PLAIN"> |
+    wd.Message.Outgoing.StatusReportReceived<"PLAIN">
 )>(
-    wdChat: wd.Chat,
+    wdChat: wd.Chat<"PLAIN">,
     message_: wd.NoId<T>
 ): Promise<T | undefined> {
 
     //NOTE: The type system does not handle it's edge case, need to cast.
     const message:
         wd.NoId<
-            wd.Message.Incoming |
-            wd.Message.Outgoing.Pending |
-            wd.Message.Outgoing.StatusReportReceived
+            wd.Message.Incoming<"PLAIN"> |
+            wd.Message.Outgoing.Pending<"PLAIN"> |
+            wd.Message.Outgoing.StatusReportReceived<"PLAIN">
         > = message_ as any;
 
     const isSameWdMessage = (
-        wdMessage: wd.Message
+        wdMessage: wd.Message<"PLAIN">
     ): boolean => {
 
         const areSame = (o1: Object, o2: Object): boolean => {
@@ -901,7 +926,14 @@ export async function newWdMessage<T extends (
 
     const { message_id } = await sendRequest<Params, Response>(
         methodName,
-        { "chat_id": wdChat.id_, message }
+        { 
+            "chat_id": wdChat.id_, 
+            "message": wd.encryptMessage(encryptorDecryptor,message) as  wd.NoId< 
+            wd.Message.Incoming<"ENCRYPTED"> | 
+            wd.Message.Outgoing.Pending<"ENCRYPTED"> | 
+            wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED"> 
+            >
+        }
     );
 
     const wdMessage = ({ ...message, "id_": message_id }) as any;
@@ -915,9 +947,9 @@ export async function newWdMessage<T extends (
 }
 
 export function notifyUaFailedToSendMessage(
-    wdChat: wd.Chat,
-    wdMessage: wd.Message.Outgoing.Pending
-): Promise<wd.Message.Outgoing.SendReportReceived> {
+    wdChat: wd.Chat<"PLAIN">,
+    wdMessage: wd.Message.Outgoing.Pending<"PLAIN">
+): Promise<wd.Message.Outgoing.SendReportReceived<"PLAIN">> {
 
     return _notifySendReportReceived(wdChat, wdMessage, false);
 
@@ -925,11 +957,11 @@ export function notifyUaFailedToSendMessage(
 
 
 export function notifySendReportReceived(
-    wdChat: wd.Chat,
+    wdChat: wd.Chat<"PLAIN">,
     sendReportBundledData: gwTypes.BundledData.ServerToClient.SendReport
-): Promise<wd.Message.Outgoing.SendReportReceived | undefined> {
+): Promise<wd.Message.Outgoing.SendReportReceived<"PLAIN"> | undefined> {
 
-    const wdMessage: wd.Message.Outgoing.Pending | undefined = (() => {
+    const wdMessage: wd.Message.Outgoing.Pending<"PLAIN"> | undefined = (() => {
 
         for (let i = wdChat.messages.length - 1; i >= 0; i--) {
 
@@ -970,10 +1002,10 @@ const _notifySendReportReceived = (() => {
     type Response = apiDeclaration.notifySendReportReceived.Response;
 
     return async function (
-        wdChat: wd.Chat,
-        wdMessage: wd.Message.Outgoing.Pending,
+        wdChat: wd.Chat<"PLAIN">,
+        wdMessage: wd.Message.Outgoing.Pending<"PLAIN">,
         isSentSuccessfully: boolean
-    ): Promise<wd.Message.Outgoing.SendReportReceived> {
+    ): Promise<wd.Message.Outgoing.SendReportReceived<"PLAIN">> {
 
 
         await sendRequest<Params, Response>(
@@ -984,7 +1016,7 @@ const _notifySendReportReceived = (() => {
             }
         );
 
-        const updatedWdMessage: wd.Message.Outgoing.SendReportReceived = {
+        const updatedWdMessage: wd.Message.Outgoing.SendReportReceived<"PLAIN"> = {
             "id_": wdMessage.id_,
             "time": wdMessage.time,
             "direction": "OUTGOING",
@@ -1012,11 +1044,11 @@ export const notifyStatusReportReceived = (() => {
 
     /** Assert the status report state that the message was sent from this device. */
     return async function (
-        wdChat: wd.Chat,
+        wdChat: wd.Chat<"PLAIN">,
         statusReportBundledData: gwTypes.BundledData.ServerToClient.StatusReport
-    ): Promise<wd.Message.Outgoing.StatusReportReceived.SentByUser | undefined> {
+    ): Promise<wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN"> | undefined> {
 
-        const wdMessage: wd.Message.Outgoing.SendReportReceived | undefined = (() => {
+        const wdMessage: wd.Message.Outgoing.SendReportReceived<"PLAIN"> | undefined = (() => {
 
             for (let i = wdChat.messages.length - 1; i >= 0; i--) {
 
@@ -1057,7 +1089,7 @@ export const notifyStatusReportReceived = (() => {
             }
         );
 
-        const updatedWdMessage: wd.Message.Outgoing.StatusReportReceived.SentByUser = {
+        const updatedWdMessage: wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN"> = {
             "id_": wdMessage.id_,
             "time": wdMessage.time,
             "direction": "OUTGOING",

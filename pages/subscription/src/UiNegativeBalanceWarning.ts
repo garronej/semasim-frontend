@@ -1,6 +1,6 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as types from "../../../shared/dist/lib/types";
-import * as currencyLib from "../../../shared/dist/lib/tools/currency";
+import * as types from "../../../shared/dist/lib/types/subscription";
+import * as currencyLib from "../../../shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 

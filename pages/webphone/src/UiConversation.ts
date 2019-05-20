@@ -2,8 +2,8 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 import { VoidSyncEvent, SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types";
-import wd = types.webphoneData;
+import * as types from "../../../shared/dist/lib/types/userSim";
+import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
 import * as moment from "moment";
 
 declare const ion: any;
@@ -69,12 +69,12 @@ export class UiConversation {
     }
 
     public readonly evtLoadMore= new SyncEvent<{
-        onLoaded: (wdMessages: wd.Message[])=> void;
+        onLoaded: (wdMessages: wd.Message<"PLAIN">[])=> void;
     }>();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdChat: wd.Chat
+        public readonly wdChat: wd.Chat<"PLAIN">
     ) {
 
         this.notifyContactNameUpdated();
@@ -288,7 +288,7 @@ export class UiConversation {
     }
 
     /** new Message or update existing one */
-    public newMessage(wdMessage: wd.Message, mute: "MUTE" | undefined = undefined) {
+    public newMessage(wdMessage: wd.Message<"PLAIN">, mute: "MUTE" | undefined = undefined) {
 
         if (this.uiBubbles.has(wdMessage.id_)) {
 
@@ -354,7 +354,7 @@ class UiBubble {
     public readonly structure = html.templates.find("li").clone();
 
     constructor(
-        public readonly wdMessage: wd.Message
+        public readonly wdMessage: wd.Message<"PLAIN">
     ) {
 
         this.structure.find("p.id_content")
@@ -371,8 +371,8 @@ namespace UiBubble {
     export class IncomingText extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Incoming.Text,
-            public readonly wdChat: wd.Chat,
+            public readonly wdMessage: wd.Message.Incoming.Text<"PLAIN">,
+            public readonly wdChat: wd.Chat<"PLAIN">,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -407,8 +407,8 @@ namespace UiBubble {
     export class IncomingNotification extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Incoming.Notification,
-            public readonly wdChat: wd.Chat,
+            public readonly wdMessage: wd.Message.Incoming.Notification<"PLAIN">,
+            public readonly wdChat: wd.Chat<"PLAIN">,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -423,7 +423,7 @@ namespace UiBubble {
     export class Outgoing extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Outgoing
+            public readonly wdMessage: wd.Message.Outgoing<"PLAIN">
         ) {
 
             super(wdMessage);

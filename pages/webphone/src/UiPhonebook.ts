@@ -2,9 +2,9 @@
 
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as types from "../../../shared/dist/lib/types";
+import * as types from "../../../shared/dist/lib/types/userSim";
+import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
 import { phoneNumber } from "phone-number";
-import wd = types.webphoneData;
 
 declare const require: any;
 
@@ -18,13 +18,13 @@ export class UiPhonebook {
     public readonly structure = html.structure.clone();
 
     public readonly evtContactSelected = new SyncEvent<{
-        wdChatPrev: wd.Chat | undefined;
-        wdChat: wd.Chat;
+        wdChatPrev: wd.Chat<"PLAIN"> | undefined;
+        wdChat: wd.Chat<"PLAIN">;
     }>();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance
+        public readonly wdInstance: wd.Instance<"PLAIN">
     ) {
 
         this.structure.find("ul").slimScroll({
@@ -61,7 +61,7 @@ export class UiPhonebook {
     /** mapped by wdChat.id_ */
     private readonly uiContacts = new Map<number, UiContact>();
 
-    private createUiContact(wdChat: wd.Chat) {
+    private createUiContact(wdChat: wd.Chat<"PLAIN">) {
 
         let uiContact = new UiContact(this.userSim, wdChat);
 
@@ -70,7 +70,7 @@ export class UiPhonebook {
             let uiContactPrev = Array.from(this.uiContacts.values())
                 .find(({ isSelected }) => isSelected);
 
-            let wdChatPrev: wd.Chat | undefined;
+            let wdChatPrev: wd.Chat<"PLAIN"> | undefined;
 
             if (uiContactPrev) {
                 uiContactPrev.unselect();
@@ -144,7 +144,7 @@ export class UiPhonebook {
 
     /** To create ui contact after init */
     public insertContact(
-        wdChat: wd.Chat
+        wdChat: wd.Chat<"PLAIN">
     ): void {
 
         this.structure.find("input").val("");
@@ -164,7 +164,7 @@ export class UiPhonebook {
      * OR
      * contact deleted
      * */
-    public notifyContactChanged(wdChat: wd.Chat) {
+    public notifyContactChanged(wdChat: wd.Chat<"PLAIN">) {
 
         const uiContact = this.uiContacts.get(wdChat.id_)!;
 
@@ -186,7 +186,7 @@ export class UiPhonebook {
 
     }
 
-    public triggerContactClick(wdChat: wd.Chat) {
+    public triggerContactClick(wdChat: wd.Chat<"PLAIN">) {
         this.uiContacts.get(wdChat.id_)!.evtClick.post();
     }
 
@@ -201,7 +201,7 @@ class UiContact {
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdChat: wd.Chat
+        public readonly wdChat: wd.Chat<"PLAIN">
     ) {
 
         this.structure

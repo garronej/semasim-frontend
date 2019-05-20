@@ -3,8 +3,8 @@ import * as sip from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as localApiHandlers from "./localApiHandlers";
 import * as remoteApiCaller from "./remoteApiCaller";
-import * as types from "../types";
-import * as bootbox_custom from "../tools/bootbox_custom";
+import * as types from "../types/userSim";
+import * as bootbox_custom from "../../tools/bootbox_custom";
 import * as Cookies from "js-cookie";
 import { baseDomain, isDevEnv  } from "../env";
 
