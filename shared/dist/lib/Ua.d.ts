@@ -1,17 +1,22 @@
 import { SyncEvent } from "ts-events-extended";
 import { types as gwTypes } from "../gateway";
+import * as cryptoLib from "crypto-lib";
 declare type phoneNumber = import("phone-number").phoneNumber;
 export declare class Ua {
-    static email: string;
-    static instanceId: string;
-    /** Must be called in webphone.ts */
-    static setUaInstanceId(uaInstanceId: string, email: string): void;
+    private readonly towardSimEncryptor;
+    /** Must be set before use in webphone.ts */
+    static session: {
+        email: string;
+        instanceId: string;
+        towardUserEncryptKey: cryptoLib.RsaKey.Public;
+        towardUserDecryptor: cryptoLib.Decryptor;
+    };
     /** post isRegistered */
     readonly evtRegistrationStateChanged: SyncEvent<boolean>;
     private readonly jsSipUa;
     private evtRingback;
     private readonly jsSipSocket;
-    constructor(imsi: string, sipPassword: string, disabledMessage?: false | "DISABLE MESSAGES");
+    constructor(imsi: string, sipPassword: string, towardSimEncryptor: cryptoLib.Encryptor, disabledMessage?: false | "DISABLE MESSAGES");
     isRegistered: boolean;
     register(): void;
     /**
@@ -21,8 +26,7 @@ export declare class Ua {
     unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
-        text: string;
+        bundledData: gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
         onProcessed: () => void;
     }>;
     private onMessage;

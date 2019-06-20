@@ -37,15 +37,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../web_api_declaration");
 var ttJC = require("transfer-tools/dist/lib/JSON_CUSTOM");
+var cryptoLib = require("crypto-lib");
 //NOTE: Assert jQuery loaded on the page
 var JSON_CUSTOM = ttJC.get();
 function sendRequest(methodName, params) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
-                    "url": "/" + apiDeclaration.apiPath + "/" + methodName,
+                    "url": apiDeclaration.apiPath + "/" + methodName,
                     "method": "POST",
-                    //"contentType": "application/json; charset=UTF-8",
                     "data": JSON_CUSTOM.stringify(params),
                     "dataType": "text",
                     "statusCode": {
@@ -58,112 +58,133 @@ function sendRequest(methodName, params) {
         });
     });
 }
-function registerUser(email, password) {
+exports.registerUser = (function () {
     var methodName = apiDeclaration.registerUser.methodName;
-    return sendRequest(methodName, { email: email, password: password });
-}
-exports.registerUser = registerUser;
-function validateEmail(email, activationCode) {
+    return function (email, secret, towardUserEncryptKey, encryptedSymmetricKey) {
+        return sendRequest(methodName, {
+            email: email,
+            secret: secret,
+            "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserEncryptKey),
+            encryptedSymmetricKey: encryptedSymmetricKey
+        });
+    };
+})();
+exports.validateEmail = (function () {
     var methodName = apiDeclaration.validateEmail.methodName;
-    return sendRequest(methodName, { email: email, activationCode: activationCode });
-}
-exports.validateEmail = validateEmail;
-function loginUser(email, password) {
+    return function (email, activationCode) {
+        return sendRequest(methodName, { email: email, activationCode: activationCode });
+    };
+})();
+exports.loginUser = (function () {
     var methodName = apiDeclaration.loginUser.methodName;
-    return sendRequest(methodName, { email: email, password: password });
-}
-exports.loginUser = loginUser;
-function logoutUser() {
+    return function (email, secret) {
+        return sendRequest(methodName, { email: email, secret: secret });
+    };
+})();
+exports.logoutUser = (function () {
     var methodName = apiDeclaration.logoutUser.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.logoutUser = logoutUser;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
 /** Return true if email has account */
-function sendRenewPasswordEmail(email) {
+exports.sendRenewPasswordEmail = (function () {
     var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
-    return sendRequest(methodName, { email: email });
-}
-exports.sendRenewPasswordEmail = sendRenewPasswordEmail;
-function renewPassword(email, newPassword, token) {
+    return function (email) {
+        return sendRequest(methodName, { email: email });
+    };
+})();
+exports.renewPassword = (function () {
     var methodName = apiDeclaration.renewPassword.methodName;
-    return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
-}
-exports.renewPassword = renewPassword;
-function getCountryIso() {
+    return function (email, newSecret, newTowardUserEncryptKey, newEncryptedSymmetricKey, token) {
+        return sendRequest(methodName, {
+            email: email,
+            newSecret: newSecret,
+            "newTowardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(newTowardUserEncryptKey),
+            newEncryptedSymmetricKey: newEncryptedSymmetricKey,
+            token: token
+        });
+    };
+})();
+exports.getCountryIso = (function () {
     var methodName = apiDeclaration.getCountryIso.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.getCountryIso = getCountryIso;
-function getChangesRates() {
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.getChangesRates = (function () {
     var methodName = apiDeclaration.getChangesRates.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.getChangesRates = getChangesRates;
-function getSubscriptionInfos() {
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.getSubscriptionInfos = (function () {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.getSubscriptionInfos = getSubscriptionInfos;
-function subscribeOrUpdateSource(sourceId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var methodName;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
-                    return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.subscribeOrUpdateSource = subscribeOrUpdateSource;
-function unsubscribe() {
-    return __awaiter(this, void 0, void 0, function () {
-        var methodName;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    methodName = apiDeclaration.unsubscribe.methodName;
-                    return [4 /*yield*/, sendRequest(methodName, undefined)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.unsubscribe = unsubscribe;
-function createStripeCheckoutSessionForShop(cart, shippingFormData, currency, success_url, cancel_url) {
-    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
-    return sendRequest(methodName, {
-        "cartDescription": cart.map(function (_a) {
-            var product = _a.product, quantity = _a.quantity;
-            return ({
-                "productName": product.name,
-                quantity: quantity
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.subscribeOrUpdateSource = (function () {
+    var methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
+    return function (sourceId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
-        }),
-        shippingFormData: shippingFormData,
-        currency: currency,
-        success_url: success_url,
-        cancel_url: cancel_url
-    });
-}
-exports.createStripeCheckoutSessionForShop = createStripeCheckoutSessionForShop;
-function createStripeCheckoutSessionForSubscription(currency, success_url, cancel_url) {
+        });
+    };
+})();
+exports.unsubscribe = (function () {
+    var methodName = apiDeclaration.unsubscribe.methodName;
+    return function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+})();
+exports.createStripeCheckoutSessionForShop = (function () {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
+    return function (cart, shippingFormData, currency, success_url, cancel_url) {
+        return sendRequest(methodName, {
+            "cartDescription": cart.map(function (_a) {
+                var product = _a.product, quantity = _a.quantity;
+                return ({
+                    "productName": product.name,
+                    quantity: quantity
+                });
+            }),
+            shippingFormData: shippingFormData,
+            currency: currency,
+            success_url: success_url,
+            cancel_url: cancel_url
+        });
+    };
+})();
+exports.createStripeCheckoutSessionForSubscription = (function () {
     var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
-    return sendRequest(methodName, {
-        currency: currency,
-        success_url: success_url,
-        cancel_url: cancel_url
-    });
-}
-exports.createStripeCheckoutSessionForSubscription = createStripeCheckoutSessionForSubscription;
-function getOrders() {
+    return function (currency, success_url, cancel_url) {
+        return sendRequest(methodName, {
+            currency: currency,
+            success_url: success_url,
+            cancel_url: cancel_url
+        });
+    };
+})();
+exports.getOrders = (function () {
     var methodName = apiDeclaration.getOrders.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.getOrders = getOrders;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();

@@ -1,17 +1,16 @@
 {
-  "version": "0.1.18",
+  "version": "0.2.1",
   "scripts": {
-    "build": "node ../../build-script/dist/bin/cmd build_page"
+    "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
     "array.prototype.find": "^2.0.4",
+    "crypto-lib": "github:garronej/crypto-lib",
     "es6-map": "^0.1.5",
     "es6-weak-map": "^2.0.2",
-    "lessify": "^1.0.2",
     "moment": "^2.20.1",
     "phone-number": "github:garronej/phone-number",
-    "ts-events-extended": "github:garronej/ts-events-extended",
-    "ts-sip": "github:garronej/ts-sip"
+    "ts-events-extended": "github:garronej/ts-events-extended"
   },
   "devDependencies": {
     "@types/autosize": "^3.0.6",

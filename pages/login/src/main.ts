@@ -1,23 +1,25 @@
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import { getURLParameter } from "../../../shared/dist/tools/getURLParameter";
 import { requestRenewPassword } from "./requestRenewPassword";
 import "../../../shared/dist/tools/standalonePolyfills";
+import * as crypto from "../../../shared/dist/lib/crypto";
+import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
+import * as availablePages from "../../../shared/dist/lib/availablePages";
+import * as urlGetParameters from "../../../shared/dist/tools/urlGetParameters";
 
-declare const Buffer: any;
-declare const Cookies: any;
+let justRegistered: localStorage.JustRegistered | undefined;
 
 declare const apiExposedByHost: {
-    onDone(email?: string, password?: string): void;
+    onDone(email: string, secret: string, towardUserKeysStr: string): void;
 };
 
 function setHandlers() {
 
 	/* Start import from theme */
 	$("#login-form").validate({
-		ignore: 'input[type="hidden"]',
-		errorPlacement: function (error, element) {
-			var place = element.closest('.input-group');
+		"ignore": 'input[type="hidden"]',
+		"errorPlacement": function (error, element) {
+			let place = element.closest(".input-group");
 			if (!place.get(0)) {
 				place = element;
 			}
@@ -25,28 +27,28 @@ function setHandlers() {
 				place.after(error);
 			}
 		},
-		errorClass: 'help-block',
-		rules: {
-			email: {
-				required: true,
-				email: true
+		"errorClass": 'help-block',
+		"rules": {
+			"email": {
+				"required": true,
+				"email": true
 			},
-			password: {
-				required: true,
-				minlength: 5
+			"password": {
+				"required": true,
+				"minlength": 5
 			}
 		},
-		messages: {
-			password: {
-				required: "Please provide a password",
-				minlength: "Your password must be at least 5 characters long"
+		"messages": {
+			"password": {
+				"required": "Please provide a password",
+				"minlength": "Your password must be at least 5 characters long"
 			},
-			email: "Please type your email",
+			"email": "Please type your email",
 		},
-		highlight: function (label) {
-			$(label).closest('.form-group').removeClass('has-success').addClass('has-error');
-		},
-		success: function (label) {
+		"highlight":  label => 
+			$(label).closest('.form-group').removeClass('has-success').addClass('has-error')
+		,
+		"success":  label => {
 			$(label).closest('.form-group').removeClass('has-error');
 			label.remove();
 		}
@@ -59,12 +61,27 @@ function setHandlers() {
 
 		if (!$(this).valid()) return;
 
-		const email = ($("#email").val() as string).toLowerCase();
-		const password = $("#password").val();
+		const [email, password] = (() => {
+
+			const [email, password] = ["#email", "#password"]
+				.map(sel => $(sel).val() as string)
+				;
+
+			return [email.toLowerCase(), password];
+
+		})();
+
+		const { secret, towardUserKeys } =
+			justRegistered ||
+			await crypto.computeLoginSecretAndTowardUserKeys(
+				password,
+				email
+			)
+			;
 
 		const resp = await webApiCaller.loginUser(
 			email,
-			password
+			secret
 		);
 
 		if (resp.status !== "SUCCESS") {
@@ -76,15 +93,19 @@ function setHandlers() {
 		switch (resp.status) {
 			case "SUCCESS":
 
-				Cookies.set("email", email);
+				if (typeof apiExposedByHost !== "undefined") {
 
-				if( typeof apiExposedByHost !== "undefined" ){
+					apiExposedByHost.onDone(
+						email,
+						secret,
+						localStorage.TowardUserKeys.stringify(towardUserKeys)
+					);
 
-					apiExposedByHost.onDone(email, password);
+				} else {
 
-				}else{
+					localStorage.TowardUserKeys.store(towardUserKeys);
 
-					window.location.href = "/manager";
+					window.location.href = `/${availablePages.PageName.manager}`;
 
 				}
 
@@ -125,88 +146,83 @@ function setHandlers() {
 
 }
 
+$(document).ready(async () => {
 
-async function handleQueryString() {
+	crypto.preSpawn();
 
-	const emailAsHex = getURLParameter("email_as_hex");
+	justRegistered = localStorage.JustRegistered.retreave();
 
-	let email = "";
+	setHandlers();
 
-	if (!!emailAsHex) {
+	const params = urlGetParameters.parseUrl<availablePages.urlParams.Login>();
 
-		email = Buffer.from(emailAsHex, "hex").toString("utf8");
-
-		$("#email").val(email);
-
+	if (params.email !== undefined) {
+		$("#email").val(params.email);
 	}
 
-	const password= Cookies.get("password");
+	if (
+		params.email_confirmation_code !== undefined ||
+		justRegistered !== undefined && justRegistered.promptEmailValidationCode
+	) {
 
-	if( !!password ){
+		const email = params.email!;
 
-		Cookies.remove("password");
+		const { email_confirmation_code } = params;
 
-		$("#password").val(password);
+		const isEmailValidated = await webApiCaller.validateEmail(
+			email,
+			email_confirmation_code !== undefined ?
+				email_confirmation_code :
+				await (async function callee(): Promise<string> {
 
-	}
-
-
-	let emailConfirmationCode = getURLParameter("email_confirmation_code");
-
-	if (!!emailConfirmationCode) {
-
-		if (emailConfirmationCode === "__prompt__") {
-
-			emailConfirmationCode = await (async function callee(): Promise<string> {
-
-				const out = await new Promise<string | null>(
-					resolve => bootbox_custom.prompt({
-						"title": "Please enter the code to confirm your email ( check also your SPAM inbox )",
-						"inputType": "number",
-						"placeholder": "XXXX",
-						"callback": result => resolve(result)
-					})
-				);
-
-				if (!out) {
-
-					await new Promise<void>(
-						resolve => bootbox_custom.alert(
-							"Validating you email address is mandatory to access Semasim services",
-							() => resolve()
-						)
+					const out = await new Promise<string | null>(
+						resolve => bootbox_custom.prompt({
+							"title": "Code you just received by email",
+							"inputType": "number",
+							"placeholder": "XXXX",
+							"callback": result => resolve(result)
+						})
 					);
 
-					return callee();
+					if (!out) {
 
-				}
+						await new Promise<void>(
+							resolve => bootbox_custom.alert(
+								"Validating you email address is mandatory to access Semasim services",
+								() => resolve()
+							)
+						);
 
-				return out;
+						return callee();
 
-			})();
+					}
 
-		}
+					return out;
 
-		const isEmailValidated = await webApiCaller.validateEmail(email, emailConfirmationCode);
+				})()
+		);
 
 		if (!isEmailValidated) {
 
 			await new Promise<void>(
 				resolve => bootbox_custom.alert(
-					"Email was already validated or provided activation code was wrong",
+					[
+						"Email was already validated or provided activation code was wrong.",
+						"Follow the link you received by email to activate your account."
+					].join(" "),
 					() => resolve()
 				)
 			);
 
-			window.close();
-
 			return;
 
-		} else {
+		}
+
+		if( email_confirmation_code !== undefined ){
 
 			await new Promise<void>(
 				resolve => bootbox_custom.alert(
-					"Semasim account successfully validated",
+					"Email successfully validated you can now proceed to login",
 					() => resolve()
 				)
 			);
@@ -215,16 +231,16 @@ async function handleQueryString() {
 
 	}
 
-	if (!!emailAsHex && !!password) {
+	if (justRegistered !== undefined) {
 
-		$("#login-form").submit();
-
+		$("#password").val(justRegistered.password);
+		$("#login-btn").trigger("click");
 		return;
 	}
 
-	const renewPasswordToken = getURLParameter("renew_password_token");
+	if (params.renew_password_token !== undefined) {
 
-	if (!!renewPasswordToken) {
+		const email = params.email!;
 
 		(async function callee() {
 
@@ -274,9 +290,22 @@ async function handleQueryString() {
 
 			}
 
+			const { secret: newSecret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys(
+				newPassword,
+				email
+			);
+
 			bootbox_custom.loading("Renewing password");
 
-			const wasTokenStillValid = await webApiCaller.renewPassword(email, newPassword, renewPasswordToken);
+			const wasTokenStillValid = await webApiCaller.renewPassword(
+				email,
+				newSecret,
+				towardUserKeys.encryptKey,
+				await crypto.symmetricKey.createThenEncryptKey(
+					towardUserKeys.encryptKey
+				),
+				params.renew_password_token!
+			);
 
 			bootbox_custom.dismissLoading();
 
@@ -288,6 +317,13 @@ async function handleQueryString() {
 
 			}
 
+			justRegistered = {
+				"password": newPassword,
+				"secret": newSecret,
+				towardUserKeys,
+				"promptEmailValidationCode": false
+			};
+
 			$("#password").val(newPassword);
 
 			$("#login-form").submit();
@@ -295,13 +331,5 @@ async function handleQueryString() {
 		})();
 
 	}
-
-}
-
-$(document).ready(() => {
-
-	setHandlers();
-
-	handleQueryString();
 
 });

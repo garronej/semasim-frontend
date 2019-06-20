@@ -55,6 +55,22 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var sipLibrary = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
@@ -62,7 +78,7 @@ var apiDeclaration = require("../../sip_api_declarations/backendToUa");
 var connection = require("./connection");
 var phone_number_1 = require("phone-number");
 var wd = require("../types/webphoneData/logic");
-var cryptoLib = require("../../tools/crypto/library");
+var cryptoLib = require("crypto-lib");
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 exports.evtUsableSim = new ts_events_extended_1.SyncEvent();
 //TODO: Fix, it's called two times!!
@@ -158,7 +174,8 @@ exports.shareSim = (function () {
     var methodName = apiDeclaration.shareSim.methodName;
     return function (userSim, emails, message) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_1, _a, emails_1, emails_1_1, email;
+            var emails_1, emails_1_1, email;
+            var e_1, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails, message: message })];
@@ -187,7 +204,8 @@ exports.stopSharingSim = (function () {
     var methodName = apiDeclaration.stopSharingSim.methodName;
     return function (userSim, emails) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_2, _a, emails_2, emails_2_1, email, _b, notConfirmed, confirmed, arr, index;
+            var emails_2, emails_2_1, email, _a, notConfirmed, confirmed, arr, index;
+            var e_2, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0: return [4 /*yield*/, sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails })];
@@ -196,7 +214,7 @@ exports.stopSharingSim = (function () {
                         try {
                             for (emails_2 = __values(emails), emails_2_1 = emails_2.next(); !emails_2_1.done; emails_2_1 = emails_2.next()) {
                                 email = emails_2_1.value;
-                                _b = userSim.ownership.sharedWith, notConfirmed = _b.notConfirmed, confirmed = _b.confirmed;
+                                _a = userSim.ownership.sharedWith, notConfirmed = _a.notConfirmed, confirmed = _a.confirmed;
                                 arr = void 0;
                                 index = void 0;
                                 index = notConfirmed.indexOf(email);
@@ -213,7 +231,7 @@ exports.stopSharingSim = (function () {
                         catch (e_2_1) { e_2 = { error: e_2_1 }; }
                         finally {
                             try {
-                                if (emails_2_1 && !emails_2_1.done && (_a = emails_2.return)) _a.call(emails_2);
+                                if (emails_2_1 && !emails_2_1.done && (_b = emails_2.return)) _b.call(emails_2);
                             }
                             finally { if (e_2) throw e_2.error; }
                         }
@@ -253,6 +271,7 @@ exports.acceptSharingRequest = (function () {
                             "sim": notConfirmedUserSim.sim,
                             friendlyName: friendlyName,
                             password: password,
+                            "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
                             "dongle": notConfirmedUserSim.dongle,
                             "gatewayLocation": notConfirmedUserSim.gatewayLocation,
                             "isOnline": notConfirmedUserSim.isOnline,
@@ -401,24 +420,26 @@ exports.shouldAppendPromotionalMessage = (function () {
         return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
     };
 })();
-exports.getUaInstanceId = (function () {
-    var methodName = apiDeclaration.getUaInstanceId.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
 //WebData sync things :
-var encryptorDecryptor;
+var wdCrypto;
 /** Must be called prior any wd related API call */
-function setEncryptorDecryptor(encryptorDecryptor1) {
-    encryptorDecryptor = encryptorDecryptor1;
+function setWebDataEncryptorDescriptor(encryptorDecryptor) {
+    wdCrypto = setWebDataEncryptorDescriptor.wrap(encryptorDecryptor);
 }
-exports.setEncryptorDecryptor = setEncryptorDecryptor;
+exports.setWebDataEncryptorDescriptor = setWebDataEncryptorDescriptor;
+(function (setWebDataEncryptorDescriptor) {
+    setWebDataEncryptorDescriptor.wrap = function (encryptorDecryptor) { return ({
+        encryptorDecryptor: encryptorDecryptor,
+        "stringifyThenEncrypt": cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor),
+        "decryptThenParse": cryptoLib.decryptThenParseFactory(encryptorDecryptor)
+    }); };
+})(setWebDataEncryptorDescriptor = exports.setWebDataEncryptorDescriptor || (exports.setWebDataEncryptorDescriptor = {}));
 exports.getOrCreateWdInstance = (function () {
     var methodName = apiDeclaration.getOrCreateInstance.methodName;
     function synchronizeUserSimAndWdInstance(userSim, wdInstance) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_3, _a, e_4, _b, wdChatWhoseContactNoLongerInPhonebook, _loop_1, _c, _d, contact, e_3_1, wdChatWhoseContactNoLongerInPhonebook_1, wdChatWhoseContactNoLongerInPhonebook_1_1, wdChat, e_4_1;
+            var wdChatWhoseContactNoLongerInPhonebook, _loop_1, _a, _b, contact, e_3_1, wdChatWhoseContactNoLongerInPhonebook_1, wdChatWhoseContactNoLongerInPhonebook_1_1, wdChat, e_4_1;
+            var e_3, _c, e_4, _d;
             return __generator(this, function (_e) {
                 switch (_e.label) {
                     case 0:
@@ -449,17 +470,17 @@ exports.getOrCreateWdInstance = (function () {
                         _e.label = 1;
                     case 1:
                         _e.trys.push([1, 6, 7, 8]);
-                        _c = __values(userSim.phonebook), _d = _c.next();
+                        _a = __values(userSim.phonebook), _b = _a.next();
                         _e.label = 2;
                     case 2:
-                        if (!!_d.done) return [3 /*break*/, 5];
-                        contact = _d.value;
+                        if (!!_b.done) return [3 /*break*/, 5];
+                        contact = _b.value;
                         return [5 /*yield**/, _loop_1(contact)];
                     case 3:
                         _e.sent();
                         _e.label = 4;
                     case 4:
-                        _d = _c.next();
+                        _b = _a.next();
                         return [3 /*break*/, 2];
                     case 5: return [3 /*break*/, 8];
                     case 6:
@@ -468,7 +489,7 @@ exports.getOrCreateWdInstance = (function () {
                         return [3 /*break*/, 8];
                     case 7:
                         try {
-                            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_3) throw e_3.error; }
                         return [7 /*endfinally*/];
@@ -493,7 +514,7 @@ exports.getOrCreateWdInstance = (function () {
                         return [3 /*break*/, 15];
                     case 14:
                         try {
-                            if (wdChatWhoseContactNoLongerInPhonebook_1_1 && !wdChatWhoseContactNoLongerInPhonebook_1_1.done && (_b = wdChatWhoseContactNoLongerInPhonebook_1.return)) _b.call(wdChatWhoseContactNoLongerInPhonebook_1);
+                            if (wdChatWhoseContactNoLongerInPhonebook_1_1 && !wdChatWhoseContactNoLongerInPhonebook_1_1.done && (_d = wdChatWhoseContactNoLongerInPhonebook_1.return)) _d.call(wdChatWhoseContactNoLongerInPhonebook_1);
                         }
                         finally { if (e_4) throw e_4.error; }
                         return [7 /*endfinally*/];
@@ -504,22 +525,26 @@ exports.getOrCreateWdInstance = (function () {
     }
     return function (userSim) {
         return __awaiter(this, void 0, void 0, function () {
-            var imsi, _a, instance_id, chats, wdInstance;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var imsi, _a, instance_id, chats, wdInstance, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         imsi = userSim.sim.imsi;
                         return [4 /*yield*/, sendRequest(methodName, { imsi: imsi })];
                     case 1:
-                        _a = _b.sent(), instance_id = _a.instance_id, chats = _a.chats;
-                        wdInstance = {
+                        _a = _d.sent(), instance_id = _a.instance_id, chats = _a.chats;
+                        _b = {
                             "id_": instance_id,
-                            imsi: imsi,
-                            "chats": chats.map(function (chat) { return wd.decryptChat(encryptorDecryptor, chat); })
+                            imsi: imsi
                         };
-                        return [4 /*yield*/, synchronizeUserSimAndWdInstance(userSim, wdInstance)];
+                        _c = "chats";
+                        return [4 /*yield*/, Promise.all(chats.map(function (chat) { return wd.decryptChat(wdCrypto.encryptorDecryptor, chat); }))];
                     case 2:
-                        _b.sent();
+                        wdInstance = (_b[_c] = _d.sent(),
+                            _b);
+                        return [4 /*yield*/, synchronizeUserSimAndWdInstance(userSim, wdInstance)];
+                    case 3:
+                        _d.sent();
                         return [2 /*return*/, wdInstance];
                 }
             });
@@ -530,19 +555,33 @@ exports.newWdChat = (function () {
     var methodName = apiDeclaration.newChat.methodName;
     return function (wdInstance, contactNumber, contactName, contactIndexInSim) {
         return __awaiter(this, void 0, void 0, function () {
-            var stringifyThenEncrypt, chat_id, wdChat;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var chat_id, _a, _b, wdChat;
+            var _this = this;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
-                        return [4 /*yield*/, sendRequest(methodName, {
-                                "instance_id": wdInstance.id_,
-                                "contactNumber": { "encrypted_string": stringifyThenEncrypt(contactNumber) },
-                                "contactName": { "encrypted_string": stringifyThenEncrypt(contactName) },
-                                "contactIndexInSim": { "encrypted_number_or_null": stringifyThenEncrypt(contactIndexInSim) }
-                            })];
-                    case 1:
-                        chat_id = (_a.sent()).chat_id;
+                        _a = sendRequest;
+                        _b = [methodName];
+                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var _a, encryptedContactNumber, encryptedContactName, encryptedContactIndexInSim;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, Promise.all([contactNumber, contactName, contactIndexInSim]
+                                                .map(function (v) { return wdCrypto.stringifyThenEncrypt(v); }))];
+                                        case 1:
+                                            _a = __read.apply(void 0, [_b.sent(), 3]), encryptedContactNumber = _a[0], encryptedContactName = _a[1], encryptedContactIndexInSim = _a[2];
+                                            return [2 /*return*/, {
+                                                    "instance_id": wdInstance.id_,
+                                                    "contactNumber": { "encrypted_string": encryptedContactNumber },
+                                                    "contactName": { "encrypted_string": encryptedContactName },
+                                                    "contactIndexInSim": { "encrypted_number_or_null": encryptedContactIndexInSim }
+                                                }];
+                                    }
+                                });
+                            }); })()];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([_c.sent()]))];
+                    case 2:
+                        chat_id = (_c.sent()).chat_id;
                         wdChat = {
                             "id_": chat_id,
                             contactNumber: contactNumber,
@@ -562,23 +601,26 @@ exports.fetchOlderWdMessages = (function () {
     var methodName = apiDeclaration.fetchOlderMessages.methodName;
     return function (wdChat) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_5, _a, lastMessage, olderThanMessageId, olderWdMessages, set, i, message, _b, _c, message;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var lastMessage, olderThanMessageId, olderWdMessages, _a, _b, set, i, message, _c, _d, message;
+            var e_5, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
                     case 0:
                         lastMessage = wdChat.messages.slice(-1).pop();
                         if (!lastMessage) {
                             return [2 /*return*/, []];
                         }
                         olderThanMessageId = wdChat.messages[0].id_;
+                        _b = (_a = Promise).all;
                         return [4 /*yield*/, sendRequest(methodName, {
                                 "chat_id": wdChat.id_,
                                 olderThanMessageId: olderThanMessageId
                             })];
-                    case 1:
-                        olderWdMessages = (_d.sent()).map(function (encryptedOlderMessage) {
-                            return wd.decryptMessage(encryptorDecryptor, encryptedOlderMessage);
-                        });
+                    case 1: return [4 /*yield*/, _b.apply(_a, [(_f.sent()).map(function (encryptedOlderMessage) {
+                                return wd.decryptMessage(wdCrypto.encryptorDecryptor, encryptedOlderMessage);
+                            })])];
+                    case 2:
+                        olderWdMessages = _f.sent();
                         set = new Set(wdChat.messages.map(function (_a) {
                             var id_ = _a.id_;
                             return id_;
@@ -593,8 +635,8 @@ exports.fetchOlderWdMessages = (function () {
                         wdChat.messages.sort(wd.compareMessage);
                         olderWdMessages = [];
                         try {
-                            for (_b = __values(wdChat.messages), _c = _b.next(); !_c.done; _c = _b.next()) {
-                                message = _c.value;
+                            for (_c = __values(wdChat.messages), _d = _c.next(); !_d.done; _d = _c.next()) {
+                                message = _d.value;
                                 if (message.id_ === olderThanMessageId) {
                                     break;
                                 }
@@ -604,7 +646,7 @@ exports.fetchOlderWdMessages = (function () {
                         catch (e_5_1) { e_5 = { error: e_5_1 }; }
                         finally {
                             try {
-                                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                                if (_d && !_d.done && (_e = _c.return)) _e.call(_c);
                             }
                             finally { if (e_5) throw e_5.error; }
                         }
@@ -665,48 +707,75 @@ var updateWdChat = (function () {
      * */
     return function (wdChat, fields) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_6, _a, stringifyThenEncrypt, params, _loop_2, _b, _c, key, key;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var params, _a, _b, key, value, _c, _d, _e, _f, _g, _h, _j, _k, _l, e_6_1, key;
+            var e_6, _m;
+            return __generator(this, function (_o) {
+                switch (_o.label) {
                     case 0:
-                        stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
                         params = { "chat_id": wdChat.id_ };
-                        _loop_2 = function (key) {
-                            var value = fields[key];
-                            if (value === undefined || wdChat[key] === value) {
-                                return "continue";
-                            }
-                            params[key] = (function () {
-                                switch (key) {
-                                    case "contactName": return {
-                                        "encrypted_string": stringifyThenEncrypt(value)
-                                    };
-                                    case "contactIndexInSim": return {
-                                        "encrypted_number_or_null": stringifyThenEncrypt(value)
-                                    };
-                                    case "idOfLastMessageSeen": return value;
-                                }
-                            })();
-                        };
+                        _o.label = 1;
+                    case 1:
+                        _o.trys.push([1, 10, 11, 12]);
+                        _a = __values(Object.keys(fields)), _b = _a.next();
+                        _o.label = 2;
+                    case 2:
+                        if (!!_b.done) return [3 /*break*/, 9];
+                        key = _b.value;
+                        value = fields[key];
+                        if (value === undefined || wdChat[key] === value) {
+                            return [3 /*break*/, 8];
+                        }
+                        _c = key;
+                        switch (_c) {
+                            case "contactName": return [3 /*break*/, 3];
+                            case "contactIndexInSim": return [3 /*break*/, 5];
+                            case "idOfLastMessageSeen": return [3 /*break*/, 7];
+                        }
+                        return [3 /*break*/, 8];
+                    case 3:
+                        _d = params;
+                        _e = key;
+                        _f = {};
+                        _g = "encrypted_string";
+                        return [4 /*yield*/, wdCrypto.stringifyThenEncrypt(value)];
+                    case 4:
+                        _d[_e] = (_f[_g] = _o.sent(),
+                            _f);
+                        return [3 /*break*/, 8];
+                    case 5:
+                        _h = params;
+                        _j = key;
+                        _k = {};
+                        _l = "encrypted_number_or_null";
+                        return [4 /*yield*/, wdCrypto.stringifyThenEncrypt(value)];
+                    case 6:
+                        _h[_j] = (_k[_l] = _o.sent(),
+                            _k);
+                        return [3 /*break*/, 8];
+                    case 7:
+                        params[key] = value;
+                        return [3 /*break*/, 8];
+                    case 8:
+                        _b = _a.next();
+                        return [3 /*break*/, 2];
+                    case 9: return [3 /*break*/, 12];
+                    case 10:
+                        e_6_1 = _o.sent();
+                        e_6 = { error: e_6_1 };
+                        return [3 /*break*/, 12];
+                    case 11:
                         try {
-                            for (_b = __values(Object.keys(fields)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                                key = _c.value;
-                                _loop_2(key);
-                            }
+                            if (_b && !_b.done && (_m = _a.return)) _m.call(_a);
                         }
-                        catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                        finally {
-                            try {
-                                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                            }
-                            finally { if (e_6) throw e_6.error; }
-                        }
+                        finally { if (e_6) throw e_6.error; }
+                        return [7 /*endfinally*/];
+                    case 12:
                         if (Object.keys(params).length === 1) {
                             return [2 /*return*/, false];
                         }
                         return [4 /*yield*/, sendRequest(methodName, params)];
-                    case 1:
-                        _d.sent();
+                    case 13:
+                        _o.sent();
                         for (key in fields) {
                             wdChat[key] = fields[key];
                         }
@@ -734,9 +803,9 @@ exports.destroyWdChat = (function () {
 })();
 function newWdMessage(wdChat, message_) {
     return __awaiter(this, void 0, void 0, function () {
-        var message, isSameWdMessage, methodName, message_id, wdMessage;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var message, isSameWdMessage, methodName, message_id, _a, _b, _c, _d, wdMessage;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0:
                     message = message_;
                     isSameWdMessage = function (wdMessage) {
@@ -762,12 +831,17 @@ function newWdMessage(wdChat, message_) {
                         return [2 /*return*/, undefined];
                     }
                     methodName = apiDeclaration.newMessage.methodName;
-                    return [4 /*yield*/, sendRequest(methodName, {
-                            "chat_id": wdChat.id_,
-                            "message": wd.encryptMessage(encryptorDecryptor, message)
-                        })];
-                case 1:
-                    message_id = (_a.sent()).message_id;
+                    _a = sendRequest;
+                    _b = [methodName];
+                    _c = {
+                        "chat_id": wdChat.id_
+                    };
+                    _d = "message";
+                    return [4 /*yield*/, wd.encryptMessage(wdCrypto.encryptorDecryptor, message)];
+                case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([(_c[_d] = (_e.sent()),
+                            _c)]))];
+                case 2:
+                    message_id = (_e.sent()).message_id;
                     wdMessage = (__assign({}, message, { "id_": message_id }));
                     wdChat.messages.push(wdMessage);
                     wdChat.messages.sort(wd.compareMessage);

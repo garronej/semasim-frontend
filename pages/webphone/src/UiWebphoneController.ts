@@ -11,6 +11,8 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import { workerThreadPoolId } from "./workerThreadPoolId";
+import * as cryptoLib from "crypto-lib";
 
 declare const require: any;
 
@@ -18,7 +20,6 @@ const html = loadUiClassHtml(
     require("../templates/UiWebphoneController.html"),
     "UiWebphoneController"
 );
-
 
 export class UiWebphoneController {
 
@@ -36,7 +37,16 @@ export class UiWebphoneController {
         public readonly wdInstance: wd.Instance<"PLAIN">,
     ) {
 
-        this.ua = new Ua(userSim.sim.imsi, userSim.password);
+        this.ua = new Ua(
+            userSim.sim.imsi,
+            userSim.password,
+            cryptoLib.rsa.encryptorFactory(
+                cryptoLib.RsaKey.parse(
+                    userSim.towardSimEncryptKeyStr
+                ),
+                workerThreadPoolId
+            )
+        );
 
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
@@ -187,7 +197,7 @@ export class UiWebphoneController {
         });
 
         this.ua.evtIncomingMessage.attach(
-            async ({ fromNumber, bundledData, text, onProcessed }) => {
+            async ({ fromNumber, bundledData, onProcessed }) => {
 
                 const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
@@ -200,7 +210,7 @@ export class UiWebphoneController {
                                 "direction": "INCOMING",
                                 "isNotification": false,
                                 "time": bundledData.pduDate.getTime(),
-                                text
+                                "text": bundledData.text
                             };
 
                             return remoteApiCaller.newWdMessage(wdChat, message);
@@ -213,7 +223,7 @@ export class UiWebphoneController {
                         }
                         case "STATUS REPORT": {
 
-                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.instanceId) {
+                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.session.instanceId) {
 
                                 return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
 
@@ -224,7 +234,7 @@ export class UiWebphoneController {
                                     "direction": "OUTGOING",
                                     "text": bundledData.messageTowardGsm.text,
                                     "sentBy": ((): wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =>
-                                        (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.email) ?
+                                        (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.session.email) ?
                                             ({ "who": "USER" }) :
                                             ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail })
                                     )(),
@@ -246,7 +256,7 @@ export class UiWebphoneController {
                                 "isNotification": true,
                                 "time": (bundledData.type === "MMS NOTIFICATION" ?
                                     bundledData.pduDate : bundledData.date).getTime(),
-                                text
+                                "text": bundledData.text
                             };
 
                             return remoteApiCaller.newWdMessage(wdChat, message);

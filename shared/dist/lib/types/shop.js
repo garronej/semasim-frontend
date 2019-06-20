@@ -88,7 +88,7 @@ var Price;
             for (var _c = __values(__spread(Object.keys(price1), Object.keys(price2))), _d = _c.next(); !_d.done; _d = _c.next()) {
                 var currency = _d.value;
                 try {
-                    for (var _e = __values([price1, price2]), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    for (var _e = (e_2 = void 0, __values([price1, price2])), _f = _e.next(); !_f.done; _f = _e.next()) {
                         var price = _f.value;
                         if (!(currency in price)) {
                             price[currency] = convertFromEuro(price["eur"], currency);

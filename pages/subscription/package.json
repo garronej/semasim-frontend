@@ -1,14 +1,14 @@
 {
-  "version": "0.1.11",
+  "version": "0.1.12",
   "scripts": {
-    "build": "node ../../build-script/dist/bin/cmd build_page"
+    "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "ts-events-extended": "github:garronej/ts-events-extended",
-    "moment": "^2.20.1",
+    "array.prototype.find": "^2.0.4",
     "es6-map": "^0.1.5",
     "es6-weak-map": "^2.0.2",
-    "array.prototype.find": "^2.0.4"
+    "moment": "^2.20.1",
+    "ts-events-extended": "github:garronej/ts-events-extended"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",
@@ -17,6 +17,6 @@
     "@types/jquery.validation": "1.13.27",
     "@types/jqueryui": "1.9.27",
     "lessify": "^1.0.2",
-    "typescript": "^3.0.1"
+    "typescript": "^3.5.1"
   }
 }

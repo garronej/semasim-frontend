@@ -58,10 +58,6 @@ var shouldAppendPromotionalMessage;
 (function (shouldAppendPromotionalMessage) {
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
-var getUaInstanceId;
-(function (getUaInstanceId) {
-    getUaInstanceId.methodName = "getUaCredentials";
-})(getUaInstanceId = exports.getUaInstanceId || (exports.getUaInstanceId = {}));
 //WebphoneData Sync things:
 var getOrCreateInstance;
 (function (getOrCreateInstance) {

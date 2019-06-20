@@ -1,5 +1,5 @@
 
-export const apiPath = "api";
+export const apiPath = "/api";
 
 
 export namespace registerUser {
@@ -8,7 +8,9 @@ export namespace registerUser {
 
     export type Params = {
         email: string;
-        password: string;
+        secret: string;
+        towardUserEncryptKeyStr: string,
+        encryptedSymmetricKey: string
     };
 
     export type Response = "CREATED" | "CREATED NO ACTIVATION REQUIRED" | "EMAIL NOT AVAILABLE";
@@ -34,7 +36,7 @@ export namespace loginUser {
 
     export type Params = {
         email: string;
-        password: string;
+        secret: string;
     };
 
     /** isGranted */
@@ -83,7 +85,9 @@ export namespace renewPassword {
 
     export type Params= {
         email: string;
-        newPassword: string;
+        newSecret: string;
+        newTowardUserEncryptKeyStr: string,
+        newEncryptedSymmetricKey: string
         token: string;
     };
 

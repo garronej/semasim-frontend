@@ -1,19 +1,20 @@
 import * as apiDeclaration from "../web_api_declaration";
-export declare function registerUser(email: string, password: string): Promise<apiDeclaration.registerUser.Response>;
-export declare function validateEmail(email: string, activationCode: string): Promise<boolean>;
-export declare function loginUser(email: string, password: string): Promise<apiDeclaration.loginUser.Response>;
-export declare function logoutUser(): Promise<undefined>;
+import * as cryptoLib from "crypto-lib";
+export declare const registerUser: (email: string, secret: string, towardUserEncryptKey: cryptoLib.RsaKey.Public, encryptedSymmetricKey: string) => Promise<apiDeclaration.registerUser.Response>;
+export declare const validateEmail: (email: string, activationCode: string) => Promise<boolean>;
+export declare const loginUser: (email: string, secret: string) => Promise<apiDeclaration.loginUser.Response>;
+export declare const logoutUser: () => Promise<undefined>;
 /** Return true if email has account */
-export declare function sendRenewPasswordEmail(email: string): Promise<boolean>;
-export declare function renewPassword(email: string, newPassword: string, token: string): Promise<boolean>;
-export declare function getCountryIso(): Promise<apiDeclaration.getCountryIso.Response>;
-export declare function getChangesRates(): Promise<apiDeclaration.getChangesRates.Response>;
-export declare function getSubscriptionInfos(): Promise<import("./types/subscription").SubscriptionInfos>;
-export declare function subscribeOrUpdateSource(sourceId?: string): Promise<void>;
-export declare function unsubscribe(): Promise<void>;
-export declare function createStripeCheckoutSessionForShop(cart: import("./types/shop").Cart, shippingFormData: import("./types/shop").ShippingFormData, currency: string, success_url: string, cancel_url: string): Promise<apiDeclaration.createStripeCheckoutSessionForShop.Response>;
-export declare function createStripeCheckoutSessionForSubscription(currency: string, success_url: string, cancel_url: string): Promise<apiDeclaration.createStripeCheckoutSessionForSubscription.Response>;
-export declare function getOrders(): Promise<{
+export declare const sendRenewPasswordEmail: (email: string) => Promise<boolean>;
+export declare const renewPassword: (email: string, newSecret: string, newTowardUserEncryptKey: cryptoLib.RsaKey.Public, newEncryptedSymmetricKey: string, token: string) => Promise<boolean>;
+export declare const getCountryIso: () => Promise<apiDeclaration.getCountryIso.Response>;
+export declare const getChangesRates: () => Promise<apiDeclaration.getChangesRates.Response>;
+export declare const getSubscriptionInfos: () => Promise<import("./types/subscription").SubscriptionInfos>;
+export declare const subscribeOrUpdateSource: (sourceId?: string | undefined) => Promise<void>;
+export declare const unsubscribe: () => Promise<void>;
+export declare const createStripeCheckoutSessionForShop: (cart: import("./types/shop").Cart.Entry[], shippingFormData: import("./types/shop").ShippingFormData, currency: string, success_url: string, cancel_url: string) => Promise<apiDeclaration.createStripeCheckoutSessionForShop.Response>;
+export declare const createStripeCheckoutSessionForSubscription: (currency: string, success_url: string, cancel_url: string) => Promise<apiDeclaration.createStripeCheckoutSessionForSubscription.Response>;
+export declare const getOrders: () => Promise<{
     date: Date;
     orderCart: {
         orderProduct: {

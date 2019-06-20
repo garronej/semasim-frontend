@@ -8,8 +8,7 @@ import { phoneNumber } from "phone-number";
 import * as types from "../types/userSim";
 import * as wd from "../types/webphoneData/logic"
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as cryptoLib from "../../tools/crypto/library";
-
+import * as cryptoLib from "crypto-lib";
 
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export const evtUsableSim = new SyncEvent<types.UserSim.Usable>();
@@ -272,6 +271,7 @@ export const acceptSharingRequest = (() => {
             "sim": notConfirmedUserSim.sim,
             friendlyName,
             password,
+            "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
             "dongle": notConfirmedUserSim.dongle,
             "gatewayLocation": notConfirmedUserSim.gatewayLocation,
             "isOnline": notConfirmedUserSim.isOnline,
@@ -485,36 +485,22 @@ export const shouldAppendPromotionalMessage = (() => {
 
 })();
 
-export const getUaInstanceId = (() => {
-
-    const methodName = apiDeclaration.getUaInstanceId.methodName;
-    type Params = apiDeclaration.getUaInstanceId.Params;
-    type Response = apiDeclaration.getUaInstanceId.Response;
-
-    return (): Promise<Response> => {
-
-        return sendRequest<Params, Response>(
-            methodName,
-            undefined
-        );
-
-    };
-
-
-})();
-
 //WebData sync things :
 
 
-
-let encryptorDecryptor: cryptoLib.EncryptorDecryptor;
-
+let wdCrypto: ReturnType<typeof setWebDataEncryptorDescriptor.wrap>;
 
 /** Must be called prior any wd related API call */
-export function setEncryptorDecryptor(encryptorDecryptor1: cryptoLib.EncryptorDecryptor){
-    encryptorDecryptor= encryptorDecryptor1;
+export function setWebDataEncryptorDescriptor(encryptorDecryptor: cryptoLib.EncryptorDecryptor) {
+    wdCrypto = setWebDataEncryptorDescriptor.wrap(encryptorDecryptor);
 }
-
+export namespace setWebDataEncryptorDescriptor {
+    export const wrap = (encryptorDecryptor: cryptoLib.EncryptorDecryptor) => ({
+        encryptorDecryptor,
+        "stringifyThenEncrypt": cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor),
+        "decryptThenParse": cryptoLib.decryptThenParseFactory(encryptorDecryptor)
+    });
+}
 
 export const getOrCreateWdInstance = (() => {
 
@@ -585,7 +571,14 @@ export const getOrCreateWdInstance = (() => {
         const wdInstance: wd.Instance<"PLAIN"> = {
             "id_": instance_id,
             imsi,
-            "chats": chats.map(chat=> wd.decryptChat(encryptorDecryptor, chat))
+            "chats": await Promise.all(
+                chats.map(
+                    chat => wd.decryptChat(
+                        wdCrypto.encryptorDecryptor,
+                        chat
+                    )
+                )
+            )
         };
 
         await synchronizeUserSimAndWdInstance(userSim, wdInstance);
@@ -610,16 +603,27 @@ export const newWdChat = (() => {
         contactIndexInSim: number | null
     ): Promise<wd.Chat<"PLAIN">> {
 
-        const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
-
         const { chat_id } = await sendRequest<Params, Response>(
             methodName,
-            {
-                "instance_id": wdInstance.id_,
-                "contactNumber": { "encrypted_string": stringifyThenEncrypt<string>(contactNumber) },
-                "contactName": { "encrypted_string": stringifyThenEncrypt<string>(contactName) },
-                "contactIndexInSim": { "encrypted_number_or_null": stringifyThenEncrypt<number | null>(contactIndexInSim) }
-            }
+            await (async () => {
+
+                const [
+                    encryptedContactNumber,
+                    encryptedContactName,
+                    encryptedContactIndexInSim
+                ] = await Promise.all(
+                    [contactNumber, contactName, contactIndexInSim]
+                        .map(v => wdCrypto.stringifyThenEncrypt(v))
+                );
+
+                return {
+                    "instance_id": wdInstance.id_,
+                    "contactNumber": { "encrypted_string": encryptedContactNumber },
+                    "contactName": { "encrypted_string": encryptedContactName },
+                    "contactIndexInSim": { "encrypted_number_or_null": encryptedContactIndexInSim }
+                };
+
+            })()
         );
 
         const wdChat: wd.Chat<"PLAIN"> = {
@@ -658,14 +662,19 @@ export const fetchOlderWdMessages = (() => {
 
         const olderThanMessageId = wdChat.messages[0].id_;
 
-        let olderWdMessages = (await sendRequest<Params, Response>(
-            methodName,
-            {
-                "chat_id": wdChat.id_,
-                olderThanMessageId
-            }
-        )).map( encryptedOlderMessage => 
-            wd.decryptMessage(encryptorDecryptor, encryptedOlderMessage)
+        let olderWdMessages = await Promise.all(
+            (await sendRequest<Params, Response>(
+                methodName,
+                {
+                    "chat_id": wdChat.id_,
+                    olderThanMessageId
+                }
+            )).map(encryptedOlderMessage =>
+                wd.decryptMessage(
+                    wdCrypto.encryptorDecryptor,
+                    encryptedOlderMessage
+                )
+            )
         );
 
         const set = new Set(wdChat.messages.map(({ id_ }) => id_));
@@ -781,8 +790,6 @@ const updateWdChat = (() => {
         fields: Partial<Pick<wd.Chat<"PLAIN">, "contactName" | "contactIndexInSim" | "idOfLastMessageSeen">>
     ): Promise<boolean> {
 
-        const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
-
         const params: Params = { "chat_id": wdChat.id_ };
 
         for (const key of Object.keys(fields) as (keyof typeof fields)[]) {
@@ -793,17 +800,26 @@ const updateWdChat = (() => {
                 continue;
             }
 
-            params[key] = (()=>{
-                switch(key){
-                    case "contactName": return { 
-                        "encrypted_string": stringifyThenEncrypt<string>(value as string)
+            switch (key) {
+                case "contactName":
+                    params[key] = {
+                        "encrypted_string": await wdCrypto.stringifyThenEncrypt(
+                            value as string
+                        )
                     };
-                    case "contactIndexInSim": return { 
-                        "encrypted_number_or_null": stringifyThenEncrypt<number | null>(value as number | null) 
+                    break;
+                case "contactIndexInSim":
+                    params[key] = {
+                        "encrypted_number_or_null": await wdCrypto.stringifyThenEncrypt(
+                            value as number | null
+                        )
                     };
-                    case "idOfLastMessageSeen": return value as number;
-                }
-            })();
+                    break;
+                case "idOfLastMessageSeen":
+                    params[key] = value as number;
+                    break;
+            }
+
 
         }
 
@@ -926,12 +942,15 @@ export async function newWdMessage<T extends (
 
     const { message_id } = await sendRequest<Params, Response>(
         methodName,
-        { 
-            "chat_id": wdChat.id_, 
-            "message": wd.encryptMessage(encryptorDecryptor,message) as  wd.NoId< 
-            wd.Message.Incoming<"ENCRYPTED"> | 
-            wd.Message.Outgoing.Pending<"ENCRYPTED"> | 
-            wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED"> 
+        {
+            "chat_id": wdChat.id_,
+            "message": await wd.encryptMessage(
+                wdCrypto.encryptorDecryptor,
+                message
+            ) as wd.NoId<
+                wd.Message.Incoming<"ENCRYPTED"> |
+                wd.Message.Outgoing.Pending<"ENCRYPTED"> |
+                wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">
             >
         }
     );

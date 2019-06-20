@@ -74,12 +74,14 @@ var runExclusive = require("run-exclusive");
 var connection = require("./toBackend/connection");
 var localApiHandlers = require("./toBackend/localApiHandlers");
 var env_1 = require("./env");
+var cryptoLib = require("crypto-lib");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
-    function Ua(imsi, sipPassword, disabledMessage) {
+    function Ua(imsi, sipPassword, towardSimEncryptor, disabledMessage) {
         var _this = this;
         if (disabledMessage === void 0) { disabledMessage = false; }
+        this.towardSimEncryptor = towardSimEncryptor;
         /** post isRegistered */
         this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
         this.evtRingback = new ts_events_extended_1.SyncEvent();
@@ -100,9 +102,16 @@ var Ua = /** @class */ (function () {
             uri: uri,
             "authorization_user": imsi,
             "password": sipPassword,
-            "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)[1],
+            "instance_id": Ua.session.instanceId.match(/"<urn:([^>]+)>"$/)[1],
             "register": false,
-            "contact_uri": uri + ";enc_email=" + gateway_1.urlSafeB64.enc(Ua.email) + (!disabledMessage ? "" : ";no_messages"),
+            "contact_uri": [
+                uri,
+                gateway_1.RegistrationParams.build({
+                    "userEmail": Ua.session.email,
+                    "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(Ua.session.towardUserEncryptKey),
+                    "messagesEnabled": !disabledMessage
+                })
+            ].join(";"),
             "register_expires": 345600
         });
         /*
@@ -133,11 +142,6 @@ var Ua = /** @class */ (function () {
         });
         this.jsSipUa.start();
     }
-    /** Must be called in webphone.ts */
-    Ua.setUaInstanceId = function (uaInstanceId, email) {
-        this.email = email;
-        this.instanceId = uaInstanceId;
-    };
     //TODO: If no response to register do something
     Ua.prototype.register = function () {
         this.jsSipUa.register();
@@ -150,54 +154,65 @@ var Ua = /** @class */ (function () {
         this.jsSipUa.emit("unregistered");
     };
     Ua.prototype.onMessage = function (request) {
-        var bundledData = gateway_1.extractBundledDataFromHeaders((function () {
-            var out = {};
-            for (var key in request.headers) {
-                out[key] = request.headers[key][0].raw;
-            }
-            return out;
-        })());
-        var fromNumber = request.from.uri.user;
-        if (bundledData.type === "RINGBACK") {
-            this.evtRingback.post(bundledData.callId);
-            return;
-        }
-        var pr = this.postEvtIncomingMessage({
-            fromNumber: fromNumber,
-            bundledData: bundledData,
-            "text": request.body,
+        return __awaiter(this, void 0, void 0, function () {
+            var bundledData, fromNumber, pr;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, gateway_1.extractBundledDataFromHeaders((function () {
+                            var out = {};
+                            for (var key in request.headers) {
+                                out[key] = request.headers[key][0].raw;
+                            }
+                            return out;
+                        })(), Ua.session.towardUserDecryptor)];
+                    case 1:
+                        bundledData = _a.sent();
+                        fromNumber = request.from.uri.user;
+                        if (bundledData.type === "RINGBACK") {
+                            this.evtRingback.post(bundledData.callId);
+                            return [2 /*return*/];
+                        }
+                        pr = this.postEvtIncomingMessage({
+                            fromNumber: fromNumber,
+                            bundledData: bundledData
+                        });
+                        this.jsSipSocket.setMessageOkDelay(request, pr);
+                        return [2 /*return*/];
+                }
+            });
         });
-        this.jsSipSocket.setMessageOkDelay(request, pr);
     };
     Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
         var _this = this;
-        var extraHeaders = (function () {
-            var headers = gateway_1.smuggleBundledDataInHeaders((function () {
-                var bundledData = {
-                    "type": "MESSAGE",
-                    exactSendDate: exactSendDate,
-                };
-                if (appendPromotionalMessage) {
-                    bundledData.appendPromotionalMessage = true;
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            var _a, _b, _c, _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        _b = (_a = this.jsSipUa).sendMessage;
+                        _c = ["sip:" + number + "@" + env_1.baseDomain,
+                            "| encrypted message bundled in header |"];
+                        _d = {
+                            "contentType": "text/plain; charset=UTF-8"
+                        };
+                        _e = "extraHeaders";
+                        return [4 /*yield*/, gateway_1.smuggleBundledDataInHeaders({
+                                "type": "MESSAGE",
+                                text: text,
+                                exactSendDate: exactSendDate,
+                                appendPromotionalMessage: appendPromotionalMessage
+                            }, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
+                    case 1: return [2 /*return*/, _b.apply(_a, _c.concat([(_d[_e] = _f.sent(),
+                                _d["eventHandlers"] = {
+                                    "succeeded": function () { return resolve(); },
+                                    "failed": function (_a) {
+                                        var cause = _a.cause;
+                                        return reject(new Error("Send message failed " + cause));
+                                    }
+                                },
+                                _d)]))];
                 }
-                return bundledData;
-            })());
-            var out = [];
-            for (var key in headers) {
-                out.push(key + ": " + headers[key]);
-            }
-            return out;
-        })();
-        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + env_1.baseDomain, text, {
-            "contentType": "text/plain; charset=UTF-8",
-            extraHeaders: extraHeaders,
-            "eventHandlers": {
-                "succeeded": function () { return resolve(); },
-                "failed": function (_a) {
-                    var cause = _a.cause;
-                    return reject(new Error("Send message failed " + cause));
-                }
-            }
+            });
         }); });
     };
     Ua.prototype.onIncomingCall = function (jsSipRtcSession, request) {

@@ -1,4 +1,4 @@
-//NOTE: Imply Cookie manager and StripeCheckout loaded on the page.
+//NOTE: Assert StripeCheckout loaded on the page.
 
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
@@ -6,8 +6,8 @@ import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types/subscription";
 import * as currencyLib from "../../../shared/dist/tools/currency";
-import { getURLParameter } from "../../../shared/dist/tools/getURLParameter";
 import { assetsRoot } from "../../../shared/dist/lib/env";
+import * as cookies from "../../../shared/dist/lib/cookies/logic/frontend";
 
 import { UiMySubscription } from "./UiMySubscription";
 import { UiSubscribe } from "./UiSubscribe";
@@ -18,8 +18,6 @@ import { UiNegativeBalanceWarning } from "./UiNegativeBalanceWarning";
 declare const require: (path: string) => any;
 declare const StripeCheckout: any;
 declare const Stripe: any;
-declare const Cookies: any;
-declare const Buffer: any;
 
 const html = loadUiClassHtml(
     require("../templates/UiController.html"),
@@ -98,9 +96,7 @@ export class UiController {
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
-                "email":
-                    Cookies.get("email") ||
-                    Buffer.from(getURLParameter("email_as_hex"), "hex").toString("utf8"),
+                "email": cookies.AuthenticatedSessionDescriptorSharedData.get().email,
                 "description": "Android app access",
                 "zipCode": true,
                 "panelLabel": "ok", //TODO: Display the price here, show the dialog only if other currency.

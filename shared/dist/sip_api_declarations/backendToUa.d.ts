@@ -142,14 +142,6 @@ export declare namespace shouldAppendPromotionalMessage {
     type Params = undefined;
     type Response = boolean;
 }
-export declare namespace getUaInstanceId {
-    const methodName = "getUaCredentials";
-    type Params = undefined;
-    type Response = {
-        uaInstanceId: string;
-        email: string;
-    };
-}
 export declare namespace getOrCreateInstance {
     const methodName = "getInstance";
     type Params = {

@@ -7,14 +7,15 @@ import "../../../shared/dist/tools/standalonePolyfills";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
 import { convertFromEuro } from "../../../shared/dist/tools/currency";
+import * as availablePages from "../../../shared/dist/lib/availablePages";
 
 $(document).ready(async () => {
 
     $("#logout").click(async () => {
 
-        webApiCaller.logoutUser();
+        await webApiCaller.logoutUser();
 
-        window.location.href = "/login";
+        location.href = `/${availablePages.PageName.login}`
 
     });
 

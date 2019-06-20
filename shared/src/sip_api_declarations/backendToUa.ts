@@ -214,19 +214,6 @@ export namespace shouldAppendPromotionalMessage {
 
 }
 
-export namespace getUaInstanceId {
-
-    export const methodName = "getUaCredentials";
-
-    export type Params = undefined;
-
-    export type Response = {
-        uaInstanceId: string;
-        email: string;
-    };
-
-}
-
 //WebphoneData Sync things:
 
 export namespace getOrCreateInstance {

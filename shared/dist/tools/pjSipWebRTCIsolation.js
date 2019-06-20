@@ -133,8 +133,8 @@ function useAlternativeWebRTCImplementation(api) {
         });
     };
     var RTCPeerConnectionProxy = function RTCPeerConnection(rtcConfiguration) {
-        var _this = this;
         var e_1, _a;
+        var _this = this;
         var rtcPeerConnectionRef = getCounter();
         api.methods.createRTCPeerConnection(rtcPeerConnectionRef, JSON.stringify(rtcConfiguration));
         var properties = {

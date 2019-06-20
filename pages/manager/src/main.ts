@@ -14,6 +14,7 @@ import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as availablePages from "../../../shared/dist/lib/availablePages";
 
 declare const __dirname: any;
 
@@ -39,59 +40,16 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 }
 
+async function onLoggedIn(): Promise<UiController> {
 
-let resolvePrUiController: (uiController: UiController) => void;
-
-window["apiExposedToHost"] = (() => {
-
-    const prUiController = new Promise<UiController>(resolve => resolvePrUiController = resolve);
-
-    return {
-        "createContact": async (imsi: string, number: string) => {
-
-            await (await prUiController).interact_createContact(imsi, number);
-
-            try{ apiExposedByHost.onDone(null); }catch{}
-
-        },
-        "updateContactName": async (number: string) => {
-
-            await (await prUiController).interact_updateContactName(number);
-
-            try{ apiExposedByHost.onDone(null); }catch{}
-
-        },
-        "deleteContact": async (number: string) => {
-
-            await (await prUiController).interact_deleteContact(number);
-
-            try{ apiExposedByHost.onDone(null); }catch{}
-
-        }
-    };
-
-})();
-
-
-
-
-$(document).ready(async () => {
-
-    $("#logout").click(() => {
-
-        webApiCaller.logoutUser();
-
-        window.location.href = "/login";
-
+    connection.connect({ 
+        "connectionType": "MAIN",
+        "requestTurnCred": false
     });
-
-    connection.connect({ "requestTurnCred": false });
 
     const uiController = new UiController(
         await remoteApiCaller.getUsableUserSims()
     );
-
-    resolvePrUiController(uiController);
 
     $("#page-payload").html("").append(uiController.structure);
 
@@ -104,5 +62,66 @@ $(document).ready(async () => {
             )
         )
         ;
+
+    return uiController;
+
+}
+
+window["apiExposedToHost"] = (() => {
+
+    const loginAndGetUiController = async (email: string, secret: string): Promise<UiController> => {
+
+        const { status } = await webApiCaller.loginUser(email, secret);
+
+        if (status !== "SUCCESS") {
+            apiExposedByHost.onDone("Login failed");
+            await new Promise(resolve => { });
+        }
+
+        return onLoggedIn();
+
+    };
+
+    const onDone = () => {
+        try {
+            apiExposedByHost.onDone(null);
+        } catch{ }
+    };
+
+    return {
+        "createContact": (email: string, secret: string, imsi: string, number: string) =>
+            loginAndGetUiController(email, secret)
+                .then(uiController => uiController.interact_createContact(imsi, number))
+                .then(() => onDone())
+        ,
+        "updateContactName": async (email: string, secret: string, number: string) =>
+            loginAndGetUiController(email, secret)
+                .then(uiController => uiController.interact_updateContactName(number))
+                .then(() => onDone())
+        ,
+        "deleteContact": async (email: string, secret: string, number: string) =>
+            loginAndGetUiController(email, secret)
+                .then(uiController => uiController.interact_deleteContact(number))
+                .then(() => onDone())
+    };
+
+})();
+
+
+$(document).ready(() => {
+
+    if (typeof apiExposedByHost !== "undefined") {
+        return;
+    }
+
+    $("#logout").click(async () => {
+
+        await webApiCaller.logoutUser();
+
+        location.href = `/${availablePages.PageName.login}`
+
+    });
+
+    onLoggedIn();
 
 });

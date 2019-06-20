@@ -7,20 +7,30 @@ import "../../../shared/dist/tools/standalonePolyfills";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { UiController } from "./UiController";
+import * as availablePages from "../../../shared/dist/lib/availablePages";
 
 declare const apiExposedByHost: {
-    onDone(email?: string, password?: string): void;
+    onDone(errorMessage: string | null): void;
 };
 
-$(document).ready(async () => {
+if( typeof apiExposedByHost !== "undefined" ){
 
-    $("#logout").click(async () => {
+    window.onerror = (msg, url, lineNumber) => {
+        apiExposedByHost.onDone(`${msg}\n'${url}:${lineNumber}`);
+        return false;
+    };
 
-        webApiCaller.logoutUser();
+    if ("onPossiblyUnhandledRejection" in Promise) {
 
-        window.location.href = "/login";
+        (Promise as any).onPossiblyUnhandledRejection(error => {
+            apiExposedByHost.onDone(error.message + " " + error.stack);
+        });
 
-    });
+    }
+
+}
+
+async function onLoggedIn() {
 
     bootbox_custom.loading("Loading subscription infos");
 
@@ -37,10 +47,13 @@ $(document).ready(async () => {
 
     if (
         typeof apiExposedByHost !== "undefined" &&
-        (subscriptionInfos.customerStatus === "EXEMPTED" || !!subscriptionInfos.subscription)
+        (
+            subscriptionInfos.customerStatus === "EXEMPTED" || 
+            !!subscriptionInfos.subscription
+        )
     ) {
 
-        apiExposedByHost.onDone();
+        apiExposedByHost.onDone(null);
 
         return;
 
@@ -57,7 +70,7 @@ $(document).ready(async () => {
 
         if (typeof apiExposedByHost !== "undefined") {
 
-            apiExposedByHost.onDone();
+            apiExposedByHost.onDone(null);
 
         } else {
 
@@ -68,5 +81,38 @@ $(document).ready(async () => {
     });
 
     $("#page-payload").html("").append(uiController.structure);
+
+}
+
+window["apiExposedToHost"] = {
+    "login": async (email: string, secret: string): Promise<void> => {
+
+        const { status } = await webApiCaller.loginUser(email, secret);
+
+        if (status !== "SUCCESS") {
+            apiExposedByHost.onDone("Login failed");
+            return;
+        }
+
+        onLoggedIn();
+
+    }
+};
+
+$(document).ready(() => {
+
+    if (typeof apiExposedByHost !== "undefined") {
+        return;
+    }
+
+    $("#logout").click(async () => {
+
+        await webApiCaller.logoutUser();
+
+        location.href = `/${availablePages.PageName.login}`
+
+    });
+
+    onLoggedIn();
 
 });

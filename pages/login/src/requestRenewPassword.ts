@@ -5,7 +5,7 @@ declare const Buffer: any;
 
 export async function requestRenewPassword() {
 
-	let email = await new Promise<string | null>(
+	const email = await new Promise<string | null>(
 		resolve => bootbox_custom.prompt({
 			"title": "Account email?",
 			"inputType": "email",

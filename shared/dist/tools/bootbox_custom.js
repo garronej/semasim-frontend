@@ -31,7 +31,8 @@ function loading(message, delayBeforeShow) {
             "message": [
                 '<p class="text-center">',
                 '<i class="fa fa-spin fa-spinner"></i>&nbsp;&nbsp;',
-                message + "</p>"
+                "<span class=\"" + loading.spanClass + "\">" + message + "</span>",
+                "</p>"
             ].join(""),
             "closeButton": false
         };
@@ -44,6 +45,9 @@ function loading(message, delayBeforeShow) {
     };
 }
 exports.loading = loading;
+(function (loading) {
+    loading.spanClass = "loading_message";
+})(loading = exports.loading || (exports.loading = {}));
 function run(method, args, isLoading) {
     if (isLoading === void 0) { isLoading = false; }
     if (!isLoading && currentModal) {

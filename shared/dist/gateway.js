@@ -7,4 +7,5 @@ exports.readImsi = sipRouting_1.readImsi;
 var bundledData_1 = require("../../../gateway/dist/lib/misc/bundledData");
 exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
-exports.urlSafeB64 = bundledData_1.urlSafeB64;
+var RegistrationParams_1 = require("../../../gateway/dist/lib/misc/RegistrationParams");
+exports.RegistrationParams = RegistrationParams_1.RegistrationParams;

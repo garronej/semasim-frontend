@@ -5,18 +5,21 @@ import * as localApiHandlers from "./localApiHandlers";
 import * as remoteApiCaller from "./remoteApiCaller";
 import * as types from "../types/userSim";
 import * as bootbox_custom from "../../tools/bootbox_custom";
-import * as Cookies from "js-cookie";
 import { baseDomain, isDevEnv  } from "../env";
+import * as cookies from "../cookies/logic/frontend";
 
 export const url = `wss://web.${baseDomain}`;
 
 const idString = "toBackend";
 
+//const log= isDevEnv ? console.log.bind(console) : (() => { });
+const log = console.log.bind(console); isDevEnv;
+
 const apiServer = new sip.api.Server(
     localApiHandlers.handlers,
     sip.api.Server.getDefaultLogger({
         idString,
-        "log": isDevEnv ? console.log.bind(console) : (() => { }),
+        log,
         "hideKeepAlive": true
     })
 );
@@ -28,7 +31,6 @@ let userSims: types.UserSim.Usable[] | undefined = undefined;
 export const evtConnect = new SyncEvent<sip.Socket>();
 
 /** 
- * Pass uaInstanceId to connect as an auxiliary connection of the user account.
  * - Multiple auxiliary connection can be established at the same time.
  * - On the contrary only one main connection can be active at the same time for a given user account )
  * - Auxiliary connections does not receive most of the events defined in localApiHandler.
@@ -39,10 +41,7 @@ export const evtConnect = new SyncEvent<sip.Socket>();
  * Called from outside isReconnect should never be passed.
  *  */
 export function connect(
-    connectionParams: {
-        requestTurnCred: boolean;
-        uaInstanceId?: string;
-    },
+    connectionParams: cookies.WebsocketConnectionParams,
     isReconnect?: undefined | "RECONNECT"
 ) {
 
@@ -63,21 +62,7 @@ export function connect(
 
     }
 
-    Cookies.set("requestTurnCred", `${connectionParams.requestTurnCred}`);
-
-    {
-
-        const { uaInstanceId } = connectionParams;
-
-        const key= "uaInstanceId";
-
-        if( uaInstanceId !== undefined ){
-            Cookies.set(key, uaInstanceId);
-        }else{
-            Cookies.remove(key);
-        }
-
-    }
+    const removeCookie= cookies.WebsocketConnectionParams.set(connectionParams);
 
     const socket = new sip.Socket(
         new WebSocket(url, "SIP"),
@@ -109,15 +94,17 @@ export function connect(
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": false,
+        "outgoingTraffic": true,
         "ignoreApiTraffic": true
-    }, console.log.bind(console));
+    }, log);
 
     socketCurrent = socket;
 
     socket.evtConnect.attachOnce(() => {
 
-        console.log(`Socket ${!!isReconnect ? "re-" : ""}connected`);
+        log(`Socket ${!!isReconnect ? "re-" : ""}connected`);
+
+        removeCookie();
 
         if (!!isReconnect) {
 
@@ -125,7 +112,7 @@ export function connect(
 
         }
 
-        const includeContacts = connectionParams.uaInstanceId === undefined;
+        const includeContacts = connectionParams.connectionType === "MAIN";
 
         if (userSims === undefined) {
 
@@ -194,7 +181,7 @@ export function connect(
 
     socket.evtClose.attachOnce(async () => {
 
-        console.log("Socket disconnected");
+        log("Socket disconnected");
 
         for (const userSim of userSims || []) {
 

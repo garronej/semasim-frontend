@@ -1,44 +1,48 @@
 export * from "./types";
 
 import * as types from "./types";
-import * as cryptoLib from "../../../tools/crypto/library";
+import * as cryptoLib from "crypto-lib";
 import { isAscendingAlphabeticalOrder } from "../../../tools/isAscendingAlphabeticalOrder";
 
-export function decryptChat(
+export async function decryptChat(
     decryptor: cryptoLib.Decryptor,
     chat: types.Chat<"ENCRYPTED">
-): types.Chat<"PLAIN"> {
+): Promise<types.Chat<"PLAIN">> {
 
     const decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
 
-    return {
-        ...chat,
-        "contactNumber": decryptThenParse<string>(chat.contactNumber.encrypted_string),
-        "contactName": decryptThenParse<string>(chat.contactName.encrypted_string),
-        "contactIndexInSim": decryptThenParse<number | null>(chat.contactIndexInSim.encrypted_number_or_null),
-        "messages": chat.messages.map(message => decryptMessage(decryptor, message))
-    };
+    const [contactNumber, contactName, contactIndexInSim, messages] =
+        await Promise.all([
+            decryptThenParse<string>(chat.contactNumber.encrypted_string),
+            decryptThenParse<string>(chat.contactName.encrypted_string),
+            decryptThenParse<number | null>(chat.contactIndexInSim.encrypted_number_or_null),
+            Promise.all(
+                chat.messages.map(message => decryptMessage(decryptor, message))
+            )
+        ]);
+
+    return { ...chat, contactNumber, contactName, contactIndexInSim, messages };
 
 }
 
 /** If input message have no id so will the output message */
-export function encryptMessage(
+export async function encryptMessage(
     encryptor: cryptoLib.Encryptor,
     message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>
-): types.Message<"ENCRYPTED"> {
+): Promise<types.Message<"ENCRYPTED">> {
 
     const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptor);
 
     const encryptedMessage: types.Message<"ENCRYPTED"> = {
         ...message,
-        "text": { "encrypted_string": stringifyThenEncrypt(message.text) }
+        "text": { "encrypted_string": await stringifyThenEncrypt(message.text) }
     } as any;
 
     if ("sentBy" in message && message.sentBy.who === "OTHER") {
 
         (encryptedMessage as types.Message.Outgoing.StatusReportReceived.SentByOther<"ENCRYPTED">).sentBy = {
             ...message.sentBy,
-            "email": { "encrypted_string": stringifyThenEncrypt(message.sentBy.email) }
+            "email": { "encrypted_string": await stringifyThenEncrypt(message.sentBy.email) }
         };
 
     }
@@ -47,23 +51,24 @@ export function encryptMessage(
 
 }
 
-export function decryptMessage(
+export async function decryptMessage(
     decryptor: cryptoLib.Decryptor,
     encryptedMessage: types.Message<"ENCRYPTED">
-): types.Message<"PLAIN"> {
+): Promise<types.Message<"PLAIN">> {
 
     const decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
 
     const message: types.Message<"PLAIN"> = {
         ...encryptedMessage,
-        "text": decryptThenParse(encryptedMessage.text.encrypted_string)
+        "text": await decryptThenParse<string>(encryptedMessage.text.encrypted_string)
     } as any;
+
 
     if ("sentBy" in encryptedMessage && encryptedMessage.sentBy.who === "OTHER") {
 
         (message as types.Message.Outgoing.StatusReportReceived.SentByOther<"PLAIN">).sentBy = {
             ...encryptedMessage.sentBy,
-            "email": decryptThenParse(encryptedMessage.sentBy.email.encrypted_string)
+            "email": await decryptThenParse<string>(encryptedMessage.sentBy.email.encrypted_string)
         };
 
     }

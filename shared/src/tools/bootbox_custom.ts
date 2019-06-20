@@ -58,7 +58,8 @@ export function loading(
                 "message": [
                     '<p class="text-center">',
                     '<i class="fa fa-spin fa-spinner"></i>&nbsp;&nbsp;',
-                    `${message}</p>`
+                    `<span class="${loading.spanClass}">${message}</span>`,
+                    `</p>`
                 ].join(""),
                 "closeButton": false
             };
@@ -75,6 +76,12 @@ export function loading(
         message,
         delayBeforeShow
     };
+
+}
+
+export namespace loading {
+
+    export const spanClass= "loading_message";
 
 }
 

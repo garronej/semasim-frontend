@@ -13,7 +13,12 @@ import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as types from "../../../shared/dist/lib/types/userSim";
 import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
-import * as aes from "../../../shared/dist/tools/crypto/aes";
+import * as crypto from "../../../shared/dist/lib/crypto";
+import * as cryptoLib from "crypto-lib";
+import * as cookies from "../../../shared/dist/lib/cookies/logic/frontend";
+import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
+import * as availablePages from "../../../shared/dist/lib/availablePages";
+import { workerThreadPoolId } from "./workerThreadPoolId";
 //import * as observer from "../../../shared/dist/lib/tools/observer";
 //import * as pjSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
 
@@ -27,25 +32,61 @@ pjSipWebRTCIsolation.useAlternativeWebRTCImplementation(
 
 $(document).ready(async () => {
 
-	$("#logout").click(async () => {
+    $("#logout").click(async () => {
 
-		await webApiCaller.logoutUser();
+        await webApiCaller.logoutUser();
 
-		window.location.href = "/login";
+        location.href = `/${availablePages.PageName.login}`
 
+    });
+
+	{
+
+		const { email, webUaInstanceId, encryptedSymmetricKey } = cookies.AuthenticatedSessionDescriptorSharedData.get();
+
+		cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 4);
+
+		const towardUserKeys = localStorage.TowardUserKeys.retrieve();
+
+		if (towardUserKeys === undefined) {
+
+			$("#logout").trigger("click");
+			return;
+
+		}
+
+		const towardUserDecryptor = cryptoLib.rsa.decryptorFactory(
+			towardUserKeys.decryptKey, 
+			workerThreadPoolId
+		);
+
+		remoteApiCaller.setWebDataEncryptorDescriptor(
+			cryptoLib.aes.encryptorDecryptorFactory(
+				await crypto.symmetricKey.decryptKey(
+					towardUserDecryptor, 
+					encryptedSymmetricKey
+				),
+				workerThreadPoolId
+			)
+		);
+
+		Ua.session = {
+			email,
+			"instanceId": webUaInstanceId,
+			"towardUserEncryptKey": towardUserKeys.encryptKey,
+			towardUserDecryptor
+		};
+
+	}
+
+	connection.connect({ 
+		"connectionType": "MAIN",
+		"requestTurnCred": true
 	});
-
-	remoteApiCaller.setEncryptorDecryptor(
-		aes.encryptorDecryptorFactory(
-			await aes.generateTestKey()
-		)
-	);
-
-	connection.connect({ "requestTurnCred": true });
 
 	$("#page-payload").html("");
 
-	bootbox_custom.loading("Fetching contacts and SMS history", 0);
+	bootbox_custom.loading("Decrypting your conversation history 🔐", 0);
 
 	const userSims = await remoteApiCaller.getUsableUserSims();
 
@@ -58,8 +99,6 @@ $(document).ready(async () => {
 	const wdInstances = new Map<types.UserSim, wd.Instance<"PLAIN">>();
 
 	await Promise.all([
-		remoteApiCaller.getUaInstanceId()
-			.then(({ uaInstanceId, email }) => Ua.setUaInstanceId(uaInstanceId, email)),
 		...userSims.map(
 			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
 				.then(wdInstance => { wdInstances.set(userSim, wdInstance) })

@@ -8,6 +8,7 @@ export { readImsi } from "../../../gateway/dist/lib/misc/sipRouting";
 
 export { 
     smuggleBundledDataInHeaders, 
-    extractBundledDataFromHeaders, 
-    urlSafeB64 
+    extractBundledDataFromHeaders
 } from "../../../gateway/dist/lib/misc/bundledData";
+
+export { RegistrationParams } from "../../../gateway/dist/lib/misc/RegistrationParams";

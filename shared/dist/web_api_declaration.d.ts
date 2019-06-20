@@ -1,9 +1,11 @@
-export declare const apiPath = "api";
+export declare const apiPath = "/api";
 export declare namespace registerUser {
     const methodName = "register-user";
     type Params = {
         email: string;
-        password: string;
+        secret: string;
+        towardUserEncryptKeyStr: string;
+        encryptedSymmetricKey: string;
     };
     type Response = "CREATED" | "CREATED NO ACTIVATION REQUIRED" | "EMAIL NOT AVAILABLE";
 }
@@ -19,7 +21,7 @@ export declare namespace loginUser {
     const methodName = "login-user";
     type Params = {
         email: string;
-        password: string;
+        secret: string;
     };
     /** isGranted */
     type Response = {
@@ -53,7 +55,9 @@ export declare namespace renewPassword {
     const methodName = "renew-password";
     type Params = {
         email: string;
-        newPassword: string;
+        newSecret: string;
+        newTowardUserEncryptKeyStr: string;
+        newEncryptedSymmetricKey: string;
         token: string;
     };
     /** return false if the token have expired */

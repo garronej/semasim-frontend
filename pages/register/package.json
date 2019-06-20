@@ -1,7 +1,7 @@
 {
-  "version": "0.1.8",
+  "version": "0.2.0",
   "scripts": {
-    "build": "node ../../build-script/dist/bin/cmd build_page"
+    "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {},
   "devDependencies": {
@@ -10,6 +10,6 @@
     "@types/jquery": "2.0.48",
     "@types/jquery.validation": "1.13.27",
     "@types/jqueryui": "1.9.27",
-    "typescript": "^3.0.1"
+    "typescript": "^3.5.1"
   }
 }

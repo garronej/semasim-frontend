@@ -50,20 +50,22 @@ var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 var bootbox_custom = require("../../tools/bootbox_custom");
-var Cookies = require("js-cookie");
 var env_1 = require("../env");
+var cookies = require("../cookies/logic/frontend");
 exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
+//const log= isDevEnv ? console.log.bind(console) : (() => { });
+var log = console.log.bind(console);
+env_1.isDevEnv;
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": env_1.isDevEnv ? console.log.bind(console) : (function () { }),
+    log: log,
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 /**
- * Pass uaInstanceId to connect as an auxiliary connection of the user account.
  * - Multiple auxiliary connection can be established at the same time.
  * - On the contrary only one main connection can be active at the same time for a given user account )
  * - Auxiliary connections does not receive most of the events defined in localApiHandler.
@@ -85,17 +87,7 @@ function connect(connectionParams, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + connectionParams.requestTurnCred);
-    {
-        var uaInstanceId = connectionParams.uaInstanceId;
-        var key = "uaInstanceId";
-        if (uaInstanceId !== undefined) {
-            Cookies.set(key, uaInstanceId);
-        }
-        else {
-            Cookies.remove(key);
-        }
-    }
+    var removeCookie = cookies.WebsocketConnectionParams.set(connectionParams);
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + env_1.baseDomain,
         "remotePort": 443
@@ -114,16 +106,17 @@ function connect(connectionParams, isReconnect) {
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": false,
+        "outgoingTraffic": true,
         "ignoreApiTraffic": true
-    }, console.log.bind(console));
+    }, log);
     socketCurrent = socket;
     socket.evtConnect.attachOnce(function () {
-        console.log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
+        log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
+        removeCookie();
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
-        var includeContacts = connectionParams.uaInstanceId === undefined;
+        var includeContacts = connectionParams.connectionType === "MAIN";
         if (userSims === undefined) {
             remoteApiCaller.getUsableUserSims(includeContacts)
                 .then(function (userSims_) { return userSims = userSims_; });
@@ -182,14 +175,15 @@ function connect(connectionParams, isReconnect) {
         exports.evtConnect.post(socket);
     });
     socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
-        var e_2, _a, _b, _c, userSim;
+        var _a, _b, userSim;
+        var e_2, _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
-                    console.log("Socket disconnected");
+                    log("Socket disconnected");
                     try {
-                        for (_b = __values(userSims || []), _c = _b.next(); !_c.done; _c = _b.next()) {
-                            userSim = _c.value;
+                        for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
+                            userSim = _b.value;
                             userSim.isOnline = false;
                             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                         }
@@ -197,7 +191,7 @@ function connect(connectionParams, isReconnect) {
                     catch (e_2_1) { e_2 = { error: e_2_1 }; }
                     finally {
                         try {
-                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_2) throw e_2.error; }
                     }

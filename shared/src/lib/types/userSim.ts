@@ -39,6 +39,7 @@ export namespace UserSim {
         sim: dcTypes.Sim;
         friendlyName: string;
         password: string;
+        towardSimEncryptKeyStr: string;
         dongle: {
             imei: string;
             isVoiceEnabled?: boolean;

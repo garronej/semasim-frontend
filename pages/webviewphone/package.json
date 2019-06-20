@@ -1,16 +1,13 @@
 {
-  "version": "0.2.1",
+  "version": "0.3.0",
   "scripts": {
-    "build": "node ../../build-script/dist/bin/cmd build_page"
+    "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "array.prototype.find": "^2.0.4",
-    "es6-map": "^0.1.5",
-    "es6-weak-map": "^2.0.2",
-    "ts-sip": "github:garronej/ts-sip",
+    "crypto-lib": "github:garronej/crypto-lib",
     "ts-events-extended": "github:garronej/ts-events-extended"
   },
   "devDependencies": {
-    "typescript": "^3.0.1"
+    "typescript": "^3.5.1"
   }
 }

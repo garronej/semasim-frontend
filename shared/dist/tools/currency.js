@@ -56,7 +56,7 @@ function isValidCountryIso(countryIso) {
                 for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
                     var currency = _d.value;
                     try {
-                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                        for (var _e = (e_2 = void 0, __values(exports.data[currency].countriesIso)), _f = _e.next(); !_f.done; _f = _e.next()) {
                             var countryIso_1 = _f.value;
                             out[countryIso_1] = true;
                         }

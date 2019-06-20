@@ -1,7 +1,7 @@
 {
-  "version": "0.1.4",
+  "version": "0.1.5",
   "scripts": {
-    "build": "node ../../build-script/dist/bin/cmd build_page"
+    "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
     "array.prototype.find": "^2.0.4",
@@ -17,6 +17,6 @@
     "@types/jquery.validation": "1.13.27",
     "@types/jqueryui": "1.9.27",
     "lessify": "^1.0.2",
-    "typescript": "^3.0.1"
+    "typescript": "^3.5.1"
   }
 }

@@ -5,14 +5,15 @@ import {
     types as gwTypes,
     extractBundledDataFromHeaders,
     smuggleBundledDataInHeaders,
-    urlSafeB64,
-    readImsi
+    readImsi,
+    RegistrationParams
 } from "../gateway";
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "./toBackend/connection";
 import * as localApiHandlers from "./toBackend/localApiHandlers";
 import { baseDomain } from "./env";
+import * as cryptoLib from "crypto-lib";
 type phoneNumber = import("phone-number").phoneNumber;
 
 declare const JsSIP: any;
@@ -23,14 +24,13 @@ JsSIP.debug.disable("JsSIP:*");
 
 export class Ua {
 
-    public static email: string;
-    public static instanceId: string;
-
-    /** Must be called in webphone.ts */
-    public static setUaInstanceId(uaInstanceId: string, email: string): void {
-        this.email = email;
-        this.instanceId = uaInstanceId;
-    }
+    /** Must be set before use in webphone.ts */
+    public static session: {
+        email: string;
+        instanceId: string;
+        towardUserEncryptKey: cryptoLib.RsaKey.Public;
+        towardUserDecryptor: cryptoLib.Decryptor;
+    };
 
     /** post isRegistered */
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
@@ -44,6 +44,7 @@ export class Ua {
     constructor(
         imsi: string,
         sipPassword: string,
+        private readonly towardSimEncryptor: cryptoLib.Encryptor,
         disabledMessage: false | "DISABLE MESSAGES" = false
     ) {
 
@@ -56,9 +57,18 @@ export class Ua {
             uri,
             "authorization_user": imsi,
             "password": sipPassword,
-            "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)![1],
+            "instance_id": Ua.session.instanceId.match(/"<urn:([^>]+)>"$/)![1],
             "register": false,
-            "contact_uri": `${uri};enc_email=${urlSafeB64.enc(Ua.email)}${!disabledMessage ? "" : ";no_messages"}`,
+            "contact_uri": [
+                uri,
+                RegistrationParams.build({
+                    "userEmail": Ua.session.email,
+                    "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
+                        Ua.session.towardUserEncryptKey
+                    ),
+                    "messagesEnabled": !disabledMessage
+                })
+            ].join(";"),
             "register_expires": 345600
         });
 
@@ -127,23 +137,26 @@ export class Ua {
     public readonly evtIncomingMessage = new SyncEvent<{
         fromNumber: phoneNumber;
         bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
-        text: string;
         onProcessed: () => void;
     }>();
 
-    private onMessage(request): void {
+    private async onMessage(request): Promise<void> {
 
-        const bundledData = extractBundledDataFromHeaders((() => {
+        const bundledData = await extractBundledDataFromHeaders<gwTypes.BundledData.ServerToClient>(
+            (() => {
 
-            const out = {};
+                const out = {};
 
-            for (const key in request.headers) {
-                out[key] = request.headers[key][0].raw;
-            }
+                for (const key in request.headers) {
+                    out[key] = request.headers[key][0].raw;
+                }
 
-            return out;
+                return out;
 
-        })()) as gwTypes.BundledData.ServerToClient;
+            })(),
+            Ua.session.towardUserDecryptor
+        );
+
 
         const fromNumber = request.from.uri.user;
 
@@ -157,8 +170,7 @@ export class Ua {
 
         const pr = this.postEvtIncomingMessage({
             fromNumber,
-            bundledData,
-            "text": request.body,
+            bundledData
         });
 
         this.jsSipSocket.setMessageOkDelay(request, pr);
@@ -166,7 +178,7 @@ export class Ua {
     }
 
     private postEvtIncomingMessage = runExclusive.buildMethod(
-        (evtData: Pick<SyncEvent.Type<typeof Ua.prototype.evtIncomingMessage>, "fromNumber" | "bundledData" | "text">) => {
+        (evtData: Pick<SyncEvent.Type<typeof Ua.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
 
             let onProcessed: () => void;
 
@@ -188,45 +200,21 @@ export class Ua {
         exactSendDate: Date,
         appendPromotionalMessage: boolean
     ): Promise<void> {
-
-        const extraHeaders = (() => {
-
-            const headers = smuggleBundledDataInHeaders((() => {
-
-                const bundledData: gwTypes.BundledData.ClientToServer.Message = {
-                    "type": "MESSAGE",
-                    exactSendDate,
-                };
-
-                if (appendPromotionalMessage) {
-
-                    bundledData.appendPromotionalMessage = true;
-
-                }
-
-                return bundledData;
-
-            })());
-
-            const out: string[] = [];
-
-            for (const key in headers) {
-
-                out.push(`${key}: ${headers[key]}`);
-
-            }
-
-            return out;
-
-        })();
-
         return new Promise<void>(
-            (resolve, reject) => this.jsSipUa.sendMessage(
+            async (resolve, reject) => this.jsSipUa.sendMessage(
                 `sip:${number}@${baseDomain}`,
-                text,
+                "| encrypted message bundled in header |",
                 {
                     "contentType": "text/plain; charset=UTF-8",
-                    extraHeaders,
+                    "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
+                        {
+                            "type": "MESSAGE",
+                            text,
+                            exactSendDate,
+                            appendPromotionalMessage
+                        },
+                        this.towardSimEncryptor
+                    ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
                     "eventHandlers": {
                         "succeeded": () => resolve(),
                         "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
@@ -234,7 +222,6 @@ export class Ua {
                 }
             )
         );
-
     }
 
     /** return exactSendDate to match with sendReport and statusReport */

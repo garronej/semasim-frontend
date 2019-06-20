@@ -2,6 +2,9 @@
 /// <reference types="bootstrap" />
 export declare function dismissLoading(): void;
 export declare function loading(message: string, delayBeforeShow?: number): void;
+export declare namespace loading {
+    const spanClass = "loading_message";
+}
 export declare function dialog(options: object): JQuery;
 export declare function alert(...args: any[]): JQuery;
 export declare function prompt(options: object): JQuery;

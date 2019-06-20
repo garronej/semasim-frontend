@@ -4,7 +4,7 @@ import { types as gwTypes } from "../../gateway";
 import * as types from "../types/userSim";
 import * as wd from "../types/webphoneData/logic";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as cryptoLib from "../../tools/crypto/library";
+import * as cryptoLib from "crypto-lib";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export declare const evtUsableSim: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const getUsableUserSims: (includeContacts?: boolean, stateless?: false | "STATELESS") => Promise<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>[]>;
@@ -22,9 +22,15 @@ export declare const updateContactName: (userSim: types.UserSim._Base<types.SimO
 export declare const deleteContact: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>, contact: types.UserSim.Contact) => Promise<void>;
 /** Api only called once */
 export declare const shouldAppendPromotionalMessage: () => boolean | Promise<boolean>;
-export declare const getUaInstanceId: () => Promise<apiDeclaration.getUaInstanceId.Response>;
 /** Must be called prior any wd related API call */
-export declare function setEncryptorDecryptor(encryptorDecryptor1: cryptoLib.EncryptorDecryptor): void;
+export declare function setWebDataEncryptorDescriptor(encryptorDecryptor: cryptoLib.EncryptorDecryptor): void;
+export declare namespace setWebDataEncryptorDescriptor {
+    const wrap: (encryptorDecryptor: cryptoLib.EncryptorDecryptor) => {
+        encryptorDecryptor: cryptoLib.EncryptorDecryptor;
+        "stringifyThenEncrypt": <V>(value: V) => Promise<string>;
+        "decryptThenParse": <V>(encryptedValue: string) => Promise<V>;
+    };
+}
 export declare const getOrCreateWdInstance: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<wd.Instance<"PLAIN">>;
 export declare const newWdChat: (wdInstance: wd.Instance<"PLAIN">, contactNumber: string, contactName: string, contactIndexInSim: number | null) => Promise<wd.Chat<"PLAIN">>;
 export declare const fetchOlderWdMessages: (wdChat: wd.Chat<"PLAIN">) => Promise<wd.Message<"PLAIN">[]>;

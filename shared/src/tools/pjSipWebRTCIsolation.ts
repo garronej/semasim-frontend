@@ -276,10 +276,7 @@ export function useAlternativeWebRTCImplementation(api: Api) {
             },
             ...(() => {
 
-                const boundToByListener = new WeakMap<
-                    (ev: RTCPeerConnectionEventMap[keyof RTCPeerConnectionEventMap]) => any,
-                    Object
-                >();
+                const boundToByListener = new WeakMap<(ev: any) => any, Object>();
 
                 const addEventListener: <K extends keyof RTCPeerConnectionEventMap>(
                     type: K,

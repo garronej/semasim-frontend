@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.apiPath = "api";
+exports.apiPath = "/api";
 var registerUser;
 (function (registerUser) {
     registerUser.methodName = "register-user";
