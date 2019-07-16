@@ -12,8 +12,7 @@ export const url = `wss://web.${baseDomain}`;
 
 const idString = "toBackend";
 
-//const log= isDevEnv ? console.log.bind(console) : (() => { });
-const log = console.log.bind(console); isDevEnv;
+const log= isDevEnv ? console.log.bind(console) : (() => { });
 
 const apiServer = new sip.api.Server(
     localApiHandlers.handlers,

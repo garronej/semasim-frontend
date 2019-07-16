@@ -54,9 +54,7 @@ var env_1 = require("../env");
 var cookies = require("../cookies/logic/frontend");
 exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
-//const log= isDevEnv ? console.log.bind(console) : (() => { });
-var log = console.log.bind(console);
-env_1.isDevEnv;
+var log = env_1.isDevEnv ? console.log.bind(console) : (function () { });
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
     log: log,

@@ -675,7 +675,7 @@ function newIceCandidateHandler(rtcICEServer: RTCIceServer) {
 
         const readyState = isReady(candidate.candidate);
 
-        console.log(readyState);
+        console.log(`ICE: ${readyState}`);
 
         switch (readyState) {
             case "NOT READY": return;

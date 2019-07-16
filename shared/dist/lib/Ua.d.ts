@@ -26,7 +26,7 @@ export declare class Ua {
     unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
         onProcessed: () => void;
     }>;
     private onMessage;

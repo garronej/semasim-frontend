@@ -529,7 +529,7 @@ function newIceCandidateHandler(rtcICEServer) {
         var candidate = data.candidate, ready = data.ready;
         //console.log(candidate);
         var readyState = isReady(candidate.candidate);
-        console.log(readyState);
+        console.log("ICE: " + readyState);
         switch (readyState) {
             case "NOT READY": return;
             case "AT LEAST ONE RELAY CANDIDATE READY":

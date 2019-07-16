@@ -599,8 +599,6 @@ exports.getRTCIceServer = (function () {
     var handler = {
         "handler": function (params, fromSocket) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                params.urls = params.urls.filter(function (url) { return url.startsWith("turns") || url.startsWith("stun"); });
-                console.log(params);
                 evtRTCIceEServer.post({
                     "rtcIceServer": params !== undefined ? params :
                         ({

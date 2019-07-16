@@ -718,10 +718,6 @@ export const getRTCIceServer = (() => {
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async (params, fromSocket) => {
 
-            params!.urls = params!.urls.filter(url => url.startsWith("turns") || url.startsWith("stun"));
-
-            console.log(params);
-
             evtRTCIceEServer.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
