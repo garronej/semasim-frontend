@@ -1,13 +1,13 @@
-declare const require: (path: string) => any;
-require("es6-map/implement");
-require("es6-weak-map/implement");
-require("array.prototype.find").shim();
-import "../../../shared/dist/tools/standalonePolyfills";
 
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { UiController } from "./UiController";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
+import "../../../shared/dist/tools/polyfills/Object.assign";
+import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
+import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
+
+notifyHostWhenPageIsReady();
 
 declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;
@@ -69,7 +69,7 @@ async function onLoggedIn() {
     uiController.evtDone.attachOnce(() => {
 
         if (typeof apiExposedByHost !== "undefined") {
-
+            
             apiExposedByHost.onDone(null);
 
         } else {
@@ -84,20 +84,31 @@ async function onLoggedIn() {
 
 }
 
-window["apiExposedToHost"] = {
-    "login": async (email: string, secret: string): Promise<void> => {
 
-        const { status } = await webApiCaller.loginUser(email, secret);
+const apiExposedToHost: {
+    login(email: string, secret: string): void;
+} = {
+    "login": (email,secret)=> {
 
-        if (status !== "SUCCESS") {
-            apiExposedByHost.onDone("Login failed");
-            return;
-        }
+        (async () => {
 
-        onLoggedIn();
+            const { status } = await webApiCaller.loginUser(email, secret);
+
+            if (status !== "SUCCESS") {
+
+                apiExposedByHost.onDone("Login failed");
+                return;
+            }
+
+            onLoggedIn();
+
+
+        })();
 
     }
 };
+
+Object.assign(window, { apiExposedToHost });
 
 $(document).ready(() => {
 
@@ -109,7 +120,7 @@ $(document).ready(() => {
 
         await webApiCaller.logoutUser();
 
-        location.href = `/${availablePages.PageName.login}`
+        location.href = `/${availablePages.PageName.login}`;
 
     });
 

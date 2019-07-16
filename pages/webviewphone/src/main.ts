@@ -1,67 +1,45 @@
 
 import { Ua } from "../../../shared/dist/lib/Ua";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller/base";
 import * as localApiHandler from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { VoidSyncEvent } from "ts-events-extended";
-import * as jsSipWebRTCIsolation from "../../../shared/dist/tools/pjSipWebRTCIsolation";
-import { TowardUserKeys } from "../../../shared/dist/lib/localStorage/logic";
-import * as cryptoLib from "crypto-lib";
+import * as hostCrypto from "./hostCrypto";
+import * as hostWebRtc from "./hostWebRtc";
+import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
 
+notifyHostWhenPageIsReady();
 
-const workerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
+declare const apiExposedByHost: (
+	hostWebRtc.ApiExposedByHost &
+	hostCrypto.ApiExposedByHost &
+	{
+		onCallTerminated(errorMessage: null | string): void;
+		onRingback(): void;
+		onEstablished(): void;
+	}
+);
 
-//NOTE: For now we don't actually use crypto here so we can disable multithreading.
-cryptoLib.disableMultithreading();
+{
 
-declare const apiExposedByHost: jsSipWebRTCIsolation.Api.Methods & {
-	onCallTerminated(errorMessage: null | string): void;
-	onRingback(): void;
-	onEstablished(): void;
-};
+	let resolvePrErrorMessage: (errorMessage: string) => void;
+	const prErrorMessage = new Promise<string>(resolve => resolvePrErrorMessage = resolve);
 
-let webRTCListeners: jsSipWebRTCIsolation.Api.Listeners;
+	window.onerror = (msg, url, lineNumber) => {
+		resolvePrErrorMessage(`${msg}\n'${url}:${lineNumber}`);
+		return false;
+	};
 
-if (typeof apiExposedByHost !== "undefined") {
+	(Promise as any).onPossiblyUnhandledRejection(error => {
+		resolvePrErrorMessage(`${error.message} ${error.stack}`);
+	});
 
-	jsSipWebRTCIsolation.useAlternativeWebRTCImplementation(
-		(() => {
-
-			const webRTCApi: jsSipWebRTCIsolation.Api = {
-				"methods": apiExposedByHost,
-				"setListeners": listeners => webRTCListeners = listeners
-			};
-
-			return webRTCApi;
-
-		})()
+	prErrorMessage.then(errorMessage =>
+		apiExposedByHost.onCallTerminated(errorMessage)
 	);
 
-	{
-
-		let resolvePrErrorMessage: (errorMessage: string) => void;
-		const prErrorMessage = new Promise<string>(resolve => resolvePrErrorMessage = resolve);
-
-		window.onerror = (msg, url, lineNumber) => {
-			resolvePrErrorMessage(`${msg}\n'${url}:${lineNumber}`);
-			return false;
-		};
-
-		(Promise as any).onPossiblyUnhandledRejection(error => {
-			resolvePrErrorMessage(`${error.message} ${error.stack}`);
-		});
-
-		prErrorMessage.then(errorMessage =>
-			apiExposedByHost.onCallTerminated(errorMessage)
-		);
-
-	}
-
 }
-
-
-const evtAcceptIncomingCall = new VoidSyncEvent();
 
 /** 
  * Never resolve and call onCallTerminated if anything goes wrong.
@@ -69,7 +47,7 @@ const evtAcceptIncomingCall = new VoidSyncEvent();
 */
 async function initUa(session: typeof Ua["session"], imsi: string): Promise<Ua> {
 
-	Ua.session= session;
+	Ua.session = session;
 
 	connection.connect({
 		"connectionType": "AUXILIARY",
@@ -98,12 +76,13 @@ async function initUa(session: typeof Ua["session"], imsi: string): Promise<Ua> 
 	const ua = new Ua(
 		imsi,
 		userSim.password,
-		cryptoLib.rsa.encryptorFactory(
-			cryptoLib.RsaKey.parse(
-				userSim.towardSimEncryptKeyStr
-			),
-			workerThreadPoolId
-		),
+		{
+			"encrypt": plainData => hostCrypto.encryptOrDecrypt(
+				"ENCRYPT",
+				userSim.towardSimEncryptKeyStr,
+				plainData
+			)
+		},
 		"DISABLE MESSAGES"
 	);
 
@@ -122,30 +101,44 @@ async function initUa(session: typeof Ua["session"], imsi: string): Promise<Ua> 
 }
 
 
+const evtAcceptIncomingCall = new VoidSyncEvent();
+
 const START_ACTION = {
 	"PLACE_OUTGOING_CALL": 0,
 	"GET_READY_TO_ACCEPT_INCOMING_CALL": 1
 };
 
-
-const apiExposedToHost: jsSipWebRTCIsolation.Api.Listeners & {
-	start(
-		action: typeof START_ACTION[keyof typeof START_ACTION],
-		email: string,
-		secret: string,
-		towardUserKeysStr: string,
-		uaInstanceId: string,
-		imsi: string,
-		number: string
-	): void;
-	sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
-	terminateCall(): void;
-	acceptIncomingCall(): void;
-} = {
-	...webRTCListeners!,
-	"start": async (action, email, secret, towardUserKeysStr, uaInstanceId, imsi, number) => {
-
-		cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 1);
+const apiExposedToHost: (
+	hostWebRtc.ApiExposedToHost &
+	hostCrypto.ApiExposedToHost &
+	{
+		start(
+			action: typeof START_ACTION[keyof typeof START_ACTION],
+			email: string,
+			secret: string,
+			towardUserEncryptKeyStr: string,
+			towardUserDecryptKeyStr: string,
+			uaInstanceId: string,
+			imsi: string,
+			number: string
+		): void;
+		sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+		terminateCall(): void;
+		acceptIncomingCall(): void;
+	}
+) = {
+	...hostWebRtc.apiExposedToHost,
+	...hostCrypto.apiExposedToHost,
+	"start": async (
+		action,
+		email,
+		secret,
+		towardUserEncryptKeyStr,
+		towardUserDecryptKeyStr,
+		uaInstanceId,
+		imsi,
+		number
+	) => {
 
 		{
 
@@ -159,24 +152,18 @@ const apiExposedToHost: jsSipWebRTCIsolation.Api.Listeners & {
 		}
 
 		const ua = await initUa(
-			(() => {
-
-				const towardUserKeys = TowardUserKeys.parse(
-					towardUserKeysStr
-				);
-
-				return {
-					email,
-					"instanceId": uaInstanceId,
-					"towardUserEncryptKey": towardUserKeys.encryptKey,
-					"towardUserDecryptor": cryptoLib.rsa.decryptorFactory(
-						towardUserKeys.decryptKey,
-						workerThreadPoolId
+			{
+				email,
+				"instanceId": uaInstanceId,
+				towardUserEncryptKeyStr,
+				"towardUserDecryptor": {
+					"decrypt": encryptedData => hostCrypto.encryptOrDecrypt(
+						"DECRYPT",
+						towardUserDecryptKeyStr,
+						encryptedData
 					)
-				};
-
-
-			})(),
+				}
+			},
 			imsi
 		);
 
@@ -256,5 +243,4 @@ const apiExposedToHost: jsSipWebRTCIsolation.Api.Listeners & {
 	"acceptIncomingCall": () => evtAcceptIncomingCall.post()
 };
 
-window["apiExposedToHost"] = apiExposedToHost;
-
+Object.assign(window, { apiExposedToHost });

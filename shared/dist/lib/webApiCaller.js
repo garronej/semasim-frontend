@@ -37,14 +37,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../web_api_declaration");
 var ttJC = require("transfer-tools/dist/lib/JSON_CUSTOM");
-var cryptoLib = require("crypto-lib");
+var webApiPath_1 = require("../gateway/webApiPath");
 //NOTE: Assert jQuery loaded on the page
 var JSON_CUSTOM = ttJC.get();
 function sendRequest(methodName, params) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
-                    "url": apiDeclaration.apiPath + "/" + methodName,
+                    "url": webApiPath_1.webApiPath + "/" + methodName,
                     "method": "POST",
                     "data": JSON_CUSTOM.stringify(params),
                     "dataType": "text",
@@ -60,11 +60,11 @@ function sendRequest(methodName, params) {
 }
 exports.registerUser = (function () {
     var methodName = apiDeclaration.registerUser.methodName;
-    return function (email, secret, towardUserEncryptKey, encryptedSymmetricKey) {
+    return function (email, secret, towardUserEncryptKeyStr, encryptedSymmetricKey) {
         return sendRequest(methodName, {
             email: email,
             secret: secret,
-            "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserEncryptKey),
+            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
             encryptedSymmetricKey: encryptedSymmetricKey
         });
     };
@@ -96,11 +96,11 @@ exports.sendRenewPasswordEmail = (function () {
 })();
 exports.renewPassword = (function () {
     var methodName = apiDeclaration.renewPassword.methodName;
-    return function (email, newSecret, newTowardUserEncryptKey, newEncryptedSymmetricKey, token) {
+    return function (email, newSecret, newTowardUserEncryptKeyStr, newEncryptedSymmetricKey, token) {
         return sendRequest(methodName, {
             email: email,
             newSecret: newSecret,
-            "newTowardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(newTowardUserEncryptKey),
+            newTowardUserEncryptKeyStr: newTowardUserEncryptKeyStr,
             newEncryptedSymmetricKey: newEncryptedSymmetricKey,
             token: token
         });

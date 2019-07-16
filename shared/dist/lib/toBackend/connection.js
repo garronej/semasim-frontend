@@ -48,7 +48,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
-var remoteApiCaller = require("./remoteApiCaller");
+var remoteApiCaller = require("./remoteApiCaller/base");
 var bootbox_custom = require("../../tools/bootbox_custom");
 var env_1 = require("../env");
 var cookies = require("../cookies/logic/frontend");

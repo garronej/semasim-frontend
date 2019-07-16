@@ -1,8 +1,3 @@
-declare const require: (path: string) => any;
-require("es6-map/implement");
-require("es6-weak-map/implement");
-require("array.prototype.find").shim();
-import "../../../shared/dist/tools/standalonePolyfills";
 
 import { Ua } from "../../../shared/dist/lib/Ua";
 import { UiWebphoneController } from "./UiWebphoneController";
@@ -18,8 +13,8 @@ import * as cryptoLib from "crypto-lib";
 import * as cookies from "../../../shared/dist/lib/cookies/logic/frontend";
 import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
-import { workerThreadPoolId } from "./workerThreadPoolId";
-//import * as observer from "../../../shared/dist/lib/tools/observer";
+import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
+//import * as observer from "../../../shared/dist/tools/observer";
 //import * as pjSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
 
 /*
@@ -32,19 +27,20 @@ pjSipWebRTCIsolation.useAlternativeWebRTCImplementation(
 
 $(document).ready(async () => {
 
-    $("#logout").click(async () => {
+	$("#logout").click(async () => {
 
-        await webApiCaller.logoutUser();
+		await webApiCaller.logoutUser();
 
-        location.href = `/${availablePages.PageName.login}`
+		location.href = `/${availablePages.PageName.login}`
 
-    });
+	});
 
 	{
 
 		const { email, webUaInstanceId, encryptedSymmetricKey } = cookies.AuthenticatedSessionDescriptorSharedData.get();
 
-		cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 4);
+		//NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
+		cryptoLib.workerThreadPool.preSpawn(rsaWorkerThreadPoolId, 1);
 
 		const towardUserKeys = localStorage.TowardUserKeys.retrieve();
 
@@ -56,30 +52,40 @@ $(document).ready(async () => {
 		}
 
 		const towardUserDecryptor = cryptoLib.rsa.decryptorFactory(
-			towardUserKeys.decryptKey, 
-			workerThreadPoolId
+			towardUserKeys.decryptKey,
+			rsaWorkerThreadPoolId
 		);
 
-		remoteApiCaller.setWebDataEncryptorDescriptor(
-			cryptoLib.aes.encryptorDecryptorFactory(
-				await crypto.symmetricKey.decryptKey(
-					towardUserDecryptor, 
-					encryptedSymmetricKey
-				),
-				workerThreadPoolId
-			)
-		);
+		{
+
+			const aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
+
+			cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
+
+			remoteApiCaller.setWebDataEncryptorDescriptor(
+				cryptoLib.aes.encryptorDecryptorFactory(
+					await crypto.symmetricKey.decryptKey(
+						towardUserDecryptor,
+						encryptedSymmetricKey
+					),
+					aesWorkerThreadPoolId
+				)
+			);
+
+		}
 
 		Ua.session = {
 			email,
 			"instanceId": webUaInstanceId,
-			"towardUserEncryptKey": towardUserKeys.encryptKey,
+			"towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
+				towardUserKeys.encryptKey
+			),
 			towardUserDecryptor
 		};
 
 	}
 
-	connection.connect({ 
+	connection.connect({
 		"connectionType": "MAIN",
 		"requestTurnCred": true
 	});

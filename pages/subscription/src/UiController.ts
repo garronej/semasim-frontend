@@ -66,7 +66,7 @@ export class UiController {
         guessedCountryIso: string | undefined
     ) {
 
-        console.log(JSON.stringify(subscriptionInfos, null, 2));
+        console.log(JSON.stringify(subscriptionInfos));
 
         const uiDownloadButton = new UiDownloadButtons();
 
@@ -197,14 +197,28 @@ export class UiController {
 
             uiSubscribe.evtRequestSubscribe.attach(async () => {
 
+                //TODO: Lot of work left.
+
+                if( typeof WeakMap === "undefined" ){
+
+                    bootbox_custom.alert([
+                        `We are very sorry but your phone is not compatible with`,
+                        `out payment platform. Please go to web.semasim.com and`,
+                        `subscribe from there.`,
+                        `Once you are done kill the app and login again`
+                    ].join(" "));
+
+                    return;
+
+                }
+
                 if( 1 === 1 ){
 
                     this.interact_checkout("eur");
 
+                    return;
+
                 }
-
-                console.log("we should not be here");
-
 
                 let newSourceId: string | undefined = undefined;
                 let currency: string;

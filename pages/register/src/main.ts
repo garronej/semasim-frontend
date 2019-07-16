@@ -1,10 +1,29 @@
+
+import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
+import "../../../shared/dist/tools/polyfills/Object.assign";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import * as urlGetParameters from "../../../shared/dist/tools/urlGetParameters";
-import "../../../shared/dist/tools/standalonePolyfills";
 import * as crypto from "../../../shared/dist/lib/crypto";
+import * as cryptoLib from "crypto-lib";
 import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
+import * as hostKfd from "../../../shared/dist/lib/hostKfd";
+
+//@ts-ignore: so it is clear that some API should be exposed by host.
+declare const apiExposedByHost: (
+	hostKfd.ApiExposedByHost &
+	{}
+);
+
+const apiExposedToHost: (
+	hostKfd.ApiExposedToHost &
+	{}
+) = {
+	...hostKfd.apiExposedToHost
+};
+
+Object.assign(window, { apiExposedToHost });
 
 function setHandlers() {
 
@@ -69,13 +88,18 @@ function setHandlers() {
 
 		const { secret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys(
 			password,
-			email
+			email,
+			hostKfd.kfd
 		);
+
+		bootbox_custom.loading("Creating account",0);
 
 		const regStatus = await webApiCaller.registerUser(
 			email,
 			secret,
-			towardUserKeys.encryptKey,
+			cryptoLib.RsaKey.stringify(
+				towardUserKeys.encryptKey
+			),
 			await crypto.symmetricKey.createThenEncryptKey(
 				towardUserKeys.encryptKey
 			)
@@ -83,6 +107,8 @@ function setHandlers() {
 
 		switch (regStatus) {
 			case "EMAIL NOT AVAILABLE":
+
+				bootbox_custom.dismissLoading();
 
 				bootbox_custom.alert(`Semasim account for ${email} has already been created`);
 

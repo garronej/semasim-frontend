@@ -2,7 +2,7 @@
 import * as sip from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as localApiHandlers from "./localApiHandlers";
-import * as remoteApiCaller from "./remoteApiCaller";
+import * as remoteApiCaller from "./remoteApiCaller/base";
 import * as types from "../types/userSim";
 import * as bootbox_custom from "../../tools/bootbox_custom";
 import { baseDomain, isDevEnv  } from "../env";

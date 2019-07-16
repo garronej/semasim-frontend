@@ -1,4 +1,3 @@
-export declare const apiPath = "/api";
 export declare namespace registerUser {
     const methodName = "register-user";
     type Params = {

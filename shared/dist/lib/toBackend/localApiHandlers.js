@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var ts_events_extended_1 = require("ts-events-extended");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
-var remoteApiCaller = require("./remoteApiCaller");
+var remoteApiCaller = require("./remoteApiCaller/base");
 //NOTE: Global JS deps.
 var bootbox_custom = require("../../tools/bootbox_custom");
 exports.handlers = {};
@@ -599,6 +599,8 @@ exports.getRTCIceServer = (function () {
     var handler = {
         "handler": function (params, fromSocket) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                params.urls = params.urls.filter(function (url) { return url.startsWith("turns") || url.startsWith("stun"); });
+                console.log(params);
                 evtRTCIceEServer.post({
                     "rtcIceServer": params !== undefined ? params :
                         ({

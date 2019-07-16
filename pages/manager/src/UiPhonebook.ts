@@ -9,6 +9,8 @@ import { isAscendingAlphabeticalOrder } from "../../../shared/dist/tools/isAscen
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
 
+import { Polyfill as Map } from "minimal-polyfills/dist/lib/Map";
+
 declare const require: any;
 
 const html = loadUiClassHtml(
@@ -123,7 +125,8 @@ export class UiPhonebook {
             this.buttonEdit
         ].forEach(button => button.prop("disabled", !this.userSim.isOnline));
 
-        const selectedCount = Array.from(this.uiContacts.values())
+        const selectedCount = Array.from(this.uiContacts.keys())
+            .map(key => this.uiContacts.get(key)!)
             .filter(uiContact => uiContact.isSelected).length;
 
         if (selectedCount === 0) {
@@ -181,8 +184,11 @@ export class UiPhonebook {
 
         const getUiContactFromStructure = (li_elem: HTMLElement): UiContact => {
 
-            //for (const uiContact of this.uiContacts.values()) { with downlevel iteration...
-            for (const uiContact of Array.from(this.uiContacts).map(([_, v]) => v)) {
+
+            
+
+            //for (const uiContact of this.uiContacts.values()) { but as we use a Minimalistic Map polyfill
+            for (const uiContact of Array.from(this.uiContacts.keys()).map(key => this.uiContacts.get(key)!)) {
 
                 if (uiContact.structure.get(0) === li_elem) {
 
@@ -473,7 +479,8 @@ export class UiPhonebook {
 
             } else {
 
-                return Array.from(this.uiContacts.values())
+                return Array.from(this.uiContacts.keys())
+                    .map(key => this.uiContacts.get(key)!)
                     .filter(uiContact => uiContact.isSelected)
                     .map(uiContact => uiContact.contact)
                     ;
@@ -541,7 +548,8 @@ export class UiPhonebook {
                     number_raw
                 )
             )! :
-            Array.from(this.uiContacts.values())
+            Array.from(this.uiContacts.keys())
+                .map(key => this.uiContacts.get(key)!)
                 .find(uiContact => uiContact.isSelected)!.contact
             ;
 

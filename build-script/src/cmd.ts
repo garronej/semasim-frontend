@@ -55,7 +55,7 @@ const startExitRepl = () => {
     });
 };
 
-const build_page = async (
+const build_page = (
     target_module_dir_path: string,
     watch?: undefined | "WATCH"
 ) => {
@@ -91,16 +91,32 @@ const build_page = async (
 
     }
 
-    buildTools.tsc_browserify_minify(
-        path.join(target_module_dir_path, "tsconfig.json"),
-        path.join(target_module_dir_path, "dist", "main.js"),
-        path.join(
+    (async () => {
+
+        await buildTools.tsc(
+            path.join(target_module_dir_path, "tsconfig.json"),
+            watch
+        );
+
+        const bundle_file_path = path.join(
             __dirname, "..", "..", "static.semasim.com",
             `${path.basename(target_module_dir_path)}-${page_version}.js`
-        ),
-        watch
-    );
+        );
 
+        await buildTools.browserify(
+            [ "--entry", path.join(target_module_dir_path, "dist", "main.js") ],
+            [ "--outfile", bundle_file_path ],
+            undefined,
+            watch
+        );
+
+        await buildTools.minify(
+            bundle_file_path,
+            watch
+        );
+
+
+    })();
 
 }
 

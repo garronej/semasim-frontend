@@ -78,8 +78,8 @@
         "signature": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/build-script/node_modules/frontend-build-tools/dist/index.d.ts": {
-        "version": "06e94dce48ef1ff85d595276e98ccdd161fa8134d50bde77929f1f84eec99f27",
-        "signature": "06e94dce48ef1ff85d595276e98ccdd161fa8134d50bde77929f1f84eec99f27"
+        "version": "b838169c844f89586861646be93ef84805ab0a48bbcc5e85e65628f1a4865be8",
+        "signature": "b838169c844f89586861646be93ef84805ab0a48bbcc5e85e65628f1a4865be8"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/build-script/node_modules/@types/node/inspector.d.ts": {
         "version": "7e49dbf1543b3ee54853ade4c5e9fa460b6a4eca967efe6bf943e0c505d087ed",
@@ -106,7 +106,7 @@
         "signature": "ce0594a0432dce2f4e9f6130d538a52d6292ca323e729b75d8e0febd9134dc65"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/build-script/src/cmd.ts": {
-        "version": "34090926bde7b8671e02f543e5ab77ec9bdf82f57d49d6f804ccbaf7462dee3c",
+        "version": "f5fbadf8eb6a718615d1568c6acacb26974607d4e716c0cba80c85ba39d311ac",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
       }
     },

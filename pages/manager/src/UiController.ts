@@ -1,7 +1,7 @@
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../../../shared/dist/lib/types/userSim";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller/base";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { UiButtonBar } from "./UiButtonBar";

@@ -34,40 +34,109 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("crypto-lib");
 var bootbox_custom = require("../tools/bootbox_custom");
+var binaryDataManipulations_1 = require("crypto-lib/dist/sync/utils/binaryDataManipulations");
 var workerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
-var workerThreadIds;
+var workerThreadId;
 /** Must be called before using the async function */
 function preSpawn() {
-    cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 4);
-    workerThreadIds = cryptoLib.workerThreadPool.listIds(workerThreadPoolId);
+    cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 1);
+    workerThreadId = cryptoLib.workerThreadPool.listIds(workerThreadPoolId)[0];
 }
 exports.preSpawn = preSpawn;
-function computeLoginSecretAndTowardUserKeys(password, salt) {
+function computeLoginSecretAndTowardUserKeys(password, uniqUserIdentification, kfdHostImplementation) {
     return __awaiter(this, void 0, void 0, function () {
-        var kdf, buildLoginSecret, computeTowardUserKeys, getMessage, progress, digests, towardUserKeys;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var kfdBrowserImplementation, _a, digest1, digest2, towardUserKeys;
+        var _this = this;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    kdf = computeLoginSecretAndTowardUserKeys.kdf, buildLoginSecret = computeLoginSecretAndTowardUserKeys.buildLoginSecret, computeTowardUserKeys = computeLoginSecretAndTowardUserKeys.computeTowardUserKeys;
-                    getMessage = function (percent) { return "Generating cryptographic digest from password \uD83D\uDD10 " + percent.toFixed(0) + "%"; };
-                    bootbox_custom.loading(getMessage(0));
-                    progress = function (percent) {
-                        return $("." + bootbox_custom.loading.spanClass)
-                            .html(getMessage(percent));
-                    };
-                    return [4 /*yield*/, kdf(password, salt, function (percent) { return progress(percent); })];
+                    kfdBrowserImplementation = computeLoginSecretAndTowardUserKeys.kfdBrowserImplementation;
+                    bootbox_custom.loading("Generating cryptographic digest from password \uD83D\uDD10");
+                    return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                            var salt;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, cryptoLib.scrypt.hash((function () {
+                                            var realm = Buffer.from("semasim.com", "utf8");
+                                            return cryptoLib.toBuffer(binaryDataManipulations_1.concatUint8Array(realm, binaryDataManipulations_1.addPadding("LEFT", Buffer.from(uniqUserIdentification, "utf8"), 100 - realm.length))).toString("utf8");
+                                        })(), "", {
+                                            "n": 3,
+                                            "digestLengthBytes": 16
+                                        }, undefined, workerThreadId)];
+                                    case 1:
+                                        salt = _a.sent();
+                                        return [2 /*return*/, Promise.all([1, 2].map(function (i) { return __awaiter(_this, void 0, void 0, function () {
+                                                var callKfd, error_1;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            callKfd = function (kfd) { return kfd(Buffer.from("" + password + i, "utf8").toString("hex"), salt); };
+                                                            _a.label = 1;
+                                                        case 1:
+                                                            _a.trys.push([1, 3, , 4]);
+                                                            return [4 /*yield*/, callKfd(kfdBrowserImplementation)];
+                                                        case 2: return [2 /*return*/, _a.sent()];
+                                                        case 3:
+                                                            error_1 = _a.sent();
+                                                            if (kfdHostImplementation === undefined) {
+                                                                if (i === 1) {
+                                                                    alert("Please use a different web browser");
+                                                                }
+                                                                throw error_1;
+                                                            }
+                                                            if (i === 1) {
+                                                                bootbox_custom.loading("Please be patient this could take a while \uD83D\uDD10");
+                                                            }
+                                                            return [2 /*return*/, callKfd(kfdHostImplementation)];
+                                                        case 4: return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); }))];
+                                }
+                            });
+                        }); })()];
                 case 1:
-                    digests = _a.sent();
+                    _a = __read.apply(void 0, [_b.sent(), 2]), digest1 = _a[0], digest2 = _a[1];
                     bootbox_custom.loading("Computing RSA keys using digest as seed \uD83D\uDD10");
-                    return [4 /*yield*/, computeTowardUserKeys(digests)];
+                    return [4 /*yield*/, (function (seed) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, publicKey, privateKey;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0: return [4 /*yield*/, cryptoLib.rsa.generateKeys(seed, 160, workerThreadId)];
+                                    case 1:
+                                        _a = _b.sent(), publicKey = _a.publicKey, privateKey = _a.privateKey;
+                                        return [2 /*return*/, {
+                                                "encryptKey": publicKey,
+                                                "decryptKey": privateKey
+                                            }];
+                                }
+                            });
+                        }); })(digest2)];
                 case 2:
-                    towardUserKeys = _a.sent();
+                    towardUserKeys = _b.sent();
                     bootbox_custom.dismissLoading();
                     return [2 /*return*/, {
-                            "secret": buildLoginSecret(digests),
+                            "secret": cryptoLib.toBuffer(digest1).toString("hex"),
                             towardUserKeys: towardUserKeys
                         }];
             }
@@ -76,64 +145,28 @@ function computeLoginSecretAndTowardUserKeys(password, salt) {
 }
 exports.computeLoginSecretAndTowardUserKeys = computeLoginSecretAndTowardUserKeys;
 (function (computeLoginSecretAndTowardUserKeys) {
-    function kdf(password, salt, progress) {
-        return __awaiter(this, void 0, void 0, function () {
-            var percentages, digests, out;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        percentages = workerThreadIds.map(function () { return 0; });
-                        return [4 /*yield*/, Promise.all(workerThreadIds
-                                .map(function (_, i) { return "" + password + i; })
-                                .map(function (text, i) { return cryptoLib.scrypt.hash(text, salt, {
-                                "n": 11,
-                                "r": 12,
-                                "p": 1,
-                                "digestLengthBytes": 64
-                            }, function (percent) {
-                                percentages[i] = percent;
-                                progress(Math.floor(percentages.reduce(function (prev, curr) { return prev + curr; }, 0) / 4));
-                            }, workerThreadIds[i]); }))];
-                    case 1:
-                        digests = _a.sent();
-                        out = {};
-                        digests.forEach(function (digest, i) { return out["digestP" + (i + 1)] = digest; });
-                        return [2 /*return*/, out];
-                }
-            });
+    var _this = this;
+    computeLoginSecretAndTowardUserKeys.kfdIterations = 500000;
+    computeLoginSecretAndTowardUserKeys.kfdBrowserImplementation = function (password, salt) { return __awaiter(_this, void 0, void 0, function () {
+        var _a, _b, _c, _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
+                case 0:
+                    _a = Uint8Array.bind;
+                    _c = (_b = window.crypto.subtle).deriveBits;
+                    _d = [{
+                            "name": "PBKDF2",
+                            salt: salt,
+                            "iterations": computeLoginSecretAndTowardUserKeys.kfdIterations,
+                            "hash": "SHA-1"
+                        }];
+                    return [4 /*yield*/, window.crypto.subtle.importKey("raw", Buffer.from(password, "utf8"), { "name": "PBKDF2" }, false, ["deriveBits"])];
+                case 1: return [4 /*yield*/, _c.apply(_b, _d.concat([_e.sent(),
+                        256]))];
+                case 2: return [2 /*return*/, new (_a.apply(Uint8Array, [void 0, _e.sent()]))()];
+            }
         });
-    }
-    computeLoginSecretAndTowardUserKeys.kdf = kdf;
-    function buildLoginSecret(digests) {
-        var digestP1 = digests.digestP1, digestP2 = digests.digestP2;
-        return [digestP1, digestP2]
-            .map(function (digest) { return cryptoLib.toBuffer(digest).toString("hex"); })
-            .join("");
-    }
-    computeLoginSecretAndTowardUserKeys.buildLoginSecret = buildLoginSecret;
-    function computeTowardUserKeys(digests) {
-        return __awaiter(this, void 0, void 0, function () {
-            var digestP3, digestP4, seed, _a, publicKey, privateKey;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        digestP3 = digests.digestP3, digestP4 = digests.digestP4;
-                        seed = new Uint8Array(digestP3.length + digestP4.length);
-                        seed.set(digestP3);
-                        seed.set(digestP4, digestP3.length);
-                        return [4 /*yield*/, cryptoLib.rsa.generateKeys(seed, 160, workerThreadIds[0])];
-                    case 1:
-                        _a = _b.sent(), publicKey = _a.publicKey, privateKey = _a.privateKey;
-                        return [2 /*return*/, {
-                                "encryptKey": publicKey,
-                                "decryptKey": privateKey
-                            }];
-                }
-            });
-        });
-    }
-    computeLoginSecretAndTowardUserKeys.computeTowardUserKeys = computeTowardUserKeys;
-    ;
+    }); };
 })(computeLoginSecretAndTowardUserKeys = exports.computeLoginSecretAndTowardUserKeys || (exports.computeLoginSecretAndTowardUserKeys = {}));
 var symmetricKey;
 (function (symmetricKey) {

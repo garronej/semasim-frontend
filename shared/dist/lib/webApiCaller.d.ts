@@ -1,12 +1,11 @@
 import * as apiDeclaration from "../web_api_declaration";
-import * as cryptoLib from "crypto-lib";
-export declare const registerUser: (email: string, secret: string, towardUserEncryptKey: cryptoLib.RsaKey.Public, encryptedSymmetricKey: string) => Promise<apiDeclaration.registerUser.Response>;
+export declare const registerUser: (email: string, secret: string, towardUserEncryptKeyStr: string, encryptedSymmetricKey: string) => Promise<apiDeclaration.registerUser.Response>;
 export declare const validateEmail: (email: string, activationCode: string) => Promise<boolean>;
 export declare const loginUser: (email: string, secret: string) => Promise<apiDeclaration.loginUser.Response>;
 export declare const logoutUser: () => Promise<undefined>;
 /** Return true if email has account */
 export declare const sendRenewPasswordEmail: (email: string) => Promise<boolean>;
-export declare const renewPassword: (email: string, newSecret: string, newTowardUserEncryptKey: cryptoLib.RsaKey.Public, newEncryptedSymmetricKey: string, token: string) => Promise<boolean>;
+export declare const renewPassword: (email: string, newSecret: string, newTowardUserEncryptKeyStr: string, newEncryptedSymmetricKey: string, token: string) => Promise<boolean>;
 export declare const getCountryIso: () => Promise<apiDeclaration.getCountryIso.Response>;
 export declare const getChangesRates: () => Promise<apiDeclaration.getChangesRates.Response>;
 export declare const getSubscriptionInfos: () => Promise<import("./types/subscription").SubscriptionInfos>;

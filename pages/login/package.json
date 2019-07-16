@@ -11,5 +11,8 @@
     "@types/jqueryui": "1.9.27",
     "typescript": "^3.5.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "crypto-lib": "github:garronej/crypto-lib",
+    "minimal-polyfills": "github:garronej/minimal-polyfills"
+  }
 }

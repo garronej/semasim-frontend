@@ -45,7 +45,7 @@ const startExitRepl = () => {
         "get": () => process.exit(0)
     });
 };
-const build_page = (target_module_dir_path, watch) => __awaiter(this, void 0, void 0, function* () {
+const build_page = (target_module_dir_path, watch) => {
     const page_version = require(path.join(target_module_dir_path, "package.json"))["version"];
     {
         const page_file_path = path.join(target_module_dir_path, "page.ejs");
@@ -62,8 +62,13 @@ const build_page = (target_module_dir_path, watch) => __awaiter(this, void 0, vo
             })()
         ].join("\n"), "utf8"));
     }
-    buildTools.tsc_browserify_minify(path.join(target_module_dir_path, "tsconfig.json"), path.join(target_module_dir_path, "dist", "main.js"), path.join(__dirname, "..", "..", "static.semasim.com", `${path.basename(target_module_dir_path)}-${page_version}.js`), watch);
-});
+    (() => __awaiter(this, void 0, void 0, function* () {
+        yield buildTools.tsc(path.join(target_module_dir_path, "tsconfig.json"), watch);
+        const bundle_file_path = path.join(__dirname, "..", "..", "static.semasim.com", `${path.basename(target_module_dir_path)}-${page_version}.js`);
+        yield buildTools.browserify(["--entry", path.join(target_module_dir_path, "dist", "main.js")], ["--outfile", bundle_file_path], undefined, watch);
+        yield buildTools.minify(bundle_file_path, watch);
+    }))();
+};
 function program_action_build_page(options) {
     return __awaiter(this, void 0, void 0, function* () {
         const watch = !!options["watch"] ? "WATCH" : undefined;

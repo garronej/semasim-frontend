@@ -11,10 +11,11 @@ import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCa
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
 import { phoneNumber } from "phone-number";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import { workerThreadPoolId } from "./workerThreadPoolId";
+import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
 import * as cryptoLib from "crypto-lib";
 
 declare const require: any;
+declare const Buffer: any;
 
 const html = loadUiClassHtml(
     require("../templates/UiWebphoneController.html"),
@@ -44,7 +45,7 @@ export class UiWebphoneController {
                 cryptoLib.RsaKey.parse(
                     userSim.towardSimEncryptKeyStr
                 ),
-                workerThreadPoolId
+                rsaWorkerThreadPoolId
             )
         );
 
@@ -209,8 +210,8 @@ export class UiWebphoneController {
                             const message: wd.NoId<wd.Message.Incoming.Text<"PLAIN">> = {
                                 "direction": "INCOMING",
                                 "isNotification": false,
-                                "time": bundledData.pduDate.getTime(),
-                                "text": bundledData.text
+                                "time": bundledData.pduDateTime,
+                                "text": Buffer.from(bundledData.textB64,"base64").toString("utf8")
                             };
 
                             return remoteApiCaller.newWdMessage(wdChat, message);
@@ -230,9 +231,9 @@ export class UiWebphoneController {
                             } else {
 
                                 const message: wd.NoId<wd.Message.Outgoing.StatusReportReceived<"PLAIN">> = {
-                                    "time": bundledData.messageTowardGsm.date.getTime(),
+                                    "time": bundledData.messageTowardGsm.dateTime,
                                     "direction": "OUTGOING",
-                                    "text": bundledData.messageTowardGsm.text,
+                                    "text": Buffer.from(bundledData.messageTowardGsm.textB64, "base64").toString("utf8"),
                                     "sentBy": ((): wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =>
                                         (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.session.email) ?
                                             ({ "who": "USER" }) :
@@ -240,23 +241,26 @@ export class UiWebphoneController {
                                     )(),
                                     "status": "STATUS REPORT RECEIVED",
                                     "deliveredTime": bundledData.statusReport.isDelivered ?
-                                        bundledData.statusReport.dischargeDate.getTime() : null
+                                        bundledData.statusReport.dischargeDateTime : null
                                 };
 
                                 return remoteApiCaller.newWdMessage(wdChat, message);
 
                             }
                         }
-                        case "MMS NOTIFICATION": console.log(`WPA PUSH: ${bundledData.wapPushMessage}`);
+                        case "MMS NOTIFICATION": 
+                            console.log(
+                                `WPA PUSH: ${Buffer.from(bundledData.wapPushMessageB64, "base64").toString("utf8")}`
+                            );
                         case "CALL ANSWERED BY":
                         case "MISSED CALL": {
 
                             const message: wd.NoId<wd.Message.Incoming.Notification<"PLAIN">> = {
                                 "direction": "INCOMING",
                                 "isNotification": true,
-                                "time": (bundledData.type === "MMS NOTIFICATION" ?
-                                    bundledData.pduDate : bundledData.date).getTime(),
-                                "text": bundledData.text
+                                "time": bundledData.type === "MMS NOTIFICATION" ?
+                                    bundledData.pduDateTime : bundledData.dateTime,
+                                "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                             };
 
                             return remoteApiCaller.newWdMessage(wdChat, message);

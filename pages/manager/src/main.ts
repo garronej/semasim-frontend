@@ -1,20 +1,20 @@
 
-declare const require: (path: string) => any;
+declare const require: Function;
 
-//Polyfill
-require("es6-map/implement");
-require("es6-weak-map/implement");
-require("array.prototype.find").shim();
-if (!Array.from) Array.from = require('array-from');
-
-import "../../../shared/dist/tools/standalonePolyfills";
-
+import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
+import "minimal-polyfills/dist/lib/Array.from";
+import "minimal-polyfills/dist/lib/String.prototype.startsWith";
+import "../../../shared/dist/tools/polyfills/Object.assign";
 import * as connection from "../../../shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
+import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller/base";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
+import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
+
+notifyHostWhenPageIsReady();
+
 
 declare const __dirname: any;
 
@@ -22,7 +22,6 @@ declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;
 };
 
-//TODO: See if defined
 if( typeof apiExposedByHost !== "undefined" ){
 
     window.onerror = (msg, url, lineNumber) => {
@@ -67,7 +66,7 @@ async function onLoggedIn(): Promise<UiController> {
 
 }
 
-window["apiExposedToHost"] = (() => {
+const apiExposedToHost= (()=>{
 
     const loginAndGetUiController = async (email: string, secret: string): Promise<UiController> => {
 
@@ -75,7 +74,7 @@ window["apiExposedToHost"] = (() => {
 
         if (status !== "SUCCESS") {
             apiExposedByHost.onDone("Login failed");
-            await new Promise(resolve => { });
+            await new Promise(() => { });
         }
 
         return onLoggedIn();
@@ -88,25 +87,62 @@ window["apiExposedToHost"] = (() => {
         } catch{ }
     };
 
-    return {
-        "createContact": (email: string, secret: string, imsi: string, number: string) =>
-            loginAndGetUiController(email, secret)
-                .then(uiController => uiController.interact_createContact(imsi, number))
-                .then(() => onDone())
-        ,
-        "updateContactName": async (email: string, secret: string, number: string) =>
-            loginAndGetUiController(email, secret)
-                .then(uiController => uiController.interact_updateContactName(number))
-                .then(() => onDone())
-        ,
-        "deleteContact": async (email: string, secret: string, number: string) =>
-            loginAndGetUiController(email, secret)
-                .then(uiController => uiController.interact_deleteContact(number))
-                .then(() => onDone())
+    const START_ACTION = {
+        "NO_ACTION": 0,
+        "CREATE_CONTACT": 1,
+        "UPDATE_CONTACT_NAME": 2,
+        "DELETE_CONTACT": 3
     };
+
+    function start(
+        action: typeof START_ACTION.NO_ACTION,
+        email: string, secret: string,
+        _p4: null, _p5: null
+    ): void;
+    function start(
+        action: typeof START_ACTION.CREATE_CONTACT,
+        email: string, secret: string,
+        number: string, imsi: string
+    ): void;
+    function start(
+        action: typeof START_ACTION.UPDATE_CONTACT_NAME,
+        email: string, secret: string,
+        number: string, _p5: null
+    ): void;
+    function start(
+        action: typeof START_ACTION.DELETE_CONTACT,
+        email: string, secret: string,
+        number: string, _p5: null
+    ): void;
+    function start(
+        action: typeof START_ACTION[keyof typeof START_ACTION],
+        email: string, secret: string,
+        number: string | null, imsi: string | null
+    ): void {
+
+        (async () => {
+
+            const uiController = await loginAndGetUiController(email, secret);
+
+            switch (action) {
+                case START_ACTION.NO_ACTION: return;
+                case START_ACTION.CREATE_CONTACT: await uiController.interact_createContact(imsi!, number!); break;
+                case START_ACTION.UPDATE_CONTACT_NAME: await uiController.interact_updateContactName(number!); break;
+                case START_ACTION.DELETE_CONTACT: await uiController.interact_deleteContact(number!); break;
+            }
+
+            onDone();
+
+        })();
+
+    }
+
+    return { start };
+
 
 })();
 
+Object.assign(window, { apiExposedToHost });
 
 $(document).ready(() => {
 

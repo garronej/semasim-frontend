@@ -1,130 +1,121 @@
 
-type Param4<T> = T extends (p1, p2, p3, p4: infer R) => any ? NonNullable<R> : never;
-
 import * as cryptoLib from "crypto-lib";
 import { TowardUserKeys } from "./localStorage/types";
 import * as bootbox_custom from "../tools/bootbox_custom";
+import { concatUint8Array, addPadding } from "crypto-lib/dist/sync/utils/binaryDataManipulations";
 
 declare const Buffer: any;
 
-const workerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 
-let workerThreadIds: [
-    cryptoLib.WorkerThreadId, 
-    cryptoLib.WorkerThreadId, 
-    cryptoLib.WorkerThreadId, 
-    cryptoLib.WorkerThreadId
-];
+const workerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
+let workerThreadId: cryptoLib.WorkerThreadId;
+
 
 /** Must be called before using the async function */
 export function preSpawn() {
 
-    cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 4);
+    cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 1);
 
-    workerThreadIds = cryptoLib.workerThreadPool.listIds(workerThreadPoolId) as any;
+    workerThreadId = cryptoLib.workerThreadPool.listIds(workerThreadPoolId)[0];
 
 }
 
-export async function computeLoginSecretAndTowardUserKeys(password: string, salt: string) {
+export async function computeLoginSecretAndTowardUserKeys(
+    password: string,
+    uniqUserIdentification: string,
+    kfdHostImplementation?: computeLoginSecretAndTowardUserKeys.Kfd
+) {
 
-    const { kdf, buildLoginSecret, computeTowardUserKeys } = computeLoginSecretAndTowardUserKeys;
+    const { kfdBrowserImplementation } = computeLoginSecretAndTowardUserKeys;
+    type Kfd = computeLoginSecretAndTowardUserKeys.Kfd;
 
-    const getMessage= (percent: number)=> `Generating cryptographic digest from password 🔐 ${percent.toFixed(0)}%`;
 
-    bootbox_custom.loading(getMessage(0));
+    bootbox_custom.loading(`Generating cryptographic digest from password 🔐`);
 
-    const progress = (percent: number) =>
-        $(`.${bootbox_custom.loading.spanClass}`)
-            .html(getMessage(percent))
-        ;
 
-    const digests = await kdf(
-        password,
-        salt,
-        percent => progress(percent)
-    );
+    const [digest1, digest2] = await (async () => {
+
+        //NOTE: scrypt("semasim.com"|| Padding to 100 || uniqUserId ) => 16 bytes
+        const salt = await cryptoLib.scrypt.hash(
+            (() => {
+
+                const realm = Buffer.from("semasim.com", "utf8") as Uint8Array;
+
+                return cryptoLib.toBuffer(
+                    concatUint8Array(
+                        realm,
+                        addPadding(
+                            "LEFT",
+                            Buffer.from(uniqUserIdentification, "utf8"),
+                            100 - realm.length
+                        )
+                    )
+                ).toString("utf8");
+
+
+            })(),
+            "",
+            {
+                "n": 3,
+                "digestLengthBytes": 16
+            },
+            undefined,
+            workerThreadId
+        );
+
+        return Promise.all(
+            [1, 2].map(async i => {
+
+                //NOTE: We convert password to hex so we are sure to have a password
+                //charset in ASCII. ( Java Modified UTF8 might cause problems ).
+                const callKfd = (kfd: Kfd) => kfd(
+                    Buffer.from(`${password}${i}`,"utf8").toString("hex"), 
+                    salt
+                );
+
+                try {
+
+                    return await callKfd(kfdBrowserImplementation);
+
+                } catch (error) {
+
+
+                    if (kfdHostImplementation === undefined) {
+
+                        if( i === 1 ){
+                            alert("Please use a different web browser");
+                        }
+
+                        throw error;
+
+                    }
+
+                    if( i === 1 ){
+
+                        bootbox_custom.loading( `Please be patient this could take a while 🔐`);
+
+                    }
+
+                    return callKfd(kfdHostImplementation);
+
+                }
+
+
+            })
+        );
+
+
+    })();
+
 
     bootbox_custom.loading(`Computing RSA keys using digest as seed 🔐`);
 
-    const towardUserKeys = await computeTowardUserKeys(digests);
-
-    bootbox_custom.dismissLoading();
-
-    return {
-        "secret": buildLoginSecret(digests),
-        towardUserKeys
-    };
-
-}
-
-export namespace computeLoginSecretAndTowardUserKeys {
-
-    export async function kdf(
-        password: string,
-        salt: string,
-        progress: Param4<typeof cryptoLib.scrypt.hash>
-    ): Promise<Record<"digestP1" | "digestP2" | "digestP3" | "digestP4", Uint8Array>> {
-
-        const percentages = workerThreadIds.map(() => 0);
-
-        const digests = await Promise.all(
-            workerThreadIds
-                .map((_, i) => `${password}${i}`)
-                .map((text, i) => cryptoLib.scrypt.hash(
-                    text,
-                    salt,
-                    {
-                        "n": 11,
-                        "r": 12,
-                        "p": 1,
-                        "digestLengthBytes": 64
-                    },
-                    percent => {
-
-                        percentages[i] = percent;
-
-                        progress(
-                            Math.floor(
-                                percentages.reduce((prev, curr) => prev + curr, 0) / 4
-                            )
-                        );
-
-                    },
-                    workerThreadIds[i]
-                ))
-        );
-
-        const out: any = {};
-
-        digests.forEach((digest, i) => out[`digestP${i + 1}`] = digest);
-
-        return out;
-
-    }
-
-    export function buildLoginSecret(digests: Record<"digestP1" | "digestP2", Uint8Array>): string {
-
-        const { digestP1, digestP2 } = digests;
-
-        return [digestP1, digestP2]
-            .map(digest => cryptoLib.toBuffer(digest).toString("hex"))
-            .join("")
-            ;
-
-    }
-
-    export async function computeTowardUserKeys(digests: Record<"digestP3" | "digestP4", Uint8Array>): Promise<TowardUserKeys> {
-
-        const { digestP3, digestP4 } = digests;
-
-        const seed = new Uint8Array(digestP3.length + digestP4.length);
-        seed.set(digestP3);
-        seed.set(digestP4, digestP3.length);
+    const towardUserKeys: TowardUserKeys = await (async (seed: Uint8Array) => {
 
         const { publicKey, privateKey } = await cryptoLib.rsa.generateKeys(
             seed,
             160,
-            workerThreadIds[0]
+            workerThreadId
         );
 
         return {
@@ -132,7 +123,42 @@ export namespace computeLoginSecretAndTowardUserKeys {
             "decryptKey": privateKey
         };
 
+    })(digest2);
+
+    bootbox_custom.dismissLoading();
+
+    return {
+        "secret": cryptoLib.toBuffer(digest1).toString("hex"),
+        towardUserKeys
     };
+
+}
+
+export namespace computeLoginSecretAndTowardUserKeys {
+
+    export const kfdIterations= 500000;
+
+    export type Kfd = (password: string, salt: Uint8Array) => Promise<Uint8Array>;
+
+    export const kfdBrowserImplementation = async (password, salt) => new Uint8Array(
+        await window.crypto.subtle.deriveBits(
+            {
+                "name": "PBKDF2",
+                salt,
+                "iterations": kfdIterations,
+                "hash": "SHA-1"
+            },
+            await window.crypto.subtle.importKey(
+                "raw",
+                Buffer.from(password, "utf8"),
+                { "name": "PBKDF2" } as any,
+                false,
+                ["deriveBits"]
+            ),
+            256,
+        )
+    );
+
 
 }
 

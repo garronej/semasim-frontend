@@ -4,12 +4,9 @@
     "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "array-from": "^2.1.1",
-    "array.prototype.find": "^2.0.4",
-    "es6-map": "^0.1.5",
-    "es6-weak-map": "^2.0.2",
     "phone-number": "github:garronej/phone-number",
-    "ts-events-extended": "github:garronej/ts-events-extended"
+    "ts-events-extended": "github:garronej/ts-events-extended",
+    "minimal-polyfills": "github:garronej/minimal-polyfills"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",

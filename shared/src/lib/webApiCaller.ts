@@ -1,7 +1,7 @@
 
 import * as apiDeclaration from "../web_api_declaration";
 import * as ttJC from "transfer-tools/dist/lib/JSON_CUSTOM";
-import * as cryptoLib from "crypto-lib";
+import { webApiPath } from "../gateway/webApiPath";
 
 //NOTE: Assert jQuery loaded on the page
 
@@ -12,7 +12,7 @@ async function sendRequest<Params, Response>(
 ): Promise<Response> {
     return new Promise<Response>(
         resolve => (window["$"] as JQueryStatic).ajax({
-            "url": `${apiDeclaration.apiPath}/${methodName}`,
+            "url": `${webApiPath}/${methodName}`,
             "method": "POST",
             "data": JSON_CUSTOM.stringify(params),
             "dataType": "text",
@@ -36,7 +36,7 @@ export const registerUser = (() => {
     return function (
         email: string,
         secret: string,
-        towardUserEncryptKey: cryptoLib.RsaKey.Public,
+        towardUserEncryptKeyStr: string,
         encryptedSymmetricKey: string
     ) {
 
@@ -45,7 +45,7 @@ export const registerUser = (() => {
             {
                 email,
                 secret,
-                "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserEncryptKey),
+                towardUserEncryptKeyStr,
                 encryptedSymmetricKey
             }
         );
@@ -141,7 +141,7 @@ export const renewPassword = (() => {
     return function (
         email: string,
         newSecret: string,
-        newTowardUserEncryptKey: cryptoLib.RsaKey.Public,
+        newTowardUserEncryptKeyStr: string,
         newEncryptedSymmetricKey: string,
         token: string
     ) {
@@ -151,9 +151,7 @@ export const renewPassword = (() => {
             {
                 email,
                 newSecret,
-                "newTowardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
-                    newTowardUserEncryptKey
-                ),
+                newTowardUserEncryptKeyStr,
                 newEncryptedSymmetricKey,
                 token
             }

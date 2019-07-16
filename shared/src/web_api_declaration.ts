@@ -1,7 +1,4 @@
 
-export const apiPath = "/api";
-
-
 export namespace registerUser {
 
     export const methodName = "register-user";

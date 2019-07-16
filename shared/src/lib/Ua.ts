@@ -1,19 +1,18 @@
 //NOTE: Require jssip_compat loaded on the page.
 
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import {
-    types as gwTypes,
-    extractBundledDataFromHeaders,
-    smuggleBundledDataInHeaders,
-    readImsi,
-    RegistrationParams
-} from "../gateway";
+
+import { types as gwTypes } from "../gateway/types";
+import { extractBundledDataFromHeaders, smuggleBundledDataInHeaders, } from "../gateway/bundledData";
+import { readImsi, } from "../gateway/readImsi";
+import { RegistrationParams } from "../gateway/RegistrationParams";
+
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "./toBackend/connection";
 import * as localApiHandlers from "./toBackend/localApiHandlers";
 import { baseDomain } from "./env";
-import * as cryptoLib from "crypto-lib";
+import * as cryptoLib from "crypto-lib/dist/sync/types";
 type phoneNumber = import("phone-number").phoneNumber;
 
 declare const JsSIP: any;
@@ -28,7 +27,7 @@ export class Ua {
     public static session: {
         email: string;
         instanceId: string;
-        towardUserEncryptKey: cryptoLib.RsaKey.Public;
+        towardUserEncryptKeyStr: string;
         towardUserDecryptor: cryptoLib.Decryptor;
     };
 
@@ -63,9 +62,7 @@ export class Ua {
                 uri,
                 RegistrationParams.build({
                     "userEmail": Ua.session.email,
-                    "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
-                        Ua.session.towardUserEncryptKey
-                    ),
+                    "towardUserEncryptKeyStr": Ua.session.towardUserEncryptKeyStr,
                     "messagesEnabled": !disabledMessage
                 })
             ].join(";"),
@@ -209,8 +206,8 @@ export class Ua {
                     "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
                         {
                             "type": "MESSAGE",
-                            text,
-                            exactSendDate,
+                            "textB64": Buffer.from(text, "utf8").toString("base64"),
+                            "exactSendDateTime": exactSendDate.getTime(),
                             appendPromotionalMessage
                         },
                         this.towardSimEncryptor
@@ -449,41 +446,83 @@ class JsSipSocket implements IjsSipSocket {
 
     public readonly url: string = connection.url;
 
-    private sdpHacks(sipPacket: sip.Packet): sip.Packet {
+    private sdpHacks(direction: "INCOMING" | "OUTGOING", sipPacket: sip.Packet) {
 
         if (sipPacket.headers["content-type"] !== "application/sdp") {
-            return sipPacket;
+            return;
         }
 
-        //NOTE: Sdp Hack for Mozilla
-        if (/firefox/i.test(navigator.userAgent)) {
-
-            console.log("Firefox SDP hack !");
+        const editSdp = (sdpEditor: (parsedSdp: any) => void): void => {
 
             const parsedSdp = sip.parseSdp(
-                sip.getPacketContent(sipPacket).toString("utf8")
+                sip.getPacketContent(sipPacket)
+                    .toString("utf8")
             );
 
-            const a = parsedSdp["m"][0]["a"];
-
-            if (!!a.find(v => /^mid:/i.test(v))) {
-                return sipPacket;
-            }
-
-            parsedSdp["m"][0]["a"] = [...a, "mid:0"];
-
-            const modifiedSipPacket = sip.clonePacket(sipPacket);
+            sdpEditor(parsedSdp);
 
             sip.setPacketContent(
-                modifiedSipPacket,
+                sipPacket,
                 sip.stringifySdp(parsedSdp)
             );
 
-            return modifiedSipPacket;
+        };
 
+        switch (direction) {
+            case "INCOMING":
+
+                //NOTE: Sdp Hack for Mozilla
+                if (!/firefox/i.test(navigator.userAgent)) {
+                    return;
+                }
+
+                console.log("Firefox SDP hack !");
+
+                editSdp(parsedSdp => {
+
+                    const a = parsedSdp["m"][0]["a"];
+
+                    if (!!a.find(v => /^mid:/i.test(v))) {
+                        return;
+                    }
+
+                    parsedSdp["m"][0]["a"] = [...a, "mid:0"];
+
+                });
+
+                break;
+            case "OUTGOING":
+
+            
+                editSdp(parsedSdp => {
+
+                    //NOTE: We allow to try establishing P2P connection only 
+                    //when the public address resolved by the stun correspond
+                    //to a private address of class A ( 192.168.x.x ).
+                    //Otherwise we stripe out the srflx candidate and use turn.
+
+                    const a = parsedSdp["m"][0]["a"];
+
+                    const updated_a = a.filter(line => {
+
+                        const match = line.match(/srflx\ raddr\ ([0-9]+)\./);
+
+                        if( !match ){
+                            return true;
+                        }
+
+                        return match[1] === "192";
+
+                    });
+
+                    parsedSdp["m"][0]["a"] = updated_a;
+
+                });
+
+                break;
         }
 
-        return sipPacket;
+
 
     }
 
@@ -501,7 +540,7 @@ class JsSipSocket implements IjsSipSocket {
                     return;
                 }
 
-                sipPacket = this.sdpHacks(sipPacket);
+                this.sdpHacks("INCOMING", sipPacket);
 
                 this.evtSipPacket.post(sipPacket);
 
@@ -513,6 +552,8 @@ class JsSipSocket implements IjsSipSocket {
 
             backendSocket.evtRequest.attach(onSipPacket);
             backendSocket.evtResponse.attach(onSipPacket);
+
+            backendSocket.evtPacketPreWrite.attach(sipPacket => this.sdpHacks("OUTGOING", sipPacket));
 
         };
 

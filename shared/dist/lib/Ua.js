@@ -68,13 +68,14 @@ var __spread = (this && this.__spread) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
-var gateway_1 = require("../gateway");
+var bundledData_1 = require("../gateway/bundledData");
+var readImsi_1 = require("../gateway/readImsi");
+var RegistrationParams_1 = require("../gateway/RegistrationParams");
 var sip = require("ts-sip");
 var runExclusive = require("run-exclusive");
 var connection = require("./toBackend/connection");
 var localApiHandlers = require("./toBackend/localApiHandlers");
 var env_1 = require("./env");
-var cryptoLib = require("crypto-lib");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
@@ -106,9 +107,9 @@ var Ua = /** @class */ (function () {
             "register": false,
             "contact_uri": [
                 uri,
-                gateway_1.RegistrationParams.build({
+                RegistrationParams_1.RegistrationParams.build({
                     "userEmail": Ua.session.email,
-                    "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(Ua.session.towardUserEncryptKey),
+                    "towardUserEncryptKeyStr": Ua.session.towardUserEncryptKeyStr,
                     "messagesEnabled": !disabledMessage
                 })
             ].join(";"),
@@ -158,7 +159,7 @@ var Ua = /** @class */ (function () {
             var bundledData, fromNumber, pr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, gateway_1.extractBundledDataFromHeaders((function () {
+                    case 0: return [4 /*yield*/, bundledData_1.extractBundledDataFromHeaders((function () {
                             var out = {};
                             for (var key in request.headers) {
                                 out[key] = request.headers[key][0].raw;
@@ -196,10 +197,10 @@ var Ua = /** @class */ (function () {
                             "contentType": "text/plain; charset=UTF-8"
                         };
                         _e = "extraHeaders";
-                        return [4 /*yield*/, gateway_1.smuggleBundledDataInHeaders({
+                        return [4 /*yield*/, bundledData_1.smuggleBundledDataInHeaders({
                                 "type": "MESSAGE",
-                                text: text,
-                                exactSendDate: exactSendDate,
+                                "textB64": Buffer.from(text, "utf8").toString("base64"),
+                                "exactSendDateTime": exactSendDate.getTime(),
                                 appendPromotionalMessage: appendPromotionalMessage
                             }, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
                     case 1: return [2 /*return*/, _b.apply(_a, _c.concat([(_d[_e] = _f.sent(),
@@ -389,15 +390,16 @@ var JsSipSocket = /** @class */ (function () {
         this.messageOkDelays = new Map();
         var onBackedSocketConnect = function (backendSocket) {
             var onSipPacket = function (sipPacket) {
-                if (gateway_1.readImsi(sipPacket) !== imsi) {
+                if (readImsi_1.readImsi(sipPacket) !== imsi) {
                     return;
                 }
-                sipPacket = _this.sdpHacks(sipPacket);
+                _this.sdpHacks("INCOMING", sipPacket);
                 _this.evtSipPacket.post(sipPacket);
                 _this.ondata(sip.toData(sipPacket).toString("utf8"));
             };
             backendSocket.evtRequest.attach(onSipPacket);
             backendSocket.evtResponse.attach(onSipPacket);
+            backendSocket.evtPacketPreWrite.attach(function (sipPacket) { return _this.sdpHacks("OUTGOING", sipPacket); });
         };
         connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
         var socket = connection.get();
@@ -405,24 +407,49 @@ var JsSipSocket = /** @class */ (function () {
             onBackedSocketConnect(socket);
         }
     }
-    JsSipSocket.prototype.sdpHacks = function (sipPacket) {
+    JsSipSocket.prototype.sdpHacks = function (direction, sipPacket) {
         if (sipPacket.headers["content-type"] !== "application/sdp") {
-            return sipPacket;
+            return;
         }
-        //NOTE: Sdp Hack for Mozilla
-        if (/firefox/i.test(navigator.userAgent)) {
-            console.log("Firefox SDP hack !");
-            var parsedSdp = sip.parseSdp(sip.getPacketContent(sipPacket).toString("utf8"));
-            var a = parsedSdp["m"][0]["a"];
-            if (!!a.find(function (v) { return /^mid:/i.test(v); })) {
-                return sipPacket;
-            }
-            parsedSdp["m"][0]["a"] = __spread(a, ["mid:0"]);
-            var modifiedSipPacket = sip.clonePacket(sipPacket);
-            sip.setPacketContent(modifiedSipPacket, sip.stringifySdp(parsedSdp));
-            return modifiedSipPacket;
+        var editSdp = function (sdpEditor) {
+            var parsedSdp = sip.parseSdp(sip.getPacketContent(sipPacket)
+                .toString("utf8"));
+            sdpEditor(parsedSdp);
+            sip.setPacketContent(sipPacket, sip.stringifySdp(parsedSdp));
+        };
+        switch (direction) {
+            case "INCOMING":
+                //NOTE: Sdp Hack for Mozilla
+                if (!/firefox/i.test(navigator.userAgent)) {
+                    return;
+                }
+                console.log("Firefox SDP hack !");
+                editSdp(function (parsedSdp) {
+                    var a = parsedSdp["m"][0]["a"];
+                    if (!!a.find(function (v) { return /^mid:/i.test(v); })) {
+                        return;
+                    }
+                    parsedSdp["m"][0]["a"] = __spread(a, ["mid:0"]);
+                });
+                break;
+            case "OUTGOING":
+                editSdp(function (parsedSdp) {
+                    //NOTE: We allow to try establishing P2P connection only 
+                    //when the public address resolved by the stun correspond
+                    //to a private address of class A ( 192.168.x.x ).
+                    //Otherwise we stripe out the srflx candidate and use turn.
+                    var a = parsedSdp["m"][0]["a"];
+                    var updated_a = a.filter(function (line) {
+                        var match = line.match(/srflx\ raddr\ ([0-9]+)\./);
+                        if (!match) {
+                            return true;
+                        }
+                        return match[1] === "192";
+                    });
+                    parsedSdp["m"][0]["a"] = updated_a;
+                });
+                break;
         }
-        return sipPacket;
     };
     JsSipSocket.prototype.connect = function () {
         this.onconnect();

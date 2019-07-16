@@ -3,7 +3,9 @@
   "scripts": {
     "build": "node ../../build-script/dist/cmd build_page"
   },
-  "dependencies": {},
+  "dependencies": {
+    "crypto-lib": "github:garronej/crypto-lib"
+  },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",
     "@types/icheck": "^0.8.29",

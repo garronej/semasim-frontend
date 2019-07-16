@@ -1,17 +1,40 @@
+import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
+import "../../../shared/dist/tools/polyfills/Object.assign";
 import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
 import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
 import { requestRenewPassword } from "./requestRenewPassword";
-import "../../../shared/dist/tools/standalonePolyfills";
 import * as crypto from "../../../shared/dist/lib/crypto";
+import * as cryptoLib from "crypto-lib";
 import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
 import * as urlGetParameters from "../../../shared/dist/tools/urlGetParameters";
+import * as hostKfd from "../../../shared/dist/lib/hostKfd";
+import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
+
+notifyHostWhenPageIsReady();
 
 let justRegistered: localStorage.JustRegistered | undefined;
 
-declare const apiExposedByHost: {
-    onDone(email: string, secret: string, towardUserKeysStr: string): void;
+declare const apiExposedByHost: (
+	hostKfd.ApiExposedByHost &
+	{
+		onDone(
+			email: string,
+			secret: string,
+			towardUserEncryptKeyStr: string,
+			towardUserDecryptKeyStr: string,
+		): void;
+	}
+);
+
+const apiExposedToHost: (
+	hostKfd.ApiExposedToHost &
+	{}
+) = {
+	...hostKfd.apiExposedToHost
 };
+
+Object.assign(window, { apiExposedToHost });
 
 function setHandlers() {
 
@@ -45,10 +68,10 @@ function setHandlers() {
 			},
 			"email": "Please type your email",
 		},
-		"highlight":  label => 
+		"highlight": label =>
 			$(label).closest('.form-group').removeClass('has-success').addClass('has-error')
 		,
-		"success":  label => {
+		"success": label => {
 			$(label).closest('.form-group').removeClass('has-error');
 			label.remove();
 		}
@@ -75,7 +98,8 @@ function setHandlers() {
 			justRegistered ||
 			await crypto.computeLoginSecretAndTowardUserKeys(
 				password,
-				email
+				email,
+				hostKfd.kfd
 			)
 			;
 
@@ -98,7 +122,8 @@ function setHandlers() {
 					apiExposedByHost.onDone(
 						email,
 						secret,
-						localStorage.TowardUserKeys.stringify(towardUserKeys)
+						cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
+						cryptoLib.RsaKey.stringify(towardUserKeys.decryptKey)
 					);
 
 				} else {
@@ -218,7 +243,7 @@ $(document).ready(async () => {
 
 		}
 
-		if( email_confirmation_code !== undefined ){
+		if (email_confirmation_code !== undefined) {
 
 			await new Promise<void>(
 				resolve => bootbox_custom.alert(
@@ -292,7 +317,8 @@ $(document).ready(async () => {
 
 			const { secret: newSecret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys(
 				newPassword,
-				email
+				email,
+				hostKfd.kfd
 			);
 
 			bootbox_custom.loading("Renewing password");
@@ -300,7 +326,9 @@ $(document).ready(async () => {
 			const wasTokenStillValid = await webApiCaller.renewPassword(
 				email,
 				newSecret,
-				towardUserKeys.encryptKey,
+				cryptoLib.RsaKey.stringify(
+					towardUserKeys.encryptKey
+				),
 				await crypto.symmetricKey.createThenEncryptKey(
 					towardUserKeys.encryptKey
 				),

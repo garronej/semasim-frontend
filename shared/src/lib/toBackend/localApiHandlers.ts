@@ -4,7 +4,7 @@ import * as sipLibrary from "ts-sip";
 import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../types/userSim";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as remoteApiCaller from "./remoteApiCaller";
+import * as remoteApiCaller from "./remoteApiCaller/base";
 
 //NOTE: Global JS deps.
 import * as bootbox_custom from "../../tools/bootbox_custom";
@@ -717,6 +717,10 @@ export const getRTCIceServer = (() => {
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async (params, fromSocket) => {
+
+            params!.urls = params!.urls.filter(url => url.startsWith("turns") || url.startsWith("stun"));
+
+            console.log(params);
 
             evtRTCIceEServer.post({
                 "rtcIceServer": params !== undefined ? params :

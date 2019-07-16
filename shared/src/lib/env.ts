@@ -1,7 +1,5 @@
 
-/** semasim.com or dev.semasim.com */
-export const baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1];
-
+export const baseDomain: "semasim.com" | "dev.semasim.com" = window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any;
 
 //NOTE: Defined at ejs building in templates/head_common.ejs
 
