@@ -1,1 +1,3 @@
-<script src="<%-assets_root%>js/libs/es6-promise_v4/es6-promise.auto.min.js"></script>
+<% if( !isDevEnv ){ %>
+    <script src="<%-assets_root%>js/libs/es6-promise_v4/es6-promise.auto.min.js"></script>
+<% } %>

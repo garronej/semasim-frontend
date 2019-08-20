@@ -43,9 +43,19 @@ export class UiQuickAction {
     public evtSms = new SyncEvent<phoneNumber>();
     public evtNewContact = new SyncEvent<phoneNumber>();
 
-    public notifySimOnlineStatusChanged() {
+    public notifySimStateChange() {
 
-        this.structure.find("button").prop("disabled", !this.userSim.isOnline);
+        for (const selector of [".id_sms", ".id_contact"]) {
+
+            this.structure.find(selector)
+                .prop("disabled", !this.userSim.isOnline)
+                ;
+
+        }
+
+        this.structure.find(".id_call")
+            .prop("disabled", !(this.userSim.isOnline && this.userSim.isGsmConnectivityOk))
+            ;
 
     }
 
@@ -186,7 +196,7 @@ export class UiQuickAction {
 
         });
 
-        this.notifySimOnlineStatusChanged();
+        this.notifySimStateChange();
 
     }
 }

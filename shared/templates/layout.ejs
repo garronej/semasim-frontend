@@ -23,9 +23,13 @@
         <!-- top right nav -->
         <ul class="nav navbar-nav navbar-right">
             <li>
+                <a id="account" href="/subscription">
+                    <i class="semasim-icon-user" style="font-size: 20px;"></i>
+                </a>
+            </li>
+            <li>
                 <a id="logout" href="#">
-                    <i class="fa fa-power-off"></i>
-                    <span class="sr-only">Logout</span>
+                    <i class="semasim-icon-power-button" style="font-size: 20px;"></i>
                 </a>
             </li>
         </ul>
@@ -53,41 +57,19 @@
                     <ul class="nav">
                         <li>
                             <a href="/manager"<%-page==="manager"?` class="active"`:``; %>>
-                                <i>
-                                    <svg class="custom-icon" style="font-size: 30px;">
-                                        <use xlink:href="#icon-sim_cards"></use>
-                                    </svg>
-                                </i>
+                                <i class="semasim-icon-dualsim" style="font-size: 25px;"></i>
                                 <span class="txt">SIMs</span>
                             </a>
                         </li>
                         <li>
                             <a href="/webphone"<%-page==="webphone"?` class="active"`:``; %>>
-                                <i>
-                                    <svg class="custom-icon" style="font-size: 30px;">
-                                        <use xlink:href="#icon-webphone"></use>
-                                    </svg>
-                                </i>
+                                <i class="semasim-icon-monitor" style="font-size: 25px;"></i>
                                 <span class="txt">Web phone</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/subscription"<%-page==="subscription"?` class="active"`:``; %>>
-                                <i>
-                                    <svg class="custom-icon" style="font-size: 30px;">
-                                        <use xlink:href="#icon-subscription"></use>
-                                    </svg>
-                                </i>
-                                <span class="txt">Subscription</span>
-                            </a>
-                        </li>
-                        <li>
                             <a href="/shop"<%-page==="shop"?` class="active"`:``; %>>
-                                <i>
-                                    <svg class="custom-icon" style="font-size: 30px;">
-                                        <use xlink:href="#icon-shop"></use>
-                                    </svg>
-                                </i>
+                                <i class="semasim-icon-shopping-cart" style="font-size: 25px;"></i>
                                 <span class="txt">Shop</span>
                             </a>
                         </li>

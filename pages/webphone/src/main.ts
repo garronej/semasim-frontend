@@ -15,13 +15,10 @@ import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
 import * as availablePages from "../../../shared/dist/lib/availablePages";
 import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
 //import * as observer from "../../../shared/dist/tools/observer";
-//import * as pjSipWebRTCIsolation from "../../../shared/dist/lib/tools/pjSipWebRTCIsolation";
 
-/*
-pjSipWebRTCIsolation.useAlternativeWebRTCImplementation(
-	pjSipWebRTCIsolation.localApi
-);
-*/
+import * as overrideWebRTCImplementation from "../../../shared/dist/tools/overrideWebRTCImplementation";
+
+overrideWebRTCImplementation.testOverrideWebRTCImplementation();
 
 //observer.observeWebRTC();
 
@@ -31,7 +28,7 @@ $(document).ready(async () => {
 
 		await webApiCaller.logoutUser();
 
-		location.href = `/${availablePages.PageName.login}`
+		location.href = `/${availablePages.PageName.login}`;
 
 	});
 

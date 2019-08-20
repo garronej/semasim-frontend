@@ -81,7 +81,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     var methodName = apiDeclaration.notifySimOnline.methodName;
     var handler = {
         "handler": function (_a) {
-            var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation;
+            var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation, isGsmConnectivityOk = _a.isGsmConnectivityOk, cellSignalStrength = _a.cellSignalStrength;
             return __awaiter(_this, void 0, void 0, function () {
                 var userSim;
                 return __generator(this, function (_b) {
@@ -103,7 +103,67 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
+                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+                            userSim.cellSignalStrength = cellSignalStrength;
                             exports.evtSimIsOnlineStatusChange.post(userSim);
+                            return [2 /*return*/, undefined];
+                    }
+                });
+            });
+        }
+    };
+    exports.handlers[methodName] = handler;
+}
+//TODO: Make use of.
+exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
+exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.log("evtSimGsmConnectivityChange", { "isGsmConnectivityOk": userSim.isGsmConnectivityOk }); });
+{
+    var methodName = apiDeclaration.notifyGsmConnectivityChange.methodName;
+    var handler = {
+        "handler": function (_a) {
+            var imsi = _a.imsi, isGsmConnectivityOk = _a.isGsmConnectivityOk;
+            return __awaiter(_this, void 0, void 0, function () {
+                var userSim;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
+                        case 1:
+                            userSim = (_b.sent())
+                                .find(function (_a) {
+                                var sim = _a.sim;
+                                return sim.imsi === imsi;
+                            });
+                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+                            exports.evtSimGsmConnectivityChange.post(userSim);
+                            return [2 /*return*/, undefined];
+                    }
+                });
+            });
+        }
+    };
+    exports.handlers[methodName] = handler;
+}
+//TODO: Make use of.
+exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
+exports.evtSimCellSignalStrengthChange.attach(function (userSim) { return console.log("evtSimCellSignalStrengthChange", { "cellSignalStrength": userSim.cellSignalStrength }); });
+{
+    var methodName = apiDeclaration.notifyCellSignalStrengthChange.methodName;
+    var handler = {
+        "handler": function (_a) {
+            var imsi = _a.imsi, cellSignalStrength = _a.cellSignalStrength;
+            return __awaiter(_this, void 0, void 0, function () {
+                var userSim;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
+                        case 1:
+                            userSim = (_b.sent())
+                                .find(function (_a) {
+                                var sim = _a.sim;
+                                return sim.imsi === imsi;
+                            });
+                            userSim.cellSignalStrength = cellSignalStrength;
+                            exports.evtSimCellSignalStrengthChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });

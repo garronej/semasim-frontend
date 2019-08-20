@@ -90,11 +90,50 @@ export class UiSimRow {
             })()
         );
 
-        this.structure.find(".id_connectivity").text(
-            this.userSim.isOnline ? "online" : "offline"
-        );
+        {
 
-        if (!this.userSim.isOnline) {
+            let text: string | undefined = undefined;
+
+            if (!this.userSim.isOnline) {
+                text = "Not reachable";
+            }
+
+            if (!this.userSim.isGsmConnectivityOk) {
+                text = "No GSM connection";
+            }
+
+
+            const $span = this.structure.find(".id_connectivity");
+
+            if (text === undefined) {
+                $span.hide();
+            } else {
+                $span.show().text(text);
+            }
+
+        }
+
+        this.structure.find("i")
+            .each((_i, e) => {
+
+                const $i = $(e);
+
+                const cellSignalStrength = $i.attr("data-strength");
+
+                if (!cellSignalStrength) {
+                    return;
+                }
+
+                $i[(
+                    this.userSim.isOnline &&
+                    this.userSim.isGsmConnectivityOk &&
+                    cellSignalStrength === this.userSim.cellSignalStrength
+                ) ? "show" : "hide"
+                ]();
+
+            });
+
+        if (!this.userSim.isOnline || !this.userSim.isGsmConnectivityOk) {
             this.structure.find(".id_row").addClass("offline");
         } else {
             this.structure.find(".id_row").removeClass("offline");

@@ -15,6 +15,24 @@ export declare namespace notifySimOnline {
         password: string;
         simDongle: types.UserSim["dongle"];
         gatewayLocation: types.UserSim.GatewayLocation;
+        isGsmConnectivityOk: boolean;
+        cellSignalStrength: types.UserSim["cellSignalStrength"];
+    };
+    type Response = undefined;
+}
+export declare namespace notifyGsmConnectivityChange {
+    const methodName = "notifyGsmConnectivityChange";
+    type Params = {
+        imsi: string;
+        isGsmConnectivityOk: boolean;
+    };
+    type Response = undefined;
+}
+export declare namespace notifyCellSignalStrengthChange {
+    const methodName = "notifyCellSignalStrengthChange";
+    type Params = {
+        imsi: string;
+        cellSignalStrength: types.UserSim["cellSignalStrength"];
     };
     type Response = undefined;
 }

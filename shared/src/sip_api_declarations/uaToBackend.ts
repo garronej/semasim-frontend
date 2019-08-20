@@ -21,7 +21,35 @@ export namespace notifySimOnline {
         hasInternalSimStorageChanged: boolean; 
         password: string;
         simDongle: types.UserSim["dongle"]
-        gatewayLocation: types.UserSim.GatewayLocation 
+        gatewayLocation: types.UserSim.GatewayLocation,
+        isGsmConnectivityOk: boolean;
+        cellSignalStrength: types.UserSim["cellSignalStrength"];
+    };
+
+    export type Response= undefined;
+
+}
+
+export namespace notifyGsmConnectivityChange {
+
+    export const methodName = "notifyGsmConnectivityChange";
+
+    export type Params = {
+        imsi: string;
+        isGsmConnectivityOk: boolean;
+    };
+
+    export type Response= undefined;
+
+}
+
+export namespace notifyCellSignalStrengthChange {
+
+    export const methodName= "notifyCellSignalStrengthChange";
+
+    export type Params = {
+        imsi: string;
+        cellSignalStrength: types.UserSim["cellSignalStrength"];
     };
 
     export type Response= undefined;

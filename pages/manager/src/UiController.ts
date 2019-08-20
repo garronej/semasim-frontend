@@ -75,6 +75,8 @@ export class UiController {
 
         const uiSimRow = new UiSimRow(userSim);
 
+
+
         this.uiSimRows.push(uiSimRow);
 
         this.structure.append(uiSimRow.structure);
@@ -115,6 +117,18 @@ export class UiController {
 
             }
         );
+
+        for (const evt of [
+            localApiHandlers.evtSimGsmConnectivityChange,
+            localApiHandlers.evtSimCellSignalStrengthChange
+        ]) {
+
+            evt.attach(
+                userSim_ => userSim_ === userSim,
+                () => uiSimRow.populate()
+            );
+
+        }
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
         for (const evt of [
@@ -445,15 +459,15 @@ export class UiController {
 
     }
 
-    public interact_updateContactName( number: phoneNumber) {
+    public interact_updateContactName(number: phoneNumber) {
         return this.interact_({ "type": "UPDATE_CONTACT_NAME", number });
     }
 
-    public interact_deleteContact( number: phoneNumber) {
+    public interact_deleteContact(number: phoneNumber) {
         return this.interact_({ "type": "DELETE_CONTACT", number });
     }
 
-    public interact_createContact(imsi: string, number: phoneNumber){
+    public interact_createContact(imsi: string, number: phoneNumber) {
         return this.interact_({ "type": "CREATE_CONTACT", imsi, number });
     }
 

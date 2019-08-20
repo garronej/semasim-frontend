@@ -3,6 +3,8 @@ import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as types from "../types/userSim";
 export declare const handlers: sipLibrary.api.Server.Handlers;
 export declare const evtSimIsOnlineStatusChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
+export declare const evtSimGsmConnectivityChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
+export declare const evtSimCellSignalStrengthChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 /** posted when a user that share the SIM created or updated a contact. */
 export declare const evtContactCreatedOrUpdated: SyncEvent<{
     userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>;

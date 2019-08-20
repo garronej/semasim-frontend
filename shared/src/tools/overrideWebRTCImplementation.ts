@@ -393,6 +393,7 @@ export function testOverrideWebRTCImplementation() {
     const rtcPeerConnectionByRef = new Map<number, RTCPeerConnection>();
 
     const listeners = overrideWebRTCImplementation({
+        /*
         "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
             getUserMediaBackup(
                 JSON.parse(mediaStreamConstraintsJson)
@@ -400,6 +401,20 @@ export function testOverrideWebRTCImplementation() {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
                 listeners.onMethodReturn(callRef, undefined);
             }),
+            */
+
+        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) => {
+
+            console.log("============> ", { mediaStreamConstraintsJson });
+
+            getUserMediaBackup(
+                JSON.parse(mediaStreamConstraintsJson)
+            ).then(mediaStream => {
+                mediaStreamByRef.set(mediaStreamRef, mediaStream);
+                listeners.onMethodReturn(callRef, undefined);
+            })
+
+        },
         "createRTCPeerConnection": (rtcPeerConnectionRef, rtcConfigurationJson) => {
 
             const rtcPeerConnection = new RTCPeerConnectionBackup((() => {

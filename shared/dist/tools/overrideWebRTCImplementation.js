@@ -321,8 +321,19 @@ function testOverrideWebRTCImplementation() {
     var getUserMediaBackup = navigator.mediaDevices.getUserMedia;
     var mediaStreamByRef = new Map();
     var rtcPeerConnectionByRef = new Map();
-    var listeners = overrideWebRTCImplementation(__assign({ "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
-            return getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
+    var listeners = overrideWebRTCImplementation(__assign({ 
+        /*
+        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
+            getUserMediaBackup(
+                JSON.parse(mediaStreamConstraintsJson)
+            ).then(mediaStream => {
+                mediaStreamByRef.set(mediaStreamRef, mediaStream);
+                listeners.onMethodReturn(callRef, undefined);
+            }),
+            */
+        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
+            console.log("============> ", { mediaStreamConstraintsJson: mediaStreamConstraintsJson });
+            getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
                 listeners.onMethodReturn(callRef, undefined);
             });

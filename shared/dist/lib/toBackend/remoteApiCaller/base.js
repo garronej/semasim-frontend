@@ -248,7 +248,9 @@ exports.acceptSharingRequest = (function () {
                                 "status": "SHARED CONFIRMED",
                                 "ownerEmail": notConfirmedUserSim.ownership.ownerEmail
                             },
-                            "phonebook": notConfirmedUserSim.phonebook
+                            "phonebook": notConfirmedUserSim.phonebook,
+                            "isGsmConnectivityOk": notConfirmedUserSim.isGsmConnectivityOk,
+                            "cellSignalStrength": notConfirmedUserSim.cellSignalStrength
                         };
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:

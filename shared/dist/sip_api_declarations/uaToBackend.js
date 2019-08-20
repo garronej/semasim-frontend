@@ -8,6 +8,14 @@ var notifySimOnline;
 (function (notifySimOnline) {
     notifySimOnline.methodName = "notifySimOnline";
 })(notifySimOnline = exports.notifySimOnline || (exports.notifySimOnline = {}));
+var notifyGsmConnectivityChange;
+(function (notifyGsmConnectivityChange) {
+    notifyGsmConnectivityChange.methodName = "notifyGsmConnectivityChange";
+})(notifyGsmConnectivityChange = exports.notifyGsmConnectivityChange || (exports.notifyGsmConnectivityChange = {}));
+var notifyCellSignalStrengthChange;
+(function (notifyCellSignalStrengthChange) {
+    notifyCellSignalStrengthChange.methodName = "notifyCellSignalStrengthChange";
+})(notifyCellSignalStrengthChange = exports.notifyCellSignalStrengthChange || (exports.notifyCellSignalStrengthChange = {}));
 /** posted when a user that share this SIM create or update a contact */
 var notifyContactCreatedOrUpdated;
 (function (notifyContactCreatedOrUpdated) {

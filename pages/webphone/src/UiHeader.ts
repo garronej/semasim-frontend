@@ -15,21 +15,109 @@ export class UiHeader {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
-    public setIsOnline(isOnline: boolean): void {
 
-        this.structure.find(".id_icon_sim_up")[isOnline ? "show" : "hide"]();
+    public notifyIsSipRegistered(isRegistered: boolean) {
 
-        for (const selector of [".id_offline", ".id_icon_sim_down"]) {
-            this.structure.find(selector)[isOnline ? "hide" : "show"]();
-        }
+        this.structure.find(".id_sip_registration_in_progress")[(
+            !this.userSim.isOnline ||
+            isRegistered
+        ) ? "hide" : "show"]();
 
     }
+
+    public notifySimStateChange(): void {
+
+        {
+
+            const text = (() => {
+
+                if (!this.userSim.isOnline) {
+                    return "Sim not reachable";
+                }
+
+                if (!this.userSim.isGsmConnectivityOk) {
+                    return "Not connected to GSM network";
+                }
+
+                return undefined;
+
+            })();
+
+            const $span = this.structure.find(".id_offline");
+
+            if (text === undefined) {
+
+                $span.hide();
+
+            } else {
+
+                $span.show().text(text);
+
+            }
+
+        }
+
+        this.structure.find("i")
+            .each((_i, e) => {
+
+                const $i = $(e);
+
+                const cellSignalStrength = $i.attr("data-strength");
+
+                if (!cellSignalStrength) {
+                    return;
+                }
+
+                $i[(
+                    this.userSim.isOnline &&
+                    this.userSim.isGsmConnectivityOk &&
+                    cellSignalStrength === this.userSim.cellSignalStrength
+                ) ? "show" : "hide"
+                ]();
+
+            });
+
+        (() => {
+
+            const $i = this.structure.find(".id_sip_registration_in_progress");
+
+            if (!this.userSim.isOnline) {
+
+                $i.hide();
+
+                return;
+
+            }
+
+            if ($i.css("display") === "none") {
+            }
+
+
+        })();
+
+        {
+
+            const $i = this.structure.find(".id_sip_registration_in_progress");
+
+            if( !this.userSim.isOnline ){
+                $i.hide();
+            }else if( !this.isSimOnlinePreviousState ){
+                $i.show();
+            }
+
+        }
+
+        this.isSimOnlinePreviousState= this.userSim.isOnline;
+
+    }
+
+    private isSimOnlinePreviousState= false;
 
     constructor(
         public readonly userSim: types.UserSim.Usable
     ) {
 
-        this.setIsOnline(userSim.isOnline);
+        this.notifySimStateChange();
 
         this.structure.find("a.id_friendly_name").popover({
             "html": true,
@@ -70,7 +158,7 @@ export class UiHeader {
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
 
-                if( selection !== null ){
+                if (selection !== null) {
 
                     selection.removeAllRanges();
                     selection.addRange(range);

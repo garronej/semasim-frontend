@@ -276,7 +276,9 @@ export const acceptSharingRequest = (() => {
                 "status": "SHARED CONFIRMED",
                 "ownerEmail": notConfirmedUserSim.ownership.ownerEmail
             },
-            "phonebook": notConfirmedUserSim.phonebook
+            "phonebook": notConfirmedUserSim.phonebook,
+            "isGsmConnectivityOk": notConfirmedUserSim.isGsmConnectivityOk,
+            "cellSignalStrength": notConfirmedUserSim.cellSignalStrength
         };
 
         (await getUsableUserSims()).push(userSim);

@@ -176,9 +176,33 @@ export class UiWebphoneController {
 
                 }
 
-                this.uiQuickAction.notifySimOnlineStatusChanged();
+                this.uiHeader.notifySimStateChange();
+
+                this.uiQuickAction.notifySimStateChange();
 
             }
+        );
+
+        localApiHandlers.evtSimGsmConnectivityChange.attach(
+            userSim => userSim === this.userSim,
+            () => {
+
+                this.uiHeader.notifySimStateChange();
+
+                this.uiQuickAction.notifySimStateChange();
+
+                for (const uiConversation of this._uiConversations.values()) {
+
+                    uiConversation.notifySimGsmConnectivityChange();
+
+                }
+
+            }
+        );
+
+        localApiHandlers.evtSimCellSignalStrengthChange.attach(
+            userSim => userSim === this.userSim,
+            () => this.uiHeader.notifySimStateChange()
         );
 
     }
@@ -187,11 +211,11 @@ export class UiWebphoneController {
 
         this.ua.evtRegistrationStateChanged.attach(isRegistered => {
 
-            this.uiHeader.setIsOnline(isRegistered);
+            this.uiHeader.notifyIsSipRegistered(isRegistered);
 
             for (const uiConversation of this._uiConversations.values()) {
 
-                uiConversation.setReadonly(!isRegistered);
+                uiConversation.notifySipIsRegistered(isRegistered);
 
             }
 
@@ -211,7 +235,7 @@ export class UiWebphoneController {
                                 "direction": "INCOMING",
                                 "isNotification": false,
                                 "time": bundledData.pduDateTime,
-                                "text": Buffer.from(bundledData.textB64,"base64").toString("utf8")
+                                "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                             };
 
                             return remoteApiCaller.newWdMessage(wdChat, message);
@@ -248,7 +272,7 @@ export class UiWebphoneController {
 
                             }
                         }
-                        case "MMS NOTIFICATION": 
+                        case "MMS NOTIFICATION":
                             console.log(
                                 `WPA PUSH: ${Buffer.from(bundledData.wapPushMessageB64, "base64").toString("utf8")}`
                             );
@@ -420,7 +444,7 @@ export class UiWebphoneController {
         const uiConversation = new UiConversation(this.userSim, wdChat);
 
         if (this.ua.isRegistered) {
-            uiConversation.setReadonly(false);
+            uiConversation.notifySipIsRegistered(true);
         }
 
         this._uiConversations.set(wdChat, uiConversation);

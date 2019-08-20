@@ -55,7 +55,8 @@ const evtUsableDongle= new SyncEvent<{ imei: string; }>();
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({
             imsi, hasInternalSimStorageChanged,
-            password, simDongle, gatewayLocation
+            password, simDongle, gatewayLocation,
+            isGsmConnectivityOk, cellSignalStrength
         }) => {
 
             evtUsableDongle.post({ "imei": simDongle.imei });
@@ -79,7 +80,71 @@ const evtUsableDongle= new SyncEvent<{ imei: string; }>();
 
             userSim.gatewayLocation = gatewayLocation;
 
+            userSim.isGsmConnectivityOk= isGsmConnectivityOk;
+
+            userSim.cellSignalStrength = cellSignalStrength;
+
             evtSimIsOnlineStatusChange.post(userSim);
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}
+
+//TODO: Make use of.
+export const evtSimGsmConnectivityChange= new SyncEvent<types.UserSim.Usable>();
+
+evtSimGsmConnectivityChange.attach(userSim => console.log("evtSimGsmConnectivityChange", { "isGsmConnectivityOk": userSim.isGsmConnectivityOk }));
+
+{
+
+    const { methodName } = apiDeclaration.notifyGsmConnectivityChange;
+    type Params = apiDeclaration.notifyGsmConnectivityChange.Params;
+    type Response = apiDeclaration.notifyGsmConnectivityChange.Response;
+
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async ({ imsi, isGsmConnectivityOk }) => {
+
+            const userSim = (await remoteApiCaller.getUsableUserSims())
+                .find(({ sim }) => sim.imsi === imsi)!;
+
+            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+
+            evtSimGsmConnectivityChange.post(userSim);
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}
+
+//TODO: Make use of.
+export const evtSimCellSignalStrengthChange= new SyncEvent<types.UserSim.Usable>();
+
+evtSimCellSignalStrengthChange.attach(userSim => console.log("evtSimCellSignalStrengthChange", { "cellSignalStrength": userSim.cellSignalStrength }));
+
+{
+
+    const { methodName } = apiDeclaration.notifyCellSignalStrengthChange;
+    type Params = apiDeclaration.notifyCellSignalStrengthChange.Params;
+    type Response = apiDeclaration.notifyCellSignalStrengthChange.Response;
+
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async ({ imsi, cellSignalStrength }) => {
+
+            const userSim = (await remoteApiCaller.getUsableUserSims())
+                .find(({ sim }) => sim.imsi === imsi)!;
+
+            userSim.cellSignalStrength = cellSignalStrength;
+
+            evtSimCellSignalStrengthChange.post(userSim);
 
             return undefined;
 

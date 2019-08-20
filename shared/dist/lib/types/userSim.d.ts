@@ -39,6 +39,8 @@ export declare namespace UserSim {
         isOnline: boolean;
         ownership: T;
         phonebook: Contact[];
+        isGsmConnectivityOk: boolean;
+        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
     };
     type Contact = {
         mem_index?: number;

@@ -42,17 +42,16 @@ export class UiConversation {
     private readonly btnCall = this.structure.find("button.id_call");
     private readonly btnDelete = this.structure.find("button.id_delete");
 
-    public setReadonly(isReadonly: boolean) {
 
-        if (isReadonly) {
+    public notifySimGsmConnectivityChange() {
 
-            this.textarea.attr("disabled", true as any);
-            this.aSend.hide();
-            this.btnUpdateContact.prop("disabled", true);
-            this.btnCall.prop("disabled", true);
-            this.btnDelete.prop("disabled", true);
+        this.btnCall.prop("disabled", !this.userSim.isGsmConnectivityOk);
 
-        } else {
+    }
+
+    public notifySipIsRegistered(isRegistered: boolean) {
+
+        if (isRegistered) {
 
             if (!phoneNumber.isDialable(this.wdChat.contactNumber)) {
                 return;
@@ -64,12 +63,21 @@ export class UiConversation {
             this.btnCall.prop("disabled", false);
             this.btnDelete.prop("disabled", false);
 
+        } else {
+
+            this.textarea.attr("disabled", true as any);
+            this.aSend.hide();
+            this.btnUpdateContact.prop("disabled", true);
+            this.btnCall.prop("disabled", true);
+            this.btnDelete.prop("disabled", true);
+
+
         }
 
     }
 
-    public readonly evtLoadMore= new SyncEvent<{
-        onLoaded: (wdMessages: wd.Message<"PLAIN">[])=> void;
+    public readonly evtLoadMore = new SyncEvent<{
+        onLoaded: (wdMessages: wd.Message<"PLAIN">[]) => void;
     }>();
 
     constructor(
@@ -78,7 +86,8 @@ export class UiConversation {
     ) {
 
         this.notifyContactNameUpdated();
-        this.setReadonly(true);
+        this.notifySipIsRegistered(false);
+        this.notifySimGsmConnectivityChange();
 
         this.btnUpdateContact
             .on("click", () => this.evtUpdateContact.post());
@@ -97,7 +106,7 @@ export class UiConversation {
                 const range = document.createRange();
                 range.selectNodeContents(e.currentTarget);
 
-                if( selection !== null ){
+                if (selection !== null) {
 
                     selection.removeAllRanges();
                     selection.addRange(range);
@@ -193,7 +202,14 @@ export class UiConversation {
 
                 this.ul.slimScroll({ "scrollTo": `${this.ul.prop("scrollHeight")}px` });
 
-                this.textarea.trigger("focus");
+
+                //NOTE: So that SMS from with no number to reply to can be marked as read.
+                if (!!this.textarea.attr("disabled")) {
+                    this.evtChecked.post();
+                } else {
+                    this.textarea.trigger("focus");
+                }
+
 
                 this.textarea["autosize"]();
 
