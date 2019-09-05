@@ -16,9 +16,9 @@ import * as availablePages from "../../../shared/dist/lib/availablePages";
 import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
 //import * as observer from "../../../shared/dist/tools/observer";
 
-import * as overrideWebRTCImplementation from "../../../shared/dist/tools/overrideWebRTCImplementation";
+//import * as overrideWebRTCImplementation from "../../../shared/dist/tools/overrideWebRTCImplementation";
 
-overrideWebRTCImplementation.testOverrideWebRTCImplementation();
+//overrideWebRTCImplementation.testOverrideWebRTCImplementation();
 
 //observer.observeWebRTC();
 
@@ -112,8 +112,8 @@ $(document).ready(async () => {
 	userSims
 		.sort((s1, s2) => {
 
-			if (s1.isOnline !== s2.isOnline) {
-				return s1.isOnline ? 1 : -1;
+			if (!!s1.reachableSimState !== !!s2.reachableSimState) {
+				return !!s1.reachableSimState ? 1 : -1;
 			}
 
 			const [c1, c2] = [s1, s2].map(userSim =>

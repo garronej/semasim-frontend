@@ -123,7 +123,7 @@ export class UiPhonebook {
             this.buttonCreateContact,
             this.buttonDelete,
             this.buttonEdit
-        ].forEach(button => button.prop("disabled", !this.userSim.isOnline));
+        ].forEach(button => button.prop("disabled", !this.userSim.reachableSimState));
 
         const selectedCount = Array.from(this.uiContacts.keys())
             .map(key => this.uiContacts.get(key)!)
@@ -409,7 +409,7 @@ export class UiPhonebook {
             return;
         }
 
-        if (!this.userSim.isOnline) {
+        if (!this.userSim.reachableSimState) {
 
             await new Promise(resolve =>
                 bootbox_custom.alert(
@@ -505,7 +505,7 @@ export class UiPhonebook {
             return;
         }
 
-        if (!this.userSim.isOnline) {
+        if (!this.userSim.reachableSimState) {
 
             await new Promise(resolve =>
                 bootbox_custom.alert(
@@ -575,7 +575,7 @@ export class UiPhonebook {
             return;
         }
 
-        if (!this.userSim.isOnline) {
+        if (!this.userSim.reachableSimState) {
 
             await new Promise(resolve =>
                 bootbox_custom.alert(

@@ -13,13 +13,35 @@ export declare namespace SimOwnership {
         type Confirmed = {
             status: "SHARED CONFIRMED";
             ownerEmail: string;
+            otherUserEmails: string[];
         };
         type NotConfirmed = {
             status: "SHARED NOT CONFIRMED";
             ownerEmail: string;
+            otherUserEmails: string[];
             sharingRequestMessage: string | undefined;
         };
     }
+}
+export declare type OngoingCall = {
+    ongoingCallId: string;
+    from: "DONGLE" | "SIP";
+    number: string;
+    isUserInCall: boolean;
+    otherUserInCallEmails: string[];
+};
+export declare type ReachableSimState = ReachableSimState.ConnectedToCellularNetwork | ReachableSimState.NotConnectedToCellularNetwork;
+export declare namespace ReachableSimState {
+    type Base = {
+        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
+    };
+    type NotConnectedToCellularNetwork = Base & {
+        isGsmConnectivityOk: false;
+    };
+    type ConnectedToCellularNetwork = Base & {
+        isGsmConnectivityOk: true;
+        ongoingCall: OngoingCall | undefined;
+    };
 }
 export declare type UserSim = UserSim._Base<SimOwnership>;
 export declare namespace UserSim {
@@ -36,11 +58,9 @@ export declare namespace UserSim {
             firmwareVersion: string;
         };
         gatewayLocation: GatewayLocation;
-        isOnline: boolean;
         ownership: T;
         phonebook: Contact[];
-        isGsmConnectivityOk: boolean;
-        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
+        reachableSimState: ReachableSimState | undefined;
     };
     type Contact = {
         mem_index?: number;

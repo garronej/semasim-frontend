@@ -1,5 +1,6 @@
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "phone-number";
+import { SyncEvent } from "ts-events-extended";
 
 import * as types from "../../../shared/dist/lib/types/userSim";
 
@@ -15,27 +16,24 @@ export class UiHeader {
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
+    public readonly evtJoinCall = new SyncEvent<phoneNumber>();
 
-    public notifyIsSipRegistered(isRegistered: boolean) {
+    public notify(): void {
 
         this.structure.find(".id_sip_registration_in_progress")[(
-            !this.userSim.isOnline ||
-            isRegistered
+            !this.userSim.reachableSimState ||
+            this.isRegistered()
         ) ? "hide" : "show"]();
-
-    }
-
-    public notifySimStateChange(): void {
 
         {
 
             const text = (() => {
 
-                if (!this.userSim.isOnline) {
+                if (!this.userSim.reachableSimState) {
                     return "Sim not reachable";
                 }
 
-                if (!this.userSim.isGsmConnectivityOk) {
+                if (!this.userSim.reachableSimState.isGsmConnectivityOk) {
                     return "Not connected to GSM network";
                 }
 
@@ -69,9 +67,9 @@ export class UiHeader {
                 }
 
                 $i[(
-                    this.userSim.isOnline &&
-                    this.userSim.isGsmConnectivityOk &&
-                    cellSignalStrength === this.userSim.cellSignalStrength
+                    !!this.userSim.reachableSimState &&
+                    this.userSim.reachableSimState.isGsmConnectivityOk &&
+                    cellSignalStrength === this.userSim.reachableSimState.cellSignalStrength
                 ) ? "show" : "hide"
                 ]();
 
@@ -81,7 +79,7 @@ export class UiHeader {
 
             const $i = this.structure.find(".id_sip_registration_in_progress");
 
-            if (!this.userSim.isOnline) {
+            if (!this.userSim.reachableSimState) {
 
                 $i.hide();
 
@@ -99,25 +97,115 @@ export class UiHeader {
 
             const $i = this.structure.find(".id_sip_registration_in_progress");
 
-            if( !this.userSim.isOnline ){
+            if (!this.userSim.reachableSimState) {
                 $i.hide();
-            }else if( !this.isSimOnlinePreviousState ){
+            } else if (!this.isSimOnlinePreviousState) {
                 $i.show();
             }
 
         }
 
-        this.isSimOnlinePreviousState= this.userSim.isOnline;
+        this.isSimOnlinePreviousState = !!this.userSim.reachableSimState;
+
+        (() => {
+
+            const divConf = this.structure.find(".id_conf");
+
+            if (
+                !this.userSim.reachableSimState ||
+                !this.userSim.reachableSimState.isGsmConnectivityOk ||
+                !this.userSim.reachableSimState.ongoingCall
+            ) {
+
+                divConf.hide();
+
+                return;
+
+            }
+
+            divConf.show();
+
+            const { ongoingCall } = this.userSim.reachableSimState;
+
+            divConf.find("span").text((() => {
+
+                const contact = this.userSim.phonebook.find(
+                    ({ number_raw }) => phoneNumber.areSame(
+                        ongoingCall.number, number_raw
+                    )
+                );
+
+                let peerId = contact === undefined ?
+                    phoneNumber.prettyPrint(
+                        ongoingCall.number,
+                        this.userSim.sim.country ?
+                            this.userSim.sim.country.iso : undefined
+                    ) : contact.name;
+
+
+
+                const userList = ongoingCall.otherUserInCallEmails.map((email, index) => {
+                    const { length } = ongoingCall.otherUserInCallEmails;
+                    if (index === length - 1) {
+                        return email;
+                    }
+                    if (index === length - 2) {
+                        return `${email} and `;
+                    }
+
+                    return `${email}, `;
+
+                }).join("");
+
+                if (ongoingCall.isUserInCall) {
+
+                    if (userList === "") {
+
+                        return `You are in call with ${peerId}`;
+
+                    } else {
+
+                        return `You alongside with ${userList} are in call with ${peerId}`;
+
+                    }
+
+
+                }
+
+                return [
+                    userList,
+                    ongoingCall.otherUserInCallEmails.length >= 2 ? "are" : "is",
+                    `in call with ${peerId}`
+                ].join(" ");
+
+            })());
+
+            const $button= divConf.find("button");
+
+            if( ongoingCall.isUserInCall ){
+                $button.hide();
+                return;
+            }
+
+            $button
+                .off("click")
+                .click(() => this.evtJoinCall.post(ongoingCall.number))
+                .show()
+                ;
+
+        })();
+
 
     }
 
-    private isSimOnlinePreviousState= false;
+    private isSimOnlinePreviousState = false;
 
     constructor(
-        public readonly userSim: types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable,
+        private readonly isRegistered: () => boolean
     ) {
 
-        this.notifySimStateChange();
+        this.notify();
 
         this.structure.find("a.id_friendly_name").popover({
             "html": true,

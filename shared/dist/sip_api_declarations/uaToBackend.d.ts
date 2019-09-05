@@ -16,7 +16,7 @@ export declare namespace notifySimOnline {
         simDongle: types.UserSim["dongle"];
         gatewayLocation: types.UserSim.GatewayLocation;
         isGsmConnectivityOk: boolean;
-        cellSignalStrength: types.UserSim["cellSignalStrength"];
+        cellSignalStrength: types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
     };
     type Response = undefined;
 }
@@ -32,8 +32,21 @@ export declare namespace notifyCellSignalStrengthChange {
     const methodName = "notifyCellSignalStrengthChange";
     type Params = {
         imsi: string;
-        cellSignalStrength: types.UserSim["cellSignalStrength"];
+        cellSignalStrength: types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
     };
+    type Response = undefined;
+}
+export declare namespace notifyOngoingCall {
+    const methodName = "notifyOngoingCall";
+    type Params = {
+        imsi: string;
+    } & ({
+        isTerminated: false;
+        ongoingCall: types.OngoingCall;
+    } | {
+        isTerminated: true;
+        ongoingCallId: string;
+    });
     type Response = undefined;
 }
 /** posted when a user that share this SIM create or update a contact */
@@ -93,8 +106,8 @@ export declare namespace notifySharingRequestResponse {
     };
     type Response = undefined;
 }
-export declare namespace notifySharedSimUnregistered {
-    const methodName = "notifySharedSimUnregistered";
+export declare namespace notifyOtherSimUserUnregisteredSim {
+    const methodName = "notifyOtherSimUserUnregisteredSim";
     type Params = {
         imsi: string;
         email: string;

@@ -18,16 +18,48 @@ export namespace SimOwnership {
 
         export type Confirmed = {
             status: "SHARED CONFIRMED";
-            ownerEmail: string
+            ownerEmail: string;
+            otherUserEmails: string[];
         };
 
         export type NotConfirmed = {
             status: "SHARED NOT CONFIRMED";
             ownerEmail: string;
+            otherUserEmails: string[];
             sharingRequestMessage: string | undefined;
         };
 
     }
+
+}
+
+export type OngoingCall = {
+    ongoingCallId: string;
+    from: "DONGLE" | "SIP";
+    number: string;
+    isUserInCall: boolean;
+    otherUserInCallEmails: string[];
+};
+
+export type ReachableSimState =
+    ReachableSimState.ConnectedToCellularNetwork |
+    ReachableSimState.NotConnectedToCellularNetwork
+    ;
+
+export namespace ReachableSimState {
+
+    export type Base = {
+        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
+    };
+
+    export type NotConnectedToCellularNetwork = Base & {
+        isGsmConnectivityOk: false;
+    };
+
+    export type ConnectedToCellularNetwork = Base & {
+        isGsmConnectivityOk: true;
+        ongoingCall: OngoingCall | undefined;
+    };
 
 }
 
@@ -48,11 +80,9 @@ export namespace UserSim {
             firmwareVersion: string;
         };
         gatewayLocation: GatewayLocation;
-        isOnline: boolean;
         ownership: T;
         phonebook: Contact[];
-        isGsmConnectivityOk: boolean;
-        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
+        reachableSimState: ReachableSimState | undefined;
     };
 
     export type Contact = {

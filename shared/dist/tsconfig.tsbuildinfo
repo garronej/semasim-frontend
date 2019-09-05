@@ -66,8 +66,8 @@
         "signature": "fe74505fc6b6d11332443b79bea6644081683adb87375c6dc7c20b690b56c9cd"
       },
       "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts": {
-        "version": "6553ce5e3c366c16206be85d362981b40389855c5e63072527536039dd362f3a",
-        "signature": "6553ce5e3c366c16206be85d362981b40389855c5e63072527536039dd362f3a"
+        "version": "08b328156b6a07571e6eb8d429e9923d863ea86e1eabf6a81df42fd09acf4461",
+        "signature": "08b328156b6a07571e6eb8d429e9923d863ea86e1eabf6a81df42fd09acf4461"
       },
       "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts": {
         "version": "67d483b80ab793ed7112b774712774712dba18e140e81d1772505302b86bf3a1",
@@ -190,8 +190,8 @@
         "signature": "b986c5f17166f5c3a270f95c72dcc057548a769a80c564223591cd14bfcae2a0"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts": {
-        "version": "96ef6dc73c0233bec1e908110fe873d2f0530ec9d6836b7ff4c14436d1964282",
-        "signature": "73c4141d4b59d5b45fe6bcab51c757d89c39d5e1959ec888309367d50fd7a8a8"
+        "version": "997f1dd4eb7dcbd6e374d8e7b791f26186f07b984b195ea3a5e152a7558d42f3",
+        "signature": "0201fd670f0cfa3f5ece632fda88e95b1c2813bc2d27a257023fb5b98883b2ba"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts": {
         "version": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958",
@@ -218,8 +218,8 @@
         "signature": "6d6ca69eb06f3b6a9ab9c47a8eb0bb2d1dd86f45619c60e861d41a1861806a2c"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts": {
-        "version": "1e6b10f5d0acd978cbcf1bbfdaabe1cd5f5b6f2fe81834c9ccf0f427468a4708",
-        "signature": "be0a4d90f154c1c42c804d53dcec4fd3e6015d2ab192a288f1be6b745050581f"
+        "version": "1f3ae087d12f77be27269afe27b64f5ad93a236efa7941282621b2fc7bc791c5",
+        "signature": "8515f57895166bd9c982ba36cd653d00f8b648a5c4670c73b7aab07ded315f9e"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts": {
         "version": "62e54f755b24b637bc4bd3197190b09b77664c4f2115c79cdf911abf19333656",
@@ -238,7 +238,7 @@
         "signature": "25aecda30c3d5ceb4375b0f43482d90939ad23c71c1f8cf78d64412f08fc673e"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts": {
-        "version": "25396ff6e827fe0a6a7ec6b32eedaa1a00a75302da1d1b2548b6083b6bfd9a48",
+        "version": "b5846c1072020484f21e2104c354e3715a809fb2cba96a1218ee20875ab48195",
         "signature": "e9cd4d74fe1e0dad9abb9af3e80a4cbbebe36f6622d8403a04ff2e0a3a6e843a"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/modal_stack.ts": {
@@ -250,8 +250,8 @@
         "signature": "fb83ed2939f42553360dd317b09e0791b31591686ca3ad126c7c876da2e2ac3e"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts": {
-        "version": "61567ca64e6f4676bc52de45a4d7700736a448789aad6a580c26628ba8877557",
-        "signature": "648e37152868400678b75875be3dd8ca7a8261a76b974819a03bd51ca235d8f9"
+        "version": "0d8d0dc77392533ee2df72ce13e94feb2d54a60fe68908b00f93e8610b34e947",
+        "signature": "d77e375ac4db3e39ccd4bc025c86ff40438f81cd0d5e964aa63bdd6dbaf39500"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts": {
         "version": "17f52511bdeab5898eeaf27d58b1330c9579e6d801115f5050b2db98d2093683",
@@ -266,7 +266,7 @@
         "signature": "16e3486f3a51f59b7705073c3d45f78bdbc1d20ff41a3d7e746767bf573ab94f"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts": {
-        "version": "3b552d5c94cce19ea74bb4ddfc34f33e6a9af35ae39cb995f2ab5c4d05952776",
+        "version": "4fb329cde18b7adf9a62e0cfe8b49a34c2baf979a7e073924e6d4ad30226c42d",
         "signature": "8c68773e66a2b702bac092013c7559be9b515c06ec490108ef39ab4054467978"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/types.d.ts": {
@@ -274,8 +274,8 @@
         "signature": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts": {
-        "version": "c71451c93a3f464e2da3df28eef7e560dfee246989e98e896f56262dab52a386",
-        "signature": "cc19186767e98e68d5ae58b56f60ec8bfb60c1c141a89713eafc1e355fff4085"
+        "version": "a3739c9f5f8d7f3c23cff7cd70a4c60da6d7d15d35b5c35786353270db81ea31",
+        "signature": "251491dd35565b1e469835b18a85b9a8638f3eb6e4d9a1da1434e6a8935ff731"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/availablepages.ts": {
         "version": "d8f9978b01f354af68f150913356f0f06d2100b2d098948ee5e8c57b52a3c0e6",
@@ -354,7 +354,7 @@
         "signature": "44808b15811c7ef44ed455703e4c33b2ddee8d00e317db22c708dcad2225e26e"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts": {
-        "version": "407984fe6f9d0bba2b055223c7bc0895a4d598db772b008c0d577610ca91f264",
+        "version": "569b4ee23cab07b752a513525ca73d2ff1230f1cb4da738739ebf247c53c8cfb",
         "signature": "10c22e139bc5f205bfd877eb601a7f485e1b76d1a27e893d36942ec5fe3cd9c3"
       },
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/index.ts": {
@@ -919,7 +919,6 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/availablepages.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/minimal-polyfills/dist/lib/array.from.d.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts",
@@ -946,7 +945,8 @@
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/urlgetparameters.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/polyfills/object.assign.ts",
       "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts"
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts",
+      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts"
     ]
   },
   "version": "3.5.2"

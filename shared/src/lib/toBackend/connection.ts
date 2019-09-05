@@ -93,7 +93,7 @@ export function connect(
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": true,
+        "outgoingTraffic": false,
         "ignoreApiTraffic": true
     }, log);
 
@@ -147,11 +147,11 @@ export function connect(
                         If userSim is online we received a notification before having the 
                         response of the request... even possible?
                          */
-                        if (userSim.isOnline) {
+                        if( !!userSim.reachableSimState ){
                             continue;
                         }
 
-                        userSim.isOnline = userSim_.isOnline;
+                        userSim.reachableSimState= userSim_.reachableSimState;
 
                         userSim.password = userSim_.password;
 
@@ -159,7 +159,7 @@ export function connect(
 
                         userSim.gatewayLocation = userSim_.gatewayLocation;
 
-                        if (userSim.isOnline) {
+                        if (!!userSim.reachableSimState) {
 
                             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
 
@@ -184,7 +184,7 @@ export function connect(
 
         for (const userSim of userSims || []) {
 
-            userSim.isOnline = false;
+            userSim.reachableSimState = undefined;
 
             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
 

@@ -25,7 +25,19 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
 
-            userSim.isOnline = false;
+            const hadOngoingCall= ( 
+                userSim.reachableSimState !== undefined && 
+                userSim.reachableSimState.isGsmConnectivityOk && 
+                userSim.reachableSimState.ongoingCall !== undefined
+            );
+
+            userSim.reachableSimState = undefined;
+
+            if( hadOngoingCall ){
+
+                evtOngoingCall.post(userSim);
+
+            }
 
             evtSimIsOnlineStatusChange.post(userSim);
 
@@ -44,7 +56,7 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
  * when the card have been unlocked and the card is ready 
  * to use.
  */
-const evtUsableDongle= new SyncEvent<{ imei: string; }>();
+const evtUsableDongle = new SyncEvent<{ imei: string; }>();
 
 {
 
@@ -72,17 +84,16 @@ const evtUsableDongle= new SyncEvent<{ imei: string; }>();
 
             }
 
-            userSim.isOnline= true;
+            userSim.reachableSimState = isGsmConnectivityOk ?
+                ({ "isGsmConnectivityOk": true, cellSignalStrength, "ongoingCall": undefined }) :
+                ({ "isGsmConnectivityOk": false, cellSignalStrength })
+                ;
 
             userSim.password = password;
 
             userSim.dongle = simDongle;
 
             userSim.gatewayLocation = gatewayLocation;
-
-            userSim.isGsmConnectivityOk= isGsmConnectivityOk;
-
-            userSim.cellSignalStrength = cellSignalStrength;
 
             evtSimIsOnlineStatusChange.post(userSim);
 
@@ -95,10 +106,7 @@ const evtUsableDongle= new SyncEvent<{ imei: string; }>();
 
 }
 
-//TODO: Make use of.
-export const evtSimGsmConnectivityChange= new SyncEvent<types.UserSim.Usable>();
-
-evtSimGsmConnectivityChange.attach(userSim => console.log("evtSimGsmConnectivityChange", { "isGsmConnectivityOk": userSim.isGsmConnectivityOk }));
+export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>();
 
 {
 
@@ -112,7 +120,37 @@ evtSimGsmConnectivityChange.attach(userSim => console.log("evtSimGsmConnectivity
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
 
-            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+            const { reachableSimState } = userSim;
+
+            if (reachableSimState === undefined) {
+                throw new Error("assert");
+            }
+
+            if( isGsmConnectivityOk === reachableSimState.isGsmConnectivityOk ){
+                throw new Error("assert");
+            }
+
+            if( reachableSimState.isGsmConnectivityOk ){
+
+                let hadOngoingCall= false;
+
+                if( reachableSimState.ongoingCall !== undefined ){
+                    delete reachableSimState.ongoingCall;
+                    hadOngoingCall= true;
+                }
+
+                reachableSimState.isGsmConnectivityOk =false as any;
+
+                if( hadOngoingCall ){
+                    evtOngoingCall.post(userSim);
+                }
+
+            }else{
+
+                reachableSimState.isGsmConnectivityOk = true as any;
+
+            }
+
 
             evtSimGsmConnectivityChange.post(userSim);
 
@@ -125,10 +163,8 @@ evtSimGsmConnectivityChange.attach(userSim => console.log("evtSimGsmConnectivity
 
 }
 
-//TODO: Make use of.
-export const evtSimCellSignalStrengthChange= new SyncEvent<types.UserSim.Usable>();
+export const evtSimCellSignalStrengthChange = new SyncEvent<types.UserSim.Usable>();
 
-evtSimCellSignalStrengthChange.attach(userSim => console.log("evtSimCellSignalStrengthChange", { "cellSignalStrength": userSim.cellSignalStrength }));
 
 {
 
@@ -142,7 +178,11 @@ evtSimCellSignalStrengthChange.attach(userSim => console.log("evtSimCellSignalSt
             const userSim = (await remoteApiCaller.getUsableUserSims())
                 .find(({ sim }) => sim.imsi === imsi)!;
 
-            userSim.cellSignalStrength = cellSignalStrength;
+            if (userSim.reachableSimState === undefined) {
+                throw new Error("Sim should be reachable");
+            }
+
+            userSim.reachableSimState.cellSignalStrength = cellSignalStrength;
 
             evtSimCellSignalStrengthChange.post(userSim);
 
@@ -154,6 +194,146 @@ evtSimCellSignalStrengthChange.attach(userSim => console.log("evtSimCellSignalSt
     handlers[methodName] = handler;
 
 }
+
+//TODO: Make use of.
+export const evtOngoingCall = new SyncEvent<types.UserSim.Usable>();
+
+/*
+evtOngoingCall.attach(userSim => {
+
+    const { reachableSimState } = userSim;
+
+    if( !reachableSimState ){
+
+        console.log("===> sim no longer reachable");
+
+        return;
+        
+    }
+
+    if( !reachableSimState.isGsmConnectivityOk ){
+
+        console.log("=============> cell connectivity lost");
+
+        return;
+
+    }
+
+    if( reachableSimState.ongoingCall === undefined ){
+
+        console.log("=================> call terminated");
+
+        return;
+
+    }
+
+    console.log("===========> ", JSON.stringify(reachableSimState.ongoingCall, null, 2));
+
+});
+*/
+
+
+{
+
+    const { methodName } = apiDeclaration.notifyOngoingCall;
+    type Params = apiDeclaration.notifyOngoingCall.Params;
+    type Response = apiDeclaration.notifyOngoingCall.Response;
+
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async params => {
+
+
+            const { imsi } = params;
+
+            const userSim = (await remoteApiCaller.getUsableUserSims())
+                .find(({ sim }) => sim.imsi === imsi)!;
+
+            if (params.isTerminated) {
+
+                const { ongoingCallId }= params;
+
+                const { reachableSimState } = userSim;
+
+                if( !reachableSimState ){
+                    //NOTE: The event would have been posted in setSimOffline handler.
+                    return;
+                }
+
+                if( !reachableSimState.isGsmConnectivityOk ){
+                    //NOTE: If we have had event notifying connectivity lost
+                    //before this event the evtOngoingCall will have been posted
+                    //in notifyGsmConnectivityChange handler function.
+                    return;
+                }
+
+                if( 
+                    reachableSimState.ongoingCall === undefined || 
+                    reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId 
+                ) {
+                    return;
+                }
+
+                reachableSimState.ongoingCall= undefined;
+
+            } else {
+
+                const { ongoingCall } = params;
+
+
+
+                const { reachableSimState } = userSim;
+
+                if (reachableSimState === undefined) {
+                    throw new Error("assert");
+                }
+
+                if (!reachableSimState.isGsmConnectivityOk) {
+                    throw new Error("assert");
+                }
+
+                if( reachableSimState.ongoingCall === undefined ){
+                    reachableSimState.ongoingCall = ongoingCall;
+                } else if ( reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId){
+
+                    reachableSimState.ongoingCall === undefined;
+
+                    evtOngoingCall.post(userSim);
+
+                    reachableSimState.ongoingCall = ongoingCall;
+
+                }else{
+
+                    const {
+                        ongoingCallId,
+                        from,
+                        number,
+                        isUserInCall,
+                        otherUserInCallEmails
+                    } = ongoingCall;
+
+                    const prevOngoingCall = reachableSimState.ongoingCall;
+
+                    Object.assign(prevOngoingCall, { ongoingCallId, from, number, isUserInCall });
+
+                    prevOngoingCall.otherUserInCallEmails.splice(0, prevOngoingCall.otherUserInCallEmails.length);
+
+                    otherUserInCallEmails.forEach(email => prevOngoingCall.otherUserInCallEmails.push(email));
+
+                }
+
+            }
+
+            evtOngoingCall.post(userSim);
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}
+
 
 /** posted when a user that share the SIM created or updated a contact. */
 export const evtContactCreatedOrUpdated = new SyncEvent<{
@@ -650,23 +830,37 @@ export const evtSharingRequestResponse = new SyncEvent<{
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, email, isAccepted }) => {
 
+            //TODO: change and also for stop sharing.
+
+
             const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned;
+                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned | types.UserSim.Shared.Confirmed;
 
-            userSim.ownership.sharedWith.notConfirmed.splice(
-                userSim.ownership.sharedWith.notConfirmed.indexOf(email),
-                1
-            );
+            switch (userSim.ownership.status) {
+                case "OWNED":
 
-            if (isAccepted) {
 
-                userSim.ownership.sharedWith.confirmed.push(email);
+                    userSim.ownership.sharedWith.notConfirmed.splice(
+                        userSim.ownership.sharedWith.notConfirmed.indexOf(email),
+                        1
+                    );
 
+                    if (isAccepted) {
+                        userSim.ownership.sharedWith.confirmed.push(email);
+                    }
+
+
+                    break;
+                case "SHARED CONFIRMED":
+
+                    if (isAccepted) {
+                        userSim.ownership.otherUserEmails.push(email);
+                    }
+
+                    break;
             }
 
-            evtSharingRequestResponse.post({ userSim, email, isAccepted });
-
-            bootbox_custom.alert(`${email} ${isAccepted ? "accepted" : "rejected"} your sharing request for ${userSim.friendlyName}`);
+            bootbox_custom.alert(`${email} ${isAccepted ? "accepted" : "rejected"} sharing request for ${userSim.friendlyName}`);
 
             return undefined;
 
@@ -677,29 +871,46 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
 }
 
-export const evtSharedSimUnregistered = new SyncEvent<{
+export const evtOtherSimUserUnregisteredSim = new SyncEvent<{
     userSim: types.UserSim.Owned;
     email: string;
 }>();
 
 {
 
-    const methodName = apiDeclaration.notifySharedSimUnregistered.methodName;
-    type Params = apiDeclaration.notifySharedSimUnregistered.Params;
-    type Response = apiDeclaration.notifySharedSimUnregistered.Response;
+    const { methodName } = apiDeclaration.notifyOtherSimUserUnregisteredSim;
+    type Params = apiDeclaration.notifyOtherSimUserUnregisteredSim.Params;
+    type Response = apiDeclaration.notifyOtherSimUserUnregisteredSim.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, email }) => {
 
+
             const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned;
+                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned | types.UserSim.Shared.Confirmed;
 
-            userSim.ownership.sharedWith.confirmed.splice(
-                userSim.ownership.sharedWith.confirmed.indexOf(email),
-                1
-            );
+            switch (userSim.ownership.status) {
+                case "OWNED":
 
-            evtSharedSimUnregistered.post({ userSim, email });
+                    userSim.ownership.sharedWith.confirmed.splice(
+                        userSim.ownership.sharedWith.confirmed.indexOf(email),
+                        1
+                    );
+
+                    break;
+
+                case "SHARED CONFIRMED":
+
+
+                    userSim.ownership.otherUserEmails.splice(
+                        userSim.ownership.otherUserEmails.indexOf(email),
+                        1
+                    );
+
+
+                    break;
+
+            }
 
             bootbox_custom.alert(`${email} no longer share ${userSim.friendlyName}`);
 
@@ -726,8 +937,8 @@ export const evtOpenElsewhere = new VoidSyncEvent();
             evtOpenElsewhere.post();
 
             bootbox_custom.alert(
-                "You are connected somewhere else", 
-                ()=> location.reload()
+                "You are connected somewhere else",
+                () => location.reload()
             );
 
             return undefined;
@@ -739,22 +950,22 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
 }
 
-const evtRTCIceEServer = new SyncEvent<{ 
-    rtcIceServer: RTCIceServer; 
-    socket: sipLibrary.Socket 
+const evtRTCIceEServer = new SyncEvent<{
+    rtcIceServer: RTCIceServer;
+    socket: sipLibrary.Socket
 }>();
 
 export const getRTCIceServer = (() => {
 
     let current: RTCIceServer | undefined = undefined;
 
-    const evtUpdated= new VoidSyncEvent();
+    const evtUpdated = new VoidSyncEvent();
 
-    evtRTCIceEServer.attach(({ rtcIceServer, socket })=> {
+    evtRTCIceEServer.attach(({ rtcIceServer, socket }) => {
 
-        socket.evtClose.attachOnce(()=> current = undefined );
-        
-        current= rtcIceServer;
+        socket.evtClose.attachOnce(() => current = undefined);
+
+        current = rtcIceServer;
 
         evtUpdated.post();
 
@@ -762,7 +973,7 @@ export const getRTCIceServer = (() => {
 
     return async function callee(): Promise<RTCIceServer> {
 
-        if( current !== undefined ){
+        if (current !== undefined) {
             return current;
         }
 

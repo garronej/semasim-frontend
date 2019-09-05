@@ -16,6 +16,10 @@ var notifyCellSignalStrengthChange;
 (function (notifyCellSignalStrengthChange) {
     notifyCellSignalStrengthChange.methodName = "notifyCellSignalStrengthChange";
 })(notifyCellSignalStrengthChange = exports.notifyCellSignalStrengthChange || (exports.notifyCellSignalStrengthChange = {}));
+var notifyOngoingCall;
+(function (notifyOngoingCall) {
+    notifyOngoingCall.methodName = "notifyOngoingCall";
+})(notifyOngoingCall = exports.notifyOngoingCall || (exports.notifyOngoingCall = {}));
 /** posted when a user that share this SIM create or update a contact */
 var notifyContactCreatedOrUpdated;
 (function (notifyContactCreatedOrUpdated) {
@@ -45,10 +49,10 @@ var notifySharingRequestResponse;
 (function (notifySharingRequestResponse) {
     notifySharingRequestResponse.methodName = "notifySharingRequestResponse";
 })(notifySharingRequestResponse = exports.notifySharingRequestResponse || (exports.notifySharingRequestResponse = {}));
-var notifySharedSimUnregistered;
-(function (notifySharedSimUnregistered) {
-    notifySharedSimUnregistered.methodName = "notifySharedSimUnregistered";
-})(notifySharedSimUnregistered = exports.notifySharedSimUnregistered || (exports.notifySharedSimUnregistered = {}));
+var notifyOtherSimUserUnregisteredSim;
+(function (notifyOtherSimUserUnregisteredSim) {
+    notifyOtherSimUserUnregisteredSim.methodName = "notifyOtherSimUserUnregisteredSim";
+})(notifyOtherSimUserUnregisteredSim = exports.notifyOtherSimUserUnregisteredSim || (exports.notifyOtherSimUserUnregisteredSim = {}));
 var notifyLoggedFromOtherTab;
 (function (notifyLoggedFromOtherTab) {
     notifyLoggedFromOtherTab.methodName = "notifyLoggedFromOtherTab";

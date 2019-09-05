@@ -94,14 +94,11 @@ export class UiSimRow {
 
             let text: string | undefined = undefined;
 
-            if (!this.userSim.isOnline) {
+            if (!this.userSim.reachableSimState) {
                 text = "Not reachable";
-            }
-
-            if (!this.userSim.isGsmConnectivityOk) {
+            } else if (!this.userSim.reachableSimState.isGsmConnectivityOk) {
                 text = "No GSM connection";
             }
-
 
             const $span = this.structure.find(".id_connectivity");
 
@@ -125,19 +122,19 @@ export class UiSimRow {
                 }
 
                 $i[(
-                    this.userSim.isOnline &&
-                    this.userSim.isGsmConnectivityOk &&
-                    cellSignalStrength === this.userSim.cellSignalStrength
+                    !!this.userSim.reachableSimState &&
+                    this.userSim.reachableSimState.isGsmConnectivityOk &&
+                    cellSignalStrength === this.userSim.reachableSimState.cellSignalStrength
                 ) ? "show" : "hide"
                 ]();
 
             });
 
-        if (!this.userSim.isOnline || !this.userSim.isGsmConnectivityOk) {
-            this.structure.find(".id_row").addClass("offline");
-        } else {
-            this.structure.find(".id_row").removeClass("offline");
-        }
+        this.structure.find(".id_row")[
+            !this.userSim.reachableSimState || !this.userSim.reachableSimState.isGsmConnectivityOk ?
+                "addClass" : "removeClass"
+        ]("offline");
+
 
         this.structure.find(".id_ownership").text(
             this.userSim.ownership.status === "OWNED" ?

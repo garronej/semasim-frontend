@@ -271,14 +271,13 @@ export const acceptSharingRequest = (() => {
             "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
             "dongle": notConfirmedUserSim.dongle,
             "gatewayLocation": notConfirmedUserSim.gatewayLocation,
-            "isOnline": notConfirmedUserSim.isOnline,
             "ownership": {
                 "status": "SHARED CONFIRMED",
-                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail
+                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
+                "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
             },
             "phonebook": notConfirmedUserSim.phonebook,
-            "isGsmConnectivityOk": notConfirmedUserSim.isGsmConnectivityOk,
-            "cellSignalStrength": notConfirmedUserSim.cellSignalStrength
+            "reachableSimState": notConfirmedUserSim.reachableSimState
         };
 
         (await getUsableUserSims()).push(userSim);

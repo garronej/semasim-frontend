@@ -43,24 +43,28 @@ export class UiQuickAction {
     public evtSms = new SyncEvent<phoneNumber>();
     public evtNewContact = new SyncEvent<phoneNumber>();
 
-    public notifySimStateChange() {
+    public notify() {
 
-        for (const selector of [".id_sms", ".id_contact"]) {
-
-            this.structure.find(selector)
-                .prop("disabled", !this.userSim.isOnline)
-                ;
-
-        }
-
-        this.structure.find(".id_call")
-            .prop("disabled", !(this.userSim.isOnline && this.userSim.isGsmConnectivityOk))
+        this.structure.find(".id_sms")
+            .prop("disabled", !this.isRegistered())
             ;
+
+        this.structure.find(".id_contact")
+            .prop("disabled", !this.userSim.reachableSimState)
+            ;
+
+        this.structure.find(".id_call") .prop("disabled", (
+            !this.isRegistered() || 
+            !this.userSim.reachableSimState ||
+            !this.userSim.reachableSimState.isGsmConnectivityOk ||
+            !!this.userSim.reachableSimState.ongoingCall
+        ));
 
     }
 
     constructor(
-        public readonly userSim: types.UserSim.Usable
+        public readonly userSim: types.UserSim.Usable,
+        private readonly isRegistered: ()=> boolean
     ) {
 
         let input = this.structure.find("input.id_tel-input");
@@ -196,7 +200,7 @@ export class UiQuickAction {
 
         });
 
-        this.notifySimStateChange();
+        this.notify();
 
     }
 }

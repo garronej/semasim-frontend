@@ -16,17 +16,18 @@ export namespace notifySimOnline {
     export const methodName= "notifySimOnline";
 
     /** internalStorageChanged is a very rare case, if it ever happen just reload the page */
-    export type Params= { 
+    export type Params = {
         imsi: string;
-        hasInternalSimStorageChanged: boolean; 
+        hasInternalSimStorageChanged: boolean;
         password: string;
         simDongle: types.UserSim["dongle"]
         gatewayLocation: types.UserSim.GatewayLocation,
         isGsmConnectivityOk: boolean;
-        cellSignalStrength: types.UserSim["cellSignalStrength"];
+        cellSignalStrength:
+        types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
@@ -39,48 +40,65 @@ export namespace notifyGsmConnectivityChange {
         isGsmConnectivityOk: boolean;
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
 export namespace notifyCellSignalStrengthChange {
 
-    export const methodName= "notifyCellSignalStrengthChange";
+    export const methodName = "notifyCellSignalStrengthChange";
 
     export type Params = {
         imsi: string;
-        cellSignalStrength: types.UserSim["cellSignalStrength"];
+        cellSignalStrength:
+        types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
+
+}
+
+export namespace notifyOngoingCall {
+
+    export const methodName = "notifyOngoingCall";
+
+    export type Params = { imsi: string } & ({
+        isTerminated: false;
+        ongoingCall: types.OngoingCall;
+    } | {
+        isTerminated: true;
+        ongoingCallId: string;
+    });
+
+    export type Response = undefined;
 
 }
 
 /** posted when a user that share this SIM create or update a contact */
 export namespace notifyContactCreatedOrUpdated {
 
-    export const methodName= "notifyContactCreatedOrUpdated";
+    export const methodName = "notifyContactCreatedOrUpdated";
 
     export type Params = {
         imsi: string;
         name: string;
         number_raw: string;
-        storage?: { 
-            mem_index: number; 
-            name_as_stored: string; 
-            new_digest: string; 
+        storage?: {
+            mem_index: number;
+            name_as_stored: string;
+            new_digest: string;
         }
     }
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
 export namespace notifyContactDeleted {
 
-    export const methodName= "notifyContactDeleted";
+    export const methodName = "notifyContactDeleted";
 
-    export type Params ={
+    export type Params = {
         imsi: string;
         number_raw: string;
         storage?: {
@@ -89,17 +107,17 @@ export namespace notifyContactDeleted {
         }
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
 export namespace notifyDongleOnLan {
 
-    export const methodName= "notifyDongleOnLan";
+    export const methodName = "notifyDongleOnLan";
 
-    export type Params= import("chan-dongle-extended-client").types.Dongle;
+    export type Params = import("chan-dongle-extended-client").types.Dongle;
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
@@ -109,49 +127,49 @@ export namespace notifyDongleOnLan {
  * */
 export namespace notifySimPermissionLost {
 
-    export const methodName= "notifySimPermissionLost";
+    export const methodName = "notifySimPermissionLost";
 
-    export type Params= { imsi: string; }
+    export type Params = { imsi: string; }
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 
 }
 
 export namespace notifySimSharingRequest {
 
-    export const methodName= "notifySimSharingRequest";
+    export const methodName = "notifySimSharingRequest";
 
-    export type Params= types.UserSim.Shared.NotConfirmed;
+    export type Params = types.UserSim.Shared.NotConfirmed;
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
 export namespace notifySharingRequestResponse {
 
-    export const methodName= "notifySharingRequestResponse";
+    export const methodName = "notifySharingRequestResponse";
 
-    export type Params= {
+    export type Params = {
         imsi: string;
         email: string;
         isAccepted: boolean;
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 
-export namespace notifySharedSimUnregistered {
+export namespace notifyOtherSimUserUnregisteredSim {
 
-    export const methodName= "notifySharedSimUnregistered";
+    export const methodName = "notifyOtherSimUserUnregisteredSim";
 
-    export type Params= {
+    export type Params = {
         imsi: string;
         email: string;
     };
 
-    export type Response= undefined;
+    export type Response = undefined;
 
 }
 

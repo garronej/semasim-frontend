@@ -42,37 +42,51 @@ export class UiConversation {
     private readonly btnCall = this.structure.find("button.id_call");
     private readonly btnDelete = this.structure.find("button.id_delete");
 
+    private readonly isDialable: boolean;
 
-    public notifySimGsmConnectivityChange() {
+    
+    /** To call whenever the widget should be updated */
+    public notify() {
 
-        this.btnCall.prop("disabled", !this.userSim.isGsmConnectivityOk);
+        this.structure.find("span.id_name").text(this.wdChat.contactName || "");
 
-    }
-
-    public notifySipIsRegistered(isRegistered: boolean) {
-
-        if (isRegistered) {
-
-            if (!phoneNumber.isDialable(this.wdChat.contactNumber)) {
-                return;
-            }
+        if (this.isRegistered() && this.isDialable) {
 
             this.textarea.removeAttr("disabled");
             this.aSend.show();
-            this.btnUpdateContact.prop("disabled", false);
-            this.btnCall.prop("disabled", false);
-            this.btnDelete.prop("disabled", false);
 
         } else {
 
             this.textarea.attr("disabled", true as any);
             this.aSend.hide();
-            this.btnUpdateContact.prop("disabled", true);
-            this.btnCall.prop("disabled", true);
-            this.btnDelete.prop("disabled", true);
-
 
         }
+
+        this.btnUpdateContact.prop("disabled", (
+            this.userSim.reachableSimState === undefined || 
+            !this.isDialable
+        ));
+
+        this.btnDelete.prop("disabled", this.userSim.reachableSimState === undefined);
+
+        this.btnCall.prop(
+            "disabled",
+            (
+                !this.isRegistered() ||
+                !this.isDialable ||
+                this.userSim.reachableSimState === undefined ||
+                !this.userSim.reachableSimState.isGsmConnectivityOk ||
+                (
+                    this.userSim.reachableSimState.ongoingCall !== undefined &&
+                    (
+                        this.userSim.reachableSimState.ongoingCall.number !== this.wdChat.contactNumber ||
+                        this.userSim.reachableSimState.ongoingCall.isUserInCall
+                    )
+                ) ||
+                !this.isRegistered()
+            )
+        );
+
 
     }
 
@@ -82,12 +96,21 @@ export class UiConversation {
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
+        private readonly isRegistered: () => boolean,
         public readonly wdChat: wd.Chat<"PLAIN">
     ) {
 
-        this.notifyContactNameUpdated();
-        this.notifySipIsRegistered(false);
-        this.notifySimGsmConnectivityChange();
+        const prettyNumber = phoneNumber.prettyPrint(
+            this.wdChat.contactNumber,
+            this.userSim.sim.country ?
+                this.userSim.sim.country.iso : undefined
+        )
+
+        this.isDialable = phoneNumber.isDialable(this.wdChat.contactNumber);
+
+        this.structure.find("span.id_number").text(prettyNumber);
+
+        this.notify();
 
         this.btnUpdateContact
             .on("click", () => this.evtUpdateContact.post());
@@ -229,29 +252,6 @@ export class UiConversation {
         return this.structure.is(":visible");
     }
 
-    public notifyContactNameUpdated() {
-
-        let prettyNumber = phoneNumber.prettyPrint(
-            this.wdChat.contactNumber,
-            this.userSim.sim.country ?
-                this.userSim.sim.country.iso : undefined
-        )
-
-        if (this.wdChat.contactName) {
-
-            this.structure.find("span.id_name").text(this.wdChat.contactName);
-
-            this.structure.find("span.id_number").text(prettyNumber);
-
-
-        } else {
-
-            this.structure.find("span.id_name").text("");
-            this.structure.find("span.id_number").text(prettyNumber);
-
-        }
-
-    }
 
     /** indexed by wd.Message.id_ */
     private readonly uiBubbles = new Map<number, UiBubble>();

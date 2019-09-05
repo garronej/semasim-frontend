@@ -104,7 +104,7 @@ function connect(connectionParams, isReconnect) {
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": true,
+        "outgoingTraffic": false,
         "ignoreApiTraffic": true
     }, log);
     socketCurrent = socket;
@@ -142,14 +142,14 @@ function connect(connectionParams, isReconnect) {
                     If userSim is online we received a notification before having the
                     response of the request... even possible?
                      */
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         return "continue";
                     }
-                    userSim.isOnline = userSim_.isOnline;
+                    userSim.reachableSimState = userSim_.reachableSimState;
                     userSim.password = userSim_.password;
                     userSim.dongle = userSim_.dongle;
                     userSim.gatewayLocation = userSim_.gatewayLocation;
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                     }
                 };
@@ -182,7 +182,7 @@ function connect(connectionParams, isReconnect) {
                     try {
                         for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
                             userSim = _b.value;
-                            userSim.isOnline = false;
+                            userSim.reachableSimState = undefined;
                             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                         }
                     }

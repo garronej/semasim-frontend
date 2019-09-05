@@ -44,6 +44,8 @@ export const getOrCreateWdInstance = (() => {
 
         const wdChatWhoseContactNoLongerInPhonebook = new Set(wdInstance.chats);
 
+        //const phonebook= userSim.phonebook.sort((a,b)=> a.
+
         for (const contact of userSim.phonebook) {
 
             const wdChat = wdInstance.chats.find(

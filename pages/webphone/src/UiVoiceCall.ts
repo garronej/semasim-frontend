@@ -262,6 +262,8 @@ export class UiVoiceCall {
         message: string
     ): void {
 
+        console.log("UiVoiceCall.setState", { state, message });
+
         if (state === this.state) {
             return;
         }

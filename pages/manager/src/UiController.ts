@@ -35,9 +35,10 @@ export class UiController {
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
 
-            localApiHandlers.evtSharedSimUnregistered.attach(
+            localApiHandlers.evtOtherSimUserUnregisteredSim.attach(
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
+
 
             return evt;
 
@@ -75,8 +76,6 @@ export class UiController {
 
         const uiSimRow = new UiSimRow(userSim);
 
-
-
         this.uiSimRows.push(uiSimRow);
 
         this.structure.append(uiSimRow.structure);
@@ -92,7 +91,7 @@ export class UiController {
             this.uiButtonBar.setState({
                 "isSimRowSelected": true,
                 "isSimSharable": types.UserSim.Owned.match(userSim),
-                "isSimOnline": userSim.isOnline
+                "isSimReachable": !!userSim.reachableSimState
             });
 
         });
@@ -105,7 +104,7 @@ export class UiController {
 
                 if (uiSimRow.isSelected) {
 
-                    this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
+                    this.uiButtonBar.setState({ "isSimReachable": !!userSim.reachableSimState });
 
                 }
 
@@ -168,7 +167,7 @@ export class UiController {
                 this.uiButtonBar.setState({
                     "isSimRowSelected": false,
                     "isSimSharable": false,
-                    "isSimOnline": false,
+                    "isSimReachable": false,
                     "areDetailsShown": false
                 });
 
@@ -196,7 +195,7 @@ export class UiController {
 
         this.initUiShareSim();
 
-        for (const userSim of userSims.sort((a, b) => +b.isOnline - +a.isOnline)) {
+        for (const userSim of userSims.sort((a, b) => +!!b.reachableSimState - +!!a.reachableSimState)) {
 
             this.addUserSim(userSim);
 
@@ -501,7 +500,7 @@ export class UiController {
 
         }
 
-        if (!userSim.isOnline) {
+        if (!userSim.reachableSimState) {
 
             await new Promise(resolve =>
                 bootbox_custom.alert(
@@ -570,7 +569,7 @@ async function interact_getUserSimContainingNumber(
             "title": `${phoneNumber.prettyPrint(number)} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
             "inputType": "select",
             "inputOptions": userSimsContainingNumber.map(userSim => ({
-                "text": `${userSim.friendlyName} ${userSim.isOnline ? "" : "( offline )"}`,
+                "text": `${userSim.friendlyName} ${!!userSim.reachableSimState ? "" : "( offline )"}`,
                 "value": userSimsContainingNumber.indexOf(userSim)
             })),
             "callback": (indexAsString: string) => resolve(parseInt(indexAsString))

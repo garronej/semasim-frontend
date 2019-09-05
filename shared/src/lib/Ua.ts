@@ -493,7 +493,7 @@ class JsSipSocket implements IjsSipSocket {
                 break;
             case "OUTGOING":
 
-            
+
                 editSdp(parsedSdp => {
 
                     //NOTE: We allow to try establishing P2P connection only 
@@ -507,7 +507,7 @@ class JsSipSocket implements IjsSipSocket {
 
                         const match = line.match(/srflx\ raddr\ ([0-9]+)\./);
 
-                        if( !match ){
+                        if (!match) {
                             return true;
                         }
 

@@ -62,7 +62,7 @@ export class UiButtonBar {
             this.btnShare.prop("disabled", true);
         }
 
-        if(!this.state.isSimOnline){
+        if(!this.state.isSimReachable){
             this.btnReboot.prop("disabled", true);
         }
 
@@ -97,7 +97,7 @@ export class UiButtonBar {
             const state: UiButtonBar.State.RowNotSelected = {
                 "isSimRowSelected": false,
                 "isSimSharable": false,
-                "isSimOnline": false,
+                "isSimReachable": false,
                 "areDetailsShown": false
             };
 
@@ -121,14 +121,14 @@ export namespace UiButtonBar {
         export type RowSelected = {
             isSimRowSelected: true;
             isSimSharable: boolean;
-            isSimOnline: boolean;
+            isSimReachable: boolean;
             areDetailsShown: boolean;
         };
 
         export type RowNotSelected = {
             isSimRowSelected: false;
             isSimSharable: false;
-            isSimOnline: false;
+            isSimReachable: false;
             areDetailsShown: false;
         };
 

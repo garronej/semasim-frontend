@@ -66,7 +66,7 @@ async function initUa(session: typeof Ua["session"], imsi: string): Promise<Ua> 
 			.then(userSims => userSims.find(({ sim }) => sim.imsi === imsi)!)
 	]);
 
-	if (!userSim.isOnline) {
+	if (!userSim.reachableSimState) {
 
 		apiExposedByHost.onCallTerminated("Sim is offline");
 		await new Promise(_resolve => { });

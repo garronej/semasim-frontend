@@ -51,9 +51,9 @@ export class UiWebphoneController {
 
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
-        this.uiHeader = new UiHeader(userSim);
+        this.uiHeader = new UiHeader(userSim, () => this.ua.isRegistered);
 
-        this.uiQuickAction = new UiQuickAction(userSim);
+        this.uiQuickAction = new UiQuickAction(userSim, () => this.ua.isRegistered);
 
         this.uiPhonebook = new UiPhonebook(userSim, wdInstance);
 
@@ -75,8 +75,9 @@ export class UiWebphoneController {
 
     private registerRemoteNotifyHandlers() {
 
-        localApiHandlers.evtSharedSimUnregistered.attachOnce(
-            ({ userSim }) => userSim === this.userSim,
+
+        localApiHandlers.evtSimPermissionLost.attachOnce(
+            userSim  => userSim === this.userSim,
             () => {
 
                 //TODO: Terminate UA.
@@ -122,7 +123,7 @@ export class UiWebphoneController {
                     this.uiPhonebook.notifyContactChanged(wdChat);
 
                     this.getOrCreateUiConversation(wdChat)
-                        .notifyContactNameUpdated()
+                        .notify()
                         ;
 
                 }
@@ -152,7 +153,7 @@ export class UiWebphoneController {
                 this.uiPhonebook.notifyContactChanged(wdChat);
 
                 this.getOrCreateUiConversation(wdChat)
-                    .notifyContactNameUpdated()
+                    .notify()
                     ;
 
             }
@@ -162,7 +163,7 @@ export class UiWebphoneController {
             userSim => userSim === this.userSim,
             async () => {
 
-                if (!this.userSim.isOnline) {
+                if (!this.userSim.reachableSimState) {
 
                     if (this.ua.isRegistered) {
 
@@ -176,9 +177,15 @@ export class UiWebphoneController {
 
                 }
 
-                this.uiHeader.notifySimStateChange();
+                this.uiHeader.notify();
 
-                this.uiQuickAction.notifySimStateChange();
+                this.uiQuickAction.notify();
+
+                for (const uiConversation of this._uiConversations.values()) {
+
+                    uiConversation.notify()
+
+                }
 
             }
         );
@@ -187,13 +194,13 @@ export class UiWebphoneController {
             userSim => userSim === this.userSim,
             () => {
 
-                this.uiHeader.notifySimStateChange();
+                this.uiHeader.notify();
 
-                this.uiQuickAction.notifySimStateChange();
+                this.uiQuickAction.notify();
 
                 for (const uiConversation of this._uiConversations.values()) {
 
-                    uiConversation.notifySimGsmConnectivityChange();
+                    uiConversation.notify()
 
                 }
 
@@ -202,20 +209,40 @@ export class UiWebphoneController {
 
         localApiHandlers.evtSimCellSignalStrengthChange.attach(
             userSim => userSim === this.userSim,
-            () => this.uiHeader.notifySimStateChange()
+            () => this.uiHeader.notify()
+        );
+
+        localApiHandlers.evtOngoingCall.attach(
+            userSim => userSim === this.userSim,
+            ()=>{
+
+                this.uiHeader.notify();
+
+                this.uiQuickAction.notify();
+
+                for (const uiConversation of this._uiConversations.values()) {
+
+                    uiConversation.notify()
+
+                }
+
+            }
         );
 
     }
 
     private initUa() {
 
-        this.ua.evtRegistrationStateChanged.attach(isRegistered => {
+        this.ua.evtRegistrationStateChanged.attach(() => {
 
-            this.uiHeader.notifyIsSipRegistered(isRegistered);
+            this.uiHeader.notify();
+
+            this.uiQuickAction.notify();
 
             for (const uiConversation of this._uiConversations.values()) {
 
-                uiConversation.notifySipIsRegistered(isRegistered);
+                
+                uiConversation.notify();
 
             }
 
@@ -277,13 +304,25 @@ export class UiWebphoneController {
                                 `WPA PUSH: ${Buffer.from(bundledData.wapPushMessageB64, "base64").toString("utf8")}`
                             );
                         case "CALL ANSWERED BY":
+                        case "FROM SIP CALL SUMMARY":
                         case "MISSED CALL": {
 
                             const message: wd.NoId<wd.Message.Incoming.Notification<"PLAIN">> = {
                                 "direction": "INCOMING",
                                 "isNotification": true,
-                                "time": bundledData.type === "MMS NOTIFICATION" ?
-                                    bundledData.pduDateTime : bundledData.dateTime,
+                                "time": (() => {
+
+                                    switch (bundledData.type) {
+                                        case "CALL ANSWERED BY":
+                                        case "MISSED CALL":
+                                            return bundledData.dateTime;
+                                        case "MMS NOTIFICATION":
+                                            return bundledData.pduDateTime;
+                                        case "FROM SIP CALL SUMMARY":
+                                            return bundledData.callPlacedAtDateTime;
+                                    }
+
+                                })(),
                                 "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                             };
 
@@ -361,7 +400,7 @@ export class UiWebphoneController {
             }
         );
 
-        if (this.userSim.isOnline) {
+        if (!!this.userSim.reachableSimState) {
 
             this.ua.register();
 
@@ -375,6 +414,10 @@ export class UiWebphoneController {
             .find("div.id_header")
             .append(this.uiHeader.structure)
             ;
+
+        this.uiHeader.evtJoinCall.attach(number=> 
+            this.uiQuickAction.evtVoiceCall.post(number)
+        );
 
     }
 
@@ -441,11 +484,12 @@ export class UiWebphoneController {
             return this._uiConversations.get(wdChat)!;
         }
 
-        const uiConversation = new UiConversation(this.userSim, wdChat);
+        const uiConversation = new UiConversation(
+            this.userSim, 
+            ()=> this.ua.isRegistered, 
+            wdChat
+        );
 
-        if (this.ua.isRegistered) {
-            uiConversation.notifySipIsRegistered(true);
-        }
 
         this._uiConversations.set(wdChat, uiConversation);
 
@@ -626,7 +670,7 @@ export class UiWebphoneController {
 
             this.uiPhonebook.notifyContactChanged(wdChat);
 
-            uiConversation.notifyContactNameUpdated();
+            uiConversation.notify();
 
         });
 
