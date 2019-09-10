@@ -193,6 +193,33 @@ export class Ua {
 
     public sendMessage(
         number: phoneNumber,
+        bundledData: gwTypes.BundledData.ClientToServer
+    ): Promise<void>{
+
+        return new Promise<void>(
+            async (resolve, reject) => this.jsSipUa.sendMessage(
+                `sip:${number}@${baseDomain}`,
+                "| encrypted message bundled in header |",
+                {
+                    "contentType": "text/plain; charset=UTF-8",
+                    "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer>(
+                        bundledData,
+                        this.towardSimEncryptor
+                    ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
+                    "eventHandlers": {
+                        "succeeded": () => resolve(),
+                        "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
+                    }
+                }
+            )
+        );
+        
+
+    }
+
+    /*
+    public sendMessage(
+        number: phoneNumber,
         text: string,
         exactSendDate: Date,
         appendPromotionalMessage: boolean
@@ -220,6 +247,7 @@ export class Ua {
             )
         );
     }
+    */
 
     /** return exactSendDate to match with sendReport and statusReport */
 

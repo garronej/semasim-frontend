@@ -19,3 +19,4 @@ function isAscendingAlphabeticalOrder(a, b) {
     return vA < vB;
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
+exports.isForWeb = true;

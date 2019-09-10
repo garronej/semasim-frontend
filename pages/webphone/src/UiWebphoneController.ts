@@ -6,6 +6,7 @@ import { UiVoiceCall } from "./UiVoiceCall";
 import { Ua } from "../../../shared/dist/lib/Ua";
 import * as types from "../../../shared/dist/lib/types/userSim";
 import * as wd from "../../../shared/dist/lib/types/webphoneData/types";
+import { types as gwTypes } from "../../../shared/dist/gateway/types";
 import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
 import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
 import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
@@ -251,6 +252,8 @@ export class UiWebphoneController {
         this.ua.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, onProcessed }) => {
 
+                console.log(JSON.stringify({ fromNumber, bundledData }, null, 2))
+
                 const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
 
                 const prWdMessage: Promise<Exclude<wd.Message<"PLAIN">, wd.Message.Outgoing.Pending<"PLAIN">> | undefined> = (() => {
@@ -329,6 +332,34 @@ export class UiWebphoneController {
                             return remoteApiCaller.newWdMessage(wdChat, message);
 
                         }
+                        case "CONVERSATION CHECKED OUT FROM OTHER UA": {
+
+                            console.log("conversation checked out from other ua !");
+
+                            const uiConversation = this._uiConversations.get(wdChat);
+
+                            let pr: Promise<undefined>;
+
+                            if (uiConversation !== undefined) {
+
+                                let resolvePr!: ()=> void;
+
+                                pr = new Promise<undefined>(resolve=> resolvePr = ()=> resolve(undefined));
+
+                                uiConversation.evtChecked.post({ 
+                                    "from": "OTHER UA", 
+                                    "onProcessed": ()=> resolvePr() 
+                                });
+
+                            }else{
+
+                                pr = Promise.resolve(undefined);
+
+                            }
+
+                            return pr;
+
+                        }
                     }
 
                 })();
@@ -337,13 +368,14 @@ export class UiWebphoneController {
 
                 onProcessed();
 
-                if (!!wdMessage) {
-
-                    this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
-
-                    this.uiPhonebook.notifyContactChanged(wdChat);
-
+                if( !wdMessage ){
+                    return;
                 }
+
+                this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
+
+                this.uiPhonebook.notifyContactChanged(wdChat);
+
 
             }
         );
@@ -415,7 +447,7 @@ export class UiWebphoneController {
             .append(this.uiHeader.structure)
             ;
 
-        this.uiHeader.evtJoinCall.attach(number=> 
+        this.uiHeader.evtJoinCall.attach(number =>
             this.uiQuickAction.evtVoiceCall.post(number)
         );
 
@@ -485,8 +517,8 @@ export class UiWebphoneController {
         }
 
         const uiConversation = new UiConversation(
-            this.userSim, 
-            ()=> this.ua.isRegistered, 
+            this.userSim,
+            () => this.ua.isRegistered,
             wdChat
         );
 
@@ -495,12 +527,42 @@ export class UiWebphoneController {
 
         this.structure.find("div.id_colRight").append(uiConversation.structure);
 
-        uiConversation.evtChecked.attach(async () => {
+        uiConversation.evtChecked.attach(async data => {
 
             const isUpdated = await remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat);
 
+            if( data.from === "OTHER UA"){
+                data.onProcessed();
+            }
+
             if (!isUpdated) {
                 return;
+            }
+
+            if (data.from === "THIS UA") {
+
+                //TODO: Notify that the conversation have been checked.
+
+                console.log("Here we should notify that the converstation have been checked");
+
+                /*
+                this.ua.sendMessage(
+                    wdChat.contactNumber,
+                    (() => {
+
+                        const out: gwTypes.BundledData.ClientToServer.ConversationCheckedOut = {
+                            "type": "CONVERSATION CHECKED OUT",
+                            "textB64": Buffer.from("checked out from web", "utf8").toString("base64"),
+                            "checkedOutAtTime": Date.now()
+                        }
+
+                        return out;
+
+
+                    })()
+                ).catch(() => console.log("Failed to send conversation checked out"));
+                */
+
             }
 
             this.uiPhonebook.notifyContactChanged(wdChat);
@@ -534,9 +596,18 @@ export class UiWebphoneController {
 
                     await this.ua.sendMessage(
                         uiConversation.wdChat.contactNumber,
-                        text,
-                        exactSendDate,
-                        await remoteApiCaller.shouldAppendPromotionalMessage()
+                        await (async () => {
+
+                            const out: gwTypes.BundledData.ClientToServer.Message = {
+                                "type": "MESSAGE",
+                                "textB64": Buffer.from(text, "utf8").toString("base64"),
+                                "exactSendDateTime": exactSendDate.getTime(),
+                                "appendPromotionalMessage": await remoteApiCaller.shouldAppendPromotionalMessage()
+                            };
+
+                            return out;
+
+                        })()
                     );
 
                 } catch (error) {

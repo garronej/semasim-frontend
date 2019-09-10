@@ -33,7 +33,8 @@ export class UiConversation {
     public readonly evtSendText = new SyncEvent<string>();
     public readonly evtDelete = new VoidSyncEvent();
 
-    public readonly evtChecked = new VoidSyncEvent();
+    //public readonly evtChecked = new SyncEvent<{ from: "OTHER UA" | "THIS UA"; }>();
+    public readonly evtChecked = new SyncEvent<{ from: "THIS UA"; } | { from: "OTHER UA"; onProcessed: () => void; }>();
 
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
@@ -158,7 +159,7 @@ export class UiConversation {
         this.textarea
             .on("keypress", event => {
 
-                this.evtChecked.post();
+                this.evtChecked.post({"from": "THIS UA"});
 
                 if (event.key === "Enter" && !event.shiftKey) {
 
@@ -168,7 +169,7 @@ export class UiConversation {
                 }
 
             })
-            .on("focus", () => this.evtChecked.post())
+            .on("focus", () => this.evtChecked.post({"from": "THIS UA"}))
             ;
 
         this.ul.slimScroll({
@@ -228,7 +229,7 @@ export class UiConversation {
 
                 //NOTE: So that SMS from with no number to reply to can be marked as read.
                 if (!!this.textarea.attr("disabled")) {
-                    this.evtChecked.post();
+                    this.evtChecked.post({"from": "THIS UA"});
                 } else {
                     this.textarea.trigger("focus");
                 }

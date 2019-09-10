@@ -26,12 +26,12 @@ export declare class Ua {
     unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.ConversationCheckedOutFromOtherUa;
         onProcessed: () => void;
     }>;
     private onMessage;
     private postEvtIncomingMessage;
-    sendMessage(number: phoneNumber, text: string, exactSendDate: Date, appendPromotionalMessage: boolean): Promise<void>;
+    sendMessage(number: phoneNumber, bundledData: gwTypes.BundledData.ClientToServer): Promise<void>;
     /** return exactSendDate to match with sendReport and statusReport */
     readonly evtIncomingCall: SyncEvent<{
         fromNumber: string;

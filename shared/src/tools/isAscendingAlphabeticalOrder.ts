@@ -30,3 +30,5 @@ export function isAscendingAlphabeticalOrder(
     return vA < vB;
 
 }
+
+export const isForWeb= true;
