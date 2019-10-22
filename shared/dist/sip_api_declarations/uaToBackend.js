@@ -20,7 +20,7 @@ var notifyOngoingCall;
 (function (notifyOngoingCall) {
     notifyOngoingCall.methodName = "notifyOngoingCall";
 })(notifyOngoingCall = exports.notifyOngoingCall || (exports.notifyOngoingCall = {}));
-/** posted when a user that share this SIM create or update a contact */
+/** posted when an other UA create or update a contact */
 var notifyContactCreatedOrUpdated;
 (function (notifyContactCreatedOrUpdated) {
     notifyContactCreatedOrUpdated.methodName = "notifyContactCreatedOrUpdated";
@@ -35,7 +35,7 @@ var notifyDongleOnLan;
 })(notifyDongleOnLan = exports.notifyDongleOnLan || (exports.notifyDongleOnLan = {}));
 /**
  * posted when the owner of the sim stop sharing the sim with the user
- * or when the user unregister the sim.
+ * or when the user unregister the sim from an other ua
  * */
 var notifySimPermissionLost;
 (function (notifySimPermissionLost) {

@@ -16,7 +16,7 @@ export namespace registerUser {
 
 export namespace validateEmail {
 
-    export const methodName= "validate-email";
+    export const methodName = "validate-email";
 
     export type Params = {
         email: string;
@@ -34,11 +34,14 @@ export namespace loginUser {
     export type Params = {
         email: string;
         secret: string;
+        uaInstanceId: string | undefined; /** undefined if login in from the Web, to provide from mobile */
     };
 
-    /** isGranted */
     export type Response = {
         status: "SUCCESS";
+        connect_sid: string;
+        webUaInstanceId: string | undefined; /** if uaInstanceIdWas not provided ( from web ) returning the webUaInstanceId */
+        encryptedSymmetricKey: string;
     } | {
         status: "NO SUCH ACCOUNT";
     } | {
@@ -52,6 +55,30 @@ export namespace loginUser {
     };
 
 }
+
+export namespace isUserLoggedIn {
+
+    export const methodName = "isUserLoggedIn";
+
+    export type Params = undefined;
+
+    export type Response = boolean;
+
+}
+
+export namespace declareUa {
+
+    export const methodName = "declareUa";
+
+    export type Params = { 
+        platform: "iOS" | "android";
+        pushNotificationToken: string;
+    };
+
+    export type Response = undefined;
+
+}
+
 
 export namespace logoutUser {
 
@@ -78,9 +105,9 @@ export namespace sendRenewPasswordEmail {
 
 export namespace renewPassword {
 
-    export const methodName= "renew-password";
+    export const methodName = "renew-password";
 
-    export type Params= {
+    export type Params = {
         email: string;
         newSecret: string;
         newTowardUserEncryptKeyStr: string,
@@ -89,7 +116,7 @@ export namespace renewPassword {
     };
 
     /** return false if the token have expired */
-    export type Response= boolean;
+    export type Response = boolean;
 
 }
 
@@ -108,11 +135,11 @@ export namespace getCountryIso {
 
 export namespace getChangesRates {
 
-    export const methodName= "get-changes-rates";
+    export const methodName = "get-changes-rates";
 
     export type Params = undefined;
 
-    export type Response= { [currency: string]: number; };
+    export type Response = { [currency: string]: number; };
 
 }
 
@@ -150,7 +177,7 @@ export namespace createStripeCheckoutSessionForShop {
 
     export const methodName = "create-stripe-checkout-session-for-shop";
 
-    export type Params= {
+    export type Params = {
         cartDescription: { productName: string; quantity: number; }[];
         shippingFormData: import("./lib/types/shop").ShippingFormData;
         currency: string;
@@ -158,7 +185,7 @@ export namespace createStripeCheckoutSessionForShop {
         cancel_url: string;
     };
 
-    export type Response= {
+    export type Response = {
         stripePublicApiKey: string;
         checkoutSessionId: string;
     };
@@ -169,13 +196,13 @@ export namespace createStripeCheckoutSessionForSubscription {
 
     export const methodName = "create-stripe-checkout-session-for-subscription";
 
-    export type Params= { 
-        currency: string; 
+    export type Params = {
+        currency: string;
         success_url: string;
         cancel_url: string;
     };
 
-    export type Response= {
+    export type Response = {
         stripePublicApiKey: string;
         checkoutSessionId: string;
     };

@@ -1,9 +1,9 @@
 //NOTE: Assert Select2 v4.0.6-rc.0 loaded.
 
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as currencyLib from "../../../shared/dist/tools/currency";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as currencyLib from "frontend-shared/dist/tools/currency";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
 declare const require: any;
 
@@ -123,23 +123,23 @@ export class UiCurrency {
     public async interact_getCurrency(): Promise<string> {
 
         const doChange= await new Promise<boolean>(resolve =>
-            bootbox_custom.dialog({
+            dialogApi.create("dialog",{
                 "title": "Currency",
                 "message": `Pay in ${currencyLib.data[this.currency].name} ?`,
                 "closeButton": false,
-                "buttons": [
-                    {
+                "buttons": {
+                    "btn1": {
                         "label": `Yes, pay in ${currencyLib.data[this.currency].symbol}`,
                         "className": "btn-success",
                         "callback": () => resolve(false)
                     },
-                    {
+                    "btn2": {
                         "label": "No, pay with an other currency",
                         "className": 'btn-warning',
                         "callback":  () => resolve(true)
-                    },
-
-                ]
+                    }
+                },
+                "onEscape": false
             })
         );
 

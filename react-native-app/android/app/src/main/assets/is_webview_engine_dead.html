@@ -1,0 +1,457 @@
+<!doctype html>
+<!--[if lt IE 8]><html class="no-js lt-ie8"> <![endif]-->
+<html class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Mobile specific metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1 user-scalable=no">
+    <!-- Force IE9 to render in normal mode -->
+    <!--[if IE]><meta http-equiv="x-ua-compatible" content="IE=9" /><![endif]-->
+
+    <title>Semasim | SIMs</title>
+
+    <!--
+<link rel="preload" href="/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link href="/fonts/quattrocento_sans_400_700/font.css" rel='stylesheet' type='text/css'>
+
+<link href="/css/icons.css" rel="stylesheet" />
+<link href="/css/bootstrap.css" rel="stylesheet" />
+<link href="/css/plugins.css" rel="stylesheet" />
+<link href="/css/main.css" rel="stylesheet" />
+
+    <link href="/plugins/ui/multiple-emails/multiple-emails.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/plugins/ui/intl-tel-input/css/intlTelInput.css">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/ico/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/img/ico/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/img/ico/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/img/ico/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/img/ico/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/img/ico/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/img/ico/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/img/ico/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/img/ico/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/ico/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/img/ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/ico/favicon-16x16.png">
+<link rel="manifest" href="/img/ico/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" href="/img/ico/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+-->
+
+    <style>
+body .vertical-centered-box {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+body .vertical-centered-box:after {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.25em;
+}
+body .vertical-centered-box .content {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 0;
+}
+
+.loader-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  margin-left: -60px;
+  margin-top: -60px;
+}
+.loader-line-mask {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 120px;
+  margin-left: -60px;
+  margin-top: -60px;
+  overflow: hidden;
+  -webkit-transform-origin: 60px 60px;
+  -moz-transform-origin: 60px 60px;
+  -ms-transform-origin: 60px 60px;
+  -o-transform-origin: 60px 60px;
+  transform-origin: 60px 60px;
+  -webkit-mask-image: -webkit-linear-gradient(top, #000000, rgba(0, 0, 0, 0));
+  -webkit-animation: rotate 1.2s infinite linear;
+  -moz-animation: rotate 1.2s infinite linear;
+  -o-animation: rotate 1.2s infinite linear;
+  animation: rotate 1.2s infinite linear;
+}
+.loader-line-mask .loader-line {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+#particles-background,
+#particles-foreground {
+  left: -51%;
+  top: -51%;
+  width: 202%;
+  height: 202%;
+  -webkit-transform: scale3d(0.5, 0.5, 1);
+  -moz-transform: scale3d(0.5, 0.5, 1);
+  -ms-transform: scale3d(0.5, 0.5, 1);
+  -o-transform: scale3d(0.5, 0.5, 1);
+  transform: scale3d(0.5, 0.5, 1);
+}
+#particles-background {
+  background: #2c2d44;
+  background-image: -moz-linear-gradient(45deg, #3f3251 2%, #002025 100%);
+  background-image: -webkit-linear-gradient(45deg, #3f3251 2%, #002025 100%);
+  background-image: linear-gradient(45deg, #3f3251 2%, #002025 100%);
+}
+
+@-webkit-keyframes rotate{ 0% { -webkit-transform: rotate(0deg);} 100% { -webkit-transform: rotate(360deg);}}
+@-moz-keyframes rotate{ 0% { -moz-transform: rotate(0deg);} 100% { -moz-transform: rotate(360deg);}}
+@-o-keyframes rotate{ 0% { -o-transform: rotate(0deg);} 100% { -o-transform: rotate(360deg);}}
+@keyframes rotate{ 0% {-webkit-transform: rotate(0deg);-moz-transform: rotate(0deg);-ms-transform: rotate(0deg);transform: rotate(0deg);} 100% {-webkit-transform: rotate(360deg);-moz-transform: rotate(360deg);-ms-transform: rotate(360deg);transform: rotate(360deg);}}
+[not-existing] {
+  zoom: 1;
+}
+
+@-webkit-keyframes fade{ 0% { opacity: 1;} 50% { opacity: 0.25;}}
+@-moz-keyframes fade{ 0% { opacity: 1;} 50% { opacity: 0.25;}}
+@-o-keyframes fade{ 0% { opacity: 1;} 50% { opacity: 0.25;}}
+@keyframes fade{ 0% { opacity: 1;} 50% { opacity: 0.25;}}
+[not-existing] {
+  zoom: 1;
+}
+
+@-webkit-keyframes fade-in{ 0% { opacity: 0;} 100% { opacity: 1;}}
+@-moz-keyframes fade-in{ 0% { opacity: 0;} 100% { opacity: 1;}}
+@-o-keyframes fade-in{ 0% { opacity: 0;} 100% { opacity: 1;}}
+@keyframes fade-in{ 0% { opacity: 0;} 100% { opacity: 1;}}
+[not-existing] {
+  zoom: 1;
+}
+</style>
+
+</head>
+
+<body>
+
+<!--[if lt IE 9]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="//browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<div id="particles-background" class="vertical-centered-box"></div>
+<div id="particles-foreground" class="vertical-centered-box"></div>
+<div class="vertical-centered-box">
+    <div class="content">
+        <div class="loader-circle"></div>
+        <div id="loader-line-mask" class="loader-line-mask">
+            <div class="loader-line"></div>
+        </div>
+        <svg width="300px" height="180px" viewBox="0 0 300 180" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <g transform="translate(110,52)"  >
+                <path d="M17.016 15v-3.984h-2.016v3.984h2.016zM12.984 12.984v-1.969h-1.969v1.969h1.969zM12.984 18.984v-3.984h-1.969v3.984h1.969zM9 15v-3.984h-2.016v3.984h2.016zM17.016 18.984v-1.969h-2.016v1.969h2.016zM9 18.984v-1.969h-2.016v1.969h2.016zM19.969 3.984l0.047 16.031c0 1.078-0.938 1.969-2.016 1.969h-12c-1.078 0-2.016-0.891-2.016-1.969v-12l6-6h8.016c1.078 0 1.969 0.891 1.969 1.969z" fill="white" transform="scale(3.2)"></path>
+            </g>
+        </svg>
+    </div>
+</div>
+
+
+
+<!-- .page-navbar -->
+<div id="header" class="page-navbar">
+    <!-- .navbar-brand -->
+    <a href="/" class="navbar-brand hidden-xs hidden-sm">
+        <img src="/img/logo@2x.png" width="191" height="48" class="logo hidden-xs" alt="Dynamic logo">
+        <img src="/img/logosm@2x.png" width="17" height="48" class="logo-sm hidden-lg hidden-md" alt="Dynamic logo">
+    </a>
+    <!-- / navbar-brand -->
+    <!-- .no-collapse -->
+    <div id="navbar-no-collapse" class="navbar-no-collapse">
+        <!-- top left nav -->
+        <ul class="nav navbar-nav">
+            <li class="toggle-sidebar">
+                <a href="#">
+                    <i class="fa fa-reorder"></i>
+                    <span class="sr-only">Collapse sidebar</span>
+                </a>
+            </li>
+        </ul>
+        <!-- / top left nav -->
+        <!-- top right nav -->
+        <ul class="nav navbar-nav navbar-right">
+
+            <li>
+                <a id="logout" href="#">
+                    <i class="fa fa-power-off"></i>
+                    <span class="sr-only">Logout</span>
+                </a>
+            </li>
+        </ul>
+        <!-- / top right nav -->
+    </div>
+    <!-- / collapse -->
+</div>
+<!-- / page-navbar -->
+<!-- #wrapper -->
+<div id="wrapper">
+
+    <!-- .page-sidebar -->
+    <aside id="sidebar" class="page-sidebar hidden-md hidden-sm hidden-xs">
+        <!-- Start .sidebar-inner -->
+        <div class="sidebar-inner">
+            <!-- Start .sidebar-scrollarea -->
+            <div class="sidebar-scrollarea">
+                <!--  .sidebar-panel -->
+                <div class="sidebar-panel">
+                    <h5 class="sidebar-panel-title">Navigation</h5>
+                </div>
+                <!-- / .sidebar-panel -->
+                <!-- .side-nav -->
+                <div class="side-nav">
+                    <ul class="nav">
+                        <li>
+                            <a href="/manager" class="active">
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-sim_cards"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">SIMs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/webphone">
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-webphone"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">Web phone</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/subscription">
+                                <i>
+                                    <svg class="custom-icon" style="font-size: 30px;">
+                                        <use xlink:href="#icon-subscription"></use>
+                                    </svg>
+                                </i>
+                                <span class="txt">Payments</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- / side-nav -->
+            </div>
+            <!-- End .sidebar-scrollarea -->
+        </div>
+        <!-- End .sidebar-inner -->
+    </aside>
+    <!-- / page-sidebar -->
+    <!-- .page-content -->
+    <div class="page-content sidebar-page right-sidebar-page clearfix">
+
+        <!-- .page-content-wrapper -->
+        <div class="page-content-wrapper">
+            <!-- Start .page-content-inner -->
+            <div class="page-content-inner">
+
+
+
+                <div class="row pl5 pr5">
+                    <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
+
+                        <!-- Start .row -->
+                        <!--<div class="row">-->
+                        <div id="page-payload" class="panel plain mt10">
+                            <!-- Here goes the page payload -->
+
+
+                        </div>
+                        <button id="register-new-sim" type="button" class="btn btn-primary hidden">Register new SIM</button>
+                        <!--</div>-->
+                        <!-- End .row -->
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <!-- End .page-content-inner -->
+        </div>
+        <!-- / page-content-wrapper -->
+    </div>
+    <!-- / page-content -->
+</div>
+<!-- / #wrapper -->
+
+
+
+<style>
+    .custom-icon {
+      display: inline-block;
+      width: 1em;
+      height: 0.9em;
+      stroke-width: 0;
+      stroke: currentColor;
+      fill: currentColor;
+      font-size: 20px;
+    }
+</style>
+
+<svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <symbol id="icon-sim_card_alert" viewBox="0 0 24 24">
+            <title>sim_card_alert</title>
+            <path d="M12.984 12.984v-4.969h-1.969v4.969h1.969zM12.984 17.016v-2.016h-1.969v2.016h1.969zM18 2.016c1.078 0 2.016 0.891 2.016 1.969v16.031c0 1.078-0.938 1.969-2.016 1.969h-12c-1.078 0-2.016-0.891-2.016-1.969l0.047-12 5.953-6h8.016z"></path>
+        </symbol>
+        <symbol id="icon-sim_card" viewBox="0 0 24 24">
+            <title>sim_card</title>
+            <path d="M17.016 15v-3.984h-2.016v3.984h2.016zM12.984 12.984v-1.969h-1.969v1.969h1.969zM12.984 18.984v-3.984h-1.969v3.984h1.969zM9 15v-3.984h-2.016v3.984h2.016zM17.016 18.984v-1.969h-2.016v1.969h2.016zM9 18.984v-1.969h-2.016v1.969h2.016zM19.969 3.984l0.047 16.031c0 1.078-0.938 1.969-2.016 1.969h-12c-1.078 0-2.016-0.891-2.016-1.969v-12l6-6h8.016c1.078 0 1.969 0.891 1.969 1.969z"></path>
+        </symbol>
+        <symbol id="icon-signal_cellular_no_sim" viewBox="0 0 24 24">
+            <title>signal_cellular_no_sim</title>
+            <path d="M3.656 3.891l17.484 17.438-1.313 1.313-1.875-1.922c-0.281 0.141-0.609 0.281-0.938 0.281h-10.031c-1.078 0-1.969-0.938-1.969-2.016v-11.203l-2.625-2.625zM18.984 5.016v11.672l-11.344-11.344 2.344-2.344h7.031c1.078 0 1.969 0.938 1.969 2.016z"></path>
+        </symbol>
+        <symbol id="icon-add_contact" x="0px" y="4px" viewBox="0 0 100 125" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+            <title>add_contact</title>
+            <g> <g> <g> <path d="M55.791,26.094c0,10.329-8.36,18.693-18.678,18.693c-10.323,0-18.683-8.364-18.683-18.693     c0-10.317,8.359-18.678,18.683-18.678C47.431,7.416,55.791,15.776,55.791,26.094z"/> <path d="M71.935,84.32c0,11.018-69.643,11.018-69.643,0c0-16.525,15.584-29,34.821-29C56.355,55.32,71.935,67.795,71.935,84.32z"/> </g> </g> <polygon points="97.708,23.727 86.69,23.727 86.69,12.71 75.673,12.71 75.673,23.727 64.656,23.727 64.656,34.744 75.673,34.744    75.673,45.761 86.69,45.761 86.69,34.744 97.708,34.744  "/>
+            </g>
+
+        </symbol>
+
+        <symbol id="icon-sms" x="0px" y="2px" viewBox="0 0 483.3 483.3" style="enable-background:new 0 0 483.3 483.3;" xml:space="preserve" >
+            <title>icon-sms</title>
+            <g> <g> <path d="M424.3,57.75H59.1c-32.6,0-59.1,26.5-59.1,59.1v249.6c0,32.6,26.5,59.1,59.1,59.1h365.1c32.6,0,59.1-26.5,59.1-59.1 v-249.5C483.4,84.35,456.9,57.75,424.3,57.75z M456.4,366.45c0,17.7-14.4,32.1-32.1,32.1H59.1c-17.7,0-32.1-14.4-32.1-32.1v-249.5 c0-17.7,14.4-32.1,32.1-32.1h365.1c17.7,0,32.1,14.4,32.1,32.1v249.5H456.4z"/> <path d="M304.8,238.55l118.2-106c5.5-5,6-13.5,1-19.1c-5-5.5-13.5-6-19.1-1l-163,146.3l-31.8-28.4c-0.1-0.1-0.2-0.2-0.2-0.3 c-0.7-0.7-1.4-1.3-2.2-1.9L78.3,112.35c-5.6-5-14.1-4.5-19.1,1.1c-5,5.6-4.5,14.1,1.1,19.1l119.6,106.9L60.8,350.95 c-5.4,5.1-5.7,13.6-0.6,19.1c2.7,2.8,6.3,4.3,9.9,4.3c3.3,0,6.6-1.2,9.2-3.6l120.9-113.1l32.8,29.3c2.6,2.3,5.8,3.4,9,3.4 c3.2,0,6.5-1.2,9-3.5l33.7-30.2l120.2,114.2c2.6,2.5,6,3.7,9.3,3.7c3.6,0,7.1-1.4,9.8-4.2c5.1-5.4,4.9-14-0.5-19.1L304.8,238.55z" /> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>
+        </symbol>
+
+        <symbol id="icon-webphone" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve">
+            <title>icon-webphone</title>
+            <path d="M35.155,56.752c0.297,0.297,0.33,0.787,0.014,1.111c-0.008,0-1.398,1.397-1.398,1.397l-0.009-0.013  c-0.818,0.85-5.584,2.468-12.972-5.099c-7.008-7.189-5.372-11.58-4.644-12.5l0.012-0.009l1.393-1.395  c0.308-0.302,0.794-0.309,1.101,0l3.666,3.666c0.288,0.291,0.324,0.781,0,1.102c0.003,0.002-1.396,1.396-1.396,1.396l0,0  c-0.721,0.722-0.617,2.346,0.169,3.329c1.127,1.392,3.024,3.224,4.151,4.148c1.71,1.387,3.187,1.403,3.88,0.721L29.112,54.6  l1.393-1.396c0.309-0.305,0.795-0.311,1.102,0C31.606,53.2,35.155,56.752,35.155,56.752z M56.123,50.009  c0-1.83-1.484-3.314-3.315-3.314l0,0c-1.831,0-3.315,1.484-3.315,3.314l0,0c0,1.831,1.484,3.315,3.315,3.315l0,0  C54.639,53.324,56.123,51.84,56.123,50.009L56.123,50.009z M45.683,50.009c0-1.83-1.484-3.314-3.315-3.314l0,0  c-1.831,0-3.315,1.484-3.315,3.314l0,0c0,1.831,1.484,3.315,3.315,3.315l0,0C44.198,53.324,45.683,51.84,45.683,50.009  L45.683,50.009z M56.123,39.569c0-1.831-1.484-3.315-3.315-3.315l0,0c-1.831,0-3.315,1.484-3.315,3.315l0,0  c0,1.83,1.484,3.314,3.315,3.314l0,0C54.639,42.884,56.123,41.399,56.123,39.569L56.123,39.569z M66.562,39.569  c0-1.831-1.483-3.315-3.314-3.315l0,0c-1.832,0-3.315,1.484-3.315,3.315l0,0c0,1.83,1.483,3.314,3.315,3.314l0,0  C65.079,42.884,66.562,41.399,66.562,39.569L66.562,39.569z M45.683,39.569c0-1.831-1.484-3.315-3.315-3.315l0,0  c-1.831,0-3.315,1.484-3.315,3.315l0,0c0,1.83,1.484,3.314,3.315,3.314l0,0C44.198,42.884,45.683,41.399,45.683,39.569  L45.683,39.569z M56.123,60.45c0-1.83-1.484-3.314-3.315-3.314l0,0c-1.831,0-3.315,1.484-3.315,3.314l0,0  c0,1.831,1.484,3.315,3.315,3.315l0,0C54.639,63.766,56.123,62.281,56.123,60.45L56.123,60.45z M66.562,60.45  c0-1.83-1.483-3.314-3.314-3.314l0,0c-1.832,0-3.315,1.484-3.315,3.314l0,0c0,1.831,1.483,3.315,3.315,3.315l0,0  C65.079,63.766,66.562,62.281,66.562,60.45L66.562,60.45z M45.683,60.45c0-1.83-1.484-3.314-3.315-3.314l0,0  c-1.831,0-3.315,1.484-3.315,3.314l0,0c0,1.831,1.484,3.315,3.315,3.315l0,0C44.198,63.766,45.683,62.281,45.683,60.45L45.683,60.45  z M66.562,50.009c0-1.83-1.483-3.314-3.314-3.314l0,0c-1.832,0-3.315,1.484-3.315,3.314l0,0c0,1.831,1.483,3.315,3.315,3.315l0,0  C65.079,53.324,66.562,51.84,66.562,50.009L66.562,50.009z M86.799,65.501c-1.621,0-2.936,1.315-2.936,2.937  s1.314,2.936,2.936,2.936s2.936-1.314,2.936-2.936S88.42,65.501,86.799,65.501z M82.438,75.184h-8.611  c-0.564,0-1.021,0.457-1.021,1.021c0,0.563,0.457,1.021,1.021,1.021h8.611c0.564,0,1.022-0.458,1.022-1.021  C83.46,75.641,83.002,75.184,82.438,75.184z M82.438,11.365h-8.611c-0.564,0-1.021,0.458-1.021,1.021  c0,0.564,0.457,1.021,1.021,1.021h8.611c0.564,0,1.022-0.457,1.022-1.021C83.46,11.823,83.002,11.365,82.438,11.365z M86.799,48.377  c-1.621,0-2.936,1.315-2.936,2.937s1.314,2.937,2.936,2.937s2.936-1.315,2.936-2.937S88.42,48.377,86.799,48.377z M86.799,39.816  c-1.62,0-2.936,1.313-2.936,2.936c0,1.621,1.315,2.937,2.936,2.937c1.622,0,2.936-1.315,2.936-2.937  C89.734,41.13,88.421,39.816,86.799,39.816z M95,8.615v71.361c0,1.988-1.611,3.6-3.6,3.6H64.865c-1.988,0-3.6-1.611-3.6-3.6v-5.812  h-6.564v14.407h2.592c2.076,0,3.758,1.683,3.758,3.759v2.654H50.943H31.96H21.852v-2.654c0-2.076,1.683-3.759,3.759-3.759h2.591  V74.165H8.758C6.683,74.165,5,72.482,5,70.406V29.613c0-2.075,1.683-3.759,3.758-3.759h52.507V8.615c0-1.988,1.611-3.601,3.6-3.601  H91.4C93.389,5.015,95,6.627,95,8.615z M67.008,67.815c2.074,0,3.758-1.684,3.758-3.76v-4.521v-23.57  c0-2.076-1.684-3.759-3.758-3.759H15.39c-2.076,0-3.759,1.683-3.759,3.759v23.57v4.521c0,2.076,1.683,3.76,3.759,3.76H67.008z   M93.096,8.615c0-0.935-0.761-1.695-1.695-1.695H64.865c-0.935,0-1.695,0.761-1.695,1.695v17.239h3.184v-5.036  c0-1.988,1.612-3.6,3.601-3.6h16.356c1.988,0,3.6,1.612,3.6,3.601v9.663c0,1.988-1.611,3.599-3.6,3.599h-8.914v5.839  c0.236-0.062,0.48-0.104,0.736-0.104c1.619,0,2.936,1.313,2.936,2.936c0,1.621-1.316,2.937-2.936,2.937  c-0.256,0-0.5-0.043-0.736-0.104v2.897c0.236-0.062,0.48-0.104,0.736-0.104c1.619,0,2.936,1.315,2.936,2.937  s-1.316,2.937-2.936,2.937c-0.256,0-0.5-0.043-0.736-0.104v2.897c0.236-0.062,0.48-0.104,0.736-0.104  c1.619,0,2.936,1.314,2.936,2.937c0,1.621-1.316,2.936-2.936,2.936c-0.256,0-0.5-0.042-0.736-0.104v7.698  c0,2.076-1.684,3.759-3.758,3.759H63.17v5.812c0,0.935,0.761,1.695,1.695,1.695H91.4c0.935,0,1.695-0.761,1.695-1.695V8.615z   M86.799,56.939c-1.621,0-2.936,1.314-2.936,2.937c0,1.621,1.314,2.936,2.936,2.936s2.936-1.314,2.936-2.936  C89.734,58.254,88.42,56.939,86.799,56.939z"/>
+        </symbol>
+
+        <symbol id="icon-subscription" x="0px" y="0px" viewBox="0 0 480 480" style="enable-background:new 0 0 480 480;" xml:space="preserve" >
+            <title>icon-subscription</title>
+            <g> <g> <path d="M319.656,298.112c4.033,0.063,7.861,1.785,10.584,4.76l79.904,86.56l11.744-10.864L367.808,320H368V104 c-0.026-22.08-17.92-39.974-40-40h-32v16h32c13.255,0,24,10.745,24,24v8h-56v16h56v174.872L341.984,292 c-5.663-6.169-13.611-9.741-21.984-9.88c-2.126-0.092-4.255,0.044-6.352,0.408l6.152-24.592L326.248,232H336v-16h-16 c-3.672,0.001-6.871,2.501-7.76,6.064L305.76,248H184c-4.418,0.001-7.999,3.584-7.998,8.002c0,0.652,0.08,1.301,0.238,1.934l16,64 c0.889,3.563,4.088,6.063,7.76,6.064h92.528c1.064,1.928,2.333,3.736,3.784,5.392l6.272,7.056c-1.472,2.2-3.937,3.53-6.584,3.552 H192v16h104c6.551-0.029,12.805-2.734,17.312-7.488l29.736,33.456c-5.639,20.704-2.873,42.797,7.696,61.472 c-3.193,9.865-12.375,16.551-22.744,16.56H168c-13.255,0-24-10.745-24-24v-8h184v-16H144V192h-16v248 c0.026,22.08,17.92,39.974,40,40h160c13.322,0,25.769-6.631,33.2-17.688c2.654,2.939,5.511,5.687,8.552,8.224l9.128,7.616 l10.24-12.304L380,458.24c-21.008-17.364-29.126-45.889-20.408-71.712c0.906-2.711,0.296-5.7-1.6-7.84l-49.704-55.92 c-5.201-5.866-4.942-14.766,0.592-20.32C311.784,299.676,315.641,298.124,319.656,298.112z M198.248,280l-4-16h22.688l2,16 H198.248z M206.248,312l-4-16h18.688l2,16H206.248z M256.936,312h-17.872l-2-16h21.872L256.936,312z M260.936,280h-25.872l-2-16 h29.872L260.936,280z M288.544,312h-15.48l2-16H293.6C290.465,300.762,288.715,306.301,288.544,312z M297.752,280h-20.688l2-16 h22.688L297.752,280z"/> </g> </g> <g> <g> <circle cx="208" cy="384" r="16"/> </g> </g> <g> <g> <circle cx="288" cy="384" r="16"/> </g> </g> <g> <g> <path d="M248,0H40C22.327,0,8,14.327,8,32v112c0,17.673,14.327,32,32,32h208c17.673,0,32-14.327,32-32V32 C280,14.327,265.673,0,248,0z M264,144c0,8.837-7.163,16-16,16H40c-8.837,0-16-7.163-16-16V32c0-8.837,7.163-16,16-16h208 c8.837,0,16,7.163,16,16V144z"/> </g> </g> <g> <g> <rect x="40" y="40" width="144" height="16"/> </g> </g> <g> <g> <path d="M236.268,91.32c-7.509-4.416-16.822-4.416-24.332,0c-3.614-2.146-7.733-3.292-11.936-3.32c-13.255,0-24,10.745-24,24 s10.745,24,24,24c4.201-0.023,8.321-1.163,11.936-3.304c11.426,6.719,26.135,2.904,32.854-8.522 C251.509,112.748,247.693,98.039,236.268,91.32z M200,120c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S204.418,120,200,120z M224,120c-0.477-0.023-0.951-0.09-1.416-0.2c1.883-5.027,1.883-10.565,0-15.592c0.465-0.11,0.939-0.18,1.416-0.208 c4.418,0,8,3.582,8,8S228.418,120,224,120z"/> </g> </g> <g> <g> <rect x="40" y="88" width="16" height="16"/> </g> </g> <g> <g> <rect x="72" y="88" width="16" height="16"/> </g> </g> <g> <g> <rect x="104" y="88" width="16" height="16"/> </g> </g> <g> <g> <rect x="136" y="88" width="16" height="16"/> </g> </g> <g> <g> <rect x="40" y="120" width="112" height="16"/> </g> </g> <g> <g> <path d="M457.104,308.8l-67.2-74.192l-11.856,10.736l67.24,74.264c6.895,7.394,10.724,17.13,10.712,27.24V480h16V346.848 C472.035,332.736,466.711,319.137,457.104,308.8z"/> </g> </g> <g> <g> <path d="M267.56,201.344L256,209.048V192h-16v17.048l-11.56-7.704l-8.88,13.312l24,16c2.688,1.794,6.192,1.794,8.88,0l24-16 L267.56,201.344z"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>
+        </symbol>
+
+        <symbol id="icon-sim_cards" x="0px" y="0px" viewBox="0 0 448 448" style="enable-background:new 0 0 448 448;" xml:space="preserve" >
+            <title>icon-sim_cards</title>
+            <g> <g> <path d="M397.656,74.344l-72-72C324.156,0.844,322.122,0,320,0H120c-19.263,0.034-35.766,13.793-39.264,32.736 C61.793,36.234,48.034,52.737,48,72v336c0.026,22.08,17.92,39.974,40,40h240c19.263-0.034,35.766-13.793,39.264-32.736 C386.207,411.766,399.966,395.263,400,376V80C400,77.878,399.156,75.844,397.656,74.344z M352,408c0,13.255-10.745,24-24,24H88 c-13.255,0-24-10.745-24-24V72c0-13.255,10.745-24,24-24h196.688L352,115.312V408z M384,376c-0.042,10.134-6.445,19.15-16,22.528 V112c0-2.122-0.844-4.156-2.344-5.656l-72-72c-1.5-1.5-3.534-2.344-5.656-2.344H97.472c3.378-9.555,12.394-15.958,22.528-16 h196.688L384,83.312V376z"/> </g> </g> <g> <g> <path d="M336,232c0-4.418-3.582-8-8-8H88c-4.418,0-8,3.582-8,8v56c0.037,1.42,0.46,2.803,1.224,4c-0.764,1.197-1.187,2.58-1.224,4 v120c0,4.418,3.582,8,8,8h240c4.418,0,8-3.582,8-8V296c-0.037-1.42-0.46-2.803-1.224-4c0.764-1.197,1.187-2.58,1.224-4V232z M160,240h48v40h-48V240z M96,240h48v40H96V240z M144,408H96v-40h48V408z M208,408h-48v-40h48V408z M272,408h-48v-40h48V408z M320,408h-32v-48c0-4.418-3.582-8-8-8H96v-48h224V408z M320,280h-96v-40h96V280z"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>
+        </symbol>
+
+        <symbol id="icon-call" x="0px" y="1px" viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve" >
+            <title>icon-call</title>
+            <g> <g> <path d="M365.354,317.9c-15.7-15.5-35.3-15.5-50.9,0c-11.9,11.8-23.8,23.6-35.5,35.6c-3.2,3.3-5.9,4-9.8,1.8 c-7.7-4.2-15.9-7.6-23.3-12.2c-34.5-21.7-63.4-49.6-89-81c-12.7-15.6-24-32.3-31.9-51.1c-1.6-3.8-1.3-6.3,1.8-9.4 c11.9-11.5,23.5-23.3,35.2-35.1c16.3-16.4,16.3-35.6-0.1-52.1c-9.3-9.4-18.6-18.6-27.9-28c-9.6-9.6-19.1-19.3-28.8-28.8 c-15.7-15.3-35.3-15.3-50.9,0.1c-12,11.8-23.5,23.9-35.7,35.5c-11.3,10.7-17,23.8-18.2,39.1c-1.9,24.9,4.2,48.4,12.8,71.3 c17.6,47.4,44.4,89.5,76.9,128.1c43.9,52.2,96.3,93.5,157.6,123.3c27.6,13.4,56.2,23.7,87.3,25.4c21.4,1.2,40-4.2,54.9-20.9 c10.2-11.4,21.7-21.8,32.5-32.7c16-16.2,16.1-35.8,0.2-51.8C403.554,355.9,384.454,336.9,365.354,317.9z"/> <path d="M346.254,238.2l36.9-6.3c-5.8-33.9-21.8-64.6-46.1-89c-25.7-25.7-58.2-41.9-94-46.9l-5.2,37.1 c27.7,3.9,52.9,16.4,72.8,36.3C329.454,188.2,341.754,212,346.254,238.2z"/> <path d="M403.954,77.8c-42.6-42.6-96.5-69.5-156-77.8l-5.2,37.1c51.4,7.2,98,30.5,134.8,67.2c34.9,34.9,57.8,79,66.1,127.5 l36.9-6.3C470.854,169.3,444.354,118.3,403.954,77.8z"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>
+        </symbol>
+
+        <symbol id="icon-edit_contact" viewBox="0 0 19 23" x="0px" y="3px">
+            <title>icon-edit_contact</title>
+            <g><path d="M21.85,10.08l-.93-.93a.5.5,0,0,0-.71,0l-4.06,3.57a.49.49,0,0,0-.15.35V14a.5.5,0,0,0,.5.5h.93a.5.5,0,0,0,.35-.14l4.07-3.57A.5.5,0,0,0,21.85,10.08Z"/><circle cx="9" cy="9" r="5"/><path d="M9,15c-3,0-7,2-7,4.5a.5.5,0,0,0,.5.5h13a.5.5,0,0,0,.5-.5C16,17,12,15,9,15Z"/></g>
+        </symbol>
+
+        <symbol id="icon-chat" x="0px" y="0px" viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve" >
+            <title>icon-chat</title>
+            <g> <path d="M10,25.465h13c0.553,0,1-0.448,1-1s-0.447-1-1-1H10c-0.553,0-1,0.448-1,1S9.447,25.465,10,25.465z"/> <path d="M36,29.465H10c-0.553,0-1,0.448-1,1s0.447,1,1,1h26c0.553,0,1-0.448,1-1S36.553,29.465,36,29.465z"/> <path d="M36,35.465H10c-0.553,0-1,0.448-1,1s0.447,1,1,1h26c0.553,0,1-0.448,1-1S36.553,35.465,36,35.465z"/> <path d="M54.072,2.535L19.93,2.465c-3.27,0-5.93,2.66-5.93,5.93v5.124l-8.07,0.017c-3.27,0-5.93,2.66-5.93,5.93v21.141 c0,3.27,2.66,5.929,5.93,5.929H12v10c0,0.413,0.254,0.784,0.64,0.933c0.117,0.045,0.239,0.067,0.36,0.067 c0.276,0,0.547-0.115,0.74-0.327l9.704-10.675l16.626-0.068c3.27,0,5.93-2.66,5.93-5.929v-0.113l5.26,5.786 c0.193,0.212,0.464,0.327,0.74,0.327c0.121,0,0.243-0.022,0.36-0.067c0.386-0.149,0.64-0.52,0.64-0.933v-10h1.07 c3.27,0,5.93-2.66,5.93-5.929V8.465C60,5.196,57.341,2.536,54.072,2.535z M44,40.536c0,2.167-1.763,3.929-3.934,3.929l-17.07,0.07 c-0.28,0.001-0.548,0.12-0.736,0.327L14,53.949v-8.414c0-0.552-0.447-1-1-1H5.93c-2.167,0-3.93-1.763-3.93-3.929V19.465 c0-2.167,1.763-3.93,3.932-3.93l9.068-0.019c0,0,0,0,0,0c0.001,0,0.001,0,0.002,0l25.068-0.052c2.167,0,3.93,1.763,3.93,3.93 v18.441V40.536z M58,29.606c0,2.167-1.763,3.929-3.93,3.929H52c-0.553,0-1,0.448-1,1v8.414l-5-5.5V19.395 c0-3.27-2.66-5.93-5.932-5.93L16,13.514v-5.12c0-2.167,1.763-3.93,3.928-3.93l34.141,0.07c0.001,0,0.001,0,0.002,0 c2.167,0,3.93,1.763,3.93,3.93V29.606z"/> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>
+        </symbol>
+
+    </defs>
+</svg>
+
+<!-- Javascripts -->
+
+
+<script src="/js/libs/bluebird_3.5.3/bluebird.js"></script>
+<script>
+    Promise.config({ warnings: false });
+    window.onerror = function(msg, url, linenumber) {
+        alert(msg+'\n'+url+':'+linenumber);
+        return false;
+    };
+    Promise.onPossiblyUnhandledRejection(function(error){
+        alert(error.message + " " + error.stack);
+        throw error;
+    });
+</script>
+
+
+<!--
+<script src="/js/libs/jquery-2.1.1.min.js"></script>
+<script src="/js/libs/jquery-ui-1.10.4.min.js"></script>
+-->
+<!--[if lt IE 9]> <script type="text/javascript" src="/js/libs/excanvas.min.js"></script> <script type="text/javascript" src="//html5shim.googlecode.com/svn/trunk/html5.js"></script> <script type="text/javascript" src="/js/libs/respond.min.js"></script> <![endif]-->
+
+<!--
+    <script src="/js/bootstrap/bootstrap.min.js"></script>
+    <script src="/js/libs/modernizr.custom.js"></script>
+    <script src="/js/jRespond.min.js"></script>
+    <script src="/plugins/core/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="/plugins/core/slimscroll/jquery.slimscroll.horizontal.min.js"></script>
+    <script src="/plugins/core/fastclick/fastclick.js"></script>
+    <script src="/plugins/core/velocity/jquery.velocity.min.js"></script>
+    <script src="/plugins/core/quicksearch/jquery.quicksearch.js"></script>
+    <script src="/plugins/ui/bootbox/bootbox.min.js"></script>
+    <script src="/plugins/ui/intl-tel-input/js/intlTelInput.min.js"></script>
+    <script src="/plugins/ui/multiple-emails/multiple-emails.js"></script>
+    <script src="/js/jquery.dynamic.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/manager-0.2.4.js"></script>
+    -->
+<!-- Stary sky JS -->
+<script>
+
+    !function(a,b){"use strict";function c(a){a=a||{};for(var b=1;b<arguments.length;b++){var c=arguments[b];if(c)for(var d in c)c.hasOwnProperty(d)&&("object"==typeof c[d]?deepExtend(a[d],c[d]):a[d]=c[d])}return a}function d(d,g){function h(){if(y){r=b.createElement("canvas"),r.className="pg-canvas",r.style.display="block",d.insertBefore(r,d.firstChild),s=r.getContext("2d"),i();for(var c=Math.round(r.width*r.height/g.density),e=0;c>e;e++){var f=new n;f.setStackPos(e),z.push(f)}a.addEventListener("resize",function(){k()},!1),b.addEventListener("mousemove",function(a){A=a.pageX,B=a.pageY},!1),D&&!C&&a.addEventListener("deviceorientation",function(){F=Math.min(Math.max(-event.beta,-30),30),E=Math.min(Math.max(-event.gamma,-30),30)},!0),j(),q("onInit")}}function i(){r.width=d.offsetWidth,r.height=d.offsetHeight,s.fillStyle=g.dotColor,s.strokeStyle=g.lineColor,s.lineWidth=g.lineWidth}function j(){if(y){u=a.innerWidth,v=a.innerHeight,s.clearRect(0,0,r.width,r.height);for(var b=0;b<z.length;b++)z[b].updatePosition();for(var b=0;b<z.length;b++)z[b].draw();G||(t=requestAnimationFrame(j))}}function k(){i();for(var a=d.offsetWidth,b=d.offsetHeight,c=z.length-1;c>=0;c--)(z[c].position.x>a||z[c].position.y>b)&&z.splice(c,1);var e=Math.round(r.width*r.height/g.density);if(e>z.length)for(;e>z.length;){var f=new n;z.push(f)}else e<z.length&&z.splice(e);for(c=z.length-1;c>=0;c--)z[c].setStackPos(c)}function l(){G=!0}function m(){G=!1,j()}function n(){switch(this.stackPos,this.active=!0,this.layer=Math.ceil(3*Math.random()),this.parallaxOffsetX=0,this.parallaxOffsetY=0,this.position={x:Math.ceil(Math.random()*r.width),y:Math.ceil(Math.random()*r.height)},this.speed={},g.directionX){case"left":this.speed.x=+(-g.maxSpeedX+Math.random()*g.maxSpeedX-g.minSpeedX).toFixed(2);break;case"right":this.speed.x=+(Math.random()*g.maxSpeedX+g.minSpeedX).toFixed(2);break;default:this.speed.x=+(-g.maxSpeedX/2+Math.random()*g.maxSpeedX).toFixed(2),this.speed.x+=this.speed.x>0?g.minSpeedX:-g.minSpeedX}switch(g.directionY){case"up":this.speed.y=+(-g.maxSpeedY+Math.random()*g.maxSpeedY-g.minSpeedY).toFixed(2);break;case"down":this.speed.y=+(Math.random()*g.maxSpeedY+g.minSpeedY).toFixed(2);break;default:this.speed.y=+(-g.maxSpeedY/2+Math.random()*g.maxSpeedY).toFixed(2),this.speed.x+=this.speed.y>0?g.minSpeedY:-g.minSpeedY}}function o(a,b){return b?void(g[a]=b):g[a]}function p(){console.log("destroy"),r.parentNode.removeChild(r),q("onDestroy"),f&&f(d).removeData("plugin_"+e)}function q(a){void 0!==g[a]&&g[a].call(d)}var r,s,t,u,v,w,x,y=!!b.createElement("canvas").getContext,z=[],A=0,B=0,C=!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|BB10|mobi|tablet|opera mini|nexus 7)/i),D=!!a.DeviceOrientationEvent,E=0,F=0,G=!1;return g=c({},a[e].defaults,g),n.prototype.draw=function(){s.beginPath(),s.arc(this.position.x+this.parallaxOffsetX,this.position.y+this.parallaxOffsetY,g.particleRadius/2,0,2*Math.PI,!0),s.closePath(),s.fill(),s.beginPath();for(var a=z.length-1;a>this.stackPos;a--){var b=z[a],c=this.position.x-b.position.x,d=this.position.y-b.position.y,e=Math.sqrt(c*c+d*d).toFixed(2);e<g.proximity&&(s.moveTo(this.position.x+this.parallaxOffsetX,this.position.y+this.parallaxOffsetY),g.curvedLines?s.quadraticCurveTo(Math.max(b.position.x,b.position.x),Math.min(b.position.y,b.position.y),b.position.x+b.parallaxOffsetX,b.position.y+b.parallaxOffsetY):s.lineTo(b.position.x+b.parallaxOffsetX,b.position.y+b.parallaxOffsetY))}s.stroke(),s.closePath()},n.prototype.updatePosition=function(){if(g.parallax){if(D&&!C){var a=(u-0)/60;w=(E- -30)*a+0;var b=(v-0)/60;x=(F- -30)*b+0}else w=A,x=B;this.parallaxTargX=(w-u/2)/(g.parallaxMultiplier*this.layer),this.parallaxOffsetX+=(this.parallaxTargX-this.parallaxOffsetX)/10,this.parallaxTargY=(x-v/2)/(g.parallaxMultiplier*this.layer),this.parallaxOffsetY+=(this.parallaxTargY-this.parallaxOffsetY)/10}var c=d.offsetWidth,e=d.offsetHeight;switch(g.directionX){case"left":this.position.x+this.speed.x+this.parallaxOffsetX<0&&(this.position.x=c-this.parallaxOffsetX);break;case"right":this.position.x+this.speed.x+this.parallaxOffsetX>c&&(this.position.x=0-this.parallaxOffsetX);break;default:(this.position.x+this.speed.x+this.parallaxOffsetX>c||this.position.x+this.speed.x+this.parallaxOffsetX<0)&&(this.speed.x=-this.speed.x)}switch(g.directionY){case"up":this.position.y+this.speed.y+this.parallaxOffsetY<0&&(this.position.y=e-this.parallaxOffsetY);break;case"down":this.position.y+this.speed.y+this.parallaxOffsetY>e&&(this.position.y=0-this.parallaxOffsetY);break;default:(this.position.y+this.speed.y+this.parallaxOffsetY>e||this.position.y+this.speed.y+this.parallaxOffsetY<0)&&(this.speed.y=-this.speed.y)}this.position.x+=this.speed.x,this.position.y+=this.speed.y},n.prototype.setStackPos=function(a){this.stackPos=a},h(),{option:o,destroy:p,start:m,pause:l}}var e="particleground",f=a.jQuery;a[e]=function(a,b){return new d(a,b)},a[e].defaults={minSpeedX:.1,maxSpeedX:.7,minSpeedY:.1,maxSpeedY:.7,directionX:"center",directionY:"center",density:1e4,dotColor:"#666666",lineColor:"#666666",particleRadius:7,lineWidth:1,curvedLines:!1,proximity:100,parallax:!0,parallaxMultiplier:5,onInit:function(){},onDestroy:function(){}},f&&(f.fn[e]=function(a){if("string"==typeof arguments[0]){var b,c=arguments[0],g=Array.prototype.slice.call(arguments,1);return this.each(function(){f.data(this,"plugin_"+e)&&"function"==typeof f.data(this,"plugin_"+e)[c]&&(b=f.data(this,"plugin_"+e)[c].apply(this,g))}),void 0!==b?b:this}return"object"!=typeof a&&a?void 0:this.each(function(){f.data(this,"plugin_"+e)||f.data(this,"plugin_"+e,new d(this,a))})})}(window,document),
+
+    function(){for(var a=0,b=["ms","moz","webkit","o"],c=0;c<b.length&&!window.requestAnimationFrame;++c)window.requestAnimationFrame=window[b[c]+"RequestAnimationFrame"],window.cancelAnimationFrame=window[b[c]+"CancelAnimationFrame"]||window[b[c]+"CancelRequestAnimationFrame"];window.requestAnimationFrame||(window.requestAnimationFrame=function(b){var c=(new Date).getTime(),d=Math.max(0,16-(c-a)),e=window.setTimeout(function(){b(c+d)},d);return a=c+d,e}),window.cancelAnimationFrame||(window.cancelAnimationFrame=function(a){clearTimeout(a)})}();
+
+    particleground(document.getElementById('particles-foreground'), {
+      dotColor: 'rgba(255, 255, 255, 1)',
+      lineColor: 'rgba(255, 255, 255, 0.05)',
+      minSpeedX: 0.3,
+      maxSpeedX: 0.6,
+      minSpeedY: 0.3,
+      maxSpeedY: 0.6,
+      density: 50000, // One particle every n pixels
+      curvedLines: false,
+      proximity: 250, // How close two dots need to be before they join
+      parallaxMultiplier: 10, // Lower the number is more extreme parallax
+      particleRadius: 4, // Dot size
+    });
+
+    particleground(document.getElementById('particles-background'), {
+      dotColor: 'rgba(255, 255, 255, 0.5)',
+      lineColor: 'rgba(255, 255, 255, 0.05)',
+      minSpeedX: 0.075,
+      maxSpeedX: 0.15,
+      minSpeedY: 0.075,
+      maxSpeedY: 0.15,
+      density: 30000, // One particle every n pixels
+      curvedLines: false,
+      proximity: 20, // How close two dots need to be before they join
+      parallaxMultiplier: 20, // Lower the number is more extreme parallax
+      particleRadius: 2, // Dot size
+    });
+
+</script>
+
+</body>
+</html>

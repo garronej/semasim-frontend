@@ -30,15 +30,16 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 function getPropertyNames(o) {
@@ -119,10 +120,10 @@ function observeObjectProperty(o, p, interceptOutput) {
                         return functionProxies.get(value);
                     }
                     if (!value.name) {
-                        Object.defineProperty(value, "name", __assign({}, Object.getOwnPropertyDescriptor(value, "name"), { "value": String(p) }));
+                        Object.defineProperty(value, "name", __assign(__assign({}, Object.getOwnPropertyDescriptor(value, "name")), { "value": String(p) }));
                     }
-                    var valueProxy = function _g() {
-                        var _newTarget = this && this instanceof _g ? this.constructor : void 0;
+                    var valueProxy = function valueProxy() {
+                        var _newTarget = this && this instanceof valueProxy ? this.constructor : void 0;
                         var args = [];
                         for (var _i = 0; _i < arguments.length; _i++) {
                             args[_i] = arguments[_i];
@@ -136,7 +137,7 @@ function observeObjectProperty(o, p, interceptOutput) {
                         logFunctionCall("" + (!!_newTarget ? "new " : objName + ".") + String(p), args, out);
                         return out;
                     };
-                    Object.defineProperty(valueProxy, "name", __assign({}, Object.getOwnPropertyDescriptor(value, "name"), { "value": value.name }));
+                    Object.defineProperty(valueProxy, "name", __assign(__assign({}, Object.getOwnPropertyDescriptor(value, "name")), { "value": value.name }));
                     {
                         var prototype = value.prototype;
                         if (!!prototype) {
@@ -158,7 +159,7 @@ function observeObjectProperty(o, p, interceptOutput) {
                     var _loop_1 = function (p_1) {
                         var pd = Object.getOwnPropertyDescriptor(value, p_1);
                         if ("value" in pd && pd.value instanceof Function) {
-                            Object.defineProperty(valueProxy, p_1, __assign({}, pd, { "value": (function () {
+                            Object.defineProperty(valueProxy, p_1, __assign(__assign({}, pd), { "value": (function () {
                                     var f = pd.value;
                                     var f_ = function () {
                                         var args = [];
@@ -169,7 +170,7 @@ function observeObjectProperty(o, p, interceptOutput) {
                                         logFunctionCall(value.name + "." + String(p_1), args, out);
                                         return out;
                                     };
-                                    Object.defineProperty(f_, "name", __assign({}, Object.getOwnPropertyDescriptor(f, "name"), { "value": f.name }));
+                                    Object.defineProperty(f_, "name", __assign(__assign({}, Object.getOwnPropertyDescriptor(f, "name")), { "value": f.name }));
                                     return f_;
                                 })() }));
                         }

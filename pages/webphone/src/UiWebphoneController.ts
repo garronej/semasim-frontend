@@ -3,17 +3,16 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { UiVoiceCall } from "./UiVoiceCall";
-import { Ua } from "../../../shared/dist/lib/Ua";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import * as wd from "../../../shared/dist/lib/types/webphoneData/types";
-import { types as gwTypes } from "../../../shared/dist/gateway/types";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
-import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import { phoneNumber } from "phone-number";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
-import * as cryptoLib from "crypto-lib";
+import { Ua } from "frontend-shared/dist/lib/Ua";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
+import { types as gwTypes } from "frontend-shared/dist/gateway/types";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
+import * as backendEvents from "frontend-shared/dist/lib/toBackend/events";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import * as setupEncryptorDecryptors from "frontend-shared/dist/lib/crypto/setupEncryptorDecryptors";
 
 declare const require: any;
 declare const Buffer: any;
@@ -36,17 +35,15 @@ export class UiWebphoneController {
 
     public constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance<"PLAIN">,
+        public readonly wdInstance: wd.Instance<"PLAIN">
     ) {
+
 
         this.ua = new Ua(
             userSim.sim.imsi,
             userSim.password,
-            cryptoLib.rsa.encryptorFactory(
-                cryptoLib.RsaKey.parse(
-                    userSim.towardSimEncryptKeyStr
-                ),
-                rsaWorkerThreadPoolId
+            setupEncryptorDecryptors.getTowardSimEncryptor(
+                userSim
             )
         );
 
@@ -77,7 +74,7 @@ export class UiWebphoneController {
     private registerRemoteNotifyHandlers() {
 
 
-        localApiHandlers.evtSimPermissionLost.attachOnce(
+        backendEvents.evtSimPermissionLost.attachOnce(
             userSim  => userSim === this.userSim,
             () => {
 
@@ -87,7 +84,7 @@ export class UiWebphoneController {
             }
         );
 
-        localApiHandlers.evtContactCreatedOrUpdated.attach(
+        backendEvents.evtContactCreatedOrUpdated.attach(
             ({ userSim }) => userSim === this.userSim,
             async ({ contact }) => {
 
@@ -132,7 +129,7 @@ export class UiWebphoneController {
             }
         );
 
-        localApiHandlers.evtContactDeleted.attach(
+        backendEvents.evtContactDeleted.attach(
             ({ userSim }) => userSim === this.userSim,
             async ({ contact }) => {
 
@@ -160,7 +157,7 @@ export class UiWebphoneController {
             }
         );
 
-        localApiHandlers.evtSimIsOnlineStatusChange.attach(
+        backendEvents.evtSimIsOnlineStatusChange.attach(
             userSim => userSim === this.userSim,
             async () => {
 
@@ -191,7 +188,7 @@ export class UiWebphoneController {
             }
         );
 
-        localApiHandlers.evtSimGsmConnectivityChange.attach(
+        backendEvents.evtSimGsmConnectivityChange.attach(
             userSim => userSim === this.userSim,
             () => {
 
@@ -208,12 +205,12 @@ export class UiWebphoneController {
             }
         );
 
-        localApiHandlers.evtSimCellSignalStrengthChange.attach(
+        backendEvents.evtSimCellSignalStrengthChange.attach(
             userSim => userSim === this.userSim,
             () => this.uiHeader.notify()
         );
 
-        localApiHandlers.evtOngoingCall.attach(
+        backendEvents.evtOngoingCall.attach(
             userSim => userSim === this.userSim,
             ()=>{
 
@@ -691,7 +688,7 @@ export class UiWebphoneController {
         uiConversation.evtUpdateContact.attach(async () => {
 
             const name = await new Promise<string | null>(
-                resolve => bootbox_custom.prompt({
+                resolve => dialogApi.create("prompt",{
                     "title": `Contact name for ${wdChat.contactNumber}`,
                     "value": wdChat.contactName || "",
                     "callback": result => resolve(result),
@@ -702,7 +699,7 @@ export class UiWebphoneController {
                 return undefined;
             }
 
-            bootbox_custom.loading("Create or update contact");
+            dialogApi.loading("Create or update contact");
 
             let contact: types.UserSim.Contact | undefined = this.userSim.phonebook.find(({ mem_index, number_raw }) => {
 
@@ -732,7 +729,7 @@ export class UiWebphoneController {
                 wdChat, name, contact.mem_index !== undefined ? contact.mem_index : null
             );
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             if (!isUpdated) {
                 return;
@@ -748,7 +745,7 @@ export class UiWebphoneController {
         uiConversation.evtDelete.attach(async () => {
 
             const shouldProceed = await new Promise<boolean>(
-                resolve => bootbox_custom.confirm({
+                resolve => dialogApi.create("confirm",{
                     "title": "Delete chat",
                     "message": "Delete contact and conversation ?",
                     callback: result => resolve(result)
@@ -759,7 +756,7 @@ export class UiWebphoneController {
                 return;
             }
 
-            bootbox_custom.loading("Deleting contact and conversation");
+            dialogApi.loading("Deleting contact and conversation");
 
             let contact: types.UserSim.Contact | undefined = this.userSim.phonebook.find(({ mem_index, number_raw }) => {
 
@@ -781,7 +778,7 @@ export class UiWebphoneController {
 
             await remoteApiCaller.destroyWdChat(this.wdInstance, wdChat);
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             this.uiPhonebook.notifyContactChanged(wdChat);
 

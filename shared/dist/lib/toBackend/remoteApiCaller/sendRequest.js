@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -37,7 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var sipLibrary = require("ts-sip");
 var connection = require("../connection");
-function sendRequest(methodName, params, retry) {
+var restartApp_1 = require("../../restartApp");
+function sendRequest(methodName, params) {
     return __awaiter(this, void 0, void 0, function () {
         var response, _a, _b, error_1;
         return __generator(this, function (_c) {
@@ -55,13 +57,8 @@ function sendRequest(methodName, params, retry) {
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _c.sent();
-                    if (!!retry) {
-                        return [2 /*return*/, sendRequest(methodName, params, "RETRY")];
-                    }
-                    else {
-                        throw error_1;
-                    }
-                    return [3 /*break*/, 4];
+                    restartApp_1.restartApp();
+                    return [2 /*return*/, new Promise(function () { })];
                 case 4: return [2 /*return*/, response];
             }
         });

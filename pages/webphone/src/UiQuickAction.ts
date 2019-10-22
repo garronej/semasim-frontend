@@ -1,8 +1,9 @@
-import { SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "phone-number";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+
 
 declare const require: any;
 
@@ -116,11 +117,11 @@ export class UiQuickAction {
 
                 input.off("countrychange", undefined, calleeA as any);
 
-                bootbox_custom.alert([
+                dialogApi.create("alert", { "message": [
                     "Warning: Consult ",
                     self.userSim.sim.serviceProvider.fromImsi || "Your operator",
                     `'s pricing for Calls/SMS toward ${countryData.name}`
-                ].join(""));
+                ].join("")});
 
                 input.on("countrychange", function calleeB(_, countryData: IntlTelInput.CountryData) {
 

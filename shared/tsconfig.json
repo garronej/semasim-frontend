@@ -3,10 +3,10 @@
         "module": "commonjs",
         "target": "es5",
         "lib": [
-                    "dom",
-                    "es5",
-                    "es2015"
-            ],
+            "dom",
+            "es5",
+            "es2015"
+        ],
         "declaration": true,
         "outDir": "./dist",
         "strictNullChecks": true,
@@ -18,10 +18,13 @@
         "strictPropertyInitialization": true,
         "strictFunctionTypes": true,
         "resolveJsonModule": true,
-        "incremental": true
+        "incremental": true,
+        "types": [
+            "bootstrap",
+            "jquery"
+        ]
     },
     "filesGlob": [
         "./src/**/*.ts"
     ]
 }
-

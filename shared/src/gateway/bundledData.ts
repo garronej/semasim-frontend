@@ -4,5 +4,6 @@
 export { 
     smuggleBundledDataInHeaders, 
     extractBundledDataFromHeaders
-} from "../../../../gateway/dist/lib/misc/bundledData";
+} from "semasim-gateway/dist/lib/misc/bundledData";
+
 

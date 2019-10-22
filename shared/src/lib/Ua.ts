@@ -10,10 +10,10 @@ import { RegistrationParams } from "../gateway/RegistrationParams";
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
 import * as connection from "./toBackend/connection";
-import * as localApiHandlers from "./toBackend/localApiHandlers";
+import { rtcIceEServer } from "./toBackend/events";
 import { baseDomain } from "./env";
 import * as cryptoLib from "crypto-lib/dist/sync/types";
-type phoneNumber = import("phone-number").phoneNumber;
+type phoneNumber = import("phone-number/dist/lib").phoneNumber;
 
 declare const JsSIP: any;
 declare const Buffer: any;
@@ -51,6 +51,16 @@ export class Ua {
 
         this.jsSipSocket = new JsSipSocket(imsi, uri);
 
+        
+
+        /*
+        NOTE: It is important to call enableKeepAlive with a period shorter than the register_expires 
+        so that if the reREGISTER can not be send in time because the app was in the background it
+        does not matter because the connection will be closed anyway.
+        Remember that when the registration has expired the GW will ignore all SIP messages coming from
+        the connection, it is then mandatory to establish a new websocket connection and re register.
+        Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
+        */
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,
@@ -66,8 +76,9 @@ export class Ua {
                     "messagesEnabled": !disabledMessage
                 })
             ].join(";"),
-            "register_expires": 345600
+            "register_expires": 61
         });
+
 
         /* 
         evt 'registered' is posted only when register change 
@@ -280,7 +291,7 @@ export class Ua {
 
         evtAccepted.attachOnce(async () => {
 
-            const rtcIceServer = await localApiHandlers.getRTCIceServer();
+            const rtcIceServer = await rtcIceEServer.getCurrent();
 
             jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
 
@@ -346,7 +357,7 @@ export class Ua {
         const evtRequestTerminate = new VoidSyncEvent();
         const evtRingback = new VoidSyncEvent();
 
-        const rtcICEServer = await localApiHandlers.getRTCIceServer();
+        const rtcICEServer = await rtcIceEServer.getCurrent();
 
         this.jsSipUa.call(
             `sip:${number}@${baseDomain}`,
@@ -562,24 +573,28 @@ class JsSipSocket implements IjsSipSocket {
 
         const onBackedSocketConnect = (backendSocket: sip.Socket) => {
 
-            const onSipPacket = (sipPacket: sip.Packet) => {
+            {
 
-                if (readImsi(sipPacket) !== imsi) {
-                    return;
+                const onSipPacket = (sipPacket: sip.Packet) => {
+
+                    if (readImsi(sipPacket) !== imsi) {
+                        return;
+                    }
+
+                    this.sdpHacks("INCOMING", sipPacket);
+
+                    this.evtSipPacket.post(sipPacket);
+
+                    this.ondata(
+                        sip.toData(sipPacket).toString("utf8")
+                    );
+
                 }
 
-                this.sdpHacks("INCOMING", sipPacket);
-
-                this.evtSipPacket.post(sipPacket);
-
-                this.ondata(
-                    sip.toData(sipPacket).toString("utf8")
-                );
+                backendSocket.evtRequest.attach(onSipPacket);
+                backendSocket.evtResponse.attach(onSipPacket);
 
             }
-
-            backendSocket.evtRequest.attach(onSipPacket);
-            backendSocket.evtResponse.attach(onSipPacket);
 
             backendSocket.evtPacketPreWrite.attach(sipPacket => this.sdpHacks("OUTGOING", sipPacket));
 

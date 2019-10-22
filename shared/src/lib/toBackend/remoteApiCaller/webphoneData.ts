@@ -2,7 +2,7 @@
 import { sendRequest } from "./sendRequest";
 import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
 import { types as gwTypes } from "../../../gateway/types";
-import { phoneNumber } from "phone-number";
+import { phoneNumber } from "phone-number/dist/lib";
 import * as types from "../../types/userSim";
 import * as wd from "../../types/webphoneData/logic"
 import * as cryptoLib from "crypto-lib";

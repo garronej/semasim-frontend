@@ -4,9 +4,8 @@
     "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "phone-number": "github:garronej/phone-number",
-    "ts-events-extended": "github:garronej/ts-events-extended",
-    "minimal-polyfills": "github:garronej/minimal-polyfills"
+    "minimal-polyfills": "github:garronej/minimal-polyfills",
+    "frontend-shared": "file:../../shared"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",

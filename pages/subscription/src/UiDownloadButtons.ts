@@ -1,4 +1,4 @@
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 
 declare const require: (path: string) => any;
 

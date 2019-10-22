@@ -21,10 +21,13 @@ export declare namespace loginUser {
     type Params = {
         email: string;
         secret: string;
+        uaInstanceId: string | undefined; /** undefined if login in from the Web, to provide from mobile */
     };
-    /** isGranted */
     type Response = {
         status: "SUCCESS";
+        connect_sid: string;
+        webUaInstanceId: string | undefined; /** if uaInstanceIdWas not provided ( from web ) returning the webUaInstanceId */
+        encryptedSymmetricKey: string;
     } | {
         status: "NO SUCH ACCOUNT";
     } | {
@@ -36,6 +39,19 @@ export declare namespace loginUser {
     } | {
         status: "NOT VALIDATED YET";
     };
+}
+export declare namespace isUserLoggedIn {
+    const methodName = "isUserLoggedIn";
+    type Params = undefined;
+    type Response = boolean;
+}
+export declare namespace declareUa {
+    const methodName = "declareUa";
+    type Params = {
+        platform: "iOS" | "android";
+        pushNotificationToken: string;
+    };
+    type Response = undefined;
 }
 export declare namespace logoutUser {
     const methodName = "logout-user";

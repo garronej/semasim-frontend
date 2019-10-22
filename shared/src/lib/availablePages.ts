@@ -11,8 +11,7 @@ export namespace PageName {
         "manager",
         "webphone",
         "subscription",
-        "shop",
-        "webviewphone"
+        "shop"
     ] as const;
 
     export const [
@@ -21,8 +20,7 @@ export namespace PageName {
         manager,
         webphone,
         subscription,
-        shop,
-        webviewphone
+        shop
     ] = pagesNames;
 
 }

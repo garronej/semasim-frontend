@@ -4,17 +4,16 @@ declare const require: Function;
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
 import "minimal-polyfills/dist/lib/Array.from";
 import "minimal-polyfills/dist/lib/String.prototype.startsWith";
-import "../../../shared/dist/tools/polyfills/Object.assign";
-import * as connection from "../../../shared/dist/lib/toBackend/connection";
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import "frontend-shared/dist/tools/polyfills/Object.assign";
+import * as connection from "frontend-shared/dist/lib/toBackend/connection";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller/base";
-import * as availablePages from "../../../shared/dist/lib/availablePages";
-import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/base";
+import * as availablePages from "frontend-shared/dist/lib/availablePages";
+import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
 
 notifyHostWhenPageIsReady();
-
 
 declare const __dirname: any;
 
@@ -41,10 +40,7 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 async function onLoggedIn(): Promise<UiController> {
 
-    connection.connect({ 
-        "connectionType": "MAIN",
-        "requestTurnCred": false
-    });
+    connection.connect("DO NOT REQUEST TURN CRED", undefined);
 
     const uiController = new UiController(
         await remoteApiCaller.getUsableUserSims()
@@ -55,22 +51,22 @@ async function onLoggedIn(): Promise<UiController> {
     $("#register-new-sim")
         .removeClass("hidden")
         .click(
-            () => bootbox_custom.alert(
-                require("fs").readFileSync(__dirname + "/../res/1.txt", "utf8")
-                    .replace(/\n/g, "<br>")
-            )
-        )
+            () => dialogApi.create("alert", {
+                "message":
+                    require("fs").readFileSync(__dirname + "/../res/1.txt", "utf8")
+                        .replace(/\n/g, "<br>")
+            }))
         ;
 
     return uiController;
 
 }
 
-const apiExposedToHost= (()=>{
+const apiExposedToHost = (() => {
 
     const loginAndGetUiController = async (email: string, secret: string): Promise<UiController> => {
 
-        const { status } = await webApiCaller.loginUser(email, secret);
+        const { status } = await webApiCaller.loginUser(email, secret, undefined);
 
         if (status !== "SUCCESS") {
             apiExposedByHost.onDone("Login failed");

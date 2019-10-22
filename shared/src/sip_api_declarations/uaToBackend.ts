@@ -74,7 +74,7 @@ export namespace notifyOngoingCall {
 
 }
 
-/** posted when a user that share this SIM create or update a contact */
+/** posted when an other UA create or update a contact */
 export namespace notifyContactCreatedOrUpdated {
 
     export const methodName = "notifyContactCreatedOrUpdated";
@@ -123,7 +123,7 @@ export namespace notifyDongleOnLan {
 
 /** 
  * posted when the owner of the sim stop sharing the sim with the user 
- * or when the user unregister the sim.
+ * or when the user unregister the sim from an other ua
  * */
 export namespace notifySimPermissionLost {
 

@@ -1,6 +1,6 @@
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "ts-events-extended";
-import * as currencyLib from "../../../shared/dist/tools/currency";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as currencyLib from "frontend-shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 

@@ -1,7 +1,7 @@
 import { SyncEvent } from "ts-events-extended";
 import { types as gwTypes } from "../gateway/types";
 import * as cryptoLib from "crypto-lib/dist/sync/types";
-declare type phoneNumber = import("phone-number").phoneNumber;
+declare type phoneNumber = import("phone-number/dist/lib").phoneNumber;
 export declare class Ua {
     private readonly towardSimEncryptor;
     /** Must be set before use in webphone.ts */

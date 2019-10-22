@@ -1,9 +1,9 @@
 
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "phone-number";
-import { VoidSyncEvent, SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
 import * as moment from "moment";
 
 declare const ion: any;

@@ -1,26 +1,24 @@
 
-import { Ua } from "../../../shared/dist/lib/Ua";
 import { UiWebphoneController } from "./UiWebphoneController";
-import * as connection from "../../../shared/dist/lib/toBackend/connection";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller";
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
-import * as crypto from "../../../shared/dist/lib/crypto";
-import * as cryptoLib from "crypto-lib";
-import * as cookies from "../../../shared/dist/lib/cookies/logic/frontend";
-import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
-import * as availablePages from "../../../shared/dist/lib/availablePages";
-import { rsaWorkerThreadPoolId } from "./workerThreadPoolId";
-//import * as observer from "../../../shared/dist/tools/observer";
+import * as connection from "frontend-shared/dist/lib/toBackend/connection";
+import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import * as backendEvents from "frontend-shared/dist/lib/toBackend/events";
 
-//import * as overrideWebRTCImplementation from "../../../shared/dist/tools/overrideWebRTCImplementation";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
+import { AuthenticatedSessionDescriptorSharedData } from "frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData";
+import * as availablePages from "frontend-shared/dist/lib/availablePages";
+import * as observer from "frontend-shared/dist/tools/observer";
+import * as setupEncryptorDecryptors from "frontend-shared/dist/lib/crypto/setupEncryptorDecryptors";
 
-//overrideWebRTCImplementation.testOverrideWebRTCImplementation();
 
-//observer.observeWebRTC();
+import * as overrideWebRTCImplementation from "frontend-shared/dist/tools/overrideWebRTCImplementation";
+
+overrideWebRTCImplementation.testOverrideWebRTCImplementation();
+
+observer.observeWebRTC();
 
 $(document).ready(async () => {
 
@@ -32,64 +30,21 @@ $(document).ready(async () => {
 
 	});
 
-	{
-
-		const { email, webUaInstanceId, encryptedSymmetricKey } = cookies.AuthenticatedSessionDescriptorSharedData.get();
-
-		//NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
-		cryptoLib.workerThreadPool.preSpawn(rsaWorkerThreadPoolId, 1);
-
-		const towardUserKeys = localStorage.TowardUserKeys.retrieve();
-
-		if (towardUserKeys === undefined) {
-
-			$("#logout").trigger("click");
-			return;
-
-		}
-
-		const towardUserDecryptor = cryptoLib.rsa.decryptorFactory(
-			towardUserKeys.decryptKey,
-			rsaWorkerThreadPoolId
-		);
-
-		{
-
-			const aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
-
-			cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
-
-			remoteApiCaller.setWebDataEncryptorDescriptor(
-				cryptoLib.aes.encryptorDecryptorFactory(
-					await crypto.symmetricKey.decryptKey(
-						towardUserDecryptor,
-						encryptedSymmetricKey
-					),
-					aesWorkerThreadPoolId
-				)
-			);
-
-		}
-
-		Ua.session = {
-			email,
-			"instanceId": webUaInstanceId,
-			"towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
-				towardUserKeys.encryptKey
-			),
-			towardUserDecryptor
-		};
+	//TODO: Do this in every page that require the user to be logged in.
+	if( !(await AuthenticatedSessionDescriptorSharedData.isPresent()) ){
+		//NOTE: User have deleted local storage but still have cookie.
+        $("#logout").trigger("click");
+        return;
 
 	}
 
-	connection.connect({
-		"connectionType": "MAIN",
-		"requestTurnCred": true
-	});
+	await setupEncryptorDecryptors.globalSetup();
+
+	connection.connect("REQUEST TURN CRED", undefined);
 
 	$("#page-payload").html("");
 
-	bootbox_custom.loading("Decrypting your conversation history 🔐", 0);
+	dialogApi.loading("Decrypting your conversation history 🔐", 0);
 
 	const userSims = await remoteApiCaller.getUsableUserSims();
 
@@ -99,14 +54,21 @@ $(document).ready(async () => {
 
 	}
 
-	const wdInstances = new Map<types.UserSim, wd.Instance<"PLAIN">>();
+	const wdInstances = await (async () => {
 
-	await Promise.all([
-		...userSims.map(
-			userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
-				.then(wdInstance => { wdInstances.set(userSim, wdInstance) })
-		),
-	]);
+		const out = new Map<types.UserSim, wd.Instance<"PLAIN">>();
+
+		await Promise.all(
+			userSims.map(
+				userSim => remoteApiCaller.getOrCreateWdInstance(userSim)
+					.then(wdInstance => out.set(userSim, wdInstance))
+			)
+		);
+
+		return out;
+
+	})();
+
 
 	//NOTE: Sort user sims so we always have the most relevant at the top of the page.
 	userSims
@@ -144,14 +106,14 @@ $(document).ready(async () => {
 		));
 
 
-	bootbox_custom.dismissLoading();
+	dialogApi.dismissLoading();
 
-	localApiHandlers.evtSimPermissionLost.attachOnce(
+	backendEvents.evtSimPermissionLost.attachOnce(
 		userSim => {
 
-			bootbox_custom.alert(
-				`${userSim.ownership.ownerEmail} revoked your access to ${userSim.friendlyName}`
-			);
+			dialogApi.create("alert", {
+				"message": `${userSim.ownership.ownerEmail} revoked your access to ${userSim.friendlyName}`
+			});
 
 			//TODO: Improve
 			location.reload();
@@ -159,7 +121,7 @@ $(document).ready(async () => {
 		}
 	);
 
-	remoteApiCaller.evtUsableSim.attach(
+	backendEvents.evtUsableSim.attach(
 		async userSim => $("#page-payload").append(
 			(
 				new UiWebphoneController(

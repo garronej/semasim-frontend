@@ -1,14 +1,14 @@
-import { SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import * as localApiHandlers from "../../../shared/dist/lib/toBackend/localApiHandlers";
-import * as remoteApiCaller from "../../../shared/dist/lib/toBackend/remoteApiCaller/base";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as backendEvents from "frontend-shared/dist/lib/toBackend/events";
+import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/base";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiButtonBar } from "./UiButtonBar";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiSimRow } from "./UiSimRow";
 import { UiShareSim } from "./UiShareSim";
-import { phoneNumber } from "phone-number";
+import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 
 declare const require: (path: string) => any;
 
@@ -31,11 +31,11 @@ export class UiController {
                 email: string;
             }>();
 
-            localApiHandlers.evtSharingRequestResponse.attach(
+            backendEvents.evtSharingRequestResponse.attach(
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
 
-            localApiHandlers.evtOtherSimUserUnregisteredSim.attach(
+            backendEvents.evtOtherSimUserUnregisteredSim.attach(
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
 
@@ -96,7 +96,7 @@ export class UiController {
 
         });
 
-        localApiHandlers.evtSimIsOnlineStatusChange.attach(
+        backendEvents.evtSimIsOnlineStatusChange.attach(
             userSim_ => userSim_ === userSim,
             () => {
 
@@ -118,8 +118,8 @@ export class UiController {
         );
 
         for (const evt of [
-            localApiHandlers.evtSimGsmConnectivityChange,
-            localApiHandlers.evtSimCellSignalStrengthChange
+            backendEvents.evtSimGsmConnectivityChange,
+            backendEvents.evtSimCellSignalStrengthChange
         ]) {
 
             evt.attach(
@@ -131,8 +131,8 @@ export class UiController {
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
         for (const evt of [
-            localApiHandlers.evtContactCreatedOrUpdated,
-            localApiHandlers.evtContactDeleted
+            backendEvents.evtContactCreatedOrUpdated,
+            backendEvents.evtContactDeleted
         ]) {
 
             evt.attach(
@@ -201,11 +201,11 @@ export class UiController {
 
         }
 
-        remoteApiCaller.evtUsableSim.attach(
+        backendEvents.evtUsableSim.attach(
             userSim => this.addUserSim(userSim)
         );
 
-        localApiHandlers.evtSimPermissionLost.attachOnce(
+        backendEvents.evtSimPermissionLost.attachOnce(
             userSim => this.removeUserSim(userSim)
         );
 
@@ -223,11 +223,11 @@ export class UiController {
 
         if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
 
-            bootbox_custom.loading("Loading");
+            dialogApi.loading("Loading");
 
             await UiPhonebook.fetchPhoneNumberUtilityScript();
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
         }
 
@@ -264,19 +264,19 @@ export class UiController {
                 ).then(() => onSubmitted())
         );
 
-        localApiHandlers.evtSimPermissionLost.attachOnce(
+        backendEvents.evtSimPermissionLost.attachOnce(
             userSim_ => userSim_ === userSim,
             () => uiPhonebook.hideModal().then(() =>
                 uiPhonebook.structure.detach()
             )
         );
 
-        localApiHandlers.evtContactCreatedOrUpdated.attach(
+        backendEvents.evtContactCreatedOrUpdated.attach(
             e => e.userSim === userSim,
             ({ contact }) => uiPhonebook.notifyContactChanged(contact)
         );
 
-        localApiHandlers.evtContactDeleted.attach(
+        backendEvents.evtContactDeleted.attach(
             e => e.userSim === userSim,
             ({ contact }) => uiPhonebook.notifyContactChanged(contact)
         );
@@ -336,7 +336,7 @@ export class UiController {
             const { userSim } = this.getSelectedUiSimRow();
 
             const shouldProceed = await new Promise<boolean>(
-                resolve => bootbox_custom.confirm({
+                resolve => dialogApi.create("confirm",{
                     "title": "Unregister SIM",
                     "message": `Do you really want to unregister ${userSim.friendlyName}?`,
                     callback: result => resolve(result)
@@ -373,7 +373,7 @@ export class UiController {
             const uiSimRow = this.getSelectedUiSimRow();
 
             const friendlyNameSubmitted = await new Promise<string | null>(
-                resolve => bootbox_custom.prompt({
+                resolve => dialogApi.create("prompt", {
                     "title": "Friendly name for this sim?",
                     "value": uiSimRow.userSim.friendlyName,
                     "callback": result => resolve(result),
@@ -398,7 +398,7 @@ export class UiController {
             const { userSim } = this.getSelectedUiSimRow();
 
             const shouldProceed = await new Promise<boolean>(
-                resolve => bootbox_custom.confirm({
+                resolve => dialogApi.create("confirm", {
                     "title": "Reboot GSM Dongle",
                     "message": `Do you really want to reboot Dongle ${userSim.dongle.manufacturer} ${userSim.dongle.model}?`,
                     callback: result => resolve(result)
@@ -409,7 +409,7 @@ export class UiController {
                 return;
             }
 
-            bootbox_custom.loading("Sending reboot command to dongle");
+            dialogApi.loading("Sending reboot command to dongle");
 
             /*
             NOTE: If the user was able to click on the reboot button
@@ -419,13 +419,13 @@ export class UiController {
                 userSim as types.Online<types.UserSim.Usable>
             );
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             await new Promise<void>(
-                resolve => bootbox_custom.alert(
-                    "Restart command issued successfully, the SIM should be back online within 30 seconds",
-                    () => resolve()
-                )
+                resolve => dialogApi.create("alert", {
+                    "message": "Restart command issued successfully, the SIM should be back online within 30 seconds",
+                    "callback": () => resolve()
+                })
             );
 
         });
@@ -490,10 +490,10 @@ export class UiController {
         if (!userSim) {
 
             await new Promise(resolve =>
-                bootbox_custom.alert(
-                    "No SIM selected, aborting.",
-                    () => resolve()
-                )
+                dialogApi.create("alert", {
+                    "message": "No SIM selected, aborting.",
+                    "callback": () => resolve()
+                })
             );
 
             return;
@@ -503,10 +503,10 @@ export class UiController {
         if (!userSim.reachableSimState) {
 
             await new Promise(resolve =>
-                bootbox_custom.alert(
-                    `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
-                    () => resolve()
-                )
+                dialogApi.create("alert", {
+                    "message": `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
+                    "callback": () => resolve()
+                })
             );
 
             return;
@@ -550,22 +550,23 @@ async function interact_getUserSimContainingNumber(
     if (userSimsContainingNumber.length === 0) {
 
         await new Promise(resolve =>
-            bootbox_custom.alert(
-                [
+            dialogApi.create("alert", {
+                "message": [
                     `${phoneNumber.prettyPrint(number)} is not saved in any of your SIM phonebook.`,
                     "Use the android contacts native feature to edit contact stored in your phone."
                 ].join("<br>"),
-                () => resolve()
-            )
+                "callback": () => resolve()
+            })
         );
 
         return undefined;
     } else if (userSimsContainingNumber.length === 1) {
         return userSimsContainingNumber.pop();
     }
-
+    
+    //TODO: Toss away
     const index = await new Promise<number | null>(
-        resolve => bootbox_custom.prompt({
+        resolve => dialogApi.create("prompt",({
             "title": `${phoneNumber.prettyPrint(number)} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
             "inputType": "select",
             "inputOptions": userSimsContainingNumber.map(userSim => ({
@@ -573,7 +574,7 @@ async function interact_getUserSimContainingNumber(
                 "value": userSimsContainingNumber.indexOf(userSim)
             })),
             "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
-        })
+        }) as any)
     );
 
     if (index === null) {

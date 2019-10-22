@@ -1,15 +1,17 @@
 export * from "./types";
 
 import * as types from "./types";
-import * as cryptoLib from "crypto-lib";
+import {  decryptThenParseFactory,  stringifyThenEncryptFactory } from "crypto-lib/dist/async/serializer";
+type Decryptor= import("crypto-lib").Decryptor;
+type Encryptor= import ("crypto-lib").Encryptor;
 import { isAscendingAlphabeticalOrder } from "../../../tools/isAscendingAlphabeticalOrder";
 
 export async function decryptChat(
-    decryptor: cryptoLib.Decryptor,
+    decryptor: Decryptor,
     chat: types.Chat<"ENCRYPTED">
 ): Promise<types.Chat<"PLAIN">> {
 
-    const decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
+    const decryptThenParse = decryptThenParseFactory(decryptor);
 
     const [contactNumber, contactName, contactIndexInSim, messages] =
         await Promise.all([
@@ -27,11 +29,11 @@ export async function decryptChat(
 
 /** If input message have no id so will the output message */
 export async function encryptMessage(
-    encryptor: cryptoLib.Encryptor,
+    encryptor: Encryptor,
     message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>
 ): Promise<types.Message<"ENCRYPTED">> {
 
-    const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptor);
+    const stringifyThenEncrypt = stringifyThenEncryptFactory(encryptor);
 
     const encryptedMessage: types.Message<"ENCRYPTED"> = {
         ...message,
@@ -52,11 +54,11 @@ export async function encryptMessage(
 }
 
 export async function decryptMessage(
-    decryptor: cryptoLib.Decryptor,
+    decryptor: Decryptor,
     encryptedMessage: types.Message<"ENCRYPTED">
 ): Promise<types.Message<"PLAIN">> {
 
-    const decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
+    const decryptThenParse = decryptThenParseFactory(decryptor);
 
     const message: types.Message<"PLAIN"> = {
         ...encryptedMessage,

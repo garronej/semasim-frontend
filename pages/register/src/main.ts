@@ -1,14 +1,10 @@
 
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
-import "../../../shared/dist/tools/polyfills/Object.assign";
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as urlGetParameters from "../../../shared/dist/tools/urlGetParameters";
-import * as crypto from "../../../shared/dist/lib/crypto";
-import * as cryptoLib from "crypto-lib";
-import * as localStorage from "../../../shared/dist/lib/localStorage/logic";
-import * as availablePages from "../../../shared/dist/lib/availablePages";
-import * as hostKfd from "../../../shared/dist/lib/hostKfd";
+import "frontend-shared/dist/tools/polyfills/Object.assign";
+import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
+import * as availablePages from "frontend-shared/dist/lib/availablePages";
+import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
+import * as procedure from "frontend-shared/dist/lib/procedure/register";
 
 //@ts-ignore: so it is clear that some API should be exposed by host.
 declare const apiExposedByHost: (
@@ -82,58 +78,18 @@ function setHandlers() {
 				.map(sel => $(sel).val() as string)
 				;
 
-			return [email.toLowerCase(), password];
+			return [email, password];
 
 		})();
 
-		const { secret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys(
-			password,
-			email,
-			hostKfd.kfd
-		);
-
-		bootbox_custom.loading("Creating account",0);
-
-		const regStatus = await webApiCaller.registerUser(
-			email,
-			secret,
-			cryptoLib.RsaKey.stringify(
-				towardUserKeys.encryptKey
-			),
-			await crypto.symmetricKey.createThenEncryptKey(
-				towardUserKeys.encryptKey
-			)
-		);
-
-		switch (regStatus) {
-			case "EMAIL NOT AVAILABLE":
-
-				bootbox_custom.dismissLoading();
-
-				bootbox_custom.alert(`Semasim account for ${email} has already been created`);
-
-				$("#email").val("");
-
-				break;
-
-			case "CREATED":
-			case "CREATED NO ACTIVATION REQUIRED":
-
-				localStorage.JustRegistered.store({
-					password,
-					secret,
-					towardUserKeys,
-					"promptEmailValidationCode": regStatus !== "CREATED NO ACTIVATION REQUIRED"
-				});
-
+		procedure.register(email, password, {
+			"resetEmail": () => $("#email").val(""),
+			"redirectToLogin": () =>
 				window.location.href = urlGetParameters.buildUrl<availablePages.urlParams.Login>(
 					`/${availablePages.PageName.login}`,
 					{ email }
-				);
-
-				break;
-
-		}
+				)
+		});
 
 	});
 
@@ -141,22 +97,14 @@ function setHandlers() {
 
 $(document).ready(() => {
 
-	crypto.preSpawn();
-
 	setHandlers();
 
-	{
-
-		const { email } = urlGetParameters.parseUrl<availablePages.urlParams.Register>();
-
-		if (email !== undefined) {
-
+	procedure.init(urlGetParameters.parseUrl<availablePages.urlParams.Register>(), {
+		"setEmailReadonly": email => {
 			$("#email").val(email);
 			$("#email").prop("readonly", true);
-
 		}
-
-	}
+	});
 
 
 });

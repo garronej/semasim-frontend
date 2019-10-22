@@ -8,7 +8,7 @@ export declare namespace setWebDataEncryptorDescriptor {
     const buildWdCrypto: (encryptorDecryptor: cryptoLib.EncryptorDecryptor) => {
         encryptorDecryptor: cryptoLib.EncryptorDecryptor;
         "stringifyThenEncrypt": <V>(value: V) => Promise<string>;
-        "decryptThenParse": <V>(encryptedValue: string) => Promise<V>;
+        "decryptThenParse": <V_1>(encryptedValue: string) => Promise<V_1>;
     };
 }
 export declare const getOrCreateWdInstance: (userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<wd.Instance<"PLAIN">>;

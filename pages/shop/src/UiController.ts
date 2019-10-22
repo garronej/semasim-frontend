@@ -1,16 +1,16 @@
 
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { UiCart } from "./UiCart";
 import { UiProduct } from "./UiProduct";
-import { getProducts } from "../../../shared/dist/lib/shopProducts";
-import * as env from "../../../shared/dist/lib/env";
+import { getProducts } from "frontend-shared/dist/lib/shopProducts";
+import * as env from "frontend-shared/dist/lib/env";
 import { UiShipTo } from "./UiShipTo";
-import { getCountryCurrency } from "../../../shared/dist/tools/currency";
+import { getCountryCurrency } from "frontend-shared/dist/tools/currency";
 import { UiCurrency } from "./UiCurrency";
 import { UiShippingForm } from "./UiShippingForm";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as types from "../../../shared/dist/lib/types/shop";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+import * as types from "frontend-shared/dist/lib/types/shop";
 
 declare const Stripe: any;
 
@@ -117,7 +117,7 @@ export class UiController {
         currency: string
     ) {
 
-        bootbox_custom.loading("Redirecting to payment page");
+        dialogApi.loading("Redirecting to payment page");
 
         const url = window.location.href.split("?")[0];
 

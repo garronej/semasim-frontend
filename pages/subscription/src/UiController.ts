@@ -1,13 +1,13 @@
 //NOTE: Assert StripeCheckout loaded on the page.
 
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/subscription";
-import * as currencyLib from "../../../shared/dist/tools/currency";
-import { assetsRoot } from "../../../shared/dist/lib/env";
-import * as cookies from "../../../shared/dist/lib/cookies/logic/frontend";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/subscription";
+import * as currencyLib from "frontend-shared/dist/tools/currency";
+import { assetsRoot } from "frontend-shared/dist/lib/env";
+import { AuthenticatedSessionDescriptorSharedData } from "frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData";
 
 import { UiMySubscription } from "./UiMySubscription";
 import { UiSubscribe } from "./UiSubscribe";
@@ -36,7 +36,7 @@ export class UiController {
         currency: string
     ) {
 
-        bootbox_custom.loading("Redirecting to payment page");
+        dialogApi.loading("Redirecting to payment page");
 
         const url = window.location.href.split("?")[0];
 
@@ -75,7 +75,7 @@ export class UiController {
 
         if (subscriptionInfos.customerStatus === "EXEMPTED") {
 
-            bootbox_custom.alert("You get free access to the service, enjoy :)");
+            dialogApi.create("alert", { "message": "You get free access to the service, enjoy :)" });
 
             return;
 
@@ -90,25 +90,29 @@ export class UiController {
                 undefined
             >();
 
-            const handler = StripeCheckout.configure({
-                "key": subscriptionInfos.stripePublicApiKey,
-                "image": `${assetsRoot}img/shop.png`,
-                "locale": "auto",
-                "allowRememberMe": false,
-                "name": 'Semasim',
-                "email": cookies.AuthenticatedSessionDescriptorSharedData.get().email,
-                "description": "Android app access",
-                "zipCode": true,
-                "panelLabel": "ok", //TODO: Display the price here, show the dialog only if other currency.
-                "source": source => evtSourceId.post({
-                    "id": source.id,
-                    "currency": currencyLib.getCardCurrency(
-                        source.card,
-                        pricingByCurrency
-                    )
-                }),
-                "closed": () => evtSourceId.post(undefined)
-            });
+            let handler: any;
+
+            AuthenticatedSessionDescriptorSharedData.get().then(
+                email => handler = StripeCheckout.configure({
+                    "key": subscriptionInfos.stripePublicApiKey,
+                    "image": `${assetsRoot}img/shop.png`,
+                    "locale": "auto",
+                    "allowRememberMe": false,
+                    "name": 'Semasim',
+                    email,
+                    "description": "Android app access",
+                    "zipCode": true,
+                    "panelLabel": "ok", //TODO: Display the price here, show the dialog only if other currency.
+                    "source": source => evtSourceId.post({
+                        "id": source.id,
+                        "currency": currencyLib.getCardCurrency(
+                            source.card,
+                            pricingByCurrency
+                        )
+                    }),
+                    "closed": () => evtSourceId.post(undefined)
+                })
+            );
 
             // Close Checkout on page navigation:
             window.addEventListener("popstate", () => handler.close());
@@ -143,11 +147,11 @@ export class UiController {
 
             uiMySubscription.evtScheduleCancel.attachOnce(async () => {
 
-                bootbox_custom.loading("Canceling your subscription");
+                dialogApi.loading("Canceling your subscription");
 
                 await webApiCaller.unsubscribe();
 
-                bootbox_custom.dismissLoading();
+                dialogApi.dismissLoading();
 
                 location.reload();
 
@@ -157,17 +161,17 @@ export class UiController {
 
                 if (!source!.isChargeable) {
 
-                    bootbox_custom.alert("Please update your payment method first");
+                    dialogApi.create("alert", { "message": "Please update your payment method first" });
 
                     return;
 
                 }
 
-                bootbox_custom.loading("Re enabling your subscription");
+                dialogApi.loading("Re enabling your subscription");
 
                 await webApiCaller.subscribeOrUpdateSource();
 
-                bootbox_custom.dismissLoading();
+                dialogApi.dismissLoading();
 
                 this.evtDone.post();
 
@@ -199,20 +203,23 @@ export class UiController {
 
                 //TODO: Lot of work left.
 
-                if( typeof WeakMap === "undefined" ){
+                if (typeof WeakMap === "undefined") {
 
-                    bootbox_custom.alert([
-                        `We are very sorry but your phone is not compatible with`,
-                        `out payment platform. Please go to web.semasim.com and`,
-                        `subscribe from there.`,
-                        `Once you are done kill the app and login again`
-                    ].join(" "));
+                    dialogApi.create(
+                        "alert", {
+                        "message": [
+                            `We are very sorry but your phone is not compatible with`,
+                            `out payment platform. Please go to web.semasim.com and`,
+                            `subscribe from there.`,
+                            `Once you are done kill the app and login again`
+                        ].join(" ")
+                    });
 
                     return;
 
                 }
 
-                if( 1 === 1 ){
+                if (1 === 1) {
 
                     this.interact_checkout("eur");
 
@@ -245,12 +252,12 @@ export class UiController {
 
                 //TODO: only display if currency was guessed wrong.
                 const shouldProceed = await new Promise<boolean>(
-                    resolve => bootbox_custom.confirm({
+                    resolve => dialogApi.create("confirm",{
                         "title": "Enable subscription",
                         "message": [
                             `Confirm subscription for `,
                             currencyLib.prettyPrint(
-                                pricingByCurrency[currency], 
+                                pricingByCurrency[currency],
                                 currency
                             ),
                             `/Month`
@@ -264,11 +271,11 @@ export class UiController {
                 }
 
 
-                bootbox_custom.loading("Enabling your subscription");
+                dialogApi.loading("Enabling your subscription");
 
                 await webApiCaller.subscribeOrUpdateSource(newSourceId);
 
-                bootbox_custom.dismissLoading();
+                dialogApi.dismissLoading();
 
                 this.evtDone.post();
 
@@ -292,11 +299,11 @@ export class UiController {
                     return;
                 }
 
-                bootbox_custom.loading("Updating your payment method");
+                dialogApi.loading("Updating your payment method");
 
                 await webApiCaller.subscribeOrUpdateSource(source.id);
 
-                bootbox_custom.dismissLoading();
+                dialogApi.dismissLoading();
 
                 location.reload();
 

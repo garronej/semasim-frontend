@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Semasim</string>
+    <string name="base_domain">dev.semasim.com</string>
+    <string name="assets_base_dir">static.semasim.com</string>
+</resources>

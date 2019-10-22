@@ -1,387 +1,571 @@
 {
   "program": {
     "fileInfos": {
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es5.d.ts": {
-        "version": "1f753cee573dea40df8a9dc873fef5566957b19ad513874f6643d8dfb14842d0",
-        "signature": "1f753cee573dea40df8a9dc873fef5566957b19ad513874f6643d8dfb14842d0"
+      "../node_modules/typescript/lib/lib.es5.d.ts": {
+        "version": "ff5688d6b2fcfef06842a395d7ff4d5730d45b724d4c48913118c889829052a1",
+        "signature": "ff5688d6b2fcfef06842a395d7ff4d5730d45b724d4c48913118c889829052a1"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.d.ts": {
         "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
         "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.dom.d.ts": {
-        "version": "973df4e41aea3780ce77073777d37dd5896f684124f4c42409f3a832133837a4",
-        "signature": "973df4e41aea3780ce77073777d37dd5896f684124f4c42409f3a832133837a4"
+      "../node_modules/typescript/lib/lib.dom.d.ts": {
+        "version": "2d53f3741e5a4f78a90f623387d71a1cc809bb258f10cdaec034b67cbf71022f",
+        "signature": "2d53f3741e5a4f78a90f623387d71a1cc809bb258f10cdaec034b67cbf71022f"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.core.d.ts": {
-        "version": "2a0390a665763bcc90f0670e43c587928d8fefe2a94a11209c1e22cba7b09f52",
-        "signature": "2a0390a665763bcc90f0670e43c587928d8fefe2a94a11209c1e22cba7b09f52"
+      "../node_modules/typescript/lib/lib.es2015.core.d.ts": {
+        "version": "4ab19088d508f9e62bfc61c157e8a65b2afaefa251ecca315e7d20b5b97b256f",
+        "signature": "4ab19088d508f9e62bfc61c157e8a65b2afaefa251ecca315e7d20b5b97b256f"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.collection.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.collection.d.ts": {
         "version": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0",
         "signature": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.generator.d.ts": {
-        "version": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3",
-        "signature": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3"
+      "../node_modules/typescript/lib/lib.es2015.generator.d.ts": {
+        "version": "765e0e9c9d74cf4d031ca8b0bdb269a853e7d81eda6354c8510218d03db12122",
+        "signature": "765e0e9c9d74cf4d031ca8b0bdb269a853e7d81eda6354c8510218d03db12122"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
-        "version": "6c9f73334f8bf47aea685ca5b46a8f7e992a223e96fbceb030f26a4d2324ba21",
-        "signature": "6c9f73334f8bf47aea685ca5b46a8f7e992a223e96fbceb030f26a4d2324ba21"
+      "../node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
+        "version": "285958e7699f1babd76d595830207f18d719662a0c30fac7baca7df7162a9210",
+        "signature": "285958e7699f1babd76d595830207f18d719662a0c30fac7baca7df7162a9210"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.promise.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.promise.d.ts": {
         "version": "e6b8ff2798f8ebd7a1c7afd8671f2cb67ee1901c422f5964d74b0b34c6574ea2",
         "signature": "e6b8ff2798f8ebd7a1c7afd8671f2cb67ee1901c422f5964d74b0b34c6574ea2"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
         "version": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe",
         "signature": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
         "version": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976",
         "signature": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
         "version": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230",
         "signature": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
+      "../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
         "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
         "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/subscription.ts": {
+      "../res/@types/@react-native-community/async-storage/index.d.ts": {
+        "version": "cdfbe7808d4e3b8cf74030beb08f3f9745755be4e366c70bd747d2eaf95e83ea",
+        "signature": "cdfbe7808d4e3b8cf74030beb08f3f9745755be4e366c70bd747d2eaf95e83ea"
+      },
+      "../src/lib/types/subscription.ts": {
         "version": "c3edb021942b10ac9738d465fec009fc587a80ad5ffc1718f9dab282445c50d7",
         "signature": "432ad493b6552cb97a340b5330a14f1999e38e50156e44b8470556f0821bf721"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/currency.ts": {
+      "../src/tools/currency.ts": {
         "version": "5c078b99741826188d3dbc1da3c8a61ab772afbf5392a51c03d01ee9ddbf9eda",
         "signature": "1aab8972cecbd5b5475206f2850b51aedc6d6efe8b597042257e7051f6541cfd"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts": {
+      "../src/lib/types/shop.ts": {
         "version": "4fe992fac681d083df734adb13ce8abbc199dbff041d631705c955b189ab7b17",
         "signature": "06dfc108649e7e25ff96109668871470d2f03b73d5de1ecacf76e0ef82d5d5d6"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts": {
-        "version": "59c45d447dfb26448698fcea0908f8578204ff86ae6f471567fdbd0bab24827b",
-        "signature": "fe74505fc6b6d11332443b79bea6644081683adb87375c6dc7c20b690b56c9cd"
+      "../src/web_api_declaration.ts": {
+        "version": "fe695fbf237e9f808a9bc091f61ad6571b5928e5a8086bf18898c3911e24903b",
+        "signature": "1b62badfa802fe7e0b7f4cc37f580293f3f301c7e72eb8619de6343d45812b22"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts": {
+      "../../../gateway/dist/lib/types.d.ts": {
         "version": "14d8b0c2024e3ba573e0513ac8b441f4e497faf591288f85ff1a0e16d00498e6",
         "signature": "14d8b0c2024e3ba573e0513ac8b441f4e497faf591288f85ff1a0e16d00498e6"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts": {
+      "../../../gateway/dist/lib/misc/registrationparams.d.ts": {
         "version": "67d483b80ab793ed7112b774712774712dba18e140e81d1772505302b86bf3a1",
         "signature": "67d483b80ab793ed7112b774712774712dba18e140e81d1772505302b86bf3a1"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/registrationparams.ts": {
-        "version": "2c34b2fe2aefdf28a0717259d5f192bfa7c1b0490d5c26ee9e2ffc00d2794e54",
-        "signature": "1d1fb80366aeb03d35cf9df115b9fb215ce371e27271b05a224c206c5d778b92"
+      "../src/gateway/registrationparams.ts": {
+        "version": "05f91dab2f3d6de89b29f7eadeb818d8b816254e9b897127768c214dd3b20c07",
+        "signature": "49cc3d3b4b8044d5149681733d96773920fdd2c7ea9563d53572472524d3ef43"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts": {
+      "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts": {
         "version": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de",
         "signature": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts": {
+      "../../../gateway/dist/lib/misc/bundleddata.d.ts": {
         "version": "3c5504463062fb7134159571f82501d5845ebd58d6494b513d94a4a77289817f",
         "signature": "3c5504463062fb7134159571f82501d5845ebd58d6494b513d94a4a77289817f"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/bundleddata.ts": {
-        "version": "bfd52a659faf83231a40ad0862ed6fb5bebfa6e2f9e71e8d812465ae7477a1ee",
-        "signature": "8015b8136d427cc235d9da2301eb1cbc073bdb51102d1d352441b2529d4b721c"
+      "../src/gateway/bundleddata.ts": {
+        "version": "7fb3e1ca668f1f8e5e0e55d0e9cfec9e53b823ed29710c86fb760a08ad228387",
+        "signature": "557e402706e287c412afd3b413d3901685e0b11aa54bcbf4fd4195ab8cffccbf"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts": {
         "version": "7a150bc951faafabece4b248c55473bb8c397cddcc86d7245c527df91f29ba88",
         "signature": "7a150bc951faafabece4b248c55473bb8c397cddcc86d7245c527df91f29ba88"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts": {
         "version": "149a1f9eb1ecb318b90bb8de231c3d659d5a277bdb8ebce854ad0f162a40fe35",
         "signature": "149a1f9eb1ecb318b90bb8de231c3d659d5a277bdb8ebce854ad0f162a40fe35"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts": {
         "version": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts": {
         "version": "6c144ddf006b0b9daf44748bde17033681faa30f1b4c84953aa2debdc24ccba8",
         "signature": "6c144ddf006b0b9daf44748bde17033681faa30f1b4c84953aa2debdc24ccba8"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": {
         "version": "7c60a8e25848c21b336c8223ba3f7dfa877bba9e739e82e08156e566cbeefa33",
         "signature": "7c60a8e25848c21b336c8223ba3f7dfa877bba9e739e82e08156e566cbeefa33"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": {
         "version": "9f764e87e1ed4647647712656a2c47997172a084bddce704b191146463b5f76c",
         "signature": "9f764e87e1ed4647647712656a2c47997172a084bddce704b191146463b5f76c"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": {
         "version": "92c65bf0b6a632d7537ed3f233d304ca34b06d9d24ffdcfc99e0d8858c010c21",
         "signature": "92c65bf0b6a632d7537ed3f233d304ca34b06d9d24ffdcfc99e0d8858c010c21"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts": {
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": {
         "version": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45",
         "signature": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": {
         "version": "104455f7800a8ef4c185b9d4b7fbbd4332732dd2e45a671c8a9e6ec20bd3670a",
         "signature": "104455f7800a8ef4c185b9d4b7fbbd4332732dd2e45a671c8a9e6ec20bd3670a"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts": {
+      "../../../gateway/node_modules/colors/index.d.ts": {
         "version": "a17e831d16c27cbe4d6f0bb238c1ded0d4a26c282009e431c68733be0b792f4f",
         "signature": "a17e831d16c27cbe4d6f0bb238c1ded0d4a26c282009e431c68733be0b792f4f"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts": {
         "version": "bfec90fa6c76a8d8cf1ed77c30587e045a3a77dc3d1db5cea987bd181f3bbd0f",
         "signature": "bfec90fa6c76a8d8cf1ed77c30587e045a3a77dc3d1db5cea987bd181f3bbd0f"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts": {
         "version": "8035f10dc68f2b26dc07a82ef887f6b985c27d599490d3bd0c80212c6cea952a",
         "signature": "8035f10dc68f2b26dc07a82ef887f6b985c27d599490d3bd0c80212c6cea952a"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": {
         "version": "06082f382f4ff101ab233a1b663e756668fb01fea3de6fb87611293912e5de47",
         "signature": "06082f382f4ff101ab233a1b663e756668fb01fea3de6fb87611293912e5de47"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": {
         "version": "25be550fe4d1cea6624ee4b2e2b140ddadb91fac64cccd90766defe0a81d4530",
         "signature": "25be550fe4d1cea6624ee4b2e2b140ddadb91fac64cccd90766defe0a81d4530"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": {
         "version": "7823d40e81c201868792880e87f141a4a2ef3fee47da15bed4a2f87c4ec3d3e1",
         "signature": "7823d40e81c201868792880e87f141a4a2ef3fee47da15bed4a2f87c4ec3d3e1"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts": {
+      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts": {
         "version": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
         "signature": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts": {
+      "../../../gateway/dist/lib/misc/siprouting.d.ts": {
         "version": "b18dc6985c36a5a32946df233fe31ba0b2da4d30150b3df54db864c29d825367",
         "signature": "b18dc6985c36a5a32946df233fe31ba0b2da4d30150b3df54db864c29d825367"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/readimsi.ts": {
-        "version": "a802bdc6e5800ddb7544e16d9312d2857ae734fe359cf3fe4a5ea6d903335b0e",
-        "signature": "0b69d20dd98c4588d5c483ba124eaba770b0dd21988efa1351eecb685902a9f5"
+      "../src/gateway/readimsi.ts": {
+        "version": "28684523973b9e6db7edad86d80e14d7448f0f25fd2c7d3bc3a00e73a1868b6c",
+        "signature": "6bcb1ba170eeb872ae1441c9cf934848df6d78261a95125720f3dd4dd28fb3e2"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts": {
-        "version": "b270c7514b9fb88e7a949f399790bc6f58497718b7e864050bbc11bbbd8018f3",
-        "signature": "c2b3536cb4e4fdd9f1f7d7d87dee725ac62183e9c7db041c648c36ff471a40bc"
+      "../src/gateway/types.ts": {
+        "version": "61cb82e7cbeadae3770f660578a21da165054cea50406f21f604f1ec55754e2f",
+        "signature": "0d316c51daa873016b65c7176409f9528395d1bf6e9ecb13078ecc79421ea8a5"
       },
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/web_api_declaration.d.ts": {
+      "../../../gateway/dist/web_api_declaration.d.ts": {
         "version": "c800dd5c2f67147fc21b74084d7c766b61f459e9cc4126618d30348068bc21ae",
         "signature": "c800dd5c2f67147fc21b74084d7c766b61f459e9cc4126618d30348068bc21ae"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/webapipath.ts": {
-        "version": "124200714ad670c09a531c071eb5302e60d8a836762fef73cb995e34b6a4db93",
-        "signature": "20f4979250e166257bb93a4a3b62160cc107eb986ffb22460246042a29590200"
+      "../src/gateway/webapipath.ts": {
+        "version": "9e8270a0f6b69c6607df8f5ef11796a90ea441ecfb28b97a7180b0bd881b8655",
+        "signature": "dc10587c937decba249305480cc9408aea82cbe5ef953f4d5bef378a7ddf09e6"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-events-extended/dist/lib/index.d.ts": {
+      "../node_modules/ts-events-extended/dist/lib/index.d.ts": {
         "version": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45",
         "signature": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-sip/dist/lib/index.d.ts": {
+      "../../local_modules/ts-sip/dist/lib/types.d.ts": {
+        "version": "7a150bc951faafabece4b248c55473bb8c397cddcc86d7245c527df91f29ba88",
+        "signature": "7a150bc951faafabece4b248c55473bb8c397cddcc86d7245c527df91f29ba88"
+      },
+      "../../local_modules/ts-sip/dist/lib/core.d.ts": {
+        "version": "149a1f9eb1ecb318b90bb8de231c3d659d5a277bdb8ebce854ad0f162a40fe35",
+        "signature": "149a1f9eb1ecb318b90bb8de231c3d659d5a277bdb8ebce854ad0f162a40fe35"
+      },
+      "../../local_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": {
+        "version": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45",
+        "signature": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45"
+      },
+      "../../local_modules/ts-sip/dist/lib/iconnection.d.ts": {
+        "version": "104455f7800a8ef4c185b9d4b7fbbd4332732dd2e45a671c8a9e6ec20bd3670a",
+        "signature": "104455f7800a8ef4c185b9d4b7fbbd4332732dd2e45a671c8a9e6ec20bd3670a"
+      },
+      "../../local_modules/ts-sip/node_modules/colors/index.d.ts": {
+        "version": "a17e831d16c27cbe4d6f0bb238c1ded0d4a26c282009e431c68733be0b792f4f",
+        "signature": "a17e831d16c27cbe4d6f0bb238c1ded0d4a26c282009e431c68733be0b792f4f"
+      },
+      "../../local_modules/ts-sip/dist/lib/socket.d.ts": {
+        "version": "bfec90fa6c76a8d8cf1ed77c30587e045a3a77dc3d1db5cea987bd181f3bbd0f",
+        "signature": "bfec90fa6c76a8d8cf1ed77c30587e045a3a77dc3d1db5cea987bd181f3bbd0f"
+      },
+      "../../local_modules/ts-sip/dist/lib/misc.d.ts": {
+        "version": "8035f10dc68f2b26dc07a82ef887f6b985c27d599490d3bd0c80212c6cea952a",
+        "signature": "8035f10dc68f2b26dc07a82ef887f6b985c27d599490d3bd0c80212c6cea952a"
+      },
+      "../../local_modules/ts-sip/dist/lib/api/server.d.ts": {
+        "version": "06082f382f4ff101ab233a1b663e756668fb01fea3de6fb87611293912e5de47",
+        "signature": "06082f382f4ff101ab233a1b663e756668fb01fea3de6fb87611293912e5de47"
+      },
+      "../../local_modules/ts-sip/dist/lib/api/client.d.ts": {
+        "version": "25be550fe4d1cea6624ee4b2e2b140ddadb91fac64cccd90766defe0a81d4530",
+        "signature": "25be550fe4d1cea6624ee4b2e2b140ddadb91fac64cccd90766defe0a81d4530"
+      },
+      "../../local_modules/ts-sip/dist/lib/api/index.d.ts": {
+        "version": "7823d40e81c201868792880e87f141a4a2ef3fee47da15bed4a2f87c4ec3d3e1",
+        "signature": "7823d40e81c201868792880e87f141a4a2ef3fee47da15bed4a2f87c4ec3d3e1"
+      },
+      "../../local_modules/ts-sip/dist/lib/index.d.ts": {
         "version": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
         "signature": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/run-exclusive/dist/lib/runexclusive.d.ts": {
+      "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts": {
         "version": "34f0a70e06970e32d059628f7ff83f615da817a20cb03c79360a5c158ac2a650",
         "signature": "34f0a70e06970e32d059628f7ff83f615da817a20cb03c79360a5c158ac2a650"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts": {
+      "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts": {
         "version": "b986c5f17166f5c3a270f95c72dcc057548a769a80c564223591cd14bfcae2a0",
         "signature": "b986c5f17166f5c3a270f95c72dcc057548a769a80c564223591cd14bfcae2a0"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts": {
+      "../src/lib/types/usersim.ts": {
         "version": "997f1dd4eb7dcbd6e374d8e7b791f26186f07b984b195ea3a5e152a7558d42f3",
         "signature": "0201fd670f0cfa3f5ece632fda88e95b1c2813bc2d27a257023fb5b98883b2ba"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts": {
+      "../node_modules/trackable-map/dist/lib/mapextended.d.ts": {
         "version": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958",
         "signature": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts": {
+      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": {
         "version": "9025a5b37f7f32b1f4d491d70af60a7e3224e1dfe276fd7b69930fb05b70fe85",
         "signature": "9025a5b37f7f32b1f4d491d70af60a7e3224e1dfe276fd7b69930fb05b70fe85"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts": {
+      "../node_modules/trackable-map/dist/lib/index.d.ts": {
         "version": "a962616fff067ab6bfe0a271ea7a30e8dc9c2b4b3acb4c67240cec15ae4e4d10",
         "signature": "a962616fff067ab6bfe0a271ea7a30e8dc9c2b4b3acb4c67240cec15ae4e4d10"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": {
+      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": {
         "version": "827beea819609471a0a48e237adff3e4a07a59db303f53c150360ed7c8c5add1",
         "signature": "827beea819609471a0a48e237adff3e4a07a59db303f53c150360ed7c8c5add1"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": {
+      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": {
         "version": "043f29d5f354595e347e4dc476dda851a59598fab4df13cd83e99050a6a5e338",
         "signature": "043f29d5f354595e347e4dc476dda851a59598fab4df13cd83e99050a6a5e338"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": {
+      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": {
         "version": "6d6ca69eb06f3b6a9ab9c47a8eb0bb2d1dd86f45619c60e861d41a1861806a2c",
         "signature": "6d6ca69eb06f3b6a9ab9c47a8eb0bb2d1dd86f45619c60e861d41a1861806a2c"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts": {
-        "version": "1f3ae087d12f77be27269afe27b64f5ad93a236efa7941282621b2fc7bc791c5",
-        "signature": "8515f57895166bd9c982ba36cd653d00f8b648a5c4670c73b7aab07ded315f9e"
+      "../src/sip_api_declarations/uatobackend.ts": {
+        "version": "6504cad283baf5609a2173d9cf32c33e032d6d0e8d733a66cb7d4b42b7ebaaf5",
+        "signature": "e489eca20611a2904ed513526ff4bce24e7fbf8448157a265924b6c023c60a66"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts": {
-        "version": "62e54f755b24b637bc4bd3197190b09b77664c4f2115c79cdf911abf19333656",
-        "signature": "f773503027fb821c7728f68053f4756b034b9af0e61b2b6a46e34295ea500a3b"
+      "../src/lib/env/jsruntimeenv.ts": {
+        "version": "c1f74b13e6144ff819daf8e86712b86658b664fcda29e31b732b824779e77e07",
+        "signature": "5adbbeb637d6351a73a06e583a4a353c47d74175ac7f5128d878aabc6c2e115a"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts": {
+      "../src/lib/env/index.ts": {
+        "version": "69ee8c2957cfe52040fdb3989da77d32487520078992a131fdd760e8c1c18bb6",
+        "signature": "58b6597c74f0adec9161ccca864b8b9dd1d38ed257182274603e5ff25df9cc16"
+      },
+      "../src/lib/tobackend/events.ts": {
+        "version": "5a570d8ec3132890e7e1e1ee4881b97b27cf6b713e1b53d9f199e45fc9264184",
+        "signature": "6ceb20642b9554396bd39e47ff52c623fff3f8b2dba941af8ff87f389775d6ef"
+      },
+      "../src/tools/modal/types.structure.ts": {
+        "version": "8178c4db7d51b5dbe4d54b1761c6c5ee793542325928e687377a2347b9e511bf",
+        "signature": "7dbcd87440cb553ba91fe86ec14d537e0a6cd2051492f525cbd851d76d69d5ee"
+      },
+      "../src/tools/modal/types.ts": {
+        "version": "3cbaae7f8de69aafb2901ba69ebabdbb934480b3fe2c46b2799a6fcf09df48a8",
+        "signature": "a88693d699f870ec1ebc243dc4aba40e292da150f95622275d6727bf841a0629"
+      },
+      "../src/tools/modal/stack.ts": {
+        "version": "99e9a747d2d34a3d90c21c3ada8f63b8f85e814ef8af2f7e66f5e3e19a3cd911",
+        "signature": "70a2b77a61fd9c75da130d3ad873ed9ccfdd7fa9a33a0f3bf688510ee38de8eb"
+      },
+      "../src/tools/modal/dialog/types.ts": {
+        "version": "3372be5094b1bc7c8779b3f7fb93b5dd8fea99ca88574231d5c9ab2e83256904",
+        "signature": "80f9ffea25843a7d4ec4b1d4a13bfce0e5e8bfcc3de5d2081a363b49d820a141"
+      },
+      "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": {
+        "version": "6bc18d34279c660e27e090365b7a177a748f3c75628c04118772a885850d7aeb",
+        "signature": "4f02b108c1f593964457c92407d36f36fccc2c7b7a8a06fc8b03316240dbba39"
+      },
+      "../src/tools/modal/dialog/getapi.ts": {
+        "version": "7bc76a0bafa40386d99ce045685f423ddf2f66b8fbcae4583ab862a145a4e306",
+        "signature": "7af47e632c90fdd62f17d667d5c2445feb5ec1e043cd4ccd16bd9c17611ac3eb"
+      },
+      "../src/tools/modal/dialog/index.ts": {
+        "version": "f024a5ef966b1915be001d7464e414821c55cb53c441a0e3c322b14eb3859ed4",
+        "signature": "4ecf8d0f5fb132f6dabd324bbe77109d09c9201f258b67c78be169725bddae01"
+      },
+      "../src/lib/restartapp/impl.ts": {
+        "version": "d829acff7d73c1b5780a12db2d4748654adb8aece56ce8b7076b74d729143511",
+        "signature": "30dd92fd197702e13b2c8ccddb26805ffbb65ff0b4ec136f97ecdb3b8373aad3"
+      },
+      "../src/lib/restartapp/index.ts": {
+        "version": "9cce778a7154292f6cc71d342511d2790d456d056662c57c82c170b5511a1d10",
+        "signature": "328024dc9aaff8fc9202f68a463ef7f4c0fcb22bf372fc0468aafe0e8c4293b0"
+      },
+      "../src/lib/tobackend/remoteapicaller/sendrequest.ts": {
+        "version": "7b694570ffc3b1106fc4b986e6ba49bdd9e1aefda3720edd4e8fe49c46f713e0",
+        "signature": "0be24ce96a86ae9cc6e7f40288081d45aaa39d6ebc52e96eec413a5ff2b8a5d4"
+      },
+      "../src/lib/types/webphonedata/types.ts": {
         "version": "42291663c0c1f6c5db187d6bbfd853093a7922c2f7edd320c6913e921d515c5b",
         "signature": "255a17735e7fe611f31fba4ea0ea75da2ed08f82fac2844114fd8fc6237d1c65"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts": {
+      "../src/sip_api_declarations/backendtoua.ts": {
         "version": "4488075e2808db3ce31fe8364eb18777288e900b4017aa5dd9d3d342bc3dfadc",
         "signature": "edbd46e48460f4c56762d10c828165f8f3b2a67bfb9b749da57872297863dd53"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts": {
+      "../../local_modules/phone-number/dist/lib/index.d.ts": {
         "version": "25aecda30c3d5ceb4375b0f43482d90939ad23c71c1f8cf78d64412f08fc673e",
         "signature": "25aecda30c3d5ceb4375b0f43482d90939ad23c71c1f8cf78d64412f08fc673e"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts": {
-        "version": "b5846c1072020484f21e2104c354e3715a809fb2cba96a1218ee20875ab48195",
-        "signature": "e9cd4d74fe1e0dad9abb9af3e80a4cbbebe36f6622d8403a04ff2e0a3a6e843a"
+      "../src/lib/tobackend/remoteapicaller/base.ts": {
+        "version": "8e74cdc2343c9543144dcf9fce9420b5d124edb5bc1d76150b122d4ca396cc39",
+        "signature": "58bd4c51ea7e758e657d7914bb72f9bdc97f03be2017f3faa9420f162dee5a79"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/modal_stack.ts": {
-        "version": "4e8e3bbe813265192d99791a87553be0996d77395f1d360029d1eda9c412ccad",
-        "signature": "bcf1e6294a85b124e9771824aa55651c6c55190b30c50225ae10b61577365f72"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts": {
-        "version": "334ebb374845675770922b24460d1c5535cf131a49029f3b74599fa2a86ad9fd",
-        "signature": "fb83ed2939f42553360dd317b09e0791b31591686ca3ad126c7c876da2e2ac3e"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts": {
-        "version": "0d8d0dc77392533ee2df72ce13e94feb2d54a60fe68908b00f93e8610b34e947",
-        "signature": "d77e375ac4db3e39ccd4bc025c86ff40438f81cd0d5e964aa63bdd6dbaf39500"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts": {
-        "version": "17f52511bdeab5898eeaf27d58b1330c9579e6d801115f5050b2db98d2093683",
-        "signature": "a22566476164cfa0ac969567e08c85657cfc060f40aadf0dc4f41c71de1dc09b"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts": {
-        "version": "d32e5cf8caaf71f844376420b81ab7269f9a38cef560eb735c7f40939041a2ea",
-        "signature": "5e8054e9e588efa9cffa6d5f73e34eba8a5af98043aae7c23eb362a2b8bb9c0f"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts": {
-        "version": "d074c55726cd89e8158fd420f9e19973151ede565a1501d91569eab449faf838",
-        "signature": "16e3486f3a51f59b7705073c3d45f78bdbc1d20ff41a3d7e746767bf573ab94f"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts": {
-        "version": "4fb329cde18b7adf9a62e0cfe8b49a34c2baf979a7e073924e6d4ad30226c42d",
-        "signature": "8c68773e66a2b702bac092013c7559be9b515c06ec490108ef39ab4054467978"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/types.d.ts": {
+      "../../local_modules/crypto-lib/dist/sync/types.d.ts": {
         "version": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de",
         "signature": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts": {
-        "version": "094dd9488b587dc16a3be8d8c12734b53f39b73231a5b5196b1f8ba971ffbb87",
-        "signature": "325e2f3e0eeaead587f24aa41f395bb8788c31ab74b695a5199a1de160864b8b"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/availablepages.ts": {
-        "version": "d8f9978b01f354af68f150913356f0f06d2100b2d098948ee5e8c57b52a3c0e6",
-        "signature": "4a88808a75aae0e3aadbb841b680002236871eebb739ac92b21d684b642203b7"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/minimal-polyfills/dist/lib/array.from.d.ts": {
-        "version": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts": {
+      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": {
         "version": "ab92620bc1dcc144ef6766893d84da02dfd9fd9e3f40991d11ed18d780b2ecc1",
         "signature": "ab92620bc1dcc144ef6766893d84da02dfd9fd9e3f40991d11ed18d780b2ecc1"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts": {
-        "version": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4",
-        "signature": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts": {
-        "version": "dcc78409cc7973f9ef1865f157b5b2ddad37d337c479fdcf4406c9789281deb9",
-        "signature": "dcc78409cc7973f9ef1865f157b5b2ddad37d337c479fdcf4406c9789281deb9"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts": {
-        "version": "9430a5b09e2eccee1525d65cc6f4581dba4fa85bfe0377c95e9beb2dc01e0007",
-        "signature": "b06fc7d47e028efecdedd36440fdbbe3150655d0580915dc20524a21382331e9"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts": {
-        "version": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516",
-        "signature": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts": {
-        "version": "874382a8cd95a29df78a6433f62f91c677f69327119186fccbb81cfaccdfedac",
-        "signature": "7835dcc62da0b466d32d50442aff4f552111e715efd9b68027706971f55576c5"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/hostkfd.ts": {
-        "version": "7555363cd55fd09e43b13a884ff98d5b6b9131dc5c32f895d2b0a8d6f91a5351",
-        "signature": "3a2a45f0e0ae6252106b3c29c88fff79b683c862148f6747e36888dad479f1b5"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/loaduiclasshtml.ts": {
-        "version": "1d17b6a126a59ac665fa30a36c9b200f02a9fe5bec3827dcbb9de667980f531e",
-        "signature": "89073745c2b49a8ecff039468cbc321a1021e7a34cc3f29d7d4c1d6d643e99c4"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/notifyhostwhenpageisready.ts": {
-        "version": "bf8706717d6295f3bc8ee884419ed76c6393c060b68592dfe84bcd1fc11d34e5",
-        "signature": "8cb1cea1fe930d2a3f91d0a62702ec97930c5f0e666d6f79276bf772f8a4b0cc"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shipping.ts": {
-        "version": "fb253b4622c650387b9bbaa421f0daad8d58851eb76117fd7d0fe000792ce993",
-        "signature": "8007d3aac92384cb6e5b38a52ed8114c7cdcc706aebf9fdadb2bfd30b93c1788"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts": {
-        "version": "35da7c58973ae1ce768c3a3eb7571a00d40e8afb35d1255289d17195200ba353",
-        "signature": "5d906a1f41cb5b12a54c54ce398661aef69a8d040f3e159fe4d5f4e1087c47eb"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts": {
-        "version": "c5b52409ab13729e63743505f73f148d598f14ed04616615ad0f66bc53946c8e",
-        "signature": "c5b52409ab13729e63743505f73f148d598f14ed04616615ad0f66bc53946c8e"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts": {
-        "version": "2d7a2a9492e5b19aa9b02dedf661a9e84f3ab3796298f72777192093bd3767ca",
-        "signature": "22329b406e4e8d0967f02fd692d750e4656575305c1d8728c037d1cd647a92e0"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/backend.ts": {
-        "version": "cff3879986af104da39726479e248551a3348fffea2904f0328a80a64d24e287",
-        "signature": "6e34ac6a4c5e9fecb44f75ba178c16ba958a79e7bac7c0a9f0505b3b4fa47218"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/logic.ts": {
-        "version": "be281b125a2f8e1586a57bb67ca8d4eb2ec165df555091c4cc87e90bfe8a1d20",
-        "signature": "b18a94d93fa7c32c557ed2ae40cb1d11609f6c78255380f480ca0553969c4245"
-      },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/isascendingalphabeticalorder.ts": {
+      "../src/tools/isascendingalphabeticalorder.ts": {
         "version": "9a173f2cd76f79033b428f602cb54730e93fba633c66bfe019f6ae55bd7cc894",
         "signature": "9135e8a9dd8a08c507966fe8cf1a95a1b1ed83e6e98239589ded79d966548b10"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts": {
-        "version": "803bb3d6a925ee36abd97d42577be13239df5279030f41edc6e0fe30b6bd84f0",
-        "signature": "44808b15811c7ef44ed455703e4c33b2ddee8d00e317db22c708dcad2225e26e"
+      "../../local_modules/crypto-lib/node_modules/minimal-polyfills/dist/lib/array.from.d.ts": {
+        "version": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts": {
-        "version": "569b4ee23cab07b752a513525ca73d2ff1230f1cb4da738739ebf247c53c8cfb",
-        "signature": "10c22e139bc5f205bfd877eb601a7f485e1b76d1a27e893d36942ec5fe3cd9c3"
+      "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts": {
+        "version": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4",
+        "signature": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/index.ts": {
-        "version": "8abe7fc5092e0e36f0c75cca9e3d903fca69b6331a83f84671028a9d0c838abe",
+      "../../local_modules/crypto-lib/dist/async/index.d.ts": {
+        "version": "dcc78409cc7973f9ef1865f157b5b2ddad37d337c479fdcf4406c9789281deb9",
+        "signature": "dcc78409cc7973f9ef1865f157b5b2ddad37d337c479fdcf4406c9789281deb9"
+      },
+      "../src/lib/types/webphonedata/logic.ts": {
+        "version": "d6697319acd74d375d0a2ac78ff2ebb87727402934f3203c9ed349f27e76e04e",
+        "signature": "ab81e2a4dbf96bf62af7dac02986f6e2f4d33c88c9b2c929c6d446288e3a4dec"
+      },
+      "../src/lib/tobackend/remoteapicaller/webphonedata.ts": {
+        "version": "90e91a9e81a17d90d3ce773af5ced632458fda3fab7b00d4e6e553aa50e2b83b",
+        "signature": "ffc692940408e586a7f4253394ebf43826ece79a88e6ccb7b8721b3fa3c1f17f"
+      },
+      "../src/lib/tobackend/remoteapicaller/index.ts": {
+        "version": "f04e1b8b0246802a815ce6110d487435f555f56fe79f1b8ee05a2eef52c7541d",
         "signature": "de1532bac2fe1e0436016a6d5430b7a690783722cbaee541d1f0847ab893634b"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/observer.ts": {
-        "version": "ccb41635813db85ca85d303eff0db5a3088540b612474063ec82f2328be39e9c",
-        "signature": "fadf587d7ab511035cb97b526517c9af0125b0ab7c7edb280292e20da36a5218"
+      "../src/lib/tobackend/localapihandlers.ts": {
+        "version": "fabc9847ffca624111380dc21d199f9db177a3474845380e43f76e881c9b1efe",
+        "signature": "1e2ecf4ec2b30af899faa5c8cc207aba31c4da3ddefe8af948467533fa37f66c"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/overridewebrtcimplementation.ts": {
-        "version": "f293f7d881c883ddc71b7f4971ed73823643020cf765f94846ba82158b542d80",
-        "signature": "9595f96193fd768c374ff57c93edda073e54c5fa8c5bcb41a3163e1602a7889b"
+      "../src/lib/types/websocketconnectionparams.ts": {
+        "version": "cf07dfd7fa5966febb709ff1000833e5c93ae3ae5910121ce07d725582adefc6",
+        "signature": "98805ea5129a2ab09ff480d11cf8d8fd464e7f64064ff86fb00baa5bb49d1d1c"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/urlgetparameters.ts": {
+      "../src/tools/urlgetparameters.ts": {
         "version": "9159da8f9b6916894a5cf1bd0b6aa6be587a52a28259f6c681ff13c8ce893ef7",
         "signature": "4b38c5678b2321034c936b0179297f8d408453c3634b51f4c5045df999e58799"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/polyfills/object.assign.ts": {
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.ts": {
+        "version": "46ca73d96daa205ad9fffb240dfb17acf26d9ae3e0cc510294946505c9842cab",
+        "signature": "46a0b34e1264c4d25ca6646ff0e6cfaa7275ea1ae5a6bc23d4dfd84edf2f2b2e"
+      },
+      "../src/lib/localstorage/localstorageapi/index.ts": {
+        "version": "dd39f6251af9316579a84b935a99cc9bbc4989ba0d3585e9ec8b99037afdff47",
+        "signature": "4e0a7042cafce07b5e9187429425d3ac0c80a058f379b3fccda0ac927512b3b7"
+      },
+      "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": {
+        "version": "b57c439cf10f917c2367dd871cf798ef8ac8b93c5422a36aac359fe6bc56ec50",
+        "signature": "350015d9eb98ddf2903af588549f526925bea2691d658395a2d6342b912bee0c"
+      },
+      "../src/lib/types/connectsidhttpheadername.ts": {
+        "version": "c9239011ef8164c2511d0f934379be5f93838d83825ecb4b911d6c4b9317bd45",
+        "signature": "4f2dd83137e5e8b443581f52b96b9b31c936d8140f6e14f6927d11a75cb59e02"
+      },
+      "../node_modules/transfer-tools/dist/lib/json_custom.d.ts": {
+        "version": "c5b52409ab13729e63743505f73f148d598f14ed04616615ad0f66bc53946c8e",
+        "signature": "c5b52409ab13729e63743505f73f148d598f14ed04616615ad0f66bc53946c8e"
+      },
+      "../src/lib/webapicaller/sendrequest.ts": {
+        "version": "256f97cbcb7eb0780049219a5c3849d103c85b7a374ca64cfba66da6df1a55c4",
+        "signature": "dd8804efb895528f167ba108f6f29055d8824dbc1a43892a89b089b251ca1ad6"
+      },
+      "../src/lib/localstorage/credentials.ts": {
+        "version": "0c84daf4913f9139331e9140576932780e8e6d141bd9a776c55c3f0ea21ecfba",
+        "signature": "156e42de42b2a10e2bad56d580804fb169040c3305b4ac1e4779a08d9e8fe753"
+      },
+      "../src/lib/networkstatemonitoring/types.ts": {
+        "version": "83f7670253b4eaba546b665d2f6a85941c207aaa0921ca317fa6efff4d0ecc61",
+        "signature": "ca0fb0d9710967bf71248cb744ab6e12e2881ebfb868cde9237defa8c3955606"
+      },
+      "../src/lib/networkstatemonitoring/impl.ts": {
+        "version": "22795a4366077b451236a181184b954326723bc2aeb207a1c221e168608247a6",
+        "signature": "c79ff691c51605f80aad6bdf5b05ad4cb6c5db0c501a6338744ff90007cf3c72"
+      },
+      "../src/lib/networkstatemonitoring/index.ts": {
+        "version": "8a5353d676aafa6f884104c726125f45d2adbfee396023fbd0f314600e19ecb2",
+        "signature": "63feb2ee2ad4ddc6c39548492ba7ae7312a3feb23c830e193a026dba3b91b842"
+      },
+      "../src/lib/webapicaller/index.ts": {
+        "version": "b89b8be9665c578cc0b624cb1158d370979a63286909203fdbccf0dc29ff0ee4",
+        "signature": "294498af9ba0766e7f46089995b75848d712f8d69f26da58e972f25e98e1312c"
+      },
+      "../src/lib/procedure/tryloginfromstoredcredentials.ts": {
+        "version": "ff1fab6c8f508ebf2c0faef3012826e2d37457832ea9287490bf836e0948b6e8",
+        "signature": "9e06448d1bc87f93df6ca40cc2b92222d4b8641e51eb52f5b3a80028ff967ccf"
+      },
+      "../src/lib/tobackend/connection.ts": {
+        "version": "811269d346f81bc346ba9b59e4877f4473366d867fd4dd9b4218682d8ccdbc25",
+        "signature": "d8d0b37281a0e6a90abd2fef2708fcdc3268f46df0f73212060bd94a06957a72"
+      },
+      "../src/lib/ua.ts": {
+        "version": "5fec8967650800dcd33dabae71c59e127a9e89a5b3fc925569b46da9c32448d3",
+        "signature": "5aec8ab7736d1708efa9811680d5ff1a64a63dd20eb3d997a725db796cc149fb"
+      },
+      "../src/lib/availablepages.ts": {
+        "version": "482ebffb661fb851a532d239bb622f9b366139fde75757567c547a0413b5b578",
+        "signature": "a21b3306c076599fdc94458f631a0a2c0f3506d94eff42d55e600144f10c0b22"
+      },
+      "../src/lib/loaduiclasshtml.ts": {
+        "version": "1d17b6a126a59ac665fa30a36c9b200f02a9fe5bec3827dcbb9de667980f531e",
+        "signature": "89073745c2b49a8ecff039468cbc321a1021e7a34cc3f29d7d4c1d6d643e99c4"
+      },
+      "../src/lib/notifyhostwhenpageisready.ts": {
+        "version": "bf8706717d6295f3bc8ee884419ed76c6393c060b68592dfe84bcd1fc11d34e5",
+        "signature": "8cb1cea1fe930d2a3f91d0a62702ec97930c5f0e666d6f79276bf772f8a4b0cc"
+      },
+      "../src/lib/shipping.ts": {
+        "version": "fb253b4622c650387b9bbaa421f0daad8d58851eb76117fd7d0fe000792ce993",
+        "signature": "8007d3aac92384cb6e5b38a52ed8114c7cdcc706aebf9fdadb2bfd30b93c1788"
+      },
+      "../src/lib/shopproducts.ts": {
+        "version": "35da7c58973ae1ce768c3a3eb7571a00d40e8afb35d1255289d17195200ba353",
+        "signature": "5d906a1f41cb5b12a54c54ce398661aef69a8d040f3e159fe4d5f4e1087c47eb"
+      },
+      "../src/lib/nativemodules/hostcryptolib.ts": {
+        "version": "4f5456921713b37835e245e20391bc827ffde2a25416f9ddc51e62078c76592f",
+        "signature": "c999a60fa7d94472db8a6faad1c25e66529a6c8c0ab38e75e954a9b459c49dff"
+      },
+      "../src/lib/crypto/cryptolibproxy.ts": {
+        "version": "4798c49ba99bc5428d0a9439b10df93ac99fff8b54c7dcf31692fbe9616c9c31",
+        "signature": "fbb6f210ef9e09453181fc5b99ba577bfe166aa0251f69aec6405eaae8b27aae"
+      },
+      "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts": {
+        "version": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516",
+        "signature": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516"
+      },
+      "../src/lib/nativemodules/hostkfd.ts": {
+        "version": "4ad4b9afff99956fea68c6d78bddc98c477737113f7fd6e3b5185132ca7c665f",
+        "signature": "ff571ae81462ceca1e558bdbd720ea0e6c63c2e14c5820c2b3e4f4cb77e647a9"
+      },
+      "../src/lib/crypto/kfd.ts": {
+        "version": "d189fe49a7a9ef8a6a5161d10f5c05d3b83c95dacdc23520c1c2882f6bf87e98",
+        "signature": "4a5841a02cfe5d12c00e783dbf557f0f4896d2896ac35ecfe3eb53f9f30a1387"
+      },
+      "../src/lib/localstorage/towarduserkeys.ts": {
+        "version": "0334799aaf6daa8fa891bdeac48d0e98679a4fa37ee2b728094c7e2d4ceddfbb",
+        "signature": "c9960cd924021c05952645f128bec85193aa4e19735494fb01d458a1f34d8ed5"
+      },
+      "../src/lib/crypto/keysgeneration.ts": {
+        "version": "f28cc366edfe6109f22b823635e1bf2e834d0d825ab9a1c8dbe2d212da48288a",
+        "signature": "6f6984945225d6b44f64abb31b537b21c90411c48127c05017fc52f60e9410d9"
+      },
+      "../src/lib/crypto/setupencryptordecryptors.ts": {
+        "version": "7ed0601d16c102960ba0b36b4c985ba5bb621f0af5fc631e57cc76c8195dcea0",
+        "signature": "ecc27bdae65edd68ede267defb9a804b97a0f919eb4e5a5e0d50f245aa8f0c27"
+      },
+      "../src/lib/env/jsruntimeenv.native.ts": {
+        "version": "23979b4bb6bb8c184a3a1d345337d50276a8c1d4079ad5baac9c3ea09c4a80f8",
+        "signature": "5adbbeb637d6351a73a06e583a4a353c47d74175ac7f5128d878aabc6c2e115a"
+      },
+      "../src/lib/localstorage/justregistered.ts": {
+        "version": "f788a72ae025e337316f8c8db68310d7fa47e92d97627a2ca2de33b7f4603479",
+        "signature": "633be446e30eb9754fa241466a8fac8095b09928c6c9591982a64c827dff3bcd"
+      },
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": {
+        "version": "09ef617b5f2d66ae1fca23974ef5d63ec5ea2b3894a06033c197fed3c3ee0e7a",
+        "signature": "fdb7aca60a016a6cfb31782d151485b93bc00070e8f2a122e9746021acf00099"
+      },
+      "../src/tools/overridewebrtcimplementation.ts": {
+        "version": "9aa82d412f24e13b820a20368710ba4ebe985dad4ca3fc7b38aca32a593ae2d4",
+        "signature": "9595f96193fd768c374ff57c93edda073e54c5fa8c5bcb41a3163e1602a7889b"
+      },
+      "../src/lib/nativemodules/hostwebrtc.ts": {
+        "version": "6f51afd66db7f4ded803de25e17d3f176f1d9696fc2baaf53e2d4c524d5326ee",
+        "signature": "eba13d2f7a738b0592555b2c6966ae5fde214b0d77405d2b2550a2a5e1b787b4"
+      },
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts": {
+        "version": "d79ea0d39b65db0b578cb474e22766187aa1ad0560c77b0a6eab783a3830630f",
+        "signature": "d79ea0d39b65db0b578cb474e22766187aa1ad0560c77b0a6eab783a3830630f"
+      },
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts": {
+        "version": "b59aefc2d67aeb91022f9292bcbcd45a0f5f72604c92eacd185fa6313232bf74",
+        "signature": "b59aefc2d67aeb91022f9292bcbcd45a0f5f72604c92eacd185fa6313232bf74"
+      },
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": {
+        "version": "1fc824b170a9eb02028c6603503db9f520e3d7bd1afedffe015069a87ab6fb69",
+        "signature": "1fc824b170a9eb02028c6603503db9f520e3d7bd1afedffe015069a87ab6fb69"
+      },
+      "../src/lib/networkstatemonitoring/impl.native.ts": {
+        "version": "214c454732437394c38f9e2ca4fda8c5de9683487787b5d3fbfff098619510c9",
+        "signature": "c79ff691c51605f80aad6bdf5b05ad4cb6c5db0c501a6338744ff90007cf3c72"
+      },
+      "../src/lib/procedure/login.ts": {
+        "version": "e949b65eea98051c8ef69c4af548001abc71eee84602bd0ee790872958ab6d44",
+        "signature": "8f38d2a1fbf52daa8cc5fb9d6ef1a2bda71d850979df04308e79f53df9171e97"
+      },
+      "../src/lib/procedure/register.ts": {
+        "version": "aa3bd0cb5631bb4175b26b2d31b8452d66682510347af42cc78b07c334de44ff",
+        "signature": "cfbcbd81ed0523cba13b59ad332a505310b41209481a1445a0f7564a3abf0123"
+      },
+      "../../react-native-app/node_modules/@types/react-native-restart/index.d.ts": {
+        "version": "24b07c5674c380530dbfc2500dae3daa4e1cf731bd6e70de2eea9513f17e6899",
+        "signature": "24b07c5674c380530dbfc2500dae3daa4e1cf731bd6e70de2eea9513f17e6899"
+      },
+      "../src/lib/restartapp/impl.native.ts": {
+        "version": "a5e01ebfe75ec37309a800dd8e0c6ee23b0efce4f9e943b184ce472d2002e091",
+        "signature": "30dd92fd197702e13b2c8ccddb26805ffbb65ff0b4ec136f97ecdb3b8373aad3"
+      },
+      "../src/tools/observer.ts": {
+        "version": "ccb41635813db85ca85d303eff0db5a3088540b612474063ec82f2328be39e9c",
+        "signature": "fadf587d7ab511035cb97b526517c9af0125b0ab7c7edb280292e20da36a5218"
+      },
+      "../src/tools/modal/getapi.ts": {
+        "version": "155e6944701b498a9f49796aaddda027a12c8d6335785937119a3871e73f7f3a",
+        "signature": "7af47e632c90fdd62f17d667d5c2445feb5ec1e043cd4ccd16bd9c17611ac3eb"
+      },
+      "../src/tools/modal/index.ts": {
+        "version": "c6796c1843ea6dbe35045fdfbd793ba5334b3b2297a63969f2f7078c14a28da0",
+        "signature": "85ff1c3e00570d6c7462d0c93052550b279183a521f3c2d551e32e520d33acd7"
+      },
+      "../src/tools/modal/types.structure.native.ts": {
+        "version": "df50f73eb71528d29013a2e97b79dc72b2502f6a6a50bc0d604d948a1c158bc2",
+        "signature": "b7d4a9932630e5d0015abaa6cce3e848021c1ba751eaa8887c04bb71c6d5a9c8"
+      },
+      "../src/tools/polyfills/object.assign.ts": {
         "version": "268d621017d8802750efdc4bc9d1799e43a184b2f10efd05a900935bf437d590",
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts": {
+      "../node_modules/@types/jquery/index.d.ts": {
         "version": "0763d8726070ce0e31aea762d06b10a950afb7bfc906d102f213a48fd3457281",
         "signature": "0763d8726070ce0e31aea762d06b10a950afb7bfc906d102f213a48fd3457281"
       },
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts": {
+      "../node_modules/@types/bootstrap/index.d.ts": {
         "version": "dd31bf493543523718595c13a629c8f9845991186c5a48fae063aa4dbc1e6a98",
         "signature": "dd31bf493543523718595c13a629c8f9845991186c5a48fae063aa4dbc1e6a98"
       }
@@ -395,7 +579,7 @@
         "lib.es2015.d.ts"
       ],
       "declaration": true,
-      "outDir": "C:/Users/joseph/Dropbox/shell/semasim/frontend/shared/dist",
+      "outDir": "./",
       "strictNullChecks": true,
       "sourceMap": false,
       "newLine": 1,
@@ -406,547 +590,877 @@
       "strictFunctionTypes": true,
       "resolveJsonModule": true,
       "incremental": true,
-      "project": "C:\\Users\\joseph\\Dropbox\\shell\\semasim\\frontend\\shared\\tsconfig.json",
-      "configFilePath": "C:/Users/joseph/Dropbox/shell/semasim/frontend/shared/tsconfig.json"
+      "types": [
+        "bootstrap",
+        "jquery"
+      ],
+      "project": "../tsconfig.json",
+      "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/currency.ts"
+      "../src/lib/types/shop.ts": [
+        "../src/tools/currency.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/subscription.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts"
+      "../src/web_api_declaration.ts": [
+        "../src/lib/types/subscription.ts",
+        "../src/lib/types/shop.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../../../gateway/dist/lib/misc/registrationparams.d.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/registrationparams.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts"
+      "../src/gateway/registrationparams.ts": [
+        "../../../gateway/dist/lib/misc/registrationparams.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../../../gateway/dist/lib/misc/bundleddata.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/bundleddata.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts"
+      "../src/gateway/bundleddata.ts": [
+        "../../../gateway/dist/lib/misc/bundleddata.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts"
+      "../../../gateway/dist/lib/misc/siprouting.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/readimsi.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts"
+      "../src/gateway/readimsi.ts": [
+        "../../../gateway/dist/lib/misc/siprouting.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../src/gateway/types.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/webapipath.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/web_api_declaration.d.ts"
+      "../src/gateway/webapipath.ts": [
+        "../../../gateway/dist/web_api_declaration.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-sip/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      "../../local_modules/ts-sip/dist/lib/core.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts"
+      "../../local_modules/ts-sip/dist/lib/iconnection.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts"
+      "../../local_modules/ts-sip/dist/lib/socket.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/dist/lib/iconnection.d.ts",
+        "../../local_modules/ts-sip/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/dist/lib/misc.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/server.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/client.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/index.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/api/server.d.ts",
+        "../../local_modules/ts-sip/dist/lib/api/client.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts"
+      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/core.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../local_modules/ts-sip/dist/lib/api/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
+      "../src/lib/types/usersim.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/modal_stack.ts"
+      "../node_modules/trackable-map/dist/lib/index.d.ts": [
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
+        "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
+        "../node_modules/trackable-map/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/bundleddata.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/readimsi.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/registrationparams.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/run-exclusive/dist/lib/runexclusive.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts"
+      "../src/sip_api_declarations/uatobackend.ts": [
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts"
+      "../src/lib/env/index.ts": [
+        "../src/lib/env/jsruntimeenv.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
+      "../src/lib/tobackend/events.ts": [
+        "../src/lib/types/usersim.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-sip/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/tools/modal/types.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/tools/modal/types.structure.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts"
+      "../src/tools/modal/stack.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/hostkfd.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      "../src/tools/modal/dialog/types.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts"
+      "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": [
+        "../src/tools/modal/types.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/webapipath.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts"
+      "../src/tools/modal/dialog/getapi.ts": [
+        "../src/tools/modal/dialog/types.ts",
+        "../src/tools/modal/creategenericproxyforbootstrapmodal.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/backend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts"
+      "../src/tools/modal/dialog/index.ts": [
+        "../src/tools/modal/stack.ts",
+        "../src/tools/modal/dialog/types.ts",
+        "../src/tools/modal/dialog/getapi.ts",
+        "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/logic.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/lib/restartapp/impl.ts": [
+        "../src/lib/env/index.ts",
+        "../src/lib/restartapp/index.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/isascendingalphabeticalorder.ts"
+      "../src/lib/restartapp/index.ts": [
+        "../src/lib/restartapp/impl.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/lib/tobackend/remoteapicaller/sendrequest.ts": [
+        "../../local_modules/ts-sip/dist/lib/index.d.ts",
+        "../src/lib/tobackend/connection.ts",
+        "../src/lib/restartapp/index.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/index.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts"
+      "../src/sip_api_declarations/backendtoua.ts": [
+        "../src/lib/types/usersim.ts",
+        "../src/lib/types/webphonedata/types.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/overridewebrtcimplementation.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      "../src/lib/tobackend/remoteapicaller/base.ts": [
+        "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
+        "../src/sip_api_declarations/backendtoua.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../src/lib/tobackend/connection.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/tobackend/events.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts"
+      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
+      ],
+      "../src/lib/types/webphonedata/logic.ts": [
+        "../src/lib/types/webphonedata/types.ts",
+        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../src/tools/isascendingalphabeticalorder.ts",
+        "../../local_modules/crypto-lib/dist/async/index.d.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
+        "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
+        "../src/sip_api_declarations/backendtoua.ts",
+        "../src/gateway/types.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../src/lib/types/usersim.ts",
+        "../src/lib/types/webphonedata/logic.ts",
+        "../../local_modules/crypto-lib/dist/async/index.d.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/index.ts": [
+        "../src/lib/tobackend/remoteapicaller/base.ts",
+        "../src/lib/tobackend/remoteapicaller/webphonedata.ts"
+      ],
+      "../src/lib/tobackend/localapihandlers.ts": [
+        "../src/sip_api_declarations/uatobackend.ts",
+        "../../local_modules/ts-sip/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../src/lib/env/index.ts",
+        "../src/lib/tobackend/events.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/tobackend/remoteapicaller/index.ts"
+      ],
+      "../src/lib/localstorage/localstorageapi/index.ts": [
+        "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.ts"
+      ],
+      "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
+        "../src/lib/localstorage/localstorageapi/index.ts"
+      ],
+      "../src/lib/webapicaller/sendrequest.ts": [
+        "../src/lib/types/connectsidhttpheadername.ts",
+        "../src/lib/env/index.ts",
+        "../node_modules/transfer-tools/dist/lib/json_custom.d.ts",
+        "../src/gateway/webapipath.ts"
+      ],
+      "../src/lib/localstorage/credentials.ts": [
+        "../src/lib/localstorage/localstorageapi/index.ts",
+        "../src/lib/env/index.ts",
+        "../src/web_api_declaration.ts"
+      ],
+      "../src/lib/networkstatemonitoring/types.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/impl.ts": [
+        "../src/lib/networkstatemonitoring/types.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/index.ts": [
+        "../src/lib/networkstatemonitoring/types.ts",
+        "../src/lib/networkstatemonitoring/impl.ts"
+      ],
+      "../src/lib/webapicaller/index.ts": [
+        "../src/web_api_declaration.ts",
+        "../src/lib/webapicaller/sendrequest.ts",
+        "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
+        "../src/lib/localstorage/credentials.ts",
+        "../src/lib/env/index.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/networkstatemonitoring/index.ts",
+        "../src/lib/types/shop.ts"
+      ],
+      "../src/lib/procedure/tryloginfromstoredcredentials.ts": [
+        "../src/lib/env/index.ts",
+        "../src/lib/webapicaller/index.ts",
+        "../src/lib/localstorage/credentials.ts"
+      ],
+      "../src/lib/tobackend/connection.ts": [
+        "../../local_modules/ts-sip/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/lib/tobackend/localapihandlers.ts",
+        "../src/lib/types/websocketconnectionparams.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/tools/urlgetparameters.ts",
+        "../src/lib/env/index.ts",
+        "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
+        "../src/lib/procedure/tryloginfromstoredcredentials.ts",
+        "../src/lib/tobackend/events.ts",
+        "../src/lib/restartapp/index.ts"
+      ],
+      "../src/lib/ua.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/gateway/types.ts",
+        "../src/gateway/bundleddata.ts",
+        "../src/gateway/readimsi.ts",
+        "../src/gateway/registrationparams.ts",
+        "../../local_modules/ts-sip/dist/lib/index.d.ts",
+        "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts",
+        "../src/lib/tobackend/connection.ts",
+        "../src/lib/tobackend/events.ts",
+        "../src/lib/env/index.ts",
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts"
+      ],
+      "../src/lib/shopproducts.ts": [
+        "../src/lib/types/shop.ts"
+      ],
+      "../src/lib/nativemodules/hostcryptolib.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/crypto/cryptolibproxy.ts": [
+        "../../local_modules/crypto-lib/dist/async/index.d.ts",
+        "../src/lib/nativemodules/hostcryptolib.ts",
+        "../src/lib/env/index.ts"
+      ],
+      "../src/lib/nativemodules/hostkfd.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/crypto/kfd.ts": [
+        "../src/lib/env/index.ts",
+        "../src/lib/nativemodules/hostkfd.ts",
+        "../src/lib/crypto/cryptolibproxy.ts"
+      ],
+      "../src/lib/localstorage/towarduserkeys.ts": [
+        "../src/lib/localstorage/localstorageapi/index.ts",
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../src/lib/crypto/keysgeneration.ts": [
+        "../src/lib/crypto/cryptolibproxy.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
+        "../src/lib/crypto/kfd.ts",
+        "../src/lib/localstorage/towarduserkeys.ts"
+      ],
+      "../src/lib/crypto/setupencryptordecryptors.ts": [
+        "../src/lib/crypto/cryptolibproxy.ts",
+        "../src/lib/crypto/keysgeneration.ts",
+        "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
+        "../src/lib/localstorage/towarduserkeys.ts",
+        "../src/lib/tobackend/remoteapicaller/index.ts",
+        "../src/lib/ua.ts",
+        "../src/lib/types/usersim.ts"
+      ],
+      "../src/lib/localstorage/justregistered.ts": [
+        "../src/lib/localstorage/localstorageapi/index.ts",
+        "../src/lib/localstorage/towarduserkeys.ts"
+      ],
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
+        "../res/@types/@react-native-community/async-storage/index.d.ts"
+      ],
+      "../src/tools/overridewebrtcimplementation.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/nativemodules/hostwebrtc.ts": [
+        "../src/tools/overridewebrtcimplementation.ts"
+      ],
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": [
+        "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
+        "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/impl.native.ts": [
+        "../src/lib/networkstatemonitoring/types.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts"
+      ],
+      "../src/lib/procedure/login.ts": [
+        "../src/lib/crypto/cryptolibproxy.ts",
+        "../src/lib/availablepages.ts",
+        "../src/lib/localstorage/towarduserkeys.ts",
+        "../src/lib/webapicaller/index.ts",
+        "../src/lib/crypto/keysgeneration.ts",
+        "../src/lib/localstorage/justregistered.ts",
+        "../src/tools/modal/dialog/index.ts"
+      ],
+      "../src/lib/procedure/register.ts": [
+        "../src/lib/webapicaller/index.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/crypto/keysgeneration.ts",
+        "../src/lib/crypto/cryptolibproxy.ts",
+        "../src/lib/localstorage/justregistered.ts",
+        "../src/lib/availablepages.ts"
+      ],
+      "../src/lib/restartapp/impl.native.ts": [
+        "../../react-native-app/node_modules/@types/react-native-restart/index.d.ts",
+        "../src/lib/restartapp/index.ts"
+      ],
+      "../src/tools/modal/getapi.ts": [
+        "../src/tools/modal/types.ts",
+        "../src/tools/modal/creategenericproxyforbootstrapmodal.ts"
+      ],
+      "../src/tools/modal/index.ts": [
+        "../src/tools/modal/types.ts",
+        "../src/tools/modal/getapi.ts",
+        "../src/tools/modal/stack.ts"
+      ],
+      "../node_modules/@types/bootstrap/index.d.ts": [
+        "../node_modules/@types/jquery/index.d.ts"
       ]
     },
     "exportedModulesMap": {
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/subscription.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts"
+      "../src/web_api_declaration.ts": [
+        "../src/lib/types/subscription.ts",
+        "../src/lib/types/shop.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../../../gateway/dist/lib/misc/registrationparams.d.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/registrationparams.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts"
+      "../src/gateway/registrationparams.ts": [
+        "../../../gateway/dist/lib/misc/registrationparams.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../../../gateway/dist/lib/misc/bundleddata.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/bundleddata.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts"
+      "../src/gateway/bundleddata.ts": [
+        "../../../gateway/dist/lib/misc/bundleddata.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts"
+      "../../../gateway/dist/lib/misc/siprouting.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/readimsi.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts"
+      "../src/gateway/readimsi.ts": [
+        "../../../gateway/dist/lib/misc/siprouting.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts"
+      "../src/gateway/types.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/webapipath.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/dist/web_api_declaration.d.ts"
+      "../src/gateway/webapipath.ts": [
+        "../../../gateway/dist/web_api_declaration.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-sip/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      "../../local_modules/ts-sip/dist/lib/core.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts"
+      "../../local_modules/ts-sip/dist/lib/iconnection.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts"
+      "../../local_modules/ts-sip/dist/lib/socket.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/dist/lib/iconnection.d.ts",
+        "../../local_modules/ts-sip/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/dist/lib/misc.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/server.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/node_modules/colors/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/client.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
+      "../../local_modules/ts-sip/dist/lib/api/index.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/api/server.d.ts",
+        "../../local_modules/ts-sip/dist/lib/api/client.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts"
+      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../local_modules/ts-sip/dist/lib/core.d.ts",
+        "../../local_modules/ts-sip/dist/lib/types.d.ts",
+        "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../local_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../local_modules/ts-sip/dist/lib/api/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts"
+      "../src/lib/types/usersim.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts"
+      "../node_modules/trackable-map/dist/lib/index.d.ts": [
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
+        "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
+        "../node_modules/trackable-map/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts"
+      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
+      "../src/sip_api_declarations/uatobackend.ts": [
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/lib/env/index.ts": [
+        "../src/lib/env/jsruntimeenv.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/lib/tobackend/events.ts": [
+        "../src/lib/types/usersim.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-sip/dist/lib/index.d.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/hostkfd.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts"
+      "../src/tools/modal/types.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/tools/modal/types.structure.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts"
+      "../src/tools/modal/stack.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/subscription.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts"
+      "../src/tools/modal/dialog/types.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/backend.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts"
+      "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/logic.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts"
+      "../src/tools/modal/dialog/getapi.ts": [
+        "../src/tools/modal/dialog/types.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts"
+      "../src/tools/modal/dialog/index.ts": [
+        "../src/tools/modal/dialog/types.ts",
+        "../src/tools/modal/dialog/getapi.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts"
+      "../src/lib/restartapp/impl.ts": [
+        "../src/lib/restartapp/index.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/index.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts",
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts"
+      "../src/lib/restartapp/index.ts": [
+        "../src/lib/restartapp/impl.ts"
       ],
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts": [
-        "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts"
+      "../src/sip_api_declarations/backendtoua.ts": [
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
+        "../src/lib/types/webphonedata/types.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/base.ts": [
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      ],
+      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
+      ],
+      "../src/lib/types/webphonedata/logic.ts": [
+        "../src/lib/types/webphonedata/types.ts",
+        "../../local_modules/crypto-lib/dist/async/index.d.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
+        "../../local_modules/crypto-lib/dist/async/index.d.ts",
+        "../src/lib/types/usersim.ts",
+        "../src/lib/types/webphonedata/logic.ts",
+        "../src/gateway/types.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/index.ts": [
+        "../src/lib/tobackend/remoteapicaller/base.ts",
+        "../src/lib/tobackend/remoteapicaller/webphonedata.ts"
+      ],
+      "../src/lib/tobackend/localapihandlers.ts": [
+        "../../local_modules/ts-sip/dist/lib/index.d.ts"
+      ],
+      "../src/lib/localstorage/credentials.ts": [
+        "../src/web_api_declaration.ts"
+      ],
+      "../src/lib/networkstatemonitoring/types.ts": [
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/impl.ts": [
+        "../src/lib/networkstatemonitoring/types.ts"
+      ],
+      "../src/lib/networkstatemonitoring/index.ts": [
+        "../src/lib/networkstatemonitoring/types.ts",
+        "../src/lib/networkstatemonitoring/impl.ts"
+      ],
+      "../src/lib/webapicaller/index.ts": [
+        "../src/lib/webapicaller/sendrequest.ts",
+        "../src/lib/types/subscription.ts",
+        "../src/lib/types/shop.ts",
+        "../src/web_api_declaration.ts"
+      ],
+      "../src/lib/tobackend/connection.ts": [
+        "../../local_modules/ts-sip/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts"
+      ],
+      "../src/lib/ua.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../src/gateway/types.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts"
+      ],
+      "../src/lib/shopproducts.ts": [
+        "../src/lib/types/shop.ts"
+      ],
+      "../src/lib/crypto/cryptolibproxy.ts": [
+        "../../local_modules/crypto-lib/dist/async/index.d.ts"
+      ],
+      "../src/lib/localstorage/towarduserkeys.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../src/lib/crypto/keysgeneration.ts": [
+        "../src/lib/localstorage/towarduserkeys.ts",
+        "../src/lib/crypto/cryptolibproxy.ts"
+      ],
+      "../src/lib/crypto/setupencryptordecryptors.ts": [
+        "../../local_modules/crypto-lib/dist/async/index.d.ts",
+        "../src/lib/types/usersim.ts"
+      ],
+      "../src/lib/localstorage/justregistered.ts": [
+        "../src/lib/localstorage/towarduserkeys.ts"
+      ],
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
+        "../res/@types/@react-native-community/async-storage/index.d.ts"
+      ],
+      "../src/lib/nativemodules/hostwebrtc.ts": [
+        "../src/tools/overridewebrtcimplementation.ts"
+      ],
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": [
+        "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
+        "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/impl.native.ts": [
+        "../src/lib/networkstatemonitoring/types.ts"
+      ],
+      "../src/lib/procedure/login.ts": [
+        "../src/lib/localstorage/justregistered.ts",
+        "../src/lib/availablepages.ts"
+      ],
+      "../src/lib/procedure/register.ts": [
+        "../src/lib/availablepages.ts"
+      ],
+      "../src/lib/restartapp/impl.native.ts": [
+        "../src/lib/restartapp/index.ts"
+      ],
+      "../src/tools/modal/getapi.ts": [
+        "../src/tools/modal/types.ts"
+      ],
+      "../src/tools/modal/index.ts": [
+        "../src/tools/modal/getapi.ts",
+        "../src/tools/modal/types.ts"
+      ],
+      "../node_modules/@types/bootstrap/index.d.ts": [
+        "../node_modules/@types/jquery/index.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es5.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.dom.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.core.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.collection.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.generator.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.promise.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/subscription.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/currency.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/shop.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/web_api_declaration.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/registrationparams.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/registrationparams.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/bundleddata.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/bundleddata.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/colors/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/client.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/lib/misc/siprouting.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/readimsi.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/types.ts",
-      "c:/users/joseph/dropbox/shell/semasim/gateway/dist/web_api_declaration.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/gateway/webapipath.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-events-extended/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/ts-sip/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/run-exclusive/dist/lib/runexclusive.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/usersim.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/mapextended.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/trackablemap.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/trackable-map/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/uatobackend.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/sendrequest.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/types.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/sip_api_declarations/backendtoua.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/phone-number/dist/lib/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/base.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/modal_stack.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/bootbox_custom.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/localapihandlers.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/env.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/types.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/frontend.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/connection.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/types.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/ua.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/availablepages.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/minimal-polyfills/dist/lib/array.from.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/serializer.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/async/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/types.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/crypto.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/hostkfd.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/loaduiclasshtml.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/notifyhostwhenpageisready.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shipping.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/shopproducts.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/transfer-tools/dist/lib/json_custom.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/webapicaller.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/cookies/logic/backend.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/localstorage/logic.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/isascendingalphabeticalorder.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/types/webphonedata/logic.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/webphonedata.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/lib/tobackend/remoteapicaller/index.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/observer.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/overridewebrtcimplementation.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/urlgetparameters.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/src/tools/polyfills/object.assign.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/jquery/index.d.ts",
-      "c:/users/joseph/dropbox/shell/semasim/frontend/shared/node_modules/@types/bootstrap/index.d.ts"
+      "../node_modules/typescript/lib/lib.es5.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.d.ts",
+      "../node_modules/typescript/lib/lib.dom.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "../res/@types/@react-native-community/async-storage/index.d.ts",
+      "../src/lib/types/subscription.ts",
+      "../src/tools/currency.ts",
+      "../src/lib/types/shop.ts",
+      "../src/web_api_declaration.ts",
+      "../../../gateway/dist/lib/types.d.ts",
+      "../../../gateway/dist/lib/misc/registrationparams.d.ts",
+      "../src/gateway/registrationparams.ts",
+      "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+      "../../../gateway/dist/lib/misc/bundleddata.d.ts",
+      "../src/gateway/bundleddata.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/defs.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+      "../../../gateway/node_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
+      "../../../gateway/node_modules/colors/index.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
+      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
+      "../../../gateway/dist/lib/misc/siprouting.d.ts",
+      "../src/gateway/readimsi.ts",
+      "../src/gateway/types.ts",
+      "../../../gateway/dist/web_api_declaration.d.ts",
+      "../src/gateway/webapipath.ts",
+      "../node_modules/ts-events-extended/dist/lib/index.d.ts",
+      "../../local_modules/ts-sip/dist/lib/types.d.ts",
+      "../../local_modules/ts-sip/dist/lib/core.d.ts",
+      "../../local_modules/ts-sip/node_modules/ts-events-extended/dist/lib/index.d.ts",
+      "../../local_modules/ts-sip/dist/lib/iconnection.d.ts",
+      "../../local_modules/ts-sip/node_modules/colors/index.d.ts",
+      "../../local_modules/ts-sip/dist/lib/socket.d.ts",
+      "../../local_modules/ts-sip/dist/lib/misc.d.ts",
+      "../../local_modules/ts-sip/dist/lib/api/server.d.ts",
+      "../../local_modules/ts-sip/dist/lib/api/client.d.ts",
+      "../../local_modules/ts-sip/dist/lib/api/index.d.ts",
+      "../../local_modules/ts-sip/dist/lib/index.d.ts",
+      "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts",
+      "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+      "../src/lib/types/usersim.ts",
+      "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
+      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts",
+      "../node_modules/trackable-map/dist/lib/index.d.ts",
+      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
+      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
+      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
+      "../src/sip_api_declarations/uatobackend.ts",
+      "../src/lib/env/jsruntimeenv.ts",
+      "../src/lib/env/index.ts",
+      "../src/lib/tobackend/events.ts",
+      "../src/tools/modal/types.structure.ts",
+      "../src/tools/modal/types.ts",
+      "../src/tools/modal/stack.ts",
+      "../src/tools/modal/dialog/types.ts",
+      "../src/tools/modal/creategenericproxyforbootstrapmodal.ts",
+      "../src/tools/modal/dialog/getapi.ts",
+      "../src/tools/modal/dialog/index.ts",
+      "../src/lib/restartapp/impl.ts",
+      "../src/lib/restartapp/index.ts",
+      "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
+      "../src/lib/types/webphonedata/types.ts",
+      "../src/sip_api_declarations/backendtoua.ts",
+      "../../local_modules/phone-number/dist/lib/index.d.ts",
+      "../src/lib/tobackend/remoteapicaller/base.ts",
+      "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+      "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+      "../src/tools/isascendingalphabeticalorder.ts",
+      "../../local_modules/crypto-lib/node_modules/minimal-polyfills/dist/lib/array.from.d.ts",
+      "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
+      "../../local_modules/crypto-lib/dist/async/index.d.ts",
+      "../src/lib/types/webphonedata/logic.ts",
+      "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
+      "../src/lib/tobackend/remoteapicaller/index.ts",
+      "../src/lib/tobackend/localapihandlers.ts",
+      "../src/lib/types/websocketconnectionparams.ts",
+      "../src/tools/urlgetparameters.ts",
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.ts",
+      "../src/lib/localstorage/localstorageapi/index.ts",
+      "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
+      "../src/lib/types/connectsidhttpheadername.ts",
+      "../node_modules/transfer-tools/dist/lib/json_custom.d.ts",
+      "../src/lib/webapicaller/sendrequest.ts",
+      "../src/lib/localstorage/credentials.ts",
+      "../src/lib/networkstatemonitoring/types.ts",
+      "../src/lib/networkstatemonitoring/impl.ts",
+      "../src/lib/networkstatemonitoring/index.ts",
+      "../src/lib/webapicaller/index.ts",
+      "../src/lib/procedure/tryloginfromstoredcredentials.ts",
+      "../src/lib/tobackend/connection.ts",
+      "../src/lib/ua.ts",
+      "../src/lib/availablepages.ts",
+      "../src/lib/loaduiclasshtml.ts",
+      "../src/lib/notifyhostwhenpageisready.ts",
+      "../src/lib/shipping.ts",
+      "../src/lib/shopproducts.ts",
+      "../src/lib/nativemodules/hostcryptolib.ts",
+      "../src/lib/crypto/cryptolibproxy.ts",
+      "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
+      "../src/lib/nativemodules/hostkfd.ts",
+      "../src/lib/crypto/kfd.ts",
+      "../src/lib/localstorage/towarduserkeys.ts",
+      "../src/lib/crypto/keysgeneration.ts",
+      "../src/lib/crypto/setupencryptordecryptors.ts",
+      "../src/lib/env/jsruntimeenv.native.ts",
+      "../src/lib/localstorage/justregistered.ts",
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts",
+      "../src/tools/overridewebrtcimplementation.ts",
+      "../src/lib/nativemodules/hostwebrtc.ts",
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts",
+      "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts",
+      "../src/lib/networkstatemonitoring/impl.native.ts",
+      "../src/lib/procedure/login.ts",
+      "../src/lib/procedure/register.ts",
+      "../../react-native-app/node_modules/@types/react-native-restart/index.d.ts",
+      "../src/lib/restartapp/impl.native.ts",
+      "../src/tools/observer.ts",
+      "../src/tools/modal/getapi.ts",
+      "../src/tools/modal/index.ts",
+      "../src/tools/modal/types.structure.native.ts",
+      "../src/tools/polyfills/object.assign.ts",
+      "../node_modules/@types/jquery/index.d.ts",
+      "../node_modules/@types/bootstrap/index.d.ts"
     ]
   },
-  "version": "3.5.2"
+  "version": "3.6.4"
 }

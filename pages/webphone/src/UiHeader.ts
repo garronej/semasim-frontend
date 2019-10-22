@@ -1,8 +1,8 @@
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "phone-number";
-import { SyncEvent } from "ts-events-extended";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
-import * as types from "../../../shared/dist/lib/types/userSim";
+import * as types from "frontend-shared/dist/lib/types/userSim";
 
 declare const require: any;
 

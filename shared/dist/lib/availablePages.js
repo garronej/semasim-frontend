@@ -25,8 +25,7 @@ var PageName;
         "manager",
         "webphone",
         "subscription",
-        "shop",
-        "webviewphone"
+        "shop"
     ];
-    _a = __read(PageName.pagesNames, 7), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5], PageName.webviewphone = _a[6];
+    _a = __read(PageName.pagesNames, 6), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5];
 })(PageName = exports.PageName || (exports.PageName = {}));

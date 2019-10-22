@@ -1,10 +1,10 @@
 //NOTE: Slimscroll must be loaded on the page.
 
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as types from "../../../shared/dist/lib/types/userSim";
-import * as wd from "../../../shared/dist/lib/types/webphoneData/logic";
-import { phoneNumber } from "phone-number";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 
 declare const require: any;
 

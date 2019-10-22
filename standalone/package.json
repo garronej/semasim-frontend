@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
+    "build": "npm run tsc && node ./dist/bin/buildAndInstall.js",
+    "test": "node ./dist/test/main.js"
+  },
+  "dependencies": {
+    "crypto-lib": "file:../local_modules/crypto-lib",
+    "frontend-build-tools": "github:garronej/frontend-build-tools"
+  },
+  "devDependencies": {
+    "@types/node": "^8.9.1",
+    "typescript": "^3.5.2",
+    "transfer-tools": "github:garronej/transfer-tools"
+  }
+}

@@ -1,11 +1,11 @@
 
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiController } from "./UiController";
-import * as availablePages from "../../../shared/dist/lib/availablePages";
-import "../../../shared/dist/tools/polyfills/Object.assign";
+import * as availablePages from "frontend-shared/dist/lib/availablePages";
+import "frontend-shared/dist/tools/polyfills/Object.assign";
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
-import { notifyHostWhenPageIsReady } from "../../../shared/dist/lib/notifyHostWhenPageIsReady";
+import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
 
 notifyHostWhenPageIsReady();
 
@@ -32,7 +32,7 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 async function onLoggedIn() {
 
-    bootbox_custom.loading("Loading subscription infos");
+    dialogApi.loading("Loading subscription infos");
 
     const [
         subscriptionInfos, 
@@ -59,7 +59,7 @@ async function onLoggedIn() {
 
     }
 
-    bootbox_custom.dismissLoading();
+    dialogApi.dismissLoading();
 
     const uiController = new UiController(
         subscriptionInfos,
@@ -92,7 +92,7 @@ const apiExposedToHost: {
 
         (async () => {
 
-            const { status } = await webApiCaller.loginUser(email, secret);
+            const { status } = await webApiCaller.loginUser(email, secret, undefined);
 
             if (status !== "SUCCESS") {
 

@@ -1,6 +1,7 @@
-import { VoidSyncEvent } from "ts-events-extended";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as types from "../../../shared/dist/lib/types/userSim";
+
+import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import * as types from "frontend-shared/dist/lib/types/userSim";
 
 declare const require: (path: string) => any;
 

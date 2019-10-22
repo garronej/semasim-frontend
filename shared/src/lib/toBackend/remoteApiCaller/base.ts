@@ -1,14 +1,15 @@
 
 
 import { sendRequest } from "./sendRequest";
-import { SyncEvent } from "ts-events-extended";
 import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
-import { phoneNumber } from "phone-number";
+import { phoneNumber } from "phone-number/dist/lib";
 import * as types from "../../types/userSim";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
+import * as connection from "../connection";
+import { restartApp } from "../../restartApp";
 
-/** Posted when user register a new sim on he's LAN or accept a sharing request */
-export const evtUsableSim = new SyncEvent<types.UserSim.Usable>();
+import { evtSimIsOnlineStatusChange, evtUsableSim } from "../events";
+
 
 //TODO: Fix, it's called two times!!
 export const getUsableUserSims = (() => {
@@ -17,49 +18,101 @@ export const getUsableUserSims = (() => {
     type Params = apiDeclaration.getUsableUserSims.Params;
     type Response = apiDeclaration.getUsableUserSims.Response;
 
-    let prUsableUserSims: Promise<types.UserSim.Usable[]> | undefined = undefined;
-
-    /** 
-     * 
-     * includeContacts is true by defaults.
-     * 
-     * The stateless argument is used to re fetch the userSim from the server regardless
-     * of if it have been done previously already, it will return a new array.
-     * If the 'stateless' argument is omitted then the returned value is static. 
-     * ( only one request is sent to the server )
-     * 
-     * Note that if the method have already been called and called with
-     * stateless falsy includeContacts will not have any effect.
-     * 
-     */
-    return (
-        includeContacts: boolean = true,
-        stateless: false | "STATELESS" = false,
-    ): Promise<types.UserSim.Usable[]> => {
-
-        if (!stateless && !!prUsableUserSims) {
-            return prUsableUserSims;
-        }
-
-        const prUsableUserSims_ = sendRequest<Params, Response>(
+    const sendGetUsableUserSimsRequest = () =>
+        sendRequest<Params, Response>(
             methodName,
-            { includeContacts }
+            { "includeContacts": true }
         );
 
-        if (!!stateless) {
+    const updateUserSims = (
+        oldUserSims: types.UserSim.Usable[],
+        newUserSims: types.UserSim.Usable[]
+    ): void => {
 
-            return prUsableUserSims_;
+        for (const newUserSim of newUserSims) {
 
-        } else {
+            const userSim = oldUserSims!
+                .find(({ sim }) => sim.imsi === newUserSim.sim.imsi);
 
-            prUsableUserSims = prUsableUserSims_;
+            /*
+            By testing if digests are the same we cover 99% of the case
+            when the sim could have been modified while offline...good enough.
+            */
+            if (
+                !userSim ||
+                userSim.sim.storage.digest !== newUserSim.sim.storage.digest
+            ) {
 
-            return getUsableUserSims();
+                restartApp();
+
+                return;
+
+            }
+
+            /*
+            If userSim is online we received a notification before having the 
+            response of the request... even possible?
+             */
+            if (!!userSim.reachableSimState) {
+                continue;
+            }
+
+            userSim.reachableSimState = newUserSim.reachableSimState;
+
+            userSim.password = newUserSim.password;
+
+            userSim.dongle = newUserSim.dongle;
+
+            userSim.gatewayLocation = newUserSim.gatewayLocation;
+
+            if (!!userSim.reachableSimState) {
+
+                evtSimIsOnlineStatusChange.post(userSim);
+
+            }
+
 
         }
 
-
     };
+
+
+    const prUserSims: Promise<types.UserSim.Usable[]> =
+        Promise.resolve(connection.get())
+            .then(() => {
+
+                connection.evtConnect.attach(socket => {
+
+                    socket.evtClose.attachOnce(async () => {
+
+                        for (const userSim of await prUserSims) {
+
+                            userSim.reachableSimState = undefined;
+
+                            evtSimIsOnlineStatusChange.post(userSim);
+
+                        }
+
+                    });
+
+                    Promise.all([
+                        prUserSims,
+                        sendGetUsableUserSimsRequest()
+                    ]).then(
+                        ([oldUserSims, newUserSims]) => updateUserSims(
+                            oldUserSims,
+                            newUserSims
+                        )
+                    );
+
+                });
+
+                return sendGetUsableUserSimsRequest();
+
+            })
+        ;
+
+    return () => prUserSims;
 
 
 })();
@@ -318,7 +371,6 @@ export const createContact = (() => {
         name: string,
         number: phoneNumber
     ): Promise<types.UserSim.Contact> {
-
 
         const resp = await sendRequest<Params, Response>(
             methodName,

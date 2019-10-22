@@ -1,9 +1,9 @@
 //NOTE: assert maps.googleapis.com/maps/api/js?libraries=places loaded ( or loading ) on the page.
 
-import { VoidSyncEvent } from "ts-events-extended";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as modal_stack from "../../../shared/dist/tools/modal_stack";
-import * as types from "../../../shared/dist/lib/types/shop";
+import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import * as types from "frontend-shared/dist/lib/types/shop";
+import * as modalApi from "frontend-shared/dist/tools/modal";
 
 declare const google: any;
 declare const require: any;
@@ -34,16 +34,20 @@ export class UiShippingForm {
      */
     constructor() {
 
-        const { hide, show } = modal_stack.add(
-            this.structure,
-            {
-                "keyboard": false,
-                "backdrop": true
-            }
-        );
+        {
 
-        this.hideModal = hide;
-        this.showModal = show;
+            const { hide, show } = modalApi.createModal(
+                this.structure,
+                {
+                    "keyboard": false,
+                    "backdrop": true
+                }
+            );
+
+            this.hideModal = hide;
+            this.showModal = show;
+
+        }
 
         this.structure.find(".id_close")
             .on("click", () => this.evt_id_close_click.post());

@@ -2,17 +2,76 @@
 import * as sip from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as localApiHandlers from "./localApiHandlers";
-import * as remoteApiCaller from "./remoteApiCaller/base";
-import * as types from "../types/userSim";
-import * as bootbox_custom from "../../tools/bootbox_custom";
-import { baseDomain, isDevEnv  } from "../env";
-import * as cookies from "../cookies/logic/frontend";
+import { WebsocketConnectionParams } from "../types/WebsocketConnectionParams";
+import { dialogApi } from "../../tools/modal/dialog";
+import * as urlGetParameters from "../../tools/urlGetParameters";
+import { baseDomain, isDevEnv } from "../env";
+import { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
+import * as env from "../env";
+import { tryLoginFromStoredCredentials } from "../procedure/tryLoginFromStoredCredentials";
+import { evtOpenElsewhere } from "./events";
+import { restartApp } from "../restartApp";
 
 export const url = `wss://web.${baseDomain}`;
 
 const idString = "toBackend";
 
-const log= isDevEnv ? console.log.bind(console) : (() => { });
+
+isDevEnv;
+/*
+const log: typeof console.log = isDevEnv ?
+    ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
+    (() => { });
+    */
+
+const log: typeof console.log = true ?
+    ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
+    (() => { });
+
+
+
+
+
+export namespace notConnectedUserFeedback {
+
+    export type State = { isVisible: true, message: string } | { isVisible: false };
+
+    let setVisibilityWithMessage: (state: State) => void;
+
+    export function setVisibility(isVisible: boolean) {
+
+        const state: State = isVisible ?
+            ({ isVisible, "message": "Connecting to Semasim..." }) :
+            ({ isVisible })
+            ;
+
+        setVisibilityWithMessage(state);
+
+    }
+
+    /** NOTE: To call from react-native project */
+    export function provideCustomImplementation(
+        setVisibilityWithMessageImpl: typeof setVisibilityWithMessage
+    ) {
+        setVisibilityWithMessage = setVisibilityWithMessageImpl;
+    }
+
+}
+
+notConnectedUserFeedback.provideCustomImplementation(state => {
+
+    if (state.isVisible) {
+
+        dialogApi.loading(state.message, 1200);
+
+    } else {
+
+
+        dialogApi.dismissLoading();
+
+    }
+
+});
 
 const apiServer = new sip.api.Server(
     localApiHandlers.handlers,
@@ -23,48 +82,128 @@ const apiServer = new sip.api.Server(
     })
 );
 
-let socketCurrent: sip.Socket | undefined = undefined;
 
-let userSims: types.UserSim.Usable[] | undefined = undefined;
+/** getPrLoggedIn is called when the user
+ * is no longer logged in, it should return a Promise
+ * that resolve when the user is logged back in
+ * if not provided and if in browser the page will be reloaded
+ * else error will be thrown.
+ */
+export const connect = (() => {
+
+    let hasBeenInvoked = false;
+
+    return (
+        requestTurnCred: WebsocketConnectionParams["requestTurnCred"],
+        getPrLoggedIn: (() => Promise<void>) | undefined
+    ) => {
+
+        if (hasBeenInvoked) {
+            return;
+        }
+
+        hasBeenInvoked = true;
+
+        //We register 'offline' event only on the first call of connect()
+        //TODO: React native.
+        if (env.jsRuntimeEnv === "browser") {
+
+            window.addEventListener("offline", () => {
+
+                const socket = get();
+
+                if (socket instanceof Promise) {
+                    return;
+                }
+
+                socket.destroy("Browser is offline");
+
+            });
+
+        }
+
+        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
+        connectRecursive(requestTurnCred, getPrLoggedIn);
+
+    };
+
+})();
 
 export const evtConnect = new SyncEvent<sip.Socket>();
 
-/** 
- * - Multiple auxiliary connection can be established at the same time.
- * - On the contrary only one main connection can be active at the same time for a given user account )
- * - Auxiliary connections does not receive most of the events defined in localApiHandler.
- *   But will receive notifyIceServer ( if requestTurnCred === true ).
- * - Auxiliary connections will not receive phonebook entries 
- * ( userSims will appear as if they had no contacts stored )
- * 
- * Called from outside isReconnect should never be passed.
- *  */
-export function connect(
-    connectionParams: cookies.WebsocketConnectionParams,
-    isReconnect?: undefined | "RECONNECT"
+let socketCurrent: sip.Socket | undefined = undefined;
+
+
+
+async function connectRecursive(
+    requestTurnCred: WebsocketConnectionParams["requestTurnCred"],
+    getPrLoggedIn: (() => Promise<void>) | undefined,
+    //isReconnect: boolean
 ) {
 
-    //We register 'offline' event only on the first call of connect()
-    if (socketCurrent === undefined) {
 
-        window.addEventListener("offline", () => {
+    notConnectedUserFeedback.setVisibility(true);
 
-            const socket = get();
 
-            if (socket instanceof Promise) {
+    {
+
+        const result = await tryLoginFromStoredCredentials();
+
+        if (result === "NO VALID CREDENTIALS") {
+
+            if (!!getPrLoggedIn) {
+
+                notConnectedUserFeedback.setVisibility(false);
+
+                await getPrLoggedIn();
+
+                notConnectedUserFeedback.setVisibility(true);
+
+
+            } else {
+
+                if (env.jsRuntimeEnv === "react-native") {
+                    throw new Error("never: getPreLoggedIn is not optional for react native");
+                }
+
+                restartApp();
                 return;
+
+
             }
 
-            socket.destroy("Browser is offline");
 
-        });
+        }
 
     }
 
-    const removeCookie= cookies.WebsocketConnectionParams.set(connectionParams);
+    let webSocket: WebSocket;
+
+    try {
+
+        webSocket = new WebSocket(
+            urlGetParameters.buildUrl<WebsocketConnectionParams>(
+                url,
+                {
+                    "connect_sid": (await AuthenticatedSessionDescriptorSharedData.get()).connect_sid,
+                    requestTurnCred
+                }
+            ), "SIP"
+        );
+
+    } catch (error) {
+
+        log("WebSocket construction error: " + error.message);
+
+        //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
+        connectRecursive(requestTurnCred, getPrLoggedIn);
+
+        return;
+
+    }
 
     const socket = new sip.Socket(
-        new WebSocket(url, "SIP"),
+        webSocket,
         true,
         {
             "remoteAddress": `web.${baseDomain}`,
@@ -73,15 +212,16 @@ export function connect(
         20000
     );
 
+
     apiServer.startListening(socket);
 
-    sip.api.client.enableKeepAlive(socket, 6 * 1000);
+    sip.api.client.enableKeepAlive(socket, 25 * 1000);
 
     sip.api.client.enableErrorLogging(
         socket,
         sip.api.client.getDefaultErrorLogger({
             idString,
-            "log": console.log.bind(console)
+            log
         })
     );
 
@@ -92,8 +232,8 @@ export function connect(
         "connection": true,
         "error": true,
         "close": true,
-        "incomingTraffic": false,
-        "outgoingTraffic": false,
+        "incomingTraffic": true,
+        "outgoingTraffic": true,
         "ignoreApiTraffic": true
     }, log);
 
@@ -101,78 +241,10 @@ export function connect(
 
     socket.evtConnect.attachOnce(() => {
 
-        log(`Socket ${!!isReconnect ? "re-" : ""}connected`);
+        log(`Socket (re-)connected`);
 
-        removeCookie();
+        notConnectedUserFeedback.setVisibility(false);
 
-        if (!!isReconnect) {
-
-            bootbox_custom.dismissLoading();
-
-        }
-
-        const includeContacts = connectionParams.connectionType === "MAIN";
-
-        if (userSims === undefined) {
-
-            remoteApiCaller.getUsableUserSims(includeContacts)
-                .then(userSims_ => userSims = userSims_);
-
-        } else {
-
-            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
-                .then(userSims_ => {
-
-                    for (const userSim_ of userSims_) {
-
-                        const userSim = userSims!
-                            .find(({ sim }) => sim.imsi === userSim_.sim.imsi);
-
-                        /*
-                        By testing if digests are the same we cover 99% of the case
-                        when the sim could have been modified while offline...good enough.
-                        */
-                        if (
-                            !userSim ||
-                            userSim.sim.storage.digest !== userSim_.sim.storage.digest
-                        ) {
-
-                            location.reload();
-
-                            return;
-
-                        }
-
-                        /*
-                        If userSim is online we received a notification before having the 
-                        response of the request... even possible?
-                         */
-                        if( !!userSim.reachableSimState ){
-                            continue;
-                        }
-
-                        userSim.reachableSimState= userSim_.reachableSimState;
-
-                        userSim.password = userSim_.password;
-
-                        userSim.dongle = userSim_.dongle;
-
-                        userSim.gatewayLocation = userSim_.gatewayLocation;
-
-                        if (!!userSim.reachableSimState) {
-
-                            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-
-                        }
-
-
-                    }
-
-
-                });
-
-
-        }
 
         evtConnect.post(socket)
 
@@ -180,33 +252,11 @@ export function connect(
 
     socket.evtClose.attachOnce(async () => {
 
-        log("Socket disconnected");
-
-        for (const userSim of userSims || []) {
-
-            userSim.reachableSimState = undefined;
-
-            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-
-        }
-
-        if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
+        if (evtOpenElsewhere.postCount !== 0) {
             return;
         }
 
-        if (socket.evtConnect.postCount === 1) {
-
-            bootbox_custom.loading("Reconnecting...");
-
-        }
-
-        while (!navigator.onLine) {
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-        }
-
-        connect(connectionParams, "RECONNECT");
+        connectRecursive(requestTurnCred, getPrLoggedIn);
 
     });
 

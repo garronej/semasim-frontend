@@ -1,10 +1,11 @@
 export * from "./types";
 import * as types from "./types";
-import * as cryptoLib from "crypto-lib";
-export declare function decryptChat(decryptor: cryptoLib.Decryptor, chat: types.Chat<"ENCRYPTED">): Promise<types.Chat<"PLAIN">>;
+declare type Decryptor = import("crypto-lib").Decryptor;
+declare type Encryptor = import("crypto-lib").Encryptor;
+export declare function decryptChat(decryptor: Decryptor, chat: types.Chat<"ENCRYPTED">): Promise<types.Chat<"PLAIN">>;
 /** If input message have no id so will the output message */
-export declare function encryptMessage(encryptor: cryptoLib.Encryptor, message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>): Promise<types.Message<"ENCRYPTED">>;
-export declare function decryptMessage(decryptor: cryptoLib.Decryptor, encryptedMessage: types.Message<"ENCRYPTED">): Promise<types.Message<"PLAIN">>;
+export declare function encryptMessage(encryptor: Encryptor, message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>): Promise<types.Message<"ENCRYPTED">>;
+export declare function decryptMessage(decryptor: Decryptor, encryptedMessage: types.Message<"ENCRYPTED">): Promise<types.Message<"PLAIN">>;
 /** Best guess on previously opened chat: */
 export declare function getChatWithLatestActivity(wdInstance: types.Instance<"PLAIN">): types.Chat<"PLAIN"> | undefined;
 /**

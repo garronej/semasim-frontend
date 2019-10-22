@@ -64,10 +64,111 @@ export type Listeners = {
     ): void;
 };
 
-
 export function overrideWebRTCImplementation(methods: Methods): Listeners {
 
-    console.log("Using alternative WebRTC implementation !");
+    console.log("Using alternative WebRTC implementation !!");
+
+    //NOTE: Polyfills for deprecated RTCSessionDescription constructor.
+    window["RTCSessionDescription"] = (function RTCSessionDescription(rtcSessionDescriptionInit?: RTCSessionDescriptionInit): RTCSessionDescription {
+        return Object.setPrototypeOf(
+            (() => {
+
+                const [sdp, type] = !!rtcSessionDescriptionInit ?
+                    [rtcSessionDescriptionInit.sdp || null, rtcSessionDescriptionInit.type || null] :
+                    [null, null]
+                    ;
+
+                return { sdp, type };
+
+            })(),
+            {
+                "constructor": RTCSessionDescription,
+                "toJSON": function toJSON() {
+                    const { sdp, type } = this;
+                    return { sdp, type };
+                }
+            }
+        );
+    }) as any;
+
+    //NOTE: Polyfills RTCIceCandidate constructor not provided by react-native.
+    window["RTCIceCandidate"] = (function RTCIceCandidate(rtcIceCandidateInit?: RTCIceCandidateInit): RTCIceCandidate {
+        return Object.setPrototypeOf(
+            (() => {
+
+                const p = rtcIceCandidateInit;
+
+                const [candidate, sdpMid, sdpMLineIndex, usernameFragment] = !!p ?
+                    [p.candidate || null, p.sdpMid || null, p.sdpMLineIndex || null, p.usernameFragment || null] :
+                    [null, null, null, null]
+                    ;
+
+
+                return Object.defineProperties(
+                    { candidate, sdpMid, sdpMLineIndex, usernameFragment },
+                    {
+                        "component": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("component not implemented")
+                            }
+                        },
+                        "foundation": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("foundation not implemented")
+
+                            }
+                        },
+                        "ip": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("ip not implemented")
+                            }
+                        },
+                        "port": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("port not implemented")
+                            }
+                        },
+                        "priority": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("priority not implemented")
+                            }
+                        },
+                        "protocol": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("protocol not implemented")
+                            }
+                        },
+                        "relatedAddress": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("relatedAddress not implemented")
+                            }
+                        },
+                        "relatedPort": {
+                            "enumerable": true,
+                            "get": () => {
+                                throw new Error("relatedPort not implemented")
+                            }
+                        }
+                    }
+                );
+
+            })(),
+            {
+                "constructor": RTCIceCandidate,
+                "toJSON": function toJSON() {
+                    const { candidate, sdpMid, sdpMLineIndex, usernameFragment } = this;
+                    return { candidate, sdpMid, sdpMLineIndex, usernameFragment };
+                },
+            }
+        );
+    }) as any;
 
     const getCounter = (() => {
 
@@ -141,6 +242,7 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
 
     };
 
+
     const RTCPeerConnectionProxy = function RTCPeerConnection(rtcConfiguration: RTCConfiguration): RTCPeerConnection {
 
         const rtcPeerConnectionRef = getCounter();
@@ -178,6 +280,7 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
 
                 return localDescriptionRTCSessionDescriptionInitOrNull !== null ?
                     new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
+
 
             })()
         );
@@ -346,9 +449,15 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
 
     };
 
+
+    //NOTE: For react-native
+    if (!navigator.mediaDevices) {
+        (navigator as any).mediaDevices = {} as any;
+    }
+
     navigator.mediaDevices.getUserMedia = getUserMediaProxy;
 
-    window["RTCPeerConnection"] = RTCPeerConnectionProxy;
+    window["RTCPeerConnection"] = RTCPeerConnectionProxy as any;
 
     return {
         "onIcecandidate": (
@@ -393,7 +502,6 @@ export function testOverrideWebRTCImplementation() {
     const rtcPeerConnectionByRef = new Map<number, RTCPeerConnection>();
 
     const listeners = overrideWebRTCImplementation({
-        /*
         "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
             getUserMediaBackup(
                 JSON.parse(mediaStreamConstraintsJson)
@@ -401,20 +509,6 @@ export function testOverrideWebRTCImplementation() {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
                 listeners.onMethodReturn(callRef, undefined);
             }),
-            */
-
-        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) => {
-
-            console.log("============> ", { mediaStreamConstraintsJson });
-
-            getUserMediaBackup(
-                JSON.parse(mediaStreamConstraintsJson)
-            ).then(mediaStream => {
-                mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, undefined);
-            })
-
-        },
         "createRTCPeerConnection": (rtcPeerConnectionRef, rtcConfigurationJson) => {
 
             const rtcPeerConnection = new RTCPeerConnectionBackup((() => {

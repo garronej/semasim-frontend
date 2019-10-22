@@ -1,8 +1,8 @@
 
-import * as webApiCaller from "../../../shared/dist/lib/webApiCaller";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
-import { convertFromEuro } from "../../../shared/dist/tools/currency";
-import * as availablePages from "../../../shared/dist/lib/availablePages";
+import { convertFromEuro } from "frontend-shared/dist/tools/currency";
+import * as availablePages from "frontend-shared/dist/lib/availablePages";
 
 $(document).ready(async () => {
 

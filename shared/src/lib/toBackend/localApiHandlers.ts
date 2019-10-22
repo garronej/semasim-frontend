@@ -1,17 +1,38 @@
 
 import * as apiDeclaration from "../../sip_api_declarations/uaToBackend";
 import * as sipLibrary from "ts-sip";
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
+import { SyncEvent } from "ts-events-extended";
 import * as types from "../types/userSim";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as remoteApiCaller from "./remoteApiCaller/base";
+import * as env from "../env";
+import { 
+    evtSimIsOnlineStatusChange, 
+    evtSimGsmConnectivityChange, 
+    evtOngoingCall,
+    evtSimCellSignalStrengthChange,
+    evtContactCreatedOrUpdated,
+    evtContactDeleted,
+    evtSimPermissionLost,
+    evtSharingRequestResponse,
+    evtOtherSimUserUnregisteredSim,
+    evtOpenElsewhere,
+    rtcIceEServer
+} from "./events";
+
 
 //NOTE: Global JS deps.
-import * as bootbox_custom from "../../tools/bootbox_custom";
+import { dialogApi, startMultiDialogProcess, DialogApi } from "../../tools/modal/dialog";
+import { restartApp } from "../restartApp";
 
 export const handlers: sipLibrary.api.Server.Handlers = {};
 
-export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
+declare const require: any;
+
+//NOTE: To avoid require cycles.
+const getRemoteApiCaller = (): typeof import("./remoteApiCaller") => require("./remoteApiCaller");
+const getUsableUserSim = (imsi: string) => getRemoteApiCaller()
+    .getUsableUserSims()
+    .then(userSims => userSims.find(({ sim }) => sim.imsi === imsi)!);
 
 {
 
@@ -22,18 +43,17 @@ export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi }) => {
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
-            const hadOngoingCall= ( 
-                userSim.reachableSimState !== undefined && 
-                userSim.reachableSimState.isGsmConnectivityOk && 
+            const hadOngoingCall = (
+                userSim.reachableSimState !== undefined &&
+                userSim.reachableSimState.isGsmConnectivityOk &&
                 userSim.reachableSimState.ongoingCall !== undefined
             );
 
             userSim.reachableSimState = undefined;
 
-            if( hadOngoingCall ){
+            if (hadOngoingCall) {
 
                 evtOngoingCall.post(userSim);
 
@@ -73,12 +93,13 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
 
             evtUsableDongle.post({ "imei": simDongle.imei });
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
             if (hasInternalSimStorageChanged) {
 
-                location.reload();
+                console.log(`${methodName} internal sim storage changed`);
+
+                restartApp();
 
                 return;
 
@@ -106,7 +127,6 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
 
 }
 
-export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>();
 
 {
 
@@ -117,8 +137,7 @@ export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>()
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, isGsmConnectivityOk }) => {
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
             const { reachableSimState } = userSim;
 
@@ -126,26 +145,26 @@ export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>()
                 throw new Error("assert");
             }
 
-            if( isGsmConnectivityOk === reachableSimState.isGsmConnectivityOk ){
+            if (isGsmConnectivityOk === reachableSimState.isGsmConnectivityOk) {
                 throw new Error("assert");
             }
 
-            if( reachableSimState.isGsmConnectivityOk ){
+            if (reachableSimState.isGsmConnectivityOk) {
 
-                let hadOngoingCall= false;
+                let hadOngoingCall = false;
 
-                if( reachableSimState.ongoingCall !== undefined ){
+                if (reachableSimState.ongoingCall !== undefined) {
                     delete reachableSimState.ongoingCall;
-                    hadOngoingCall= true;
+                    hadOngoingCall = true;
                 }
 
-                reachableSimState.isGsmConnectivityOk =false as any;
+                reachableSimState.isGsmConnectivityOk = false as any;
 
-                if( hadOngoingCall ){
+                if (hadOngoingCall) {
                     evtOngoingCall.post(userSim);
                 }
 
-            }else{
+            } else {
 
                 reachableSimState.isGsmConnectivityOk = true as any;
 
@@ -163,7 +182,6 @@ export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>()
 
 }
 
-export const evtSimCellSignalStrengthChange = new SyncEvent<types.UserSim.Usable>();
 
 
 {
@@ -175,8 +193,7 @@ export const evtSimCellSignalStrengthChange = new SyncEvent<types.UserSim.Usable
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, cellSignalStrength }) => {
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
             if (userSim.reachableSimState === undefined) {
                 throw new Error("Sim should be reachable");
@@ -195,8 +212,6 @@ export const evtSimCellSignalStrengthChange = new SyncEvent<types.UserSim.Usable
 
 }
 
-//TODO: Make use of.
-export const evtOngoingCall = new SyncEvent<types.UserSim.Usable>();
 
 /*
 evtOngoingCall.attach(userSim => {
@@ -245,35 +260,34 @@ evtOngoingCall.attach(userSim => {
 
             const { imsi } = params;
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
             if (params.isTerminated) {
 
-                const { ongoingCallId }= params;
+                const { ongoingCallId } = params;
 
                 const { reachableSimState } = userSim;
 
-                if( !reachableSimState ){
+                if (!reachableSimState) {
                     //NOTE: The event would have been posted in setSimOffline handler.
                     return;
                 }
 
-                if( !reachableSimState.isGsmConnectivityOk ){
+                if (!reachableSimState.isGsmConnectivityOk) {
                     //NOTE: If we have had event notifying connectivity lost
                     //before this event the evtOngoingCall will have been posted
                     //in notifyGsmConnectivityChange handler function.
                     return;
                 }
 
-                if( 
-                    reachableSimState.ongoingCall === undefined || 
-                    reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId 
+                if (
+                    reachableSimState.ongoingCall === undefined ||
+                    reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId
                 ) {
                     return;
                 }
 
-                reachableSimState.ongoingCall= undefined;
+                reachableSimState.ongoingCall = undefined;
 
             } else {
 
@@ -291,9 +305,9 @@ evtOngoingCall.attach(userSim => {
                     throw new Error("assert");
                 }
 
-                if( reachableSimState.ongoingCall === undefined ){
+                if (reachableSimState.ongoingCall === undefined) {
                     reachableSimState.ongoingCall = ongoingCall;
-                } else if ( reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId){
+                } else if (reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId) {
 
                     reachableSimState.ongoingCall === undefined;
 
@@ -301,7 +315,7 @@ evtOngoingCall.attach(userSim => {
 
                     reachableSimState.ongoingCall = ongoingCall;
 
-                }else{
+                } else {
 
                     const {
                         ongoingCallId,
@@ -335,23 +349,17 @@ evtOngoingCall.attach(userSim => {
 }
 
 
-/** posted when a user that share the SIM created or updated a contact. */
-export const evtContactCreatedOrUpdated = new SyncEvent<{
-    userSim: types.UserSim.Usable;
-    contact: types.UserSim.Contact
-}>();
 
 {
 
-    const methodName = apiDeclaration.notifyContactCreatedOrUpdated.methodName;
+    const { methodName } = apiDeclaration.notifyContactCreatedOrUpdated;
     type Params = apiDeclaration.notifyContactCreatedOrUpdated.Params;
     type Response = apiDeclaration.notifyContactCreatedOrUpdated.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, name, number_raw, storage }) => {
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
 
             let contact = userSim.phonebook.find(contact => {
@@ -415,22 +423,17 @@ export const evtContactCreatedOrUpdated = new SyncEvent<{
 
 }
 
-export const evtContactDeleted = new SyncEvent<{
-    userSim: types.UserSim.Usable;
-    contact: types.UserSim.Contact
-}>();
 
 {
 
-    const methodName = apiDeclaration.notifyContactDeleted.methodName;
+    const { methodName } = apiDeclaration.notifyContactDeleted;
     type Params = apiDeclaration.notifyContactDeleted.Params;
     type Response = apiDeclaration.notifyContactDeleted.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, number_raw, storage }) => {
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)!;
+            const userSim = await getUsableUserSim(imsi);
 
             let contact: types.UserSim.Contact;
 
@@ -482,24 +485,33 @@ export const evtContactDeleted = new SyncEvent<{
 
 {
 
-    const methodName = apiDeclaration.notifyDongleOnLan.methodName;
+    const { methodName } = apiDeclaration.notifyDongleOnLan;
     type Params = apiDeclaration.notifyDongleOnLan.Params;
     type Response = apiDeclaration.notifyDongleOnLan.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async dongle => {
 
-            if (dcTypes.Dongle.Locked.match(dongle)) {
+            (async () => {
 
-                interact_onLockedDongle(dongle);
+                const { dialogApi, endMultiDialogProcess } = startMultiDialogProcess();
 
-            } else {
+                if (dcTypes.Dongle.Locked.match(dongle)) {
 
-                evtUsableDongle.post({ "imei": dongle.imei });
+                    await interact_onLockedDongle(dongle, dialogApi);
 
-                interact_onUsableDongle(dongle);
+                } else {
 
-            }
+                    evtUsableDongle.post({ "imei": dongle.imei });
+
+                    await interact_onUsableDongle(dongle, dialogApi);
+
+                }
+
+                endMultiDialogProcess();
+
+            })();
+
 
             return undefined;
 
@@ -508,11 +520,13 @@ export const evtContactDeleted = new SyncEvent<{
 
     handlers[methodName] = handler;
 
-    const interact_onLockedDongle = async (dongle: dcTypes.Dongle.Locked) => {
+
+
+    const interact_onLockedDongle = async (dongle: dcTypes.Dongle.Locked, dialogApi: DialogApi) => {
 
         if (dongle.sim.pinState !== "SIM PIN") {
 
-            bootbox_custom.alert(`${dongle.sim.pinState} require manual unlock`);
+            await dialogApi.create("alert", { "message": `${dongle.sim.pinState} require manual unlock` });
 
             return;
 
@@ -520,8 +534,8 @@ export const evtContactDeleted = new SyncEvent<{
 
         const pin = await (async function callee(): Promise<string | undefined> {
 
-            const pin = await new Promise<string>(
-                resolve => bootbox_custom.prompt({
+            const pin = await new Promise<string | null>(
+                resolve => dialogApi.create("prompt", {
                     "title": `PIN code for sim inside ${dongle.manufacturer} ${dongle.model} (${dongle.sim.tryLeft} tries left)`,
                     "inputType": "number",
                     "callback": result => resolve(result)
@@ -535,7 +549,7 @@ export const evtContactDeleted = new SyncEvent<{
             if (!pin.match(/^[0-9]{4}$/)) {
 
                 let shouldContinue = await new Promise<boolean>(
-                    resolve => bootbox_custom.confirm({
+                    resolve => dialogApi.create("confirm", {
                         "title": "PIN malformed!",
                         "message": "A pin code is composed of 4 digits, e.g. 0000",
                         callback: result => resolve(result)
@@ -558,11 +572,11 @@ export const evtContactDeleted = new SyncEvent<{
             return;
         }
 
-        bootbox_custom.loading("Your sim is being unlocked please wait...", 0);
+        dialogApi.loading("Your sim is being unlocked please wait...", 0);
 
-        const unlockResult = await remoteApiCaller.unlockSim(dongle, pin);
+        const unlockResult = await getRemoteApiCaller().unlockSim(dongle, pin);
 
-        bootbox_custom.dismissLoading();
+        dialogApi.dismissLoading();
 
         if (!unlockResult) {
 
@@ -578,14 +592,15 @@ export const evtContactDeleted = new SyncEvent<{
 
         }
 
-        bootbox_custom.loading("Initialization of the sim...", 0);
+        dialogApi.loading("Initialization of the sim...", 0);
 
         await evtUsableDongle.waitFor(({ imei }) => imei === dongle.imei);
 
-        bootbox_custom.dismissLoading();
+        dialogApi.dismissLoading();
+
     };
 
-    const interact_onUsableDongle = async (dongle: dcTypes.Dongle.Usable) => {
+    const interact_onUsableDongle = async (dongle: dcTypes.Dongle.Usable, dialogApi: DialogApi) => {
 
         const shouldAdd_message = [
             `SIM inside:`,
@@ -594,22 +609,28 @@ export const evtContactDeleted = new SyncEvent<{
         ].join("<br>");
 
         const shouldAdd = await new Promise<boolean>(
-            resolve => bootbox_custom.dialog({
-                "title": "SIM ready to be registered",
-                "message": `<p class="text-center">${shouldAdd_message}</p>`,
-                "buttons": {
-                    "cancel": {
-                        "label": "Not now",
-                        "callback": () => resolve(false)
+            resolve => dialogApi.create(
+                "dialog",
+                {
+                    "title": "SIM ready to be registered",
+                    "message": env.jsRuntimeEnv === "browser" ?
+                        `<p class="text-center">${shouldAdd_message}</p>` :
+                        shouldAdd_message,
+                    "buttons": {
+                        "cancel": {
+                            "label": "Not now",
+                            "callback": () => resolve(false)
+                        },
+                        "success": {
+                            "label": "Yes, register this sim",
+                            "className": "btn-success",
+                            "callback": () => resolve(true)
+                        }
                     },
-                    "success": {
-                        "label": "Yes, register this sim",
-                        "className": "btn-success",
-                        "callback": () => resolve(true)
-                    }
-                },
-                "closeButton": false
-            })
+                    "closeButton": false,
+                    "onEscape": false
+                }
+            )
         );
 
         if (!shouldAdd) {
@@ -620,23 +641,25 @@ export const evtContactDeleted = new SyncEvent<{
 
             //TODO: Improve message.
             await new Promise<void>(
-                resolve => bootbox_custom.alert(
-                    [
-                        "You won't be able to make phone call with this device until it have been voice enabled",
-                        "See: <a href='https://www.semasim.com/enable-voice'></a>"
-                    ].join("<br>"),
-                    () => resolve()
+                resolve => dialogApi.create("alert",
+                    {
+                        "message": [
+                            "You won't be able to make phone call with this device until it have been voice enabled",
+                            "See: <a href='https://www.semasim.com/enable-voice'></a>"
+                        ].join("<br>"),
+                        "callback": () => resolve()
+                    }
                 )
             );
 
         }
 
-        bootbox_custom.loading("Suggesting a suitable friendly name ...");
+        dialogApi.loading("Suggesting a suitable friendly name ...");
 
         let friendlyName = await getDefaultFriendlyName(dongle.sim);
 
         let friendlyNameSubmitted = await new Promise<string | null>(
-            resolve => bootbox_custom.prompt({
+            resolve => dialogApi.create("prompt", {
                 "title": "Friendly name for this sim?",
                 "value": friendlyName,
                 "callback": result => resolve(result),
@@ -649,11 +672,11 @@ export const evtContactDeleted = new SyncEvent<{
 
         friendlyName = friendlyNameSubmitted;
 
-        bootbox_custom.loading("Registering SIM...");
+        dialogApi.loading("Registering SIM...");
 
-        await remoteApiCaller.registerSim(dongle, friendlyName);
+        await getRemoteApiCaller().registerSim(dongle, friendlyName);
 
-        bootbox_custom.dismissLoading();
+        dialogApi.dismissLoading();
 
     };
 
@@ -675,11 +698,11 @@ export const evtContactDeleted = new SyncEvent<{
 
         let i = 0;
 
-        const userSims = await remoteApiCaller.getUsableUserSims();
+        const userSims = await getRemoteApiCaller().getUsableUserSims();
 
         while (
             userSims.filter(
-                ({ friendlyName, sim }) => friendlyName === build(i)
+                ({ friendlyName }) => friendlyName === build(i)
             ).length
         ) {
             i++;
@@ -691,18 +714,17 @@ export const evtContactDeleted = new SyncEvent<{
 
 }
 
-export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed>();
 
 {
 
-    const methodName = apiDeclaration.notifySimPermissionLost.methodName;
+    const { methodName } = apiDeclaration.notifySimPermissionLost;
     type Params = apiDeclaration.notifySimPermissionLost.Params;
     type Response = apiDeclaration.notifySimPermissionLost.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi }) => {
 
-            const userSims = await remoteApiCaller.getUsableUserSims();
+            const userSims = await getRemoteApiCaller().getUsableUserSims();
 
             const userSim = userSims.find(
                 ({ sim }) => sim.imsi === imsi
@@ -723,16 +745,18 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
 {
 
-    const methodName = apiDeclaration.notifySimSharingRequest.methodName;
+    const { methodName } = apiDeclaration.notifySimSharingRequest;
     type Params = apiDeclaration.notifySimSharingRequest.Params;
     type Response = apiDeclaration.notifySimSharingRequest.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
-        "handler": async params => {
+        "handler": params => {
 
-            interact(params);
+            const { endMultiDialogProcess, dialogApi } = startMultiDialogProcess();
 
-            return undefined;
+            interact(params, dialogApi).then(() => endMultiDialogProcess());
+
+            return Promise.resolve(undefined);;
 
         }
     };
@@ -740,10 +764,10 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
     handlers[methodName] = handler;
 
     //TODO: run exclusive
-    const interact = async (userSim: types.UserSim.Shared.NotConfirmed): Promise<void> => {
+    const interact = async (userSim: types.UserSim.Shared.NotConfirmed, dialogApi: DialogApi): Promise<void> => {
 
         const shouldProceed = await new Promise<"ACCEPT" | "REFUSE" | "LATER">(
-            resolve => bootbox_custom.dialog({
+            resolve => dialogApi.create("dialog", {
                 "title": `${userSim.ownership.ownerEmail} would like to share a SIM with you, accept?`,
                 "message": userSim.ownership.sharingRequestMessage ?
                     `«${userSim.ownership.sharingRequestMessage.replace(/\n/g, "<br>")}»` : "",
@@ -758,6 +782,7 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
                         "callback": () => resolve("ACCEPT")
                     }
                 },
+                "closeButton": true,
                 "onEscape": () => resolve("LATER")
             })
         );
@@ -768,11 +793,11 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
         if (shouldProceed === "REFUSE") {
 
-            bootbox_custom.loading("Rejecting SIM sharing request...");
+            dialogApi.loading("Rejecting SIM sharing request...");
 
-            await remoteApiCaller.rejectSharingRequest(userSim);
+            await getRemoteApiCaller().rejectSharingRequest(userSim);
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             return undefined;
 
@@ -780,7 +805,7 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
         //TODO: max length for friendly name, should only have ok button
         let friendlyNameSubmitted = await new Promise<string | null>(
-            resolve => bootbox_custom.prompt({
+            resolve => dialogApi.create("prompt", {
                 "title": "Friendly name for this sim?",
                 "value": userSim.friendlyName,
                 "callback": result => resolve(result),
@@ -789,11 +814,11 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
         if (!friendlyNameSubmitted) {
 
-            bootbox_custom.loading("Rejecting SIM sharing request...");
+            dialogApi.loading("Rejecting SIM sharing request...");
 
-            await remoteApiCaller.rejectSharingRequest(userSim);
+            await getRemoteApiCaller().rejectSharingRequest(userSim);
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             return undefined;
 
@@ -801,29 +826,22 @@ export const evtSimPermissionLost = new SyncEvent<types.UserSim.Shared.Confirmed
 
         userSim.friendlyName = friendlyNameSubmitted;
 
-        bootbox_custom.loading("Accepting SIM sharing request...");
+        dialogApi.loading("Accepting SIM sharing request...");
 
-        await remoteApiCaller.acceptSharingRequest(
+        await (await getRemoteApiCaller()).acceptSharingRequest(
             userSim,
             userSim.friendlyName
         );
 
-        bootbox_custom.dismissLoading();
+        dialogApi.dismissLoading();
 
     };
 
 }
 
-
-export const evtSharingRequestResponse = new SyncEvent<{
-    userSim: types.UserSim.Owned;
-    email: string;
-    isAccepted: boolean;
-}>();
-
 {
 
-    const methodName = apiDeclaration.notifySharingRequestResponse.methodName;
+    const { methodName } = apiDeclaration.notifySharingRequestResponse;
     type Params = apiDeclaration.notifySharingRequestResponse.Params;
     type Response = apiDeclaration.notifySharingRequestResponse.Response;
 
@@ -832,9 +850,8 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
             //TODO: change and also for stop sharing.
 
+            const userSim = await getUsableUserSim(imsi);
 
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned | types.UserSim.Shared.Confirmed;
 
             switch (userSim.ownership.status) {
                 case "OWNED":
@@ -860,7 +877,20 @@ export const evtSharingRequestResponse = new SyncEvent<{
                     break;
             }
 
-            bootbox_custom.alert(`${email} ${isAccepted ? "accepted" : "rejected"} sharing request for ${userSim.friendlyName}`);
+            dialogApi.create(
+                "alert",
+                {
+                    "message": `${email} ${isAccepted ? "accepted" : "rejected"} sharing request for ${userSim.friendlyName}`
+                }
+            );
+
+            //TODO: Study when this method is called.
+            evtSharingRequestResponse.post({
+                "userSim": userSim as any,
+                email,
+                isAccepted
+
+            });
 
             return undefined;
 
@@ -871,10 +901,6 @@ export const evtSharingRequestResponse = new SyncEvent<{
 
 }
 
-export const evtOtherSimUserUnregisteredSim = new SyncEvent<{
-    userSim: types.UserSim.Owned;
-    email: string;
-}>();
 
 {
 
@@ -885,9 +911,7 @@ export const evtOtherSimUserUnregisteredSim = new SyncEvent<{
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async ({ imsi, email }) => {
 
-
-            const userSim = (await remoteApiCaller.getUsableUserSims())
-                .find(({ sim }) => sim.imsi === imsi)! as types.UserSim.Owned | types.UserSim.Shared.Confirmed;
+            const userSim = await getUsableUserSim(imsi);
 
             switch (userSim.ownership.status) {
                 case "OWNED":
@@ -912,33 +936,15 @@ export const evtOtherSimUserUnregisteredSim = new SyncEvent<{
 
             }
 
-            bootbox_custom.alert(`${email} no longer share ${userSim.friendlyName}`);
+            //TODO: Study this function.
+            evtOtherSimUserUnregisteredSim.post({
+                "userSim": userSim as any,
+                email
+            });
 
-            return undefined;
-
-        }
-    };
-
-    handlers[methodName] = handler;
-
-}
-
-export const evtOpenElsewhere = new VoidSyncEvent();
-
-{
-
-    const methodName = apiDeclaration.notifyLoggedFromOtherTab.methodName;
-    type Params = apiDeclaration.notifyLoggedFromOtherTab.Params;
-    type Response = apiDeclaration.notifyLoggedFromOtherTab.Response;
-
-    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
-        "handler": async () => {
-
-            evtOpenElsewhere.post();
-
-            bootbox_custom.alert(
-                "You are connected somewhere else",
-                () => location.reload()
+            dialogApi.create(
+                "alert",
+                { "message": `${email} no longer share ${userSim.friendlyName}` }
             );
 
             return undefined;
@@ -950,51 +956,46 @@ export const evtOpenElsewhere = new VoidSyncEvent();
 
 }
 
-const evtRTCIceEServer = new SyncEvent<{
-    rtcIceServer: RTCIceServer;
-    socket: sipLibrary.Socket
-}>();
-
-export const getRTCIceServer = (() => {
-
-    let current: RTCIceServer | undefined = undefined;
-
-    const evtUpdated = new VoidSyncEvent();
-
-    evtRTCIceEServer.attach(({ rtcIceServer, socket }) => {
-
-        socket.evtClose.attachOnce(() => current = undefined);
-
-        current = rtcIceServer;
-
-        evtUpdated.post();
-
-    });
-
-    return async function callee(): Promise<RTCIceServer> {
-
-        if (current !== undefined) {
-            return current;
-        }
-
-        await evtUpdated.waitFor();
-
-        return callee();
-
-    };
-
-})();
 
 {
 
-    const methodName = apiDeclaration.notifyIceServer.methodName;
+    const { methodName } = apiDeclaration.notifyLoggedFromOtherTab;
+    type Params = apiDeclaration.notifyLoggedFromOtherTab.Params;
+    type Response = apiDeclaration.notifyLoggedFromOtherTab.Response;
+
+    const handler: sipLibrary.api.Server.Handler<Params, Response> = {
+        "handler": async () => {
+
+            evtOpenElsewhere.post();
+
+            dialogApi.create(
+                "alert",
+                {
+                    "message": "You are connected somewhere else",
+                    "callback": () => restartApp()
+                }
+            );
+
+            return undefined;
+
+        }
+    };
+
+    handlers[methodName] = handler;
+
+}
+
+
+{
+
+    const { methodName } = apiDeclaration.notifyIceServer;
     type Params = apiDeclaration.notifyIceServer.Params;
     type Response = apiDeclaration.notifyIceServer.Response;
 
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": async (params, fromSocket) => {
 
-            evtRTCIceEServer.post({
+            rtcIceEServer.evt.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
                         "urls": [

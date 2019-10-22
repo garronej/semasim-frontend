@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -34,54 +35,142 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sendRequest_1 = require("./sendRequest");
-var ts_events_extended_1 = require("ts-events-extended");
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
-/** Posted when user register a new sim on he's LAN or accept a sharing request */
-exports.evtUsableSim = new ts_events_extended_1.SyncEvent();
+var connection = require("../connection");
+var restartApp_1 = require("../../restartApp");
+var events_1 = require("../events");
 //TODO: Fix, it's called two times!!
 exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
-    var prUsableUserSims = undefined;
-    /**
-     *
-     * includeContacts is true by defaults.
-     *
-     * The stateless argument is used to re fetch the userSim from the server regardless
-     * of if it have been done previously already, it will return a new array.
-     * If the 'stateless' argument is omitted then the returned value is static.
-     * ( only one request is sent to the server )
-     *
-     * Note that if the method have already been called and called with
-     * stateless falsy includeContacts will not have any effect.
-     *
-     */
-    return function (includeContacts, stateless) {
-        if (includeContacts === void 0) { includeContacts = true; }
-        if (stateless === void 0) { stateless = false; }
-        if (!stateless && !!prUsableUserSims) {
-            return prUsableUserSims;
+    var sendGetUsableUserSimsRequest = function () {
+        return sendRequest_1.sendRequest(methodName, { "includeContacts": true });
+    };
+    var updateUserSims = function (oldUserSims, newUserSims) {
+        var e_1, _a;
+        var _loop_1 = function (newUserSim) {
+            var userSim = oldUserSims
+                .find(function (_a) {
+                var sim = _a.sim;
+                return sim.imsi === newUserSim.sim.imsi;
+            });
+            /*
+            By testing if digests are the same we cover 99% of the case
+            when the sim could have been modified while offline...good enough.
+            */
+            if (!userSim ||
+                userSim.sim.storage.digest !== newUserSim.sim.storage.digest) {
+                restartApp_1.restartApp();
+                return { value: void 0 };
+            }
+            /*
+            If userSim is online we received a notification before having the
+            response of the request... even possible?
+             */
+            if (!!userSim.reachableSimState) {
+                return "continue";
+            }
+            userSim.reachableSimState = newUserSim.reachableSimState;
+            userSim.password = newUserSim.password;
+            userSim.dongle = newUserSim.dongle;
+            userSim.gatewayLocation = newUserSim.gatewayLocation;
+            if (!!userSim.reachableSimState) {
+                events_1.evtSimIsOnlineStatusChange.post(userSim);
+            }
+        };
+        try {
+            for (var newUserSims_1 = __values(newUserSims), newUserSims_1_1 = newUserSims_1.next(); !newUserSims_1_1.done; newUserSims_1_1 = newUserSims_1.next()) {
+                var newUserSim = newUserSims_1_1.value;
+                var state_1 = _loop_1(newUserSim);
+                if (typeof state_1 === "object")
+                    return state_1.value;
+            }
         }
-        var prUsableUserSims_ = sendRequest_1.sendRequest(methodName, { includeContacts: includeContacts });
-        if (!!stateless) {
-            return prUsableUserSims_;
-        }
-        else {
-            prUsableUserSims = prUsableUserSims_;
-            return exports.getUsableUserSims();
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (newUserSims_1_1 && !newUserSims_1_1.done && (_a = newUserSims_1.return)) _a.call(newUserSims_1);
+            }
+            finally { if (e_1) throw e_1.error; }
         }
     };
+    var prUserSims = Promise.resolve(connection.get())
+        .then(function () {
+        connection.evtConnect.attach(function (socket) {
+            socket.evtClose.attachOnce(function () { return __awaiter(void 0, void 0, void 0, function () {
+                var _a, _b, userSim, e_2_1;
+                var e_2, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0:
+                            _d.trys.push([0, 5, 6, 7]);
+                            return [4 /*yield*/, prUserSims];
+                        case 1:
+                            _a = __values.apply(void 0, [_d.sent()]), _b = _a.next();
+                            _d.label = 2;
+                        case 2:
+                            if (!!_b.done) return [3 /*break*/, 4];
+                            userSim = _b.value;
+                            userSim.reachableSimState = undefined;
+                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            _d.label = 3;
+                        case 3:
+                            _b = _a.next();
+                            return [3 /*break*/, 2];
+                        case 4: return [3 /*break*/, 7];
+                        case 5:
+                            e_2_1 = _d.sent();
+                            e_2 = { error: e_2_1 };
+                            return [3 /*break*/, 7];
+                        case 6:
+                            try {
+                                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                            }
+                            finally { if (e_2) throw e_2.error; }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); });
+            Promise.all([
+                prUserSims,
+                sendGetUsableUserSimsRequest()
+            ]).then(function (_a) {
+                var _b = __read(_a, 2), oldUserSims = _b[0], newUserSims = _b[1];
+                return updateUserSims(oldUserSims, newUserSims);
+            });
+        });
+        return sendGetUsableUserSimsRequest();
+    });
+    return function () { return prUserSims; };
 })();
 exports.unlockSim = (function () {
     var methodName = apiDeclaration.unlockSim.methodName;
@@ -106,7 +195,7 @@ exports.registerSim = (function () {
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
                         (_a.sent()).push(userSim);
-                        exports.evtUsableSim.post(userSim);
+                        events_1.evtUsableSim.post(userSim);
                         return [2 /*return*/];
                 }
             });
@@ -144,7 +233,7 @@ exports.shareSim = (function () {
     return function (userSim, emails, message) {
         return __awaiter(this, void 0, void 0, function () {
             var emails_1, emails_1_1, email;
-            var e_1, _a;
+            var e_3, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails, message: message })];
@@ -156,12 +245,12 @@ exports.shareSim = (function () {
                                 userSim.ownership.sharedWith.notConfirmed.push(email);
                             }
                         }
-                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
                         finally {
                             try {
                                 if (emails_1_1 && !emails_1_1.done && (_a = emails_1.return)) _a.call(emails_1);
                             }
-                            finally { if (e_1) throw e_1.error; }
+                            finally { if (e_3) throw e_3.error; }
                         }
                         return [2 /*return*/];
                 }
@@ -174,7 +263,7 @@ exports.stopSharingSim = (function () {
     return function (userSim, emails) {
         return __awaiter(this, void 0, void 0, function () {
             var emails_2, emails_2_1, email, _a, notConfirmed, confirmed, arr, index;
-            var e_2, _b;
+            var e_4, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails })];
@@ -197,12 +286,12 @@ exports.stopSharingSim = (function () {
                                 arr.splice(index, 1);
                             }
                         }
-                        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                        catch (e_4_1) { e_4 = { error: e_4_1 }; }
                         finally {
                             try {
                                 if (emails_2_1 && !emails_2_1.done && (_b = emails_2.return)) _b.call(emails_2);
                             }
-                            finally { if (e_2) throw e_2.error; }
+                            finally { if (e_4) throw e_4.error; }
                         }
                         return [2 /*return*/];
                 }
@@ -254,7 +343,7 @@ exports.acceptSharingRequest = (function () {
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
                         (_a.sent()).push(userSim);
-                        exports.evtUsableSim.post(userSim);
+                        events_1.evtUsableSim.post(userSim);
                         return [2 /*return*/];
                 }
             });

@@ -1,10 +1,10 @@
 import * as sipLibrary from "ts-sip";
 import * as connection from "../connection";
+import { restartApp } from "../../restartApp";
 
 export async function sendRequest<Params, Response>(
     methodName: string,
-    params: Params,
-    retry?: "RETRY"
+    params: Params
 ): Promise<Response> {
 
     let response: Response;
@@ -20,19 +20,9 @@ export async function sendRequest<Params, Response>(
 
     } catch (error) {
 
-        if (!!retry) {
+        restartApp();
 
-            return sendRequest<Params, Response>(
-                methodName,
-                params,
-                "RETRY"
-            );
-
-        } else {
-
-            throw error;
-
-        }
+        return new Promise<never>(()=>{});
 
     }
 

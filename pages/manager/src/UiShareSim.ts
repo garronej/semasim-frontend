@@ -1,8 +1,9 @@
-import * as types from "../../../shared/dist/lib/types/userSim";
-import { SyncEvent } from "ts-events-extended";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import * as modal_stack from "../../../shared/dist/tools/modal_stack";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+
+import * as modalApi from "frontend-shared/dist/tools/modal";
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
 declare const require: any;
 
@@ -67,13 +68,20 @@ export class UiShareSim {
         }>
     ) {
 
-        const { hide, show }= modal_stack.add(this.structure, {
-            "keyboard": false,
-            "backdrop": true
-        });
+        {
 
-        this.hideModal= hide;
-        this.showModal= show;
+            const { hide, show }= modalApi.createModal(
+                this.structure,
+                {
+                    "keyboard": false,
+                    "backdrop": true
+                }
+            );
+
+            this.hideModal = hide;
+            this.showModal = show;
+
+        }
 
         this.buttonClose.on("click", () => this.hideModal());
 
@@ -94,7 +102,7 @@ export class UiShareSim {
 
             await this.hideModal();
 
-            bootbox_custom.loading("Revoking some user's SIM access");
+            dialogApi.loading("Revoking some user's SIM access");
 
             await new Promise(resolve =>
                 this.evtStopSharing.post({
@@ -104,7 +112,7 @@ export class UiShareSim {
                 })
             );
 
-            bootbox_custom.dismissLoading();
+            dialogApi.dismissLoading();
 
             this.open(this.currentUserSim!);
 
@@ -123,7 +131,7 @@ export class UiShareSim {
 
                 await this.hideModal();
 
-                bootbox_custom.loading("Granting sim access to some users");
+                dialogApi.loading("Granting sim access to some users");
 
                 await new Promise(resolve =>
                     this.evtShare.post({
@@ -134,7 +142,7 @@ export class UiShareSim {
                     })
                 );
 
-                bootbox_custom.dismissLoading();
+                dialogApi.dismissLoading();
 
                 this.open(this.currentUserSim!);
 
@@ -155,7 +163,7 @@ export class UiShareSim {
                 this.buttonSubmit.text("Share");
 
                 this.textareaMessage.parent().show({
-                    "done": ()=> this.textareaMessage.focus()
+                    "done": () => this.textareaMessage.focus()
                 });
 
             }

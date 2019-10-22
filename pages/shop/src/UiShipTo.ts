@@ -1,5 +1,6 @@
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { SyncEvent } from "ts-events-extended";
+
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
 declare const require: any;
 

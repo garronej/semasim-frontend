@@ -1,0 +1,61 @@
+{
+  "name": "Semasim",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "postinstall": "node ./remove_symlinks.js",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "react": "16.9.0",
+    "react-native": "0.61.2",
+    "buffer": "^5.4.2",
+    "util": "^0.12.1",
+    "@react-native-community/async-storage": "1.6.1",
+    "@react-native-community/netinfo": "4.3.3",
+    "events": "^3.0.0",
+    "assert": "^2.0.0",
+    "static_js_libs": "file:../static.semasim.com/js/libs",
+    "frontend-shared": "file:../shared",
+    "os": "file:./polyfills_modules/os",
+    "constants": "file:./polyfills_modules/constants",
+    "stream": "file:./polyfills_modules/stream-browserify",
+    "crypto": "file:./polyfills_modules/crypto-browserify",
+    "vm": "file:./polyfills_modules/vm-browserify",
+    "path": "file:./polyfills_modules/path",
+    "react-native-callkeep": "^3.0.6",
+    "uuid": "^3.3.3",
+    "react-native-device-info": "^4.0.1",
+    "react-native-restart": "^0.0.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/runtime": "^7.6.2",
+    "@react-native-community/eslint-config": "^0.0.5",
+    "@types/jest": "^24.0.18",
+    "@types/react": "16.9.0",
+    "@types/react-native": "^0.60.17",
+    "@types/react-test-renderer": "16.9.0",
+    "babel-jest": "^24.9.0",
+    "jest": "^24.9.0",
+    "metro-react-native-babel-preset": "^0.56.0",
+    "react-test-renderer": "16.9.0",
+    "typescript": "^3.6.3",
+    "@types/uuid": "^3.4.5",
+    "@types/react-native-restart": "^0.0.0"
+  },
+  "jest": {
+    "preset": "react-native",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

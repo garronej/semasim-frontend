@@ -1,10 +1,10 @@
 
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/shop";
-import { assetsRoot } from "../../../shared/dist/lib/env";
-import { solve as solveShipping } from "../../../shared/dist/lib/shipping";
-import { convertFromEuro } from "../../../shared/dist/tools/currency";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/shop";
+import { assetsRoot } from "frontend-shared/dist/lib/env";
+import { solve as solveShipping } from "frontend-shared/dist/lib/shipping";
+import { convertFromEuro } from "frontend-shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
 

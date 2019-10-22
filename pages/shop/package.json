@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "moment": "^2.20.1",
-    "ts-events-extended": "github:garronej/ts-events-extended"
+    "frontend-shared": "file:../../shared"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",

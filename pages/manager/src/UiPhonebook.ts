@@ -1,13 +1,13 @@
 //NOTE: Slimscroll must be loaded on the page.
 
-import * as types from "../../../shared/dist/lib/types/userSim";
-import { assetsRoot } from "../../../shared/dist/lib/env";
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as bootbox_custom from "../../../shared/dist/tools/bootbox_custom";
-import * as modal_stack from "../../../shared/dist/tools/modal_stack";
-import { isAscendingAlphabeticalOrder } from "../../../shared/dist/tools/isAscendingAlphabeticalOrder";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "phone-number";
+import * as types from "frontend-shared/dist/lib/types/userSim";
+import { assetsRoot } from "frontend-shared/dist/lib/env";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as modalApi from "frontend-shared/dist/tools/modal";
+import { DialogApi, startMultiDialogProcess, dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import { isAscendingAlphabeticalOrder } from "frontend-shared/dist/tools/isAscendingAlphabeticalOrder";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 
 import { Polyfill as Map } from "minimal-polyfills/dist/lib/Map";
 
@@ -17,6 +17,8 @@ const html = loadUiClassHtml(
     require("../templates/UiPhonebook.html"),
     "UiPhonebook"
 );
+
+Object.assign(window, { dialogApi });
 
 export class UiPhonebook {
 
@@ -69,7 +71,7 @@ export class UiPhonebook {
 
         {
 
-            const { hide, show } = modal_stack.add(
+            const { hide, show } = modalApi.createModal(
                 this.structure,
                 {
                     "keyboard": false,
@@ -185,7 +187,7 @@ export class UiPhonebook {
         const getUiContactFromStructure = (li_elem: HTMLElement): UiContact => {
 
 
-            
+
 
             //for (const uiContact of this.uiContacts.values()) { but as we use a Minimalistic Map polyfill
             for (const uiContact of Array.from(this.uiContacts.keys()).map(key => this.uiContacts.get(key)!)) {
@@ -308,299 +310,369 @@ export class UiPhonebook {
      */
     public async interact_createContact(provided_number?: phoneNumber) {
 
-        const userSim = this.userSim;
+        const { dialogApi, endMultiDialogProcess } = startMultiDialogProcess();
 
-        const number = provided_number || await new Promise<phoneNumber | undefined>(
-            function callee(resolve) {
+        await (async (dialogApi: DialogApi) => {
 
-                const modal = bootbox_custom.prompt({
-                    "title": `Phone number`,
-                    "size": "small",
-                    "callback": async result => {
+            const userSim = this.userSim;
 
-                        if (result === null) {
-                            resolve(undefined);
-                            return;
-                        }
+            const number = provided_number || await new Promise<phoneNumber | undefined>(
+                 async function callee(resolve) {
 
-                        const number = phoneNumber.build(
-                            input.val(),
-                            input.intlTelInput("getSelectedCountryData").iso2
-                        );
+                    const className= "prompt-phone-number-modal";
 
-                        if (!phoneNumber.isDialable(number)) {
+                    dialogApi.create("prompt", {
+                        "title": `Phone number`,
+                        "size": "small",
+                        className,
+                        "callback": async result => {
 
-                            await new Promise(
-                                resolve_ => bootbox_custom.alert(
-                                    `${number} is not a valid phone number`,
-                                    () => resolve_()
-                                )
+                            if (result === null) {
+                                resolve(undefined);
+                                return;
+                            }
+
+                            const number = phoneNumber.build(
+                                input.val(),
+                                input.intlTelInput("getSelectedCountryData").iso2
                             );
 
-                            callee(resolve);
+                            if (!phoneNumber.isDialable(number)) {
 
-                            return;
+                                await new Promise(
+                                    resolve_ => dialogApi.create("alert",{
+                                        "message": `${number} is not a valid phone number`,
+                                        "callback": () => resolve_()
+                                    })
+                                );
 
+                                callee(resolve);
+
+                                return;
+
+                            }
+
+                            resolve(number);
+
+                        },
+                    });
+
+                    const modal = await new Promise<JQuery>(resolve => {
+
+                        const mutationObserver = new MutationObserver(function (mutations) {
+                            mutations.forEach(mutation => {
+
+                                if( mutation.type !== "childList" ){
+                                    return;
+                                }
+
+                                const $node = (() => {
+
+                                    const out: JQuery[] = [];
+
+                                    mutation.addedNodes.forEach(node => out.push($(node)));
+
+                                    return out;
+
+                                })().find($node => $node.hasClass(className));
+
+                                if ($node === undefined) {
+                                    return;
+                                }
+
+                                mutationObserver.disconnect();
+
+                                resolve($node);
+
+                            });
+                        });
+
+                        mutationObserver.observe(document.documentElement, {
+                            "attributes": true,
+                            "characterData": true,
+                            "childList": true,
+                            "subtree": true,
+                            "attributeOldValue": true,
+                            "characterDataOldValue": true
+                        });
+
+                    });
+
+                    modal.find(".bootbox-body").css("text-align", "center");
+
+                    const input = modal.find("input");
+
+                    input.intlTelInput((() => {
+
+                        const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
+                        const gwIso = userSim.gatewayLocation.countryIso;
+
+                        const intlTelInputOptions: IntlTelInput.Options = {
+                            "dropdownContainer": "body"
+                        };
+
+                        const preferredCountries: string[] = [];
+
+                        if (simIso) {
+                            preferredCountries.push(simIso);
                         }
 
-                        resolve(number);
+                        if (gwIso && simIso !== gwIso) {
+                            preferredCountries.push(gwIso);
+                        }
 
-                    },
-                });
+                        if (preferredCountries.length) {
+                            intlTelInputOptions.preferredCountries = preferredCountries;
+                        }
 
-                modal.find(".bootbox-body").css("text-align", "center");
+                        if (simIso || gwIso) {
+                            intlTelInputOptions.initialCountry = simIso || gwIso;
+                        }
 
-                const input = modal.find("input");
+                        return intlTelInputOptions;
 
-                input.intlTelInput((() => {
+                    })());
 
-                    const simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                    const gwIso = userSim.gatewayLocation.countryIso;
 
-                    const intlTelInputOptions: IntlTelInput.Options = {
-                        "dropdownContainer": "body"
-                    };
-
-                    const preferredCountries: string[] = [];
-
-                    if (simIso) {
-                        preferredCountries.push(simIso);
-                    }
-
-                    if (gwIso && simIso !== gwIso) {
-                        preferredCountries.push(gwIso);
-                    }
-
-                    if (preferredCountries.length) {
-                        intlTelInputOptions.preferredCountries = preferredCountries;
-                    }
-
-                    if (simIso || gwIso) {
-                        intlTelInputOptions.initialCountry = simIso || gwIso;
-                    }
-
-                    return intlTelInputOptions;
-
-                })());
-
-            }
-        );
-
-        if (!number) {
-            return;
-        }
-
-        const contact = userSim.phonebook.find(
-            ({ number_raw }) => phoneNumber.areSame(
-                number,
-                number_raw
-            )
-        );
-
-        const name = await new Promise<string | null>(
-            resolve => bootbox_custom.prompt({
-                "title": `Create contact ${phoneNumber.prettyPrint(number)} in ${this.userSim.friendlyName} internal memory`,
-                "value": !!contact ? contact.name : "New contact",
-                "callback": result => resolve(result),
-            })
-        );
-
-        if (!name) {
-            return;
-        }
-
-        if (!this.userSim.reachableSimState) {
-
-            await new Promise(resolve =>
-                bootbox_custom.alert(
-                    `Can't proceed, ${this.userSim.friendlyName} no longer online`,
-                    () => resolve()
-                )
+                }
             );
 
-            return;
-
-        }
-
-        if (!contact) {
-
-            bootbox_custom.loading("Creating contact...");
-
-            const contact = await new Promise<types.UserSim.Contact>(resolve =>
-                this.evtClickCreateContact.post({
-                    name,
-                    number,
-                    "onSubmitted": contact => resolve(contact)
-                })
-            );
-
-            this.createUiContact(contact);
-
-        } else {
-
-            if (contact.name === name) {
+            if (!number) {
                 return;
             }
 
-            bootbox_custom.loading(
-                "Updating contact name..."
+            const contact = userSim.phonebook.find(
+                ({ number_raw }) => phoneNumber.areSame(
+                    number,
+                    number_raw
+                )
             );
 
-            await new Promise(resolve =>
-                this.evtClickUpdateContactName.post({
-                    contact,
-                    "newName": name,
-                    "onSubmitted": () => resolve()
+            const name = await new Promise<string | null>(
+                resolve => dialogApi.create("prompt", {
+                    "title": `Create contact ${phoneNumber.prettyPrint(number)} in ${this.userSim.friendlyName} internal memory`,
+                    "value": !!contact ? contact.name : "New contact",
+                    "callback": result => resolve(result),
                 })
             );
 
-            this.notifyContactChanged(contact);
+            if (!name) {
+                return;
+            }
 
-        }
+            if (!this.userSim.reachableSimState) {
 
-        bootbox_custom.dismissLoading();
+                await new Promise(resolve =>
+                    dialogApi.create("alert", {
+                        "message": `Can't proceed, ${this.userSim.friendlyName} no longer online`,
+                        "callback": () => resolve()
+                    })
+                );
+
+                return;
+
+            }
+
+            if (!contact) {
+
+                dialogApi.loading("Creating contact...");
+
+                const contact = await new Promise<types.UserSim.Contact>(resolve =>
+                    this.evtClickCreateContact.post({
+                        name,
+                        number,
+                        "onSubmitted": contact => resolve(contact)
+                    })
+                );
+
+                this.createUiContact(contact);
+
+            } else {
+
+                if (contact.name === name) {
+                    return;
+                }
+
+                dialogApi.loading(
+                    "Updating contact name..."
+                );
+
+                await new Promise(resolve =>
+                    this.evtClickUpdateContactName.post({
+                        contact,
+                        "newName": name,
+                        "onSubmitted": () => resolve()
+                    })
+                );
+
+                this.notifyContactChanged(contact);
+
+            }
+
+            dialogApi.dismissLoading();
+
+        })(dialogApi);
+
+        endMultiDialogProcess();
 
     }
 
     public async interact_deleteContacts(provided_number?: phoneNumber) {
 
-        const contacts: types.UserSim.Contact[] = (() => {
+        const { dialogApi, endMultiDialogProcess } = startMultiDialogProcess();
 
-            if (provided_number !== undefined) {
+        await (async (dialogApi: DialogApi) => {
 
-                const contact = this.userSim.phonebook.find(
-                    ({ number_raw }) => phoneNumber.areSame(
-                        provided_number,
-                        number_raw
-                    )
-                )!;
+            const contacts: types.UserSim.Contact[] = (() => {
 
-                return [contact];
+                if (provided_number !== undefined) {
 
-            } else {
+                    const contact = this.userSim.phonebook.find(
+                        ({ number_raw }) => phoneNumber.areSame(
+                            provided_number,
+                            number_raw
+                        )
+                    )!;
 
-                return Array.from(this.uiContacts.keys())
-                    .map(key => this.uiContacts.get(key)!)
-                    .filter(uiContact => uiContact.isSelected)
-                    .map(uiContact => uiContact.contact)
-                    ;
+                    return [contact];
+
+                } else {
+
+                    return Array.from(this.uiContacts.keys())
+                        .map(key => this.uiContacts.get(key)!)
+                        .filter(uiContact => uiContact.isSelected)
+                        .map(uiContact => uiContact.contact)
+                        ;
+
+                }
+
+            })();
+
+            const isConfirmed = await new Promise<boolean>(resolve =>
+                dialogApi.create("confirm", {
+                    "size": "small",
+                    "message": [
+                        "Are you sure you want to delete",
+                        contacts.map(({ name }) => name).join(" "),
+                        `from ${this.userSim.friendlyName} internal storage ?`
+                    ].join(" "),
+                    "callback": result => resolve(result)
+                })
+            );
+
+            if (!isConfirmed) {
+                return;
+            }
+
+            if (!this.userSim.reachableSimState) {
+
+                await new Promise(resolve =>
+                    dialogApi.create("alert", {
+                        "message": `Can't delete, ${this.userSim.friendlyName} no longer online`,
+                        "callback": () => resolve()
+                    })
+                );
+
+                return;
 
             }
 
-        })();
-
-        const isConfirmed = await new Promise<boolean>(resolve =>
-            bootbox_custom.confirm({
-                "size": "small",
-                "message": [
-                    "Are you sure you want to delete",
-                    contacts.map(({ name }) => name).join(" "),
-                    `from ${this.userSim.friendlyName} internal storage ?`
-                ].join(" "),
-                "callback": result => resolve(result)
-            })
-        );
-
-        if (!isConfirmed) {
-            return;
-        }
-
-        if (!this.userSim.reachableSimState) {
+            dialogApi.loading("Deleting contacts...");
 
             await new Promise(resolve =>
-                bootbox_custom.alert(
-                    `Can't delete, ${this.userSim.friendlyName} no longer online`,
-                    () => resolve()
-                )
+                this.evtClickDeleteContacts.post({
+                    contacts,
+                    "onSubmitted": () => resolve()
+                })
             );
 
-            return;
+            for (const contact of contacts) {
 
-        }
+                this.notifyContactChanged(contact);
 
-        bootbox_custom.loading("Deleting contacts...");
+            }
 
-        await new Promise(resolve =>
-            this.evtClickDeleteContacts.post({
-                contacts,
-                "onSubmitted": () => resolve()
-            })
-        );
+            this.updateButtons();
 
-        for (const contact of contacts) {
+            dialogApi.dismissLoading();
 
-            this.notifyContactChanged(contact);
+        })(dialogApi);
 
-        }
+        endMultiDialogProcess();
 
-        this.updateButtons();
-
-        bootbox_custom.dismissLoading();
 
     }
 
     public async interact_updateContact(provided_number?: phoneNumber) {
 
-        const contact = provided_number !== undefined ?
-            this.userSim.phonebook.find(
-                ({ number_raw }) => phoneNumber.areSame(
-                    provided_number,
-                    number_raw
-                )
-            )! :
-            Array.from(this.uiContacts.keys())
-                .map(key => this.uiContacts.get(key)!)
-                .find(uiContact => uiContact.isSelected)!.contact
-            ;
+        const { dialogApi, endMultiDialogProcess } = startMultiDialogProcess();
+
+        await (async (dialogApi: DialogApi) => {
+
+            const contact = provided_number !== undefined ?
+                this.userSim.phonebook.find(
+                    ({ number_raw }) => phoneNumber.areSame(
+                        provided_number,
+                        number_raw
+                    )
+                )! :
+                Array.from(this.uiContacts.keys())
+                    .map(key => this.uiContacts.get(key)!)
+                    .find(uiContact => uiContact.isSelected)!.contact
+                ;
 
 
-        const prettyNumber = phoneNumber.prettyPrint(
-            phoneNumber.build(
-                contact.number_raw,
-                !!this.userSim.sim.country ?
-                    this.userSim.sim.country.iso :
-                    undefined
-            )
-        );
-
-        const newName = await new Promise<string | null>(
-            resolve => bootbox_custom.prompt({
-                "title": `New contact name for ${prettyNumber} stored in ${this.userSim.friendlyName}`,
-                "value": contact.name,
-                "callback": result => resolve(result),
-            })
-        );
-
-        if (!newName || contact.name === newName) {
-            return;
-        }
-
-        if (!this.userSim.reachableSimState) {
-
-            await new Promise(resolve =>
-                bootbox_custom.alert(
-                    `Can't update, ${this.userSim.friendlyName} no longer online`,
-                    () => resolve()
+            const prettyNumber = phoneNumber.prettyPrint(
+                phoneNumber.build(
+                    contact.number_raw,
+                    !!this.userSim.sim.country ?
+                        this.userSim.sim.country.iso :
+                        undefined
                 )
             );
 
-            return;
+            const newName = await new Promise<string | null>(
+                resolve => dialogApi.create("prompt", {
+                    "title": `New contact name for ${prettyNumber} stored in ${this.userSim.friendlyName}`,
+                    "value": contact.name,
+                    "callback": result => resolve(result),
+                })
+            );
 
-        }
+            if (!newName || contact.name === newName) {
+                return;
+            }
 
-        bootbox_custom.loading("Updating contact name ...");
+            if (!this.userSim.reachableSimState) {
 
-        await new Promise(resolve =>
-            this.evtClickUpdateContactName.post({
-                contact,
-                newName,
-                "onSubmitted": () => resolve()
-            })
-        );
+                await new Promise(resolve =>
+                    dialogApi.create("alert", {
+                        "message": `Can't update, ${this.userSim.friendlyName} no longer online`,
+                        "callback": () => resolve()
+                    })
+                );
 
-        bootbox_custom.dismissLoading();
+                return;
 
-        this.notifyContactChanged(contact);
+            }
+
+            dialogApi.loading("Updating contact name ...");
+
+            await new Promise(resolve =>
+                this.evtClickUpdateContactName.post({
+                    contact,
+                    newName,
+                    "onSubmitted": () => resolve()
+                })
+            );
+
+            dialogApi.dismissLoading();
+
+            this.notifyContactChanged(contact);
+
+        })(dialogApi);
+
+        endMultiDialogProcess();
 
     }
 

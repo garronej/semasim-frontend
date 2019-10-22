@@ -12,10 +12,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -74,7 +75,7 @@ var RegistrationParams_1 = require("../gateway/RegistrationParams");
 var sip = require("ts-sip");
 var runExclusive = require("run-exclusive");
 var connection = require("./toBackend/connection");
-var localApiHandlers = require("./toBackend/localApiHandlers");
+var events_1 = require("./toBackend/events");
 var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
@@ -91,7 +92,7 @@ var Ua = /** @class */ (function () {
         this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
             var onProcessed;
             var pr = new Promise(function (resolve) { return onProcessed = resolve; });
-            _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
+            _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { "onProcessed": onProcessed }));
             return pr;
         });
         /*
@@ -129,6 +130,14 @@ var Ua = /** @class */ (function () {
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
         this.jsSipSocket = new JsSipSocket(imsi, uri);
+        /*
+        NOTE: It is important to call enableKeepAlive with a period shorter than the register_expires
+        so that if the reREGISTER can not be send in time because the app was in the background it
+        does not matter because the connection will be closed anyway.
+        Remember that when the registration has expired the GW will ignore all SIP messages coming from
+        the connection, it is then mandatory to establish a new websocket connection and re register.
+        Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
+        */
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri: uri,
@@ -144,7 +153,7 @@ var Ua = /** @class */ (function () {
                     "messagesEnabled": !disabledMessage
                 })
             ].join(";"),
-            "register_expires": 345600
+            "register_expires": 61
         });
         /*
         evt 'registered' is posted only when register change
@@ -258,7 +267,7 @@ var Ua = /** @class */ (function () {
             var rtcIceServer;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                    case 0: return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
                     case 1:
                         rtcIceServer = _a.sent();
                         jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
@@ -313,7 +322,7 @@ var Ua = /** @class */ (function () {
                         evtDtmf = new ts_events_extended_1.SyncEvent();
                         evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
                         evtRingback = new ts_events_extended_1.VoidSyncEvent();
-                        return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                        return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
                     case 1:
                         rtcICEServer = _a.sent();
                         this.jsSipUa.call("sip:" + number + "@" + env_1.baseDomain, {
@@ -415,16 +424,18 @@ var JsSipSocket = /** @class */ (function () {
         this.url = connection.url;
         this.messageOkDelays = new Map();
         var onBackedSocketConnect = function (backendSocket) {
-            var onSipPacket = function (sipPacket) {
-                if (readImsi_1.readImsi(sipPacket) !== imsi) {
-                    return;
-                }
-                _this.sdpHacks("INCOMING", sipPacket);
-                _this.evtSipPacket.post(sipPacket);
-                _this.ondata(sip.toData(sipPacket).toString("utf8"));
-            };
-            backendSocket.evtRequest.attach(onSipPacket);
-            backendSocket.evtResponse.attach(onSipPacket);
+            {
+                var onSipPacket = function (sipPacket) {
+                    if (readImsi_1.readImsi(sipPacket) !== imsi) {
+                        return;
+                    }
+                    _this.sdpHacks("INCOMING", sipPacket);
+                    _this.evtSipPacket.post(sipPacket);
+                    _this.ondata(sip.toData(sipPacket).toString("utf8"));
+                };
+                backendSocket.evtRequest.attach(onSipPacket);
+                backendSocket.evtResponse.attach(onSipPacket);
+            }
             backendSocket.evtPacketPreWrite.attach(function (sipPacket) { return _this.sdpHacks("OUTGOING", sipPacket); });
         };
         connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
@@ -596,7 +607,7 @@ function newIceCandidateHandler(rtcICEServer) {
                 var component = _a.component;
                 return component === "RTCP";
             });
-            if (isFullyReady(__assign({}, p, { isRtcpExcepted: isRtcpExcepted }))) {
+            if (isFullyReady(__assign(__assign({}, p), { isRtcpExcepted: isRtcpExcepted }))) {
                 return "ALL CANDIDATES READY";
             }
             return countRelayCandidatesReady(p.lines, isRtcpExcepted) >= 1 ?

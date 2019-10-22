@@ -4,10 +4,8 @@
     "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "crypto-lib": "github:garronej/crypto-lib",
     "moment": "^2.20.1",
-    "phone-number": "github:garronej/phone-number",
-    "ts-events-extended": "github:garronej/ts-events-extended"
+    "frontend-shared": "file:../../shared"
   },
   "devDependencies": {
     "@types/autosize": "^3.0.6",

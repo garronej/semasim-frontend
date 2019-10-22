@@ -1,12 +1,12 @@
 //NOTE: Require ion sound loaded on the page.
 
-import { SyncEvent } from "ts-events-extended";
-import * as types from "../../../shared/dist/lib/types/UserSim";
-import * as wd from "../../../shared/dist/lib/types/webphoneData/types";
-import { loadUiClassHtml } from "../../../shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "phone-number";
-import * as modal_stack from "../../../shared/dist/tools/modal_stack";
-type DtmFSignal = import("../../../shared/dist/lib/Ua").Ua.DtmFSignal;
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import * as types from "frontend-shared/dist/lib/types/UserSim";
+import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
+import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import * as modalApi from "frontend-shared/dist/tools/modal";
+type DtmFSignal = import("frontend-shared/dist/lib/Ua").Ua.DtmFSignal;
 
 declare const ion: any;
 declare const require: any;
@@ -36,15 +36,12 @@ export class UiVoiceCall {
         private readonly userSim: types.UserSim.Usable
     ) {
 
-        //Debug only
-        window["uiVoiceCall"] = this;
-
         this.countryIso = userSim.sim.country ?
             userSim.sim.country.iso : undefined;
 
         {
 
-            const { hide, show } = modal_stack.add(
+            const { hide, show } = modalApi.createModal(
                 this.structure,
                 {
                     "keyboard": false,

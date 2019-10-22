@@ -4,7 +4,8 @@
     "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "crypto-lib": "github:garronej/crypto-lib"
+    "minimal-polyfills": "github:garronej/minimal-polyfills",
+    "frontend-shared": "file:../../shared"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",

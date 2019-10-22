@@ -1,5 +1,5 @@
 
 
-import * as types from "../../../../gateway/dist/lib/types";
+import * as types from "semasim-gateway/dist/lib/types";
 
 export { types };

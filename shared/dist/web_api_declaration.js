@@ -12,6 +12,14 @@ var loginUser;
 (function (loginUser) {
     loginUser.methodName = "login-user";
 })(loginUser = exports.loginUser || (exports.loginUser = {}));
+var isUserLoggedIn;
+(function (isUserLoggedIn) {
+    isUserLoggedIn.methodName = "isUserLoggedIn";
+})(isUserLoggedIn = exports.isUserLoggedIn || (exports.isUserLoggedIn = {}));
+var declareUa;
+(function (declareUa) {
+    declareUa.methodName = "declareUa";
+})(declareUa = exports.declareUa || (exports.declareUa = {}));
 var logoutUser;
 (function (logoutUser) {
     logoutUser.methodName = "logout-user";

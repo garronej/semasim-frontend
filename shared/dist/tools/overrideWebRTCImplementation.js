@@ -11,10 +11,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -45,16 +46,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -71,10 +62,101 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 function overrideWebRTCImplementation(methods) {
-    console.log("Using alternative WebRTC implementation !");
+    console.log("Using alternative WebRTC implementation !!");
+    //NOTE: Polyfills for deprecated RTCSessionDescription constructor.
+    window["RTCSessionDescription"] = (function RTCSessionDescription(rtcSessionDescriptionInit) {
+        return Object.setPrototypeOf((function () {
+            var _a = __read(!!rtcSessionDescriptionInit ?
+                [rtcSessionDescriptionInit.sdp || null, rtcSessionDescriptionInit.type || null] :
+                [null, null], 2), sdp = _a[0], type = _a[1];
+            return { sdp: sdp, type: type };
+        })(), {
+            "constructor": RTCSessionDescription,
+            "toJSON": function toJSON() {
+                var _a = this, sdp = _a.sdp, type = _a.type;
+                return { sdp: sdp, type: type };
+            }
+        });
+    });
+    //NOTE: Polyfills RTCIceCandidate constructor not provided by react-native.
+    window["RTCIceCandidate"] = (function RTCIceCandidate(rtcIceCandidateInit) {
+        return Object.setPrototypeOf((function () {
+            var p = rtcIceCandidateInit;
+            var _a = __read(!!p ?
+                [p.candidate || null, p.sdpMid || null, p.sdpMLineIndex || null, p.usernameFragment || null] :
+                [null, null, null, null], 4), candidate = _a[0], sdpMid = _a[1], sdpMLineIndex = _a[2], usernameFragment = _a[3];
+            return Object.defineProperties({ candidate: candidate, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex, usernameFragment: usernameFragment }, {
+                "component": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("component not implemented");
+                    }
+                },
+                "foundation": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("foundation not implemented");
+                    }
+                },
+                "ip": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("ip not implemented");
+                    }
+                },
+                "port": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("port not implemented");
+                    }
+                },
+                "priority": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("priority not implemented");
+                    }
+                },
+                "protocol": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("protocol not implemented");
+                    }
+                },
+                "relatedAddress": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("relatedAddress not implemented");
+                    }
+                },
+                "relatedPort": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("relatedPort not implemented");
+                    }
+                }
+            });
+        })(), {
+            "constructor": RTCIceCandidate,
+            "toJSON": function toJSON() {
+                var _a = this, candidate = _a.candidate, sdpMid = _a.sdpMid, sdpMLineIndex = _a.sdpMLineIndex, usernameFragment = _a.usernameFragment;
+                return { candidate: candidate, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex, usernameFragment: usernameFragment };
+            },
+        });
+    });
     var getCounter = (function () {
         var counter = (function () {
             var min = -2147483000;
@@ -153,7 +235,7 @@ function overrideWebRTCImplementation(methods) {
                     new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
             })();
         });
-        var rtcPeerConnectionProxy = __assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+        var rtcPeerConnectionProxy = __assign(__assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
                 var ref, rtcSessionDescriptionInitJson;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -273,7 +355,7 @@ function overrideWebRTCImplementation(methods) {
                     .detach();
             };
             return { addEventListener: addEventListener, removeEventListener: removeEventListener };
-        })(), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });
+        })()), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });
         var _loop_1 = function (propertyName) {
             Object.defineProperty(rtcPeerConnectionProxy, propertyName, {
                 "get": function () { return properties[propertyName]; },
@@ -296,6 +378,10 @@ function overrideWebRTCImplementation(methods) {
         }
         return Object.setPrototypeOf(rtcPeerConnectionProxy, { "constructor": RTCPeerConnection });
     };
+    //NOTE: For react-native
+    if (!navigator.mediaDevices) {
+        navigator.mediaDevices = {};
+    }
     navigator.mediaDevices.getUserMedia = getUserMediaProxy;
     window["RTCPeerConnection"] = RTCPeerConnectionProxy;
     return {
@@ -321,19 +407,8 @@ function testOverrideWebRTCImplementation() {
     var getUserMediaBackup = navigator.mediaDevices.getUserMedia;
     var mediaStreamByRef = new Map();
     var rtcPeerConnectionByRef = new Map();
-    var listeners = overrideWebRTCImplementation(__assign({ 
-        /*
-        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
-            getUserMediaBackup(
-                JSON.parse(mediaStreamConstraintsJson)
-            ).then(mediaStream => {
-                mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, undefined);
-            }),
-            */
-        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
-            console.log("============> ", { mediaStreamConstraintsJson: mediaStreamConstraintsJson });
-            getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
+    var listeners = overrideWebRTCImplementation(__assign(__assign({ "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
+            return getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
                 listeners.onMethodReturn(callRef, undefined);
             });
@@ -366,7 +441,7 @@ function testOverrideWebRTCImplementation() {
         var createAnswerForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef); };
         var createOfferForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef); };
         return { createAnswerForRTCPeerConnection: createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection: createOfferForRTCPeerConnection };
-    })(), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+    })()), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
                 .then(function () { return listeners.onMethodReturn(callRef, undefined); });

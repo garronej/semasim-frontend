@@ -11,10 +11,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -45,15 +46,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -74,7 +76,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var sendRequest_1 = require("./sendRequest");
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
-var phone_number_1 = require("phone-number");
+var lib_1 = require("phone-number/dist/lib");
 var wd = require("../../types/webphoneData/logic");
 var cryptoLib = require("crypto-lib");
 //WebData sync things :
@@ -109,7 +111,7 @@ exports.getOrCreateWdInstance = (function () {
                                     case 0:
                                         wdChat = wdInstance.chats.find(function (_a) {
                                             var contactNumber = _a.contactNumber;
-                                            return phone_number_1.phoneNumber.areSame(contactNumber, contact.number_raw);
+                                            return lib_1.phoneNumber.areSame(contactNumber, contact.number_raw);
                                         });
                                         if (!!!wdChat) return [3 /*break*/, 2];
                                         wdChatWhoseContactNoLongerInPhonebook.delete(wdChat);
@@ -117,7 +119,7 @@ exports.getOrCreateWdInstance = (function () {
                                     case 1:
                                         _a.sent();
                                         return [3 /*break*/, 4];
-                                    case 2: return [4 /*yield*/, exports.newWdChat(wdInstance, phone_number_1.phoneNumber.build(contact.number_raw, userSim.sim.country ? userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                                    case 2: return [4 /*yield*/, exports.newWdChat(wdInstance, lib_1.phoneNumber.build(contact.number_raw, userSim.sim.country ? userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
                                     case 3:
                                         _a.sent();
                                         _a.label = 4;
@@ -500,7 +502,7 @@ function newWdMessage(wdChat, message_) {
                             _c)]))];
                 case 2:
                     message_id = (_e.sent()).message_id;
-                    wdMessage = (__assign({}, message, { "id_": message_id }));
+                    wdMessage = (__assign(__assign({}, message), { "id_": message_id }));
                     wdChat.messages.push(wdMessage);
                     wdChat.messages.sort(wd.compareMessage);
                     return [2 /*return*/, wdMessage];

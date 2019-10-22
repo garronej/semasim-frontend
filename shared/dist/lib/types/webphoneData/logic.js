@@ -11,10 +11,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -61,18 +62,19 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var cryptoLib = require("crypto-lib");
+var serializer_1 = require("crypto-lib/dist/async/serializer");
 var isAscendingAlphabeticalOrder_1 = require("../../../tools/isAscendingAlphabeticalOrder");
 function decryptChat(decryptor, chat) {
     return __awaiter(this, void 0, void 0, function () {
@@ -80,7 +82,7 @@ function decryptChat(decryptor, chat) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
+                    decryptThenParse = serializer_1.decryptThenParseFactory(decryptor);
                     return [4 /*yield*/, Promise.all([
                             decryptThenParse(chat.contactNumber.encrypted_string),
                             decryptThenParse(chat.contactName.encrypted_string),
@@ -89,7 +91,7 @@ function decryptChat(decryptor, chat) {
                         ])];
                 case 1:
                     _a = __read.apply(void 0, [_b.sent(), 4]), contactNumber = _a[0], contactName = _a[1], contactIndexInSim = _a[2], messages = _a[3];
-                    return [2 /*return*/, __assign({}, chat, { contactNumber: contactNumber, contactName: contactName, contactIndexInSim: contactIndexInSim, messages: messages })];
+                    return [2 /*return*/, __assign(__assign({}, chat), { contactNumber: contactNumber, contactName: contactName, contactIndexInSim: contactIndexInSim, messages: messages })];
             }
         });
     });
@@ -102,8 +104,8 @@ function encryptMessage(encryptor, message) {
         return __generator(this, function (_m) {
             switch (_m.label) {
                 case 0:
-                    stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptor);
-                    _a = [{}, message];
+                    stringifyThenEncrypt = serializer_1.stringifyThenEncryptFactory(encryptor);
+                    _a = [__assign({}, message)];
                     _b = {};
                     _c = "text";
                     _d = {};
@@ -113,7 +115,7 @@ function encryptMessage(encryptor, message) {
                     encryptedMessage = __assign.apply(void 0, _a.concat([(_b[_c] = (_d[_e] = _m.sent(), _d), _b)]));
                     if (!("sentBy" in message && message.sentBy.who === "OTHER")) return [3 /*break*/, 3];
                     _f = encryptedMessage;
-                    _g = [{}, message.sentBy];
+                    _g = [__assign({}, message.sentBy)];
                     _h = {};
                     _j = "email";
                     _k = {};
@@ -134,8 +136,8 @@ function decryptMessage(decryptor, encryptedMessage) {
         return __generator(this, function (_h) {
             switch (_h.label) {
                 case 0:
-                    decryptThenParse = cryptoLib.decryptThenParseFactory(decryptor);
-                    _a = [{}, encryptedMessage];
+                    decryptThenParse = serializer_1.decryptThenParseFactory(decryptor);
+                    _a = [__assign({}, encryptedMessage)];
                     _b = {};
                     _c = "text";
                     return [4 /*yield*/, decryptThenParse(encryptedMessage.text.encrypted_string)];
@@ -143,7 +145,7 @@ function decryptMessage(decryptor, encryptedMessage) {
                     message = __assign.apply(void 0, _a.concat([(_b[_c] = _h.sent(), _b)]));
                     if (!("sentBy" in encryptedMessage && encryptedMessage.sentBy.who === "OTHER")) return [3 /*break*/, 3];
                     _d = message;
-                    _e = [{}, encryptedMessage.sentBy];
+                    _e = [__assign({}, encryptedMessage.sentBy)];
                     _f = {};
                     _g = "email";
                     return [4 /*yield*/, decryptThenParse(encryptedMessage.sentBy.email.encrypted_string)];

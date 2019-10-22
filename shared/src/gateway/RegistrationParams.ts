@@ -1,3 +1,3 @@
 
-export { RegistrationParams } from "../../../../gateway/dist/lib/misc/RegistrationParams";
+export { RegistrationParams } from "semasim-gateway/dist/lib/misc/RegistrationParams";
 

@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -34,186 +35,200 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
         }
-    };
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
-var remoteApiCaller = require("./remoteApiCaller/base");
-var bootbox_custom = require("../../tools/bootbox_custom");
+var dialog_1 = require("../../tools/modal/dialog");
+var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
-var cookies = require("../cookies/logic/frontend");
+var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
+var env = require("../env");
+var tryLoginFromStoredCredentials_1 = require("../procedure/tryLoginFromStoredCredentials");
+var events_1 = require("./events");
+var restartApp_1 = require("../restartApp");
 exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
-var log = env_1.isDevEnv ? console.log.bind(console) : (function () { });
+env_1.isDevEnv;
+/*
+const log: typeof console.log = isDevEnv ?
+    ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
+    (() => { });
+    */
+var log = true ?
+    (function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return console.log.apply(console, __spread(["[toBackend/connection]"], args));
+    }) :
+    (function () { });
+var notConnectedUserFeedback;
+(function (notConnectedUserFeedback) {
+    var setVisibilityWithMessage;
+    function setVisibility(isVisible) {
+        var state = isVisible ?
+            ({ isVisible: isVisible, "message": "Connecting to Semasim..." }) :
+            ({ isVisible: isVisible });
+        setVisibilityWithMessage(state);
+    }
+    notConnectedUserFeedback.setVisibility = setVisibility;
+    /** NOTE: To call from react-native project */
+    function provideCustomImplementation(setVisibilityWithMessageImpl) {
+        setVisibilityWithMessage = setVisibilityWithMessageImpl;
+    }
+    notConnectedUserFeedback.provideCustomImplementation = provideCustomImplementation;
+})(notConnectedUserFeedback = exports.notConnectedUserFeedback || (exports.notConnectedUserFeedback = {}));
+notConnectedUserFeedback.provideCustomImplementation(function (state) {
+    if (state.isVisible) {
+        dialog_1.dialogApi.loading(state.message, 1200);
+    }
+    else {
+        dialog_1.dialogApi.dismissLoading();
+    }
+});
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
     log: log,
     "hideKeepAlive": true
 }));
-var socketCurrent = undefined;
-var userSims = undefined;
-exports.evtConnect = new ts_events_extended_1.SyncEvent();
-/**
- * - Multiple auxiliary connection can be established at the same time.
- * - On the contrary only one main connection can be active at the same time for a given user account )
- * - Auxiliary connections does not receive most of the events defined in localApiHandler.
- *   But will receive notifyIceServer ( if requestTurnCred === true ).
- * - Auxiliary connections will not receive phonebook entries
- * ( userSims will appear as if they had no contacts stored )
- *
- * Called from outside isReconnect should never be passed.
- *  */
-function connect(connectionParams, isReconnect) {
-    var _this = this;
-    //We register 'offline' event only on the first call of connect()
-    if (socketCurrent === undefined) {
-        window.addEventListener("offline", function () {
-            var socket = get();
-            if (socket instanceof Promise) {
-                return;
-            }
-            socket.destroy("Browser is offline");
-        });
-    }
-    var removeCookie = cookies.WebsocketConnectionParams.set(connectionParams);
-    var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": "web." + env_1.baseDomain,
-        "remotePort": 443
-    }, 20000);
-    apiServer.startListening(socket);
-    sip.api.client.enableKeepAlive(socket, 6 * 1000);
-    sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
-        idString: idString,
-        "log": console.log.bind(console)
-    }));
-    socket.enableLogger({
-        "socketId": idString,
-        "remoteEndId": "BACKEND",
-        "localEndId": "FRONTEND",
-        "connection": true,
-        "error": true,
-        "close": true,
-        "incomingTraffic": false,
-        "outgoingTraffic": false,
-        "ignoreApiTraffic": true
-    }, log);
-    socketCurrent = socket;
-    socket.evtConnect.attachOnce(function () {
-        log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
-        removeCookie();
-        if (!!isReconnect) {
-            bootbox_custom.dismissLoading();
+/** getPrLoggedIn is called when the user
+ * is no longer logged in, it should return a Promise
+ * that resolve when the user is logged back in
+ * if not provided and if in browser the page will be reloaded
+ * else error will be thrown.
+ */
+exports.connect = (function () {
+    var hasBeenInvoked = false;
+    return function (requestTurnCred, getPrLoggedIn) {
+        if (hasBeenInvoked) {
+            return;
         }
-        var includeContacts = connectionParams.connectionType === "MAIN";
-        if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims(includeContacts)
-                .then(function (userSims_) { return userSims = userSims_; });
-        }
-        else {
-            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
-                .then(function (userSims_) {
-                var e_1, _a;
-                var _loop_1 = function (userSim_) {
-                    var userSim = userSims
-                        .find(function (_a) {
-                        var sim = _a.sim;
-                        return sim.imsi === userSim_.sim.imsi;
-                    });
-                    /*
-                    By testing if digests are the same we cover 99% of the case
-                    when the sim could have been modified while offline...good enough.
-                    */
-                    if (!userSim ||
-                        userSim.sim.storage.digest !== userSim_.sim.storage.digest) {
-                        location.reload();
-                        return { value: void 0 };
-                    }
-                    /*
-                    If userSim is online we received a notification before having the
-                    response of the request... even possible?
-                     */
-                    if (!!userSim.reachableSimState) {
-                        return "continue";
-                    }
-                    userSim.reachableSimState = userSim_.reachableSimState;
-                    userSim.password = userSim_.password;
-                    userSim.dongle = userSim_.dongle;
-                    userSim.gatewayLocation = userSim_.gatewayLocation;
-                    if (!!userSim.reachableSimState) {
-                        localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-                    }
-                };
-                try {
-                    for (var userSims_1 = __values(userSims_), userSims_1_1 = userSims_1.next(); !userSims_1_1.done; userSims_1_1 = userSims_1.next()) {
-                        var userSim_ = userSims_1_1.value;
-                        var state_1 = _loop_1(userSim_);
-                        if (typeof state_1 === "object")
-                            return state_1.value;
-                    }
+        hasBeenInvoked = true;
+        //We register 'offline' event only on the first call of connect()
+        //TODO: React native.
+        if (env.jsRuntimeEnv === "browser") {
+            window.addEventListener("offline", function () {
+                var socket = get();
+                if (socket instanceof Promise) {
+                    return;
                 }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (userSims_1_1 && !userSims_1_1.done && (_a = userSims_1.return)) _a.call(userSims_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                }
+                socket.destroy("Browser is offline");
             });
         }
-        exports.evtConnect.post(socket);
-    });
-    socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
-        var _a, _b, userSim;
-        var e_2, _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
+        connectRecursive(requestTurnCred, getPrLoggedIn);
+    };
+})();
+exports.evtConnect = new ts_events_extended_1.SyncEvent();
+var socketCurrent = undefined;
+function connectRecursive(requestTurnCred, getPrLoggedIn) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result, webSocket, _a, _b, _c, _d, _e, _f, error_1, socket;
+        var _this = this;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
-                    log("Socket disconnected");
-                    try {
-                        for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
-                            userSim = _b.value;
-                            userSim.reachableSimState = undefined;
-                            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-                        }
-                    }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                    finally {
-                        try {
-                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                    }
-                    if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
-                        return [2 /*return*/];
-                    }
-                    if (socket.evtConnect.postCount === 1) {
-                        bootbox_custom.loading("Reconnecting...");
-                    }
-                    _d.label = 1;
+                    notConnectedUserFeedback.setVisibility(true);
+                    return [4 /*yield*/, tryLoginFromStoredCredentials_1.tryLoginFromStoredCredentials()];
                 case 1:
-                    if (!!navigator.onLine) return [3 /*break*/, 3];
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
+                    result = _g.sent();
+                    if (!(result === "NO VALID CREDENTIALS")) return [3 /*break*/, 4];
+                    if (!!!getPrLoggedIn) return [3 /*break*/, 3];
+                    notConnectedUserFeedback.setVisibility(false);
+                    return [4 /*yield*/, getPrLoggedIn()];
                 case 2:
-                    _d.sent();
-                    return [3 /*break*/, 1];
+                    _g.sent();
+                    notConnectedUserFeedback.setVisibility(true);
+                    return [3 /*break*/, 4];
                 case 3:
-                    connect(connectionParams, "RECONNECT");
+                    if (env.jsRuntimeEnv === "react-native") {
+                        throw new Error("never: getPreLoggedIn is not optional for react native");
+                    }
+                    restartApp_1.restartApp();
+                    return [2 /*return*/];
+                case 4:
+                    _g.trys.push([4, 6, , 7]);
+                    _a = WebSocket.bind;
+                    _c = (_b = urlGetParameters).buildUrl;
+                    _d = [exports.url];
+                    _e = {};
+                    _f = "connect_sid";
+                    return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
+                case 5:
+                    webSocket = new (_a.apply(WebSocket, [void 0, _c.apply(_b, _d.concat([(_e[_f] = (_g.sent()).connect_sid,
+                                _e.requestTurnCred = requestTurnCred,
+                                _e)])), "SIP"]))();
+                    return [3 /*break*/, 7];
+                case 6:
+                    error_1 = _g.sent();
+                    log("WebSocket construction error: " + error_1.message);
+                    //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
+                    connectRecursive(requestTurnCred, getPrLoggedIn);
+                    return [2 /*return*/];
+                case 7:
+                    socket = new sip.Socket(webSocket, true, {
+                        "remoteAddress": "web." + env_1.baseDomain,
+                        "remotePort": 443
+                    }, 20000);
+                    apiServer.startListening(socket);
+                    sip.api.client.enableKeepAlive(socket, 25 * 1000);
+                    sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
+                        idString: idString,
+                        log: log
+                    }));
+                    socket.enableLogger({
+                        "socketId": idString,
+                        "remoteEndId": "BACKEND",
+                        "localEndId": "FRONTEND",
+                        "connection": true,
+                        "error": true,
+                        "close": true,
+                        "incomingTraffic": true,
+                        "outgoingTraffic": true,
+                        "ignoreApiTraffic": true
+                    }, log);
+                    socketCurrent = socket;
+                    socket.evtConnect.attachOnce(function () {
+                        log("Socket (re-)connected");
+                        notConnectedUserFeedback.setVisibility(false);
+                        exports.evtConnect.post(socket);
+                    });
+                    socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            if (events_1.evtOpenElsewhere.postCount !== 0) {
+                                return [2 /*return*/];
+                            }
+                            connectRecursive(requestTurnCred, getPrLoggedIn);
+                            return [2 /*return*/];
+                        });
+                    }); });
                     return [2 /*return*/];
             }
         });
-    }); });
+    });
 }
-exports.connect = connect;
 function get() {
     if (!socketCurrent ||
         socketCurrent.evtClose.postCount !== 0 ||
