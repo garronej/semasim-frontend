@@ -89,7 +89,9 @@ function program_action_build_pages(options) {
         }
         console.log(path.join(frontend_root_dir_path, "shared", "tsconfig.json"));
         yield buildTools.tsc(path.join(frontend_root_dir_path, "shared", "tsconfig.json"), watch);
-        for (const page_name of fs.readdirSync(pages_dir_path)) {
+        for (const page_name of fs.readdirSync(pages_dir_path)
+            .filter(entry => fs.statSync(path.join(pages_dir_path, entry))
+            .isDirectory())) {
             build_page(path.join(pages_dir_path, page_name), watch);
         }
     });
