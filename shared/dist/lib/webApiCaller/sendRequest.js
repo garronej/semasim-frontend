@@ -61,7 +61,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
-var env = require("../env");
+var env_1 = require("../env");
 var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
 var webApiPath_1 = require("../../gateway/webApiPath");
 var serializer = JSON_CUSTOM_1.get();
@@ -83,7 +83,7 @@ function sendRequest(methodName, params, connectSid) {
         var _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                case 0: return [4 /*yield*/, fetch("https://web." + env_1.env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
                         "method": "POST",
                         "cache": "no-cache",
                         "credentials": "same-origin",

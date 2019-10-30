@@ -6,7 +6,7 @@ export type TowardUserKeys = {
     decryptKey: RsaKey.Private;
 };
 
-export const key= "toward-user-keys";
+const key= "toward-user-keys";
 
 export namespace TowardUserKeys {
 

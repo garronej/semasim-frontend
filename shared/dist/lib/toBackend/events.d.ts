@@ -3,7 +3,11 @@ import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import * as sipLibrary from "ts-sip";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export declare const evtUsableSim: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
-export declare const evtSimIsOnlineStatusChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
+export declare const evtSimReachabilityStatusChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
+/** NOTE: This is posted when an user lose access to the sim, the password
+ * is then renewed, there is not a special notify event from the server
+ * but the sim is re-notified online */
+export declare const evtSimPasswordChanged: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const evtSimGsmConnectivityChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const evtOngoingCall: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;
 export declare const evtSimCellSignalStrengthChange: SyncEvent<types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>>;

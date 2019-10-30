@@ -1,5 +1,6 @@
 
-import {Dimensions} from "react-native";
+import * as rn from "react-native";
+import { AppLifeCycleListener } from "./appLifeCycle";
 
 /*
 const width = 360;
@@ -23,35 +24,64 @@ const ov= {
     }
 }
 
-export function overrideWindowDimensions(windowDimensions: { width: number; height: number }){
 
-    const windowDimensionsCurrent = get();
-    const orientation= getOrientation();
 
-    let wasCorrected= false;
+export const fixDimensions: AppLifeCycleListener = ({ evtRootViewOnLayout }) => {
 
-    for (const dim of ["width", "height"] as const) {
-
-        const [currentValue, value] = [windowDimensionsCurrent, windowDimensions].map(o => o[dim]);
-
-        if (value === currentValue || Math.abs(value/currentValue - 1) > 0.1  ) {
-            continue;
-        }
-
-        ov[orientation][dim] = value;
-        wasCorrected = true;
-
+    if( rn.Platform.OS === "ios" ){
+        return;
     }
 
-    return { wasCorrected };
+    const overrideWindowDimensions = (windowDimensions: { width: number; height: number }) => {
 
-}
+        const windowDimensionsCurrent = get();
+        const orientation = getOrientation();
+
+        let wasCorrected = false;
+
+        for (const dim of ["width", "height"] as const) {
+
+            const [currentValue, value] = [windowDimensionsCurrent, windowDimensions].map(o => o[dim]);
+
+            if (value === currentValue || Math.abs(value / currentValue - 1) > 0.1) {
+                continue;
+            }
+
+            ov[orientation][dim] = value;
+            wasCorrected = true;
+
+        }
+
+        return { wasCorrected };
+
+    };
+
+
+    evtRootViewOnLayout.attach(
+        ({ layoutChangeEvent: { nativeEvent: { layout } }, component }) => {
+
+            const { width, height } = layout;
+
+            const { wasCorrected } = overrideWindowDimensions({ width, height });
+
+            if (!wasCorrected) {
+                return;
+            }
+
+            component.forceUpdate();
+
+        }
+    );
+
+
+};
+
 
 function get() {
 
     const { width, height } = ov[getOrientation()];
 
-    const windowDimensionsDefault = Dimensions.get("window");
+    const windowDimensionsDefault = rn.Dimensions.get("window");
 
     return {
         "width": width || windowDimensionsDefault.width,
@@ -73,7 +103,7 @@ export const percentageOfDiagonalDp = (num: number) => {
 }
 
 export function getOrientation(): "PORTRAIT" | "LANDSCAPE" {
-    const { width, height } = Dimensions.get("window");
+    const { width, height } = rn.Dimensions.get("window");
     return width <= height ? "PORTRAIT" : "LANDSCAPE";
 }
 

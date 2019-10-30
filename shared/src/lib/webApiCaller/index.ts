@@ -3,7 +3,7 @@ import * as apiDeclaration from "../../web_api_declaration";
 import { sendRequest as sendRequestMayThrow, WebApiError } from "./sendRequest";
 import { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
 import { Credentials } from "../localStorage/Credentials";
-import * as env from "../env";
+import { env } from "../env";
 import { SyncEvent } from "ts-events-extended";
 import { restartApp } from "../restartApp";
 

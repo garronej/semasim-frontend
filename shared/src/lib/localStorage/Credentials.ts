@@ -1,33 +1,18 @@
 
 
 import * as localStorageApi from "./localStorageApi";
-import * as env from "../env";
 
-export const key = "credentials";
+const key = "credentials";
 
-declare const Buffer: any;
-
-export type Credentials = Omit<import ("../../web_api_declaration").loginUser.Params, "uaInstanceId"> & { uaInstanceId: string; };
+/** Soult be used only with react-native */
+export type Credentials = Omit<import("../../web_api_declaration").loginUser.Params, "uaInstanceId"> & { uaInstanceId: string; };
 
 
 export namespace Credentials {
 
-
-    function throwIfWeb(): void | never {
-
-        if( env.jsRuntimeEnv === "react-native" ){
-            return;
-        }
-
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-
-    }
-
     export async function isPresent(): Promise<boolean> {
 
-        throwIfWeb();
-
-        const value= await localStorageApi.getItem(key);
+        const value = await localStorageApi.getItem(key);
 
         return value !== null;
 
@@ -35,9 +20,7 @@ export namespace Credentials {
 
     export async function remove() {
 
-        throwIfWeb();
-
-        if( !(await isPresent())){
+        if (!(await isPresent())) {
             return;
         }
 
@@ -49,39 +32,25 @@ export namespace Credentials {
     /** assert isPresent */
     export async function get(): Promise<Credentials> {
 
-        throwIfWeb();
+        const value = await localStorageApi.getItem(key);
 
-        const value: string | null = await localStorageApi.getItem(key);
-
-        if( value === undefined ){
+        if (value === null) {
             throw new Error("Auth not present in localStorage");
         }
 
-        return JSON.parse(
-            Buffer.from(
-                value,
-                "hex"
-            ).toString("utf8")
-        );
+        return JSON.parse(value);
 
     }
 
     export async function set(authenticatedSessionDescriptorSharedData: Credentials): Promise<void> {
 
-        throwIfWeb();
-
         await localStorageApi.setItem(
             key,
-            Buffer.from(
-                JSON.stringify(authenticatedSessionDescriptorSharedData),
-                "utf8"
-            ).toString("hex")
+            JSON.stringify(authenticatedSessionDescriptorSharedData)
         );
 
     }
 
-    
-
 }
 
-    
+

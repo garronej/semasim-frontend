@@ -4,16 +4,16 @@ import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 
 import { types as gwTypes } from "../gateway/types";
 import { extractBundledDataFromHeaders, smuggleBundledDataInHeaders, } from "../gateway/bundledData";
-import { readImsi, } from "../gateway/readImsi";
-import { RegistrationParams } from "../gateway/RegistrationParams";
+import { readImsi } from "../gateway/readImsi";
+import * as  serializedUaObjectCarriedOverSipContactParameter from "../gateway/serializedUaObjectCarriedOverSipContactParameter";
 
 import * as sip from "ts-sip";
 import * as runExclusive from "run-exclusive";
-import * as connection from "./toBackend/connection";
-import { rtcIceEServer } from "./toBackend/events";
-import { baseDomain } from "./env";
-import * as cryptoLib from "crypto-lib/dist/sync/types";
+import { env } from "./env";
+
 type phoneNumber = import("phone-number/dist/lib").phoneNumber;
+type Encryptor= import("./crypto/cryptoLibProxy").Encryptor;
+type Decryptor= import("./crypto/cryptoLibProxy").Decryptor;
 
 declare const JsSIP: any;
 declare const Buffer: any;
@@ -21,63 +21,215 @@ declare const Buffer: any;
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 
+
+export type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+
+type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (...args: any) => Promise<infer R> ? R : any;
+
+export async function uaInstantiationHelper(params: {
+    cryptoRelatedParams: AsyncReturnType<
+        typeof import(
+        "./crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"
+        )["setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"]
+    >,
+    pushNotificationToken: string;
+}): Promise<Ua> {
+
+    const {
+        cryptoRelatedParams: {
+            towardUserDecryptor,
+            towardUserEncryptKeyStr,
+            getTowardSimEncryptor
+        },
+        pushNotificationToken
+    } = params;
+
+    const [{ AuthenticatedSessionDescriptorSharedData }, backendEvents, connection] = await Promise.all([
+        import("./localStorage/AuthenticatedSessionDescriptorSharedData"),
+        import("./toBackend/events"),
+        import("./toBackend/connection")
+    ])
+
+    return new Ua(
+        await (async () => {
+
+            const { email, uaInstanceId } =
+                await AuthenticatedSessionDescriptorSharedData.get();
+
+            return {
+                "instance": uaInstanceId,
+                "pushToken": pushNotificationToken,
+                towardUserEncryptKeyStr,
+                "userEmail": email
+            };
+
+        })(),
+        towardUserDecryptor,
+        (() => {
+
+            const evtUnregisteredByGateway = new SyncEvent<{ imsi: string; }>();
+
+            const onEvt = ({ sim: { imsi } }: import("./types/userSim").UserSim.Usable) => evtUnregisteredByGateway.post({ imsi })
+
+            backendEvents.evtSimPasswordChanged.attach(onEvt);
+
+            backendEvents.evtSimPermissionLost.attach(onEvt);
+
+            backendEvents.evtSimReachabilityStatusChange.attach(
+                ({ reachableSimState }) => reachableSimState === undefined,
+                onEvt
+            );
+
+            return evtUnregisteredByGateway;
+
+        })(),
+        getTowardSimEncryptor,
+        (imsi: string) => new JsSipSocket(imsi, connection),
+        () => backendEvents.rtcIceEServer.getCurrent()
+    );
+
+}
+
+
 export class Ua {
 
-    /** Must be set before use in webphone.ts */
-    public static session: {
-        email: string;
-        instanceId: string;
-        towardUserEncryptKeyStr: string;
-        towardUserDecryptor: cryptoLib.Decryptor;
-    };
+    public descriptor: gwTypes.Ua;
+
+    /** evtUnregisteredByGateway should post when a sim that was previously
+     * reachable goes unreachable, when this happen SIP packets can no longer be
+     * routed to the gateway and the gateway unregister all the SIP contact
+     * It happen also when an user lose access to sim or need to refresh sim password.
+     * */
+    public constructor(
+        uaDescriptorWithoutPlatform: Omit<gwTypes.Ua, "platform">,
+        private towardUserDecryptor: Decryptor,
+        private evtUnregisteredByGateway: SyncEvent<{ imsi: string; }>,
+        private getTowardSimEncryptor: (usableUserSim: { towardSimEncryptKeyStr: string; }) => { towardSimEncryptor: Encryptor; },
+        private getJsSipSocket: (imsi: string) => JsSipSocket,
+        private getRtcIceServer: () => Promise<RTCIceServer>,
+    ) {
+
+        this.descriptor = {
+            ...uaDescriptorWithoutPlatform,
+            "platform": (() => {
+                switch (env.jsRuntimeEnv) {
+                    case "browser": return "web";
+                    case "react-native": return env.hostOs;
+                }
+            })()
+        };
+
+    }
+
+
+    public newUaSim(
+        usableUserSim: { sim: { imsi: string; }; password: string; towardSimEncryptKeyStr: string; }
+    ): UaSim {
+
+        const { sim } = usableUserSim;
+
+        return new UaSim(
+            this.descriptor,
+            this.towardUserDecryptor,
+            this.getRtcIceServer,
+            (() => {
+
+                const out = new VoidSyncEvent();
+
+                this.evtUnregisteredByGateway.attach(
+                    ({ imsi }) => imsi === sim.imsi,
+                    () => out.post()
+                );
+
+                return out;
+
+
+            })(),
+            this.getJsSipSocket(sim.imsi),
+            sim.imsi,
+            usableUserSim.password,
+            this.getTowardSimEncryptor(usableUserSim).towardSimEncryptor
+        );
+    }
+
+
+}
+
+
+export class UaSim {
+
 
     /** post isRegistered */
     public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
 
-
     private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
 
-    private readonly jsSipSocket: JsSipSocket;
 
+
+    /** Use UA.prototype.newUaSim to instantiate an UaSim */
     constructor(
+
+        public readonly uaDescriptor: gwTypes.Ua,
+        private readonly towardUserDecryptor: Decryptor,
+        private getRtcIceServer: () => Promise<RTCIceServer>,
+        evtUnregisteredByGateway: VoidSyncEvent,
+        private readonly jsSipSocket: JsSipSocket,
         imsi: string,
         sipPassword: string,
-        private readonly towardSimEncryptor: cryptoLib.Encryptor,
-        disabledMessage: false | "DISABLE MESSAGES" = false
+        private readonly towardSimEncryptor: Encryptor,
+
     ) {
 
-        const uri = `sip:${imsi}-webRTC@${baseDomain}`;
+        const uri = this.jsSipSocket.sip_uri;
 
-        this.jsSipSocket = new JsSipSocket(imsi, uri);
+        const register_expires= 61;
 
-        
-
-        /*
-        NOTE: It is important to call enableKeepAlive with a period shorter than the register_expires 
-        so that if the reREGISTER can not be send in time because the app was in the background it
-        does not matter because the connection will be closed anyway.
-        Remember that when the registration has expired the GW will ignore all SIP messages coming from
-        the connection, it is then mandatory to establish a new websocket connection and re register.
-        Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
-        */
+        //NOTE: Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,
             "authorization_user": imsi,
             "password": sipPassword,
-            "instance_id": Ua.session.instanceId.match(/"<urn:([^>]+)>"$/)![1],
+            //NOTE: The ua instance id is also bundled in the contact uri but
+            //but jsSip does not allow us to not include an instance id
+            //if we don't provide one it will generate one for us.
+            //So we are providing it for consistency.
+            "instance_id": uaDescriptor.instance.match(/"<urn:([^>]+)>"$/)![1],
             "register": false,
-            "contact_uri": [
-                uri,
-                RegistrationParams.build({
-                    "userEmail": Ua.session.email,
-                    "towardUserEncryptKeyStr": Ua.session.towardUserEncryptKeyStr,
-                    "messagesEnabled": !disabledMessage
-                })
-            ].join(";"),
-            "register_expires": 61
+            "contact_uri": uri + ";" + serializedUaObjectCarriedOverSipContactParameter.buildParameter(uaDescriptor),
+            register_expires
         });
+
+        let lastRegisterTime = 0;
+
+        this.jsSipUa.on("registrationExpiring", async () => {
+
+            if( !this.isRegistered ){
+                return;
+            }
+
+            //NOTE: For react native, jsSIP does not post "unregistered" event when registration
+            //actually expire.
+            if( Date.now() - lastRegisterTime >= register_expires * 1000 ){
+
+                console.log("Sip registration has expired while app was in the background");
+
+                this.jsSipUa.emit("unregistered");
+
+            }else{
+                console.log(`Ua registration expiring for ${imsi}`);
+            }
+
+            console.log("re-registering");
+
+            this.jsSipUa.register();
+
+        });
+
+        evtUnregisteredByGateway.attach(
+            () => this.jsSipUa.emit("unregistered")
+        );
 
 
         /* 
@@ -92,6 +244,8 @@ export class Ua {
             ),
             () => {
 
+                lastRegisterTime= Date.now();
+
                 this.isRegistered = true;
 
                 this.evtRegistrationStateChanged.post(true);
@@ -101,6 +255,8 @@ export class Ua {
 
         this.jsSipUa.on("unregistered", () => {
 
+            console.log("ua sim unregistered");
+
             this.isRegistered = false;
 
             this.evtRegistrationStateChanged.post(false);
@@ -109,17 +265,21 @@ export class Ua {
 
         this.jsSipUa.on("newMessage", ({ originator, request }) => {
 
-            if (originator === "remote") {
-                this.onMessage(request);
+            if (originator !== "remote") {
+                return;
             }
+
+            this.onMessage(request);
 
         });
 
         this.jsSipUa.on("newRTCSession", ({ originator, session, request }) => {
 
-            if (originator === "remote") {
-                this.onIncomingCall(session, request);
+            if (originator !== "remote") {
+                return;
             }
+
+            this.onIncomingCall(session, request);
 
         });
 
@@ -131,16 +291,23 @@ export class Ua {
 
     //TODO: If no response to register do something
     public register() {
+
         this.jsSipUa.register();
+
     }
 
-    /** 
-     * Do not actually send a REGISTER expire=0. 
-     * Assert no packet will arrive to this UA until next register.
-     * */
+
     public unregister() {
-        this.jsSipUa.emit("unregistered");
+
+        if (!this.isRegistered) {
+            return;
+        }
+
+        this.jsSipUa.unregister();
+
     }
+
+
 
     public readonly evtIncomingMessage = new SyncEvent<{
         fromNumber: phoneNumber;
@@ -162,7 +329,7 @@ export class Ua {
                 return out;
 
             })(),
-            Ua.session.towardUserDecryptor
+            this.towardUserDecryptor
         );
 
 
@@ -186,7 +353,7 @@ export class Ua {
     }
 
     private postEvtIncomingMessage = runExclusive.buildMethod(
-        (evtData: Pick<SyncEvent.Type<typeof Ua.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
+        (evtData: Pick<SyncEvent.Type<typeof UaSim.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
 
             let onProcessed: () => void;
 
@@ -205,11 +372,11 @@ export class Ua {
     public sendMessage(
         number: phoneNumber,
         bundledData: gwTypes.BundledData.ClientToServer
-    ): Promise<void>{
+    ): Promise<void> {
 
         return new Promise<void>(
             async (resolve, reject) => this.jsSipUa.sendMessage(
-                `sip:${number}@${baseDomain}`,
+                `sip:${number}@${env.baseDomain}`,
                 "| encrypted message bundled in header |",
                 {
                     "contentType": "text/plain; charset=UTF-8",
@@ -224,44 +391,9 @@ export class Ua {
                 }
             )
         );
-        
+
 
     }
-
-    /*
-    public sendMessage(
-        number: phoneNumber,
-        text: string,
-        exactSendDate: Date,
-        appendPromotionalMessage: boolean
-    ): Promise<void> {
-        return new Promise<void>(
-            async (resolve, reject) => this.jsSipUa.sendMessage(
-                `sip:${number}@${baseDomain}`,
-                "| encrypted message bundled in header |",
-                {
-                    "contentType": "text/plain; charset=UTF-8",
-                    "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
-                        {
-                            "type": "MESSAGE",
-                            "textB64": Buffer.from(text, "utf8").toString("base64"),
-                            "exactSendDateTime": exactSendDate.getTime(),
-                            appendPromotionalMessage
-                        },
-                        this.towardSimEncryptor
-                    ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
-                    "eventHandlers": {
-                        "succeeded": () => resolve(),
-                        "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
-                    }
-                }
-            )
-        );
-    }
-    */
-
-    /** return exactSendDate to match with sendReport and statusReport */
-
 
     public readonly evtIncomingCall = new SyncEvent<{
         fromNumber: phoneNumber;
@@ -269,7 +401,7 @@ export class Ua {
         prTerminated: Promise<void>;
         onAccepted(): Promise<{
             state: "ESTABLISHED";
-            sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+            sendDtmf(signal: DtmFSignal, duration: number): void;
         }>
     }>();
 
@@ -279,7 +411,7 @@ export class Ua {
         const evtRequestTerminate = new VoidSyncEvent();
         const evtAccepted = new VoidSyncEvent();
         const evtTerminated = new VoidSyncEvent();
-        const evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+        const evtDtmf = new SyncEvent<{ signal: DtmFSignal; duration: number; }>();
         const evtEstablished = new VoidSyncEvent();
 
 
@@ -291,7 +423,7 @@ export class Ua {
 
         evtAccepted.attachOnce(async () => {
 
-            const rtcIceServer = await rtcIceEServer.getCurrent();
+            const rtcIceServer = await this.getRtcIceServer();
 
             jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
 
@@ -346,21 +478,21 @@ export class Ua {
             state: "RINGBACK";
             prNextState: Promise<{
                 state: "ESTABLISHED";
-                sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+                sendDtmf(signal: DtmFSignal, duration: number): void;
             }>
         }>
     }> {
 
         const evtEstablished = new VoidSyncEvent();
         const evtTerminated = new VoidSyncEvent();
-        const evtDtmf = new SyncEvent<{ signal: Ua.DtmFSignal; duration: number; }>();
+        const evtDtmf = new SyncEvent<{ signal: DtmFSignal; duration: number; }>();
         const evtRequestTerminate = new VoidSyncEvent();
         const evtRingback = new VoidSyncEvent();
 
-        const rtcICEServer = await rtcIceEServer.getCurrent();
+        const rtcICEServer = await this.getRtcIceServer();
 
         this.jsSipUa.call(
-            `sip:${number}@${baseDomain}`,
+            `sip:${number}@${env.baseDomain}`,
             {
                 "mediaConstraints": { "audio": true, "video": false },
                 "pcConfig": {
@@ -441,14 +573,10 @@ export class Ua {
 
     }
 
-}
 
-export namespace Ua {
-
-    export type DtmFSignal =
-        "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 
 }
+
 
 function playAudioStream(stream: MediaStream) {
 
@@ -465,7 +593,7 @@ interface IjsSipSocket {
 
     via_transport: string;
     url: string; /* "wss://dev.[dev.]semasim.com" */
-    sip_uri: string; /* `sip:${imsi}-webRTC@[dev.]semasim.com` */
+    sip_uri: string; /* `sip:${imsi}@[dev.]semasim.com` */
 
     connect(): void;
     disconnect(): void;
@@ -483,7 +611,7 @@ class JsSipSocket implements IjsSipSocket {
 
     public readonly via_transport: sip.TransportProtocol = "WSS";
 
-    public readonly url: string = connection.url;
+    public readonly url: string = this.connection.url;
 
     private sdpHacks(direction: "INCOMING" | "OUTGOING", sipPacket: sip.Packet) {
 
@@ -565,11 +693,18 @@ class JsSipSocket implements IjsSipSocket {
 
     }
 
+    public readonly sip_uri: string;
+
     constructor(
         imsi: string,
-        public readonly sip_uri: string
+        private readonly connection: {
+            url: string;
+            evtConnect: SyncEvent<sip.Socket>;
+            get: () => Promise<sip.Socket> | sip.Socket;
+        }
     ) {
 
+        this.sip_uri = `sip:${imsi}@${env.baseDomain}`;
 
         const onBackedSocketConnect = (backendSocket: sip.Socket) => {
 
@@ -671,17 +806,28 @@ class JsSipSocket implements IjsSipSocket {
 
             }
 
-            const socketOrPrSocket = connection.get();
+            while (true) {
 
-            const socket = socketOrPrSocket instanceof Promise ?
-                (await socketOrPrSocket) :
-                socketOrPrSocket;
+                const socketOrPrSocket = this.connection.get();
 
-            socket.write(
-                sip.parse(
-                    Buffer.from(data, "utf8")
-                )
-            );
+                const socket = socketOrPrSocket instanceof Promise ?
+                    (await socketOrPrSocket) :
+                    socketOrPrSocket;
+
+                const isSent = await socket.write(
+                    sip.parse(
+                        Buffer.from(data, "utf8")
+                    )
+                );
+
+                if (!isSent) {
+                    console.log("WARNING: websocket sip data was not sent successfully", data);
+                    continue;
+                }
+
+                break;
+
+            }
 
         })();
 

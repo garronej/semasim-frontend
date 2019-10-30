@@ -1,6 +1,6 @@
 
 import { connectSidHttpHeaderName } from "../types/connectSidHttpHeaderName";
-import * as env from "../env";
+import { env } from "../env";
 
 import { get as JSON_CUSTOM_factory } from "transfer-tools/dist/lib/JSON_CUSTOM";
 import { webApiPath } from "../../gateway/webApiPath";

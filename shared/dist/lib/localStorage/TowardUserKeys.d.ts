@@ -3,7 +3,6 @@ export declare type TowardUserKeys = {
     encryptKey: RsaKey.Public;
     decryptKey: RsaKey.Private;
 };
-export declare const key = "toward-user-keys";
 export declare namespace TowardUserKeys {
     function stringify(towardUserKeys: TowardUserKeys): string;
     function parse(towardUserKeysStr: string): TowardUserKeys;

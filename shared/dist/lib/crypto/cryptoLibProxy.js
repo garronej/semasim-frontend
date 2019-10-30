@@ -58,7 +58,7 @@ var __spread = (this && this.__spread) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("crypto-lib");
 var hostCrypto = require("../nativeModules/hostCryptoLib");
-var env = require("../env");
+var env_1 = require("../env");
 var crypto_lib_1 = require("crypto-lib");
 exports.WorkerThreadId = crypto_lib_1.WorkerThreadId;
 exports.RsaKey = crypto_lib_1.RsaKey;
@@ -66,13 +66,13 @@ exports.scrypt = crypto_lib_1.scrypt;
 exports.aes = crypto_lib_1.aes;
 exports.toBuffer = crypto_lib_1.toBuffer;
 exports.workerThreadPool = crypto_lib_1.workerThreadPool;
-if (env.jsRuntimeEnv === "react-native") {
+if (env_1.env.jsRuntimeEnv === "react-native") {
     cryptoLib.disableMultithreading();
 }
 var rsa;
 (function (rsa) {
     var _this = this;
-    rsa.generateKeys = env.jsRuntimeEnv === "browser" ?
+    rsa.generateKeys = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -86,7 +86,7 @@ var rsa;
                 "publicKey": cryptoLib.RsaKey.parse(keys.publicKeyStr),
                 "privateKey": cryptoLib.RsaKey.parse(keys.privateKeyStr)
             }); }); };
-    rsa.encryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.encryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -102,7 +102,7 @@ var rsa;
                     return Buffer.from(outputDataB64, "base64");
                 }); }
             }); };
-    rsa.decryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.decryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];

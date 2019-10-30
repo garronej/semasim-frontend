@@ -6,7 +6,7 @@ import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 import * as modalApi from "frontend-shared/dist/tools/modal";
-type DtmFSignal = import("frontend-shared/dist/lib/Ua").Ua.DtmFSignal;
+type DtmFSignal = import("frontend-shared/dist/lib/Ua").DtmFSignal;
 
 declare const ion: any;
 declare const require: any;
@@ -275,7 +275,7 @@ export class UiVoiceCall {
 
         this.structure.find("[class^='id_icon-']").addClass("hide");
 
-        let spanTimer = this.structure.find("span.id_timer");
+        let spanTimer: any = this.structure.find("span.id_timer");
 
         if (spanTimer["timer"] instanceof Function) {
             spanTimer["timer"]("remove");

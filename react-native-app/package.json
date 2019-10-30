@@ -29,7 +29,9 @@
     "react-native-callkeep": "^3.0.6",
     "uuid": "^3.3.3",
     "react-native-device-info": "^4.0.1",
-    "react-native-restart": "^0.0.13"
+    "react-native-restart": "^0.0.13",
+    "@react-native-firebase/app": "6.0.2",
+    "@react-native-firebase/messaging": "6.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",

@@ -5,21 +5,20 @@ import * as localApiHandlers from "./localApiHandlers";
 import { WebsocketConnectionParams } from "../types/WebsocketConnectionParams";
 import { dialogApi } from "../../tools/modal/dialog";
 import * as urlGetParameters from "../../tools/urlGetParameters";
-import { baseDomain, isDevEnv } from "../env";
+import { env } from "../env";
 import { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
-import * as env from "../env";
-import { tryLoginFromStoredCredentials } from "../procedure/tryLoginFromStoredCredentials";
+import { tryLoginFromStoredCredentials } from "../tryLoginFromStoredCredentials";
 import { evtOpenElsewhere } from "./events";
 import { restartApp } from "../restartApp";
 
-export const url = `wss://web.${baseDomain}`;
+export const url = `wss://web.${env.baseDomain}`;
 
 const idString = "toBackend";
 
 
-isDevEnv;
+env.isDevEnv;
 /*
-const log: typeof console.log = isDevEnv ?
+const log: typeof console.log = env.isDevEnv ?
     ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
     (() => { });
     */
@@ -83,7 +82,7 @@ const apiServer = new sip.api.Server(
 );
 
 
-/** getPrLoggedIn is called when the user
+/** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
@@ -93,10 +92,10 @@ export const connect = (() => {
 
     let hasBeenInvoked = false;
 
-    return (
-        requestTurnCred: WebsocketConnectionParams["requestTurnCred"],
-        getPrLoggedIn: (() => Promise<void>) | undefined
-    ) => {
+    return (params: {
+        requestTurnCred: boolean;
+        login?: () => Promise<void>;
+    }) => {
 
         if (hasBeenInvoked) {
             return;
@@ -122,8 +121,10 @@ export const connect = (() => {
 
         }
 
-        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(
+            params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED",
+            params.login
+        );
 
     };
 
@@ -137,8 +138,7 @@ let socketCurrent: sip.Socket | undefined = undefined;
 
 async function connectRecursive(
     requestTurnCred: WebsocketConnectionParams["requestTurnCred"],
-    getPrLoggedIn: (() => Promise<void>) | undefined,
-    //isReconnect: boolean
+    login: (() => Promise<void>) | undefined,
 ) {
 
 
@@ -151,11 +151,11 @@ async function connectRecursive(
 
         if (result === "NO VALID CREDENTIALS") {
 
-            if (!!getPrLoggedIn) {
+            if (!!login) {
 
                 notConnectedUserFeedback.setVisibility(false);
 
-                await getPrLoggedIn();
+                await login();
 
                 notConnectedUserFeedback.setVisibility(true);
 
@@ -163,7 +163,7 @@ async function connectRecursive(
             } else {
 
                 if (env.jsRuntimeEnv === "react-native") {
-                    throw new Error("never: getPreLoggedIn is not optional for react native");
+                    throw new Error("never: no login function provided");
                 }
 
                 restartApp();
@@ -196,7 +196,7 @@ async function connectRecursive(
         log("WebSocket construction error: " + error.message);
 
         //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(requestTurnCred, login);
 
         return;
 
@@ -206,7 +206,7 @@ async function connectRecursive(
         webSocket,
         true,
         {
-            "remoteAddress": `web.${baseDomain}`,
+            "remoteAddress": `web.${env.baseDomain}`,
             "remotePort": 443
         },
         20000
@@ -256,7 +256,7 @@ async function connectRecursive(
             return;
         }
 
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(requestTurnCred, login);
 
     });
 

@@ -41,14 +41,14 @@ var sendRequest_1 = require("./sendRequest");
 exports.WebApiError = sendRequest_1.WebApiError;
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var Credentials_1 = require("../localStorage/Credentials");
-var env = require("../env");
+var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
     var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env.jsRuntimeEnv) {
+    switch (env_1.env.jsRuntimeEnv) {
         case "browser":
             {
                 switch (httpErrorStatus) {
@@ -99,7 +99,7 @@ var sendRequest = function (methodName, params) { return __awaiter(void 0, void 
                 _a = sendRequest_1.sendRequest;
                 _b = [methodName,
                     params];
-                _d = env.jsRuntimeEnv === "react-native";
+                _d = env_1.env.jsRuntimeEnv === "react-native";
                 if (!_d) return [3 /*break*/, 5];
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 4:
@@ -163,7 +163,7 @@ exports.loginUser = (function () {
                         if (response.status !== "SUCCESS") {
                             return [2 /*return*/, response];
                         }
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
                         return [4 /*yield*/, Credentials_1.Credentials.set({
                                 email: email,
                                 secret: secret,
@@ -235,7 +235,7 @@ exports.logoutUser = (function () {
                         return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
                     case 2:
                         _a.sent();
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
                         return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 3:
                         _a.sent();

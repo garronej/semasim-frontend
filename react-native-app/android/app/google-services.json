@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "843339183893",
+    "firebase_url": "https://semasim-c54c1.firebaseio.com",
+    "project_id": "semasim-c54c1",
+    "storage_bucket": "semasim-c54c1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843339183893:android:199834959cbef64c4b5b1c",
+        "android_client_info": {
+          "package_name": "com.semasim.semasim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843339183893-8df0t6hp2ndvoc5l1u7g7ed5s5ee27p8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.semasim.semasim",
+            "certificate_hash": "c74da2f001560efcee46546916834e5bbb5d2473"
+          }
+        },
+        {
+          "client_id": "843339183893-3rn121jclhu88gdauautuh7grl3eh6nc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd_B3Fiyr1jqbO10kHFuvEaFJzmG70nuE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843339183893-3rn121jclhu88gdauautuh7grl3eh6nc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

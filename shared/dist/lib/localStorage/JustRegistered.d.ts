@@ -1,4 +1,3 @@
-export declare const key = "just-registered";
 export declare type JustRegistered = {
     password: string;
     secret: string;

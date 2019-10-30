@@ -4,7 +4,7 @@ import "frontend-shared/dist/tools/polyfills/Object.assign";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
-import * as procedure from "frontend-shared/dist/lib/procedure/register";
+import * as registerPageLogic from "frontend-shared/dist/lib/pageLogic/registerPageLogic";
 
 //@ts-ignore: so it is clear that some API should be exposed by host.
 declare const apiExposedByHost: (
@@ -82,7 +82,7 @@ function setHandlers() {
 
 		})();
 
-		procedure.register(email, password, {
+		registerPageLogic.register(email, password, {
 			"resetEmail": () => $("#email").val(""),
 			"redirectToLogin": () =>
 				window.location.href = urlGetParameters.buildUrl<availablePages.urlParams.Login>(
@@ -99,7 +99,7 @@ $(document).ready(() => {
 
 	setHandlers();
 
-	procedure.init(urlGetParameters.parseUrl<availablePages.urlParams.Register>(), {
+	registerPageLogic.init(urlGetParameters.parseUrl<availablePages.urlParams.Register>(), {
 		"setEmailReadonly": email => {
 			$("#email").val(email);
 			$("#email").prop("readonly", true);

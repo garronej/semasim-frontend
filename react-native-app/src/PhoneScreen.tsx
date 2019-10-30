@@ -2,30 +2,67 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import * as setupEncryptorDecryptors from "frontend-shared/dist/lib/crypto/setupEncryptorDecryptors";
+import { setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa } 
+    from "frontend-shared/dist/lib/crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
+import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
 import { UiVoiceCall } from "./lib/UiVoiceCall";
-import { Ua } from "frontend-shared/dist/lib/Ua";
+import { uaInstantiationHelper } from "frontend-shared/dist/lib/Ua";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import RNRestart from "react-native-restart";
+import * as declaredPushNotificationToken from "frontend-shared/dist/lib/localStorage/declaredPushNotificationToken";
+import { env } from "frontend-shared/dist/lib/env";
+import { UaSim } from "frontend-shared/dist/lib/Ua";
+import * as backendConnection from "frontend-shared/dist/lib/toBackend/connection";
+
+
+import { firebase } from '@react-native-firebase/messaging';
 
 //import * as testCall from  "./lib/testCall";
 
 const log: typeof console.log = true ? console.log.bind(console) : () => { };
 
 log("[PhoneScreen] imported");
+import { askUserForPermissions } from "./lib/askUserForPermissions";
+
+
+let uaSim: UaSim;
+let wdInstance: wd.Instance<"PLAIN">;
+let userSim: types.UserSim.Usable;
 
 //TODO: put in constructor
-async function test() {
+const prSetup= (async ()=>{
 
     log("[PhoneScreen] test call");
 
-    //TODO: This should be callable multiple time (without forking over and over)
-    await setupEncryptorDecryptors.globalSetup();
+
+    //NOTE: Once we have a backend connection that mead we are authenticated.
+    await backendConnection.get();
+
+
+    const pushNotificationToken= await firebase.messaging().getToken();
+
+    if ( pushNotificationToken !== await declaredPushNotificationToken.get()) {
+
+        log("Declaring UA");
+
+        await webApiCaller.declareUa({
+            "platform": env.hostOs!,
+            pushNotificationToken
+        });
+
+        await declaredPushNotificationToken.set(pushNotificationToken);
+
+    }
+
+    const ua= await uaInstantiationHelper({
+        "cryptoRelatedParams": await setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa(),
+        pushNotificationToken
+    });
 
     dialogApi.loading("Fetching user sims", 0);
 
@@ -56,22 +93,16 @@ async function test() {
 
     })();
 
-    const userSim = userSims[0];
+    dialogApi.dismissLoading();
 
-    const wdInstance = wdInstances.get(userSim)!;
+    userSim = userSims[0];
+
+    wdInstance = wdInstances.get(userSim)!;
 
     log({ userSim });
 
-    const uiVoiceCall = new UiVoiceCall(userSim);
 
-    const ua = new Ua(
-        userSim.sim.imsi,
-        userSim.password,
-        setupEncryptorDecryptors.getTowardSimEncryptor(
-            userSim
-        )
-    );
-
+    uaSim = ua.newUaSim( userSim);
 
     async function getOrCreateChatByPhoneNumber(number: phoneNumber): Promise<wd.Chat<"PLAIN">> {
 
@@ -91,7 +122,7 @@ async function test() {
 
     }
 
-    ua.evtIncomingMessage.attach(
+    uaSim.evtIncomingMessage.attach(
         async ({ fromNumber, bundledData, onProcessed }) => {
 
             log("ua.evtIncomingMessage", JSON.stringify({ fromNumber, bundledData }, null, 2))
@@ -120,7 +151,7 @@ async function test() {
                     }
                     case "STATUS REPORT": {
 
-                        if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.session.instanceId) {
+                        if (bundledData.messageTowardGsm.uaSim.ua.instance === uaSim.uaDescriptor.instance) {
 
                             return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
 
@@ -131,7 +162,7 @@ async function test() {
                                 "direction": "OUTGOING",
                                 "text": Buffer.from(bundledData.messageTowardGsm.textB64, "base64").toString("utf8"),
                                 "sentBy": ((): wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =>
-                                    (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.session.email) ?
+                                    (bundledData.messageTowardGsm.uaSim.ua.userEmail === uaSim.uaDescriptor.userEmail) ?
                                         ({ "who": "USER" }) :
                                         ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail })
                                 )(),
@@ -197,35 +228,45 @@ async function test() {
         }
     );
 
-    ua.register();
+    uaSim.register();
+
+})();
 
 
+async function makeTestCall(){
+
+    log("Making test call");
+
+    await askUserForPermissions();
+
+    await prSetup;
 
     const wdChat = wdInstance.chats.find(o => o.contactNumber === "+33636786385")!;
 
     log({ wdChat });
 
-    await ua.evtRegistrationStateChanged.waitFor();
+    if( !uaSim.isRegistered ){
 
-    log("UA registered! waiting...");
+        await uaSim.evtRegistrationStateChanged.waitFor();
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    }
 
+    log("UA registered! Proceeding with the call ");
 
-    log("Proceeding with the call...");
+    const uiVoiceCall = new UiVoiceCall(userSim);
 
     const { terminate, prTerminated, prNextState } =
-        await ua.placeOutgoingCall(wdChat.contactNumber);
+        await uaSim.placeOutgoingCall(wdChat.contactNumber);
 
     const { onTerminated, onRingback, prUserInput } =
         uiVoiceCall.onOutgoing(wdChat);
 
-    ua.evtRegistrationStateChanged.attachOnce(
+    uaSim.evtRegistrationStateChanged.attachOnce(
         isRegistered => !isRegistered,
         () => onTerminated("UA unregistered")
     );
 
-    ua.evtRegistrationStateChanged.waitFor(6000)
+    uaSim.evtRegistrationStateChanged.waitFor(6000)
         .catch(() => onTerminated("UA failed to register"));
 
 
@@ -258,9 +299,9 @@ async function test() {
 
     });
 
-
-
 }
+
+
 
 export class PhoneScreen extends React.Component<{}, {}> {
 
@@ -291,8 +332,7 @@ export class PhoneScreen extends React.Component<{}, {}> {
                 style={{ backgroundColor: "blue" }}
                 onPress={() => {
 
-                    test();
-
+                    makeTestCall();
 
                 }}>
                 <rn.Text>Start call</rn.Text>
@@ -303,9 +343,7 @@ export class PhoneScreen extends React.Component<{}, {}> {
 
                     log("Restarting app now");
 
-                    RNRestart.Restart()
-
-                    log("Is this shown ?");
+                    RNRestart.Restart();
 
                 }}>
                 <rn.Text>Restart app</rn.Text>
@@ -319,79 +357,3 @@ export class PhoneScreen extends React.Component<{}, {}> {
 
 }
 
-
-/*
-async function makeTestCall() {
-
-    const { PERMISSIONS } = rn.PermissionsAndroid;
-
-    for (const permission of [
-        PERMISSIONS.RECORD_AUDIO,
-        PERMISSIONS.READ_CONTACTS,
-        PERMISSIONS.READ_PHONE_STATE
-    ]) {
-
-        log("================>", { permission });
-
-        if (!permission) {
-
-            log("=============> continue");
-
-            continue;
-
-        }
-
-        let permissionStatus: rn.PermissionStatus;
-
-        try {
-
-            permissionStatus = await rn.PermissionsAndroid.request(
-                permission,
-                {
-                    "title": `Semasim ${permission}`,
-                    "message": `Grant ${permission} ?`,
-                    "buttonPositive": 'OK'
-                },
-            );
-
-        } catch (error) {
-
-            log("Throw error");
-
-            throw error;
-
-        }
-
-        if (permissionStatus !== rn.PermissionsAndroid.RESULTS.GRANTED) {
-            throw new Error(`Need permission ${permission}`);
-        }
-
-        log(`${permission} granted`);
-
-    }
-
-    log("=============> making test call");
-
-    const testCall = await import("./lib/testCall");
-
-    const testCallApi = testCall.getApi({
-        "onCallTerminated": errorMessage => {
-            log("onCallTerminated", { errorMessage });
-        },
-        "onRingback": () => {
-            log("onRingback");
-        },
-        "onEstablished": () => {
-            log("onEstablished");
-        }
-    });
-
-
-    testCallApi.start(
-        testCall.START_ACTION.PLACE_OUTGOING_CALL,
-        "208150121504485",
-        "+33636786385"
-    );
-
-}
-*/

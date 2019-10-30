@@ -1,4 +1,3 @@
-export declare const key = "authenticated-session-descriptor-shared-data";
 export declare type AuthenticatedSessionDescriptorSharedData = {
     connect_sid: string;
     email: string;

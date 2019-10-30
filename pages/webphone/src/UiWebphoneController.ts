@@ -3,16 +3,16 @@ import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { UiVoiceCall } from "./UiVoiceCall";
-import { Ua } from "frontend-shared/dist/lib/Ua";
+import { Ua, UaSim } from "frontend-shared/dist/lib/Ua";
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
 import { types as gwTypes } from "frontend-shared/dist/gateway/types";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
-import * as backendEvents from "frontend-shared/dist/lib/toBackend/events";
+//import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
+
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import * as setupEncryptorDecryptors from "frontend-shared/dist/lib/crypto/setupEncryptorDecryptors";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
 declare const require: any;
 declare const Buffer: any;
@@ -31,31 +31,28 @@ export class UiWebphoneController {
     private readonly uiQuickAction: UiQuickAction;
     private readonly uiPhonebook: UiPhonebook;
 
-    private readonly ua: Ua;
+    private readonly uaSim: UaSim;
 
     public constructor(
+        ua: Ua,
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance<"PLAIN">
+        public readonly wdInstance: wd.Instance<"PLAIN">,
+        private events: UiWebphoneController.BackendEvents,
+        private remoteApiCaller: UiWebphoneController.RemoteApiCaller
     ) {
 
 
-        this.ua = new Ua(
-            userSim.sim.imsi,
-            userSim.password,
-            setupEncryptorDecryptors.getTowardSimEncryptor(
-                userSim
-            )
-        );
+        this.uaSim = ua.newUaSim(userSim);
 
         this.uiVoiceCall = new UiVoiceCall(userSim);
 
-        this.uiHeader = new UiHeader(userSim, () => this.ua.isRegistered);
+        this.uiHeader = new UiHeader(userSim, () => this.uaSim.isRegistered);
 
-        this.uiQuickAction = new UiQuickAction(userSim, () => this.ua.isRegistered);
+        this.uiQuickAction = new UiQuickAction(userSim, () => this.uaSim.isRegistered);
 
         this.uiPhonebook = new UiPhonebook(userSim, wdInstance);
 
-        this.registerRemoteNotifyHandlers();
+        this.attachEventHandlers();
 
         this.initUa();
 
@@ -71,21 +68,10 @@ export class UiWebphoneController {
 
     }
 
-    private registerRemoteNotifyHandlers() {
+    private attachEventHandlers() {
 
 
-        backendEvents.evtSimPermissionLost.attachOnce(
-            userSim  => userSim === this.userSim,
-            () => {
-
-                //TODO: Terminate UA.
-                this.structure.detach();
-
-            }
-        );
-
-        backendEvents.evtContactCreatedOrUpdated.attach(
-            ({ userSim }) => userSim === this.userSim,
+        this.events.evtContactCreatedOrUpdated.attach(
             async ({ contact }) => {
 
                 let wdChat = this.wdInstance.chats.find(
@@ -94,7 +80,7 @@ export class UiWebphoneController {
 
                 if (!wdChat) {
 
-                    wdChat = await remoteApiCaller.newWdChat(
+                    wdChat = await this.remoteApiCaller.newWdChat(
                         this.wdInstance,
                         phoneNumber.build(
                             contact.number_raw,
@@ -108,7 +94,7 @@ export class UiWebphoneController {
 
                 } else {
 
-                    const isUpdated = await remoteApiCaller.updateWdChatContactInfos(
+                    const isUpdated = await this.remoteApiCaller.updateWdChatContactInfos(
                         wdChat, contact.name,
                         contact.mem_index !== undefined ? contact.mem_index : null
                     );
@@ -129,15 +115,14 @@ export class UiWebphoneController {
             }
         );
 
-        backendEvents.evtContactDeleted.attach(
-            ({ userSim }) => userSim === this.userSim,
+        this.events.evtContactDeleted.attach(
             async ({ contact }) => {
 
                 const wdChat = this.wdInstance.chats.find(
                     ({ contactNumber }) => phoneNumber.areSame(contactNumber, contact.number_raw)
                 )!;
 
-                const isUpdated = await remoteApiCaller.updateWdChatContactInfos(
+                const isUpdated = await this.remoteApiCaller.updateWdChatContactInfos(
                     wdChat,
                     "",
                     null
@@ -157,21 +142,12 @@ export class UiWebphoneController {
             }
         );
 
-        backendEvents.evtSimIsOnlineStatusChange.attach(
-            userSim => userSim === this.userSim,
+        this.events.evtSimReachabilityStatusChange.attach(
             async () => {
 
-                if (!this.userSim.reachableSimState) {
+                if (!!this.userSim.reachableSimState) {
 
-                    if (this.ua.isRegistered) {
-
-                        this.ua.unregister();
-
-                    }
-
-                } else {
-
-                    this.ua.register();
+                    this.uaSim.register();
 
                 }
 
@@ -188,8 +164,7 @@ export class UiWebphoneController {
             }
         );
 
-        backendEvents.evtSimGsmConnectivityChange.attach(
-            userSim => userSim === this.userSim,
+        this.events.evtSimGsmConnectivityChange.attach(
             () => {
 
                 this.uiHeader.notify();
@@ -205,14 +180,12 @@ export class UiWebphoneController {
             }
         );
 
-        backendEvents.evtSimCellSignalStrengthChange.attach(
-            userSim => userSim === this.userSim,
+        this.events.evtSimCellSignalStrengthChange.attach(
             () => this.uiHeader.notify()
         );
 
-        backendEvents.evtOngoingCall.attach(
-            userSim => userSim === this.userSim,
-            ()=>{
+        this.events.evtOngoingCall.attach(
+            () => {
 
                 this.uiHeader.notify();
 
@@ -231,7 +204,7 @@ export class UiWebphoneController {
 
     private initUa() {
 
-        this.ua.evtRegistrationStateChanged.attach(() => {
+        this.uaSim.evtRegistrationStateChanged.attach(() => {
 
             this.uiHeader.notify();
 
@@ -239,14 +212,14 @@ export class UiWebphoneController {
 
             for (const uiConversation of this._uiConversations.values()) {
 
-                
+
                 uiConversation.notify();
 
             }
 
         });
 
-        this.ua.evtIncomingMessage.attach(
+        this.uaSim.evtIncomingMessage.attach(
             async ({ fromNumber, bundledData, onProcessed }) => {
 
                 console.log(JSON.stringify({ fromNumber, bundledData }, null, 2))
@@ -265,19 +238,19 @@ export class UiWebphoneController {
                                 "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                             };
 
-                            return remoteApiCaller.newWdMessage(wdChat, message);
+                            return this.remoteApiCaller.newWdMessage(wdChat, message);
 
                         }
                         case "SEND REPORT": {
 
-                            return remoteApiCaller.notifySendReportReceived(wdChat, bundledData);
+                            return this.remoteApiCaller.notifySendReportReceived(wdChat, bundledData);
 
                         }
                         case "STATUS REPORT": {
 
-                            if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua.session.instanceId) {
+                            if (bundledData.messageTowardGsm.uaSim.ua.instance === this.uaSim.uaDescriptor.instance) {
 
-                                return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
+                                return this.remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
 
                             } else {
 
@@ -286,7 +259,7 @@ export class UiWebphoneController {
                                     "direction": "OUTGOING",
                                     "text": Buffer.from(bundledData.messageTowardGsm.textB64, "base64").toString("utf8"),
                                     "sentBy": ((): wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =>
-                                        (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua.session.email) ?
+                                        (bundledData.messageTowardGsm.uaSim.ua.userEmail === this.uaSim.uaDescriptor.userEmail) ?
                                             ({ "who": "USER" }) :
                                             ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail })
                                     )(),
@@ -295,7 +268,7 @@ export class UiWebphoneController {
                                         bundledData.statusReport.dischargeDateTime : null
                                 };
 
-                                return remoteApiCaller.newWdMessage(wdChat, message);
+                                return this.remoteApiCaller.newWdMessage(wdChat, message);
 
                             }
                         }
@@ -326,7 +299,7 @@ export class UiWebphoneController {
                                 "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                             };
 
-                            return remoteApiCaller.newWdMessage(wdChat, message);
+                            return this.remoteApiCaller.newWdMessage(wdChat, message);
 
                         }
                         case "CONVERSATION CHECKED OUT FROM OTHER UA": {
@@ -339,16 +312,16 @@ export class UiWebphoneController {
 
                             if (uiConversation !== undefined) {
 
-                                let resolvePr!: ()=> void;
+                                let resolvePr!: () => void;
 
-                                pr = new Promise<undefined>(resolve=> resolvePr = ()=> resolve(undefined));
+                                pr = new Promise<undefined>(resolve => resolvePr = () => resolve(undefined));
 
-                                uiConversation.evtChecked.post({ 
-                                    "from": "OTHER UA", 
-                                    "onProcessed": ()=> resolvePr() 
+                                uiConversation.evtChecked.post({
+                                    "from": "OTHER UA",
+                                    "onProcessed": () => resolvePr()
                                 });
 
-                            }else{
+                            } else {
 
                                 pr = Promise.resolve(undefined);
 
@@ -365,7 +338,7 @@ export class UiWebphoneController {
 
                 onProcessed();
 
-                if( !wdMessage ){
+                if (!wdMessage) {
                     return;
                 }
 
@@ -377,7 +350,7 @@ export class UiWebphoneController {
             }
         );
 
-        this.ua.evtIncomingCall.attach(
+        this.uaSim.evtIncomingCall.attach(
             async ({ fromNumber, terminate, prTerminated, onAccepted }) => {
 
                 const wdChat = await this.getOrCreateChatByPhoneNumber(fromNumber);
@@ -431,7 +404,7 @@ export class UiWebphoneController {
 
         if (!!this.userSim.reachableSimState) {
 
-            this.ua.register();
+            this.uaSim.register();
 
         }
 
@@ -515,7 +488,7 @@ export class UiWebphoneController {
 
         const uiConversation = new UiConversation(
             this.userSim,
-            () => this.ua.isRegistered,
+            () => this.uaSim.isRegistered,
             wdChat
         );
 
@@ -526,9 +499,9 @@ export class UiWebphoneController {
 
         uiConversation.evtChecked.attach(async data => {
 
-            const isUpdated = await remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat);
+            const isUpdated = await this.remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat);
 
-            if( data.from === "OTHER UA"){
+            if (data.from === "OTHER UA") {
                 data.onProcessed();
             }
 
@@ -571,7 +544,7 @@ export class UiWebphoneController {
 
                 const exactSendDate = new Date();
 
-                const wdMessage = await remoteApiCaller.newWdMessage(
+                const wdMessage = await this.remoteApiCaller.newWdMessage(
                     uiConversation.wdChat,
                     (() => {
 
@@ -591,7 +564,7 @@ export class UiWebphoneController {
 
                 try {
 
-                    await this.ua.sendMessage(
+                    await this.uaSim.sendMessage(
                         uiConversation.wdChat.contactNumber,
                         await (async () => {
 
@@ -599,7 +572,7 @@ export class UiWebphoneController {
                                 "type": "MESSAGE",
                                 "textB64": Buffer.from(text, "utf8").toString("base64"),
                                 "exactSendDateTime": exactSendDate.getTime(),
-                                "appendPromotionalMessage": await remoteApiCaller.shouldAppendPromotionalMessage()
+                                "appendPromotionalMessage": await this.remoteApiCaller.shouldAppendPromotionalMessage()
                             };
 
                             return out;
@@ -611,7 +584,7 @@ export class UiWebphoneController {
 
                     console.log("ua send message error", error);
 
-                    const wdMessageUpdated = await remoteApiCaller.notifyUaFailedToSendMessage(
+                    const wdMessageUpdated = await this.remoteApiCaller.notifyUaFailedToSendMessage(
                         uiConversation.wdChat, wdMessage
                     );
 
@@ -647,7 +620,7 @@ export class UiWebphoneController {
                 */
 
                 const { terminate, prTerminated, prNextState } =
-                    await this.ua.placeOutgoingCall(wdChat.contactNumber);
+                    await this.uaSim.placeOutgoingCall(wdChat.contactNumber);
 
                 const { onTerminated, onRingback, prUserInput } =
                     this.uiVoiceCall.onOutgoing(wdChat);
@@ -688,7 +661,7 @@ export class UiWebphoneController {
         uiConversation.evtUpdateContact.attach(async () => {
 
             const name = await new Promise<string | null>(
-                resolve => dialogApi.create("prompt",{
+                resolve => dialogApi.create("prompt", {
                     "title": `Contact name for ${wdChat.contactNumber}`,
                     "value": wdChat.contactName || "",
                     "callback": result => resolve(result),
@@ -713,19 +686,19 @@ export class UiWebphoneController {
 
             if (!!contact) {
 
-                await remoteApiCaller.updateContactName(
+                await this.remoteApiCaller.updateContactName(
                     this.userSim, contact, name
                 );
 
             } else {
 
-                contact = await remoteApiCaller.createContact(
+                contact = await this.remoteApiCaller.createContact(
                     this.userSim, name, wdChat.contactNumber
                 );
 
             }
 
-            const isUpdated = await remoteApiCaller.updateWdChatContactInfos(
+            const isUpdated = await this.remoteApiCaller.updateWdChatContactInfos(
                 wdChat, name, contact.mem_index !== undefined ? contact.mem_index : null
             );
 
@@ -745,7 +718,7 @@ export class UiWebphoneController {
         uiConversation.evtDelete.attach(async () => {
 
             const shouldProceed = await new Promise<boolean>(
-                resolve => dialogApi.create("confirm",{
+                resolve => dialogApi.create("confirm", {
                     "title": "Delete chat",
                     "message": "Delete contact and conversation ?",
                     callback: result => resolve(result)
@@ -770,13 +743,13 @@ export class UiWebphoneController {
 
             if (!!contact) {
 
-                await remoteApiCaller.deleteContact(
+                await this.remoteApiCaller.deleteContact(
                     this.userSim, contact
                 );
 
             }
 
-            await remoteApiCaller.destroyWdChat(this.wdInstance, wdChat);
+            await this.remoteApiCaller.destroyWdChat(this.wdInstance, wdChat);
 
             dialogApi.dismissLoading();
 
@@ -791,7 +764,7 @@ export class UiWebphoneController {
         });
 
         uiConversation.evtLoadMore.attach(({ onLoaded }) =>
-            remoteApiCaller.fetchOlderWdMessages(wdChat)
+            this.remoteApiCaller.fetchOlderWdMessages(wdChat)
                 .then(wdMessages => onLoaded(wdMessages))
         );
 
@@ -807,7 +780,7 @@ export class UiWebphoneController {
 
         if (!wdChat) {
 
-            wdChat = await remoteApiCaller.newWdChat(
+            wdChat = await this.remoteApiCaller.newWdChat(
                 this.wdInstance, number, "", null
             );
 
@@ -818,6 +791,70 @@ export class UiWebphoneController {
         }
 
         return wdChat;
+
+    }
+
+}
+
+export namespace UiWebphoneController {
+
+
+    export type BackendEvents = BackendEvents.HelperType<
+        "evtContactCreatedOrUpdated" |
+        "evtContactDeleted" |
+        "evtSimReachabilityStatusChange" |
+        "evtSimGsmConnectivityChange" |
+        "evtSimCellSignalStrengthChange" |
+        "evtOngoingCall"
+    >;
+
+    export namespace BackendEvents {
+
+        type HelperType1<T> = T extends SyncEvent<infer U> ?
+            (
+                U extends types.UserSim.Usable ?
+                VoidSyncEvent
+                :
+                (
+                    U extends { userSim: types.UserSim.Usable } ?
+                    SyncEvent<Omit<U, "userSim">>
+                    :
+                    T
+                )
+            )
+            :
+            T
+            ;
+
+        type HelperType2<T> = { [key in keyof T]: HelperType1<T[key]>; };
+
+        type TypeofImport = typeof import("frontend-shared/dist/lib/toBackend/events");
+
+        export type HelperType<K extends keyof TypeofImport> = HelperType2<Pick<TypeofImport, K>>;
+
+    }
+
+    export type RemoteApiCaller = RemoteApiCaller.HelperType<
+        "newWdChat" |
+        "updateWdChatContactInfos" |
+        "newWdMessage" |
+        "notifySendReportReceived" |
+        "notifyStatusReportReceived" |
+        "updateWdChatIdOfLastMessageSeen" |
+        "shouldAppendPromotionalMessage" |
+        "notifyUaFailedToSendMessage" | 
+        "updateContactName" |
+        "createContact" |
+        "deleteContact" |
+        "destroyWdChat" | 
+        "fetchOlderWdMessages"
+    >;
+
+    export namespace RemoteApiCaller {
+
+        type TypeofImport = typeof import("frontend-shared/dist/lib/toBackend/remoteApiCaller");
+
+        export type HelperType<K extends keyof TypeofImport> = { [key in K]: TypeofImport[key]; };
 
     }
 

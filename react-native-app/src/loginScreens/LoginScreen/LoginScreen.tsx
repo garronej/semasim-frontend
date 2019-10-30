@@ -4,10 +4,9 @@ import { InputField } from "../../genericComponents/InputField";
 import { w, h, getOrientation } from "../../lib/dimensions";
 import { GetStarted } from "./GetStarted";
 import * as imageAssets from "../../lib/imageAssets";
-import * as procedure from "frontend-shared/dist/lib/procedure/login";
+import * as loginPageLogic from "frontend-shared/dist/lib/pageLogic/loginPageLogic";
 import { JustRegistered } from "frontend-shared/dist/lib/localStorage/JustRegistered";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import * as webApiCaller  from "frontend-shared/dist/lib/webApiCaller";
 
 import { default as DeviceInfo } from 'react-native-device-info';
 
@@ -44,7 +43,7 @@ export class LoginScreen extends React.Component<Props, State> {
 
     log("[LoginScreen] componentDidMount");
 
-    procedure.init({ "email": this.props.email }, {
+    loginPageLogic.init({ "email": this.props.email }, {
       "setEmail": email => this.emailInput!.setInputValue(email),
       "setJustRegistered": justRegistered => this.justRegistered = justRegistered,
       "setPassword": password => this.passwordInput!.setInputValue(password),
@@ -95,28 +94,13 @@ export class LoginScreen extends React.Component<Props, State> {
 
     }
 
-    procedure.login(
+    loginPageLogic.login(
       email,
       password,
       `"<urn:uuid:${uuidv3(DeviceInfo.getUniqueId(), (new Array(16)).fill(0))}>"`,
       this.justRegistered,
       {
-        "loginSuccess": async () => {
-
-          await webApiCaller.declareUa({
-            "platform": (() => {
-              switch (rn.Platform.OS) {
-                case "android": return "android";
-                case "ios": return "iOS";
-                default: throw new Error("never (yet)");
-              }
-            })(),
-            "pushNotificationToken": "==>TODO<=="
-          });
-
-          this.props.onLoggedIn();
-
-        },
+        "loginSuccess": async () => this.props.onLoggedIn(),
         "resetPassword": () => {
           this.passwordInput!.setInputValue("");
 
@@ -228,7 +212,7 @@ export class LoginScreen extends React.Component<Props, State> {
                 </rn.TouchableOpacity>
                 <rn.TouchableOpacity
                   style={({ "flex": 1, "flexDirection": "row-reverse" })}
-                  onPress={() => procedure.requestRenewPassword({
+                  onPress={() => loginPageLogic.requestRenewPassword({
                     "getEmail": () => this.emailInput!.getInputValue(),
                     "redirectToRegister": () => this.props.goToRegister(),
                     "setEmail": email => this.emailInput!.setInputValue(email)

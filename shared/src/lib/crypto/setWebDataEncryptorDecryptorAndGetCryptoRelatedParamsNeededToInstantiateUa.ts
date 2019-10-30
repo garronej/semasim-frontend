@@ -1,27 +1,24 @@
+
 import * as cryptoLib from "./cryptoLibProxy";
 import * as crypto from "./keysGeneration";
 import { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
 import { TowardUserKeys } from "../localStorage/TowardUserKeys";
 import * as remoteApiCaller from "../toBackend/remoteApiCaller";
-import { Ua } from "../Ua";
-import * as types from "../types/userSim";
 
 /** When creating a new Ua instance an encryptor must be provided
  * so we expose the reference of the rsa thread */
 const rsaWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 
-
 /** 
  * ASSERT: User logged.
- * 
- * -Pre spawn the crypto workers ( aes and rsa )
- * -Provide an aes encryptor/decryptor to remoteApiCaller so that 
- *  the webData api can be used.
- * -Statically provide a rsa decryptor to Ua class ( so that incoming 
- * message can be decrypted ) */
-export async function globalSetup() {
+ * */
+export async function setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa(): Promise<{
+    towardUserEncryptKeyStr: string;
+    towardUserDecryptor: cryptoLib.Decryptor;
+    getTowardSimEncryptor: (usableUserSim: { towardSimEncryptKeyStr: string; })=> { towardSimEncryptor: cryptoLib.Encryptor; }
+}> {
 
-    const { email, uaInstanceId, encryptedSymmetricKey } =
+    const { encryptedSymmetricKey } =
         await AuthenticatedSessionDescriptorSharedData.get();
 
     //NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
@@ -53,22 +50,24 @@ export async function globalSetup() {
 
     }
 
-    Ua.session = {
-        email,
-        "instanceId": uaInstanceId,
+    return {
         "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
             towardUserKeys.encryptKey
         ),
-        towardUserDecryptor
+        towardUserDecryptor,
+        "getTowardSimEncryptor": ({ towardSimEncryptKeyStr }) => ({
+            "towardSimEncryptor": cryptoLib.rsa.encryptorFactory(
+                cryptoLib.RsaKey.parse( towardSimEncryptKeyStr),
+                rsaWorkerThreadPoolId
+            )
+        })
     };
 
 }
 
 
-export const getTowardSimEncryptor = (userSim: types.UserSim.Usable) =>
-    cryptoLib.rsa.encryptorFactory(
-        cryptoLib.RsaKey.parse(
-            userSim.towardSimEncryptKeyStr
-        ),
-        rsaWorkerThreadPoolId
-    );
+
+
+
+
+

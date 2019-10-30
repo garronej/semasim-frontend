@@ -14,12 +14,15 @@ export declare namespace notConnectedUserFeedback {
     export function provideCustomImplementation(setVisibilityWithMessageImpl: typeof setVisibilityWithMessage): void;
     export {};
 }
-/** getPrLoggedIn is called when the user
+/** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
  * else error will be thrown.
  */
-export declare const connect: (requestTurnCred: "REQUEST TURN CRED" | "DO NOT REQUEST TURN CRED", getPrLoggedIn: (() => Promise<void>) | undefined) => void;
+export declare const connect: (params: {
+    requestTurnCred: boolean;
+    login?: (() => Promise<void>) | undefined;
+}) => void;
 export declare const evtConnect: SyncEvent<sip.Socket>;
 export declare function get(): sip.Socket | Promise<sip.Socket>;

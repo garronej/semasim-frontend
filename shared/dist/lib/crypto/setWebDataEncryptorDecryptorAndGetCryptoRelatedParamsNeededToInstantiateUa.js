@@ -41,52 +41,46 @@ var crypto = require("./keysGeneration");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var TowardUserKeys_1 = require("../localStorage/TowardUserKeys");
 var remoteApiCaller = require("../toBackend/remoteApiCaller");
-var Ua_1 = require("../Ua");
 /** When creating a new Ua instance an encryptor must be provided
  * so we expose the reference of the rsa thread */
 var rsaWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 /**
  * ASSERT: User logged.
- *
- * -Pre spawn the crypto workers ( aes and rsa )
- * -Provide an aes encryptor/decryptor to remoteApiCaller so that
- *  the webData api can be used.
- * -Statically provide a rsa decryptor to Ua class ( so that incoming
- * message can be decrypted ) */
-function globalSetup() {
+ * */
+function setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, email, uaInstanceId, encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _b, _c, _d, _e;
-        return __generator(this, function (_f) {
-            switch (_f.label) {
+        var encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _a, _b, _c, _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
                 case 1:
-                    _a = _f.sent(), email = _a.email, uaInstanceId = _a.uaInstanceId, encryptedSymmetricKey = _a.encryptedSymmetricKey;
+                    encryptedSymmetricKey = (_e.sent()).encryptedSymmetricKey;
                     //NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
                     cryptoLib.workerThreadPool.preSpawn(rsaWorkerThreadPoolId, 1);
                     return [4 /*yield*/, TowardUserKeys_1.TowardUserKeys.retrieve()];
                 case 2:
-                    towardUserKeys = _f.sent();
+                    towardUserKeys = _e.sent();
                     towardUserDecryptor = cryptoLib.rsa.decryptorFactory(towardUserKeys.decryptKey, rsaWorkerThreadPoolId);
                     aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
                     cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
-                    _c = (_b = remoteApiCaller).setWebDataEncryptorDescriptor;
-                    _e = (_d = cryptoLib.aes).encryptorDecryptorFactory;
+                    _b = (_a = remoteApiCaller).setWebDataEncryptorDescriptor;
+                    _d = (_c = cryptoLib.aes).encryptorDecryptorFactory;
                     return [4 /*yield*/, crypto.symmetricKey.decryptKey(towardUserDecryptor, encryptedSymmetricKey)];
                 case 3:
-                    _c.apply(_b, [_e.apply(_d, [_f.sent(),
+                    _b.apply(_a, [_d.apply(_c, [_e.sent(),
                             aesWorkerThreadPoolId])]);
-                    Ua_1.Ua.session = {
-                        email: email,
-                        "instanceId": uaInstanceId,
-                        "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
-                        towardUserDecryptor: towardUserDecryptor
-                    };
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
+                            towardUserDecryptor: towardUserDecryptor,
+                            "getTowardSimEncryptor": function (_a) {
+                                var towardSimEncryptKeyStr = _a.towardSimEncryptKeyStr;
+                                return ({
+                                    "towardSimEncryptor": cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(towardSimEncryptKeyStr), rsaWorkerThreadPoolId)
+                                });
+                            }
+                        }];
             }
         });
     });
 }
-exports.globalSetup = globalSetup;
-exports.getTowardSimEncryptor = function (userSim) {
-    return cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(userSim.towardSimEncryptKeyStr), rsaWorkerThreadPoolId);
-};
+exports.setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa = setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa;

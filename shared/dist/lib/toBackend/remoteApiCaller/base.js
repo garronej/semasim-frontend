@@ -103,7 +103,7 @@ exports.getUsableUserSims = (function () {
             userSim.dongle = newUserSim.dongle;
             userSim.gatewayLocation = newUserSim.gatewayLocation;
             if (!!userSim.reachableSimState) {
-                events_1.evtSimIsOnlineStatusChange.post(userSim);
+                events_1.evtSimReachabilityStatusChange.post(userSim);
             }
         };
         try {
@@ -140,7 +140,7 @@ exports.getUsableUserSims = (function () {
                             if (!!_b.done) return [3 /*break*/, 4];
                             userSim = _b.value;
                             userSim.reachableSimState = undefined;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             _d.label = 3;
                         case 3:
                             _b = _a.next();

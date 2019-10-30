@@ -1,7 +1,7 @@
 
 import * as localStorageApi from "./localStorageApi";
 
-export const key = "authenticated-session-descriptor-shared-data";
+const key = "authenticated-session-descriptor-shared-data";
 
 declare const Buffer: any;
 

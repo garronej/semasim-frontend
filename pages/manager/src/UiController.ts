@@ -96,7 +96,7 @@ export class UiController {
 
         });
 
-        backendEvents.evtSimIsOnlineStatusChange.attach(
+        backendEvents.evtSimReachabilityStatusChange.attach(
             userSim_ => userSim_ === userSim,
             () => {
 

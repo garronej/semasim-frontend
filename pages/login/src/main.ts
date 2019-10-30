@@ -4,7 +4,7 @@ import { JustRegistered } from "frontend-shared/dist/lib/localStorage/JustRegist
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
 import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
-import * as procedure from "frontend-shared/dist/lib/procedure/login";
+import * as loginPageLogic from "frontend-shared/dist/lib/pageLogic/loginPageLogic";
 import { TowardUserKeys } from "frontend-shared/dist/lib/localStorage/TowardUserKeys";
 import * as cryptoLib from "frontend-shared/node_modules/crypto-lib";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
@@ -92,7 +92,7 @@ function setHandlers() {
 
 		})();
 
-		procedure.login(
+		loginPageLogic.login(
 			email,
 			password,
 			undefined,
@@ -129,7 +129,7 @@ function setHandlers() {
 
 		event.preventDefault();
 
-		procedure.requestRenewPassword({
+		loginPageLogic.requestRenewPassword({
 			"redirectToRegister": () => window.location.href = `/${availablePages.PageName.register}`,
 			"getEmail": () => $("#email").val(),
 			"setEmail": email => $("#email").val(email)
@@ -144,7 +144,7 @@ $(document).ready(async () => {
 
 	setHandlers();
 
-	procedure.init(
+	loginPageLogic.init(
 		urlGetParameters.parseUrl<availablePages.urlParams.Login>(),
 		{
 			"setEmail": email => $("#email").val(email),

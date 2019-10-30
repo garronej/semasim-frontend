@@ -3,7 +3,7 @@ import * as rn from "react-native";
 import { LoginScreen } from "./LoginScreen/LoginScreen";
 import { RegisterScreen } from './RegisterScreen';
 import * as imageAssets from "../lib/imageAssets";
-import { tryLoginFromStoredCredentials } from "frontend-shared/dist/lib/procedure/tryLoginFromStoredCredentials";
+import { tryLoginFromStoredCredentials } from "frontend-shared/dist/lib/tryLoginFromStoredCredentials";
 
 const log: typeof console.log = false ? console.log.bind(console) : () => { };
 

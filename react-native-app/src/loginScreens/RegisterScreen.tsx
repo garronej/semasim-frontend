@@ -4,7 +4,7 @@ import { w, h, percentageOfDiagonalDp } from "../lib/dimensions";
 import { InputField } from "../genericComponents/InputField";
 import * as imageAssets from "../lib/imageAssets";
 import { dialogApi }  from "frontend-shared/dist/tools/modal/dialog";
-import * as procedure from "frontend-shared/dist/lib/procedure/register";
+import * as registerPageLogic from "frontend-shared/dist/lib/pageLogic/registerPageLogic";
 
 const log: typeof console.log = false ? console.log.bind(console) : () => { };
 
@@ -35,7 +35,7 @@ export class RegisterScreen extends React.Component<Props> {
 
     log("[RegisterScreen] componentDidMount");
 
-    procedure.init(
+    registerPageLogic.init(
         {},
         { "setEmailReadonly": email => this.emailInput!.setInputValue(email) }
     );
@@ -102,7 +102,7 @@ export class RegisterScreen extends React.Component<Props> {
             return;
         }
 
-        procedure.register(email, password, {
+        registerPageLogic.register(email, password, {
             "redirectToLogin": () => this.props.goToLogin(email),
             "resetEmail": () => {
                 this.emailInput!.setInputValue("");

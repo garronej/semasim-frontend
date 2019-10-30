@@ -54,7 +54,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
 var types_1 = require("crypto-lib/dist/sync/types");
-exports.key = "toward-user-keys";
+var key = "toward-user-keys";
 var TowardUserKeys;
 (function (TowardUserKeys) {
     function stringify(towardUserKeys) {
@@ -73,7 +73,7 @@ var TowardUserKeys;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, stringify(towardUserKeys))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, stringify(towardUserKeys))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -89,7 +89,7 @@ var TowardUserKeys;
             var towardUserKeysStr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         towardUserKeysStr = _a.sent();
                         if (towardUserKeysStr === null) {

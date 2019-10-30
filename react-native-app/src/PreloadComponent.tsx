@@ -1,15 +1,16 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import * as dimensions from "./lib/dimensions";
+import { appLifeCycleEvents, addAppLifeCycleListeners } from "./lib/appLifeCycle";
+import { redrawOnRotate } from "./lib/redrawOnRotate";
+import { fixDimensions } from "./lib/dimensions";
+import { restartAppIfPushNotificationTockenChange, testForegroundPushNotification  } from "./lib/restartAppIfPushNotificationTockenChange";
 
 let RootComponent: typeof import("./RootComponent").RootComponent;
 
 const log: typeof console.log = true ? console.log.bind(console) : () => { };
 
 log("[PreloadComponent] imported");
-
-declare const window: any;
 
 const prDoneImporting = (async () => {
 
@@ -41,12 +42,19 @@ const prDoneImporting = (async () => {
   }
   */
 
-  log(`Done pre importing ${Date.now() - start}`);
+  log(`Done pre importing ${Date.now() - start} !`);
 
   RootComponent = (await import("./RootComponent")).RootComponent;
 
-
 })();
+
+
+addAppLifeCycleListeners([
+  redrawOnRotate, 
+  fixDimensions, 
+  restartAppIfPushNotificationTockenChange,
+  testForegroundPushNotification
+]);
 
 type State = { isDoneImporting: boolean; };
 
@@ -58,19 +66,19 @@ class PreloadComponent extends React.Component<{}, State> {
 
     super(props);
 
-    log("[PreloadComponent] constructor");
+    log("[PreloadComponent] constructor !!!");
+
+    appLifeCycleEvents.evtConstructor.post(this);
 
     prDoneImporting.then(() => this.setState({ "isDoneImporting": true }));
 
   }
 
-  private handleDimensionChange = () => this.forceUpdate();
-
   public componentDidMount = () => {
 
     log("[PreloadComponent] componentDidMount");
 
-    rn.Dimensions.addEventListener("change", this.handleDimensionChange);
+    appLifeCycleEvents.evtComponentDidMount.post(this);
 
   };
 
@@ -78,27 +86,16 @@ class PreloadComponent extends React.Component<{}, State> {
 
     log("[PreloadComponent] componentWillUnmount");
 
-    rn.Dimensions.removeEventListener("change", this.handleDimensionChange);
-
-  };
-
-  public onLayout = ({ nativeEvent: { layout } }: rn.LayoutChangeEvent) => {
-
-    const { width, height } = layout;
-
-    const { wasCorrected } = dimensions.overrideWindowDimensions({ width, height });
-
-    if (!wasCorrected) {
-      return;
-    }
-
-    this.forceUpdate();
+    appLifeCycleEvents.evtComponentWillUnmount.post(this);
 
   };
 
   //TODO: suppress the image that slow down the loading
   public render = () => (
-    <rn.View style={{ flex: 1 /*, backgroundColor: "#1c17ad"*/ }} onLayout={this.onLayout}>
+    <rn.View
+      style={{ flex: 1 /*, backgroundColor: "#1c17ad"*/ }}
+      onLayout={layoutChangeEvent => appLifeCycleEvents.evtRootViewOnLayout.post({ layoutChangeEvent, "component": this })}
+    >
       {this.state.isDoneImporting && <RootComponent />}
     </rn.View>
   );

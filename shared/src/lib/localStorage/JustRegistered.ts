@@ -2,10 +2,7 @@ import * as localStorageApi from "./localStorageApi";
 
 import { TowardUserKeys } from "./TowardUserKeys";
 
-export const key = "just-registered";
-
-
-
+const key = "just-registered";
 
 export type JustRegistered = {
     password: string;

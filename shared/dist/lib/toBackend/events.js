@@ -39,7 +39,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 exports.evtUsableSim = new ts_events_extended_1.SyncEvent();
-exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
+exports.evtSimReachabilityStatusChange = new ts_events_extended_1.SyncEvent();
+/** NOTE: This is posted when an user lose access to the sim, the password
+ * is then renewed, there is not a special notify event from the server
+ * but the sim is re-notified online */
+exports.evtSimPasswordChanged = new ts_events_extended_1.SyncEvent();
 exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
 exports.evtOngoingCall = new ts_events_extended_1.SyncEvent();
 exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();

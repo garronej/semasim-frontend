@@ -2,4 +2,4 @@
  * @format
  */
 
-import "./src/lib/index";
+import "./src/lib/appEntryPoint";

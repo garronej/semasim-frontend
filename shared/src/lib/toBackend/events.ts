@@ -6,7 +6,11 @@ import * as sipLibrary from "ts-sip";
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 export const evtUsableSim = new SyncEvent<types.UserSim.Usable>();
 
-export const evtSimIsOnlineStatusChange = new SyncEvent<types.UserSim.Usable>();
+export const evtSimReachabilityStatusChange = new SyncEvent<types.UserSim.Usable>();
+/** NOTE: This is posted when an user lose access to the sim, the password
+ * is then renewed, there is not a special notify event from the server
+ * but the sim is re-notified online */
+export const evtSimPasswordChanged = new SyncEvent<types.UserSim.Usable>();
 export const evtSimGsmConnectivityChange = new SyncEvent<types.UserSim.Usable>();
 export const evtOngoingCall = new SyncEvent<types.UserSim.Usable>();
 export const evtSimCellSignalStrengthChange = new SyncEvent<types.UserSim.Usable>();

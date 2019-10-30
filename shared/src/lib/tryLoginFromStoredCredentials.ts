@@ -1,7 +1,7 @@
 
-import * as env from "../env";
-import * as webApiCaller from "../webApiCaller";
-import { Credentials } from "../localStorage/Credentials";
+import { env } from "./env";
+import * as webApiCaller from "./webApiCaller";
+import { Credentials } from "./localStorage/Credentials";
 
 export type Result = "LOGGED IN" | "NO VALID CREDENTIALS";
 

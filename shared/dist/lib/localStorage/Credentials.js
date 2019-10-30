@@ -37,24 +37,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-var env = require("../env");
-exports.key = "credentials";
+var key = "credentials";
 var Credentials;
 (function (Credentials) {
-    function throwIfWeb() {
-        if (env.jsRuntimeEnv === "react-native") {
-            return;
-        }
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-    }
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -67,14 +58,12 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, isPresent()];
+                    case 0: return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -89,15 +78,13 @@ var Credentials;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
-                        if (value === undefined) {
+                        if (value === null) {
                             throw new Error("Auth not present in localStorage");
                         }
-                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                        return [2 /*return*/, JSON.parse(value)];
                 }
             });
         });
@@ -107,9 +94,7 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];

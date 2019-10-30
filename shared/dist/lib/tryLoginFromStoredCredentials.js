@@ -36,9 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
-var webApiCaller = require("../webApiCaller");
-var Credentials_1 = require("../localStorage/Credentials");
+var env_1 = require("./env");
+var webApiCaller = require("./webApiCaller");
+var Credentials_1 = require("./localStorage/Credentials");
 var prResult = undefined;
 function tryLoginFromStoredCredentials() {
     if (prResult !== undefined) {
@@ -72,7 +72,7 @@ function tryLoginFromStoredCredentials() {
                         if (isUserLoggedIn) {
                             return [2 /*return*/, "LOGGED IN"];
                         }
-                        if (env.jsRuntimeEnv === "browser") {
+                        if (env_1.env.jsRuntimeEnv === "browser") {
                             return [2 /*return*/, "NO VALID CREDENTIALS"];
                         }
                         return [4 /*yield*/, Credentials_1.Credentials.isPresent()];

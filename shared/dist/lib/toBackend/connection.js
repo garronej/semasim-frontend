@@ -63,15 +63,14 @@ var dialog_1 = require("../../tools/modal/dialog");
 var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var env = require("../env");
-var tryLoginFromStoredCredentials_1 = require("../procedure/tryLoginFromStoredCredentials");
+var tryLoginFromStoredCredentials_1 = require("../tryLoginFromStoredCredentials");
 var events_1 = require("./events");
 var restartApp_1 = require("../restartApp");
-exports.url = "wss://web." + env_1.baseDomain;
+exports.url = "wss://web." + env_1.env.baseDomain;
 var idString = "toBackend";
-env_1.isDevEnv;
+env_1.env.isDevEnv;
 /*
-const log: typeof console.log = isDevEnv ?
+const log: typeof console.log = env.isDevEnv ?
     ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
     (() => { });
     */
@@ -113,7 +112,7 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
     log: log,
     "hideKeepAlive": true
 }));
-/** getPrLoggedIn is called when the user
+/** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
@@ -121,14 +120,14 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
  */
 exports.connect = (function () {
     var hasBeenInvoked = false;
-    return function (requestTurnCred, getPrLoggedIn) {
+    return function (params) {
         if (hasBeenInvoked) {
             return;
         }
         hasBeenInvoked = true;
         //We register 'offline' event only on the first call of connect()
         //TODO: React native.
-        if (env.jsRuntimeEnv === "browser") {
+        if (env_1.env.jsRuntimeEnv === "browser") {
             window.addEventListener("offline", function () {
                 var socket = get();
                 if (socket instanceof Promise) {
@@ -137,13 +136,12 @@ exports.connect = (function () {
                 socket.destroy("Browser is offline");
             });
         }
-        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED", params.login);
     };
 })();
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 var socketCurrent = undefined;
-function connectRecursive(requestTurnCred, getPrLoggedIn) {
+function connectRecursive(requestTurnCred, login) {
     return __awaiter(this, void 0, void 0, function () {
         var result, webSocket, _a, _b, _c, _d, _e, _f, error_1, socket;
         var _this = this;
@@ -155,16 +153,16 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                 case 1:
                     result = _g.sent();
                     if (!(result === "NO VALID CREDENTIALS")) return [3 /*break*/, 4];
-                    if (!!!getPrLoggedIn) return [3 /*break*/, 3];
+                    if (!!!login) return [3 /*break*/, 3];
                     notConnectedUserFeedback.setVisibility(false);
-                    return [4 /*yield*/, getPrLoggedIn()];
+                    return [4 /*yield*/, login()];
                 case 2:
                     _g.sent();
                     notConnectedUserFeedback.setVisibility(true);
                     return [3 /*break*/, 4];
                 case 3:
-                    if (env.jsRuntimeEnv === "react-native") {
-                        throw new Error("never: getPreLoggedIn is not optional for react native");
+                    if (env_1.env.jsRuntimeEnv === "react-native") {
+                        throw new Error("never: no login function provided");
                     }
                     restartApp_1.restartApp();
                     return [2 /*return*/];
@@ -185,11 +183,11 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     error_1 = _g.sent();
                     log("WebSocket construction error: " + error_1.message);
                     //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-                    connectRecursive(requestTurnCred, getPrLoggedIn);
+                    connectRecursive(requestTurnCred, login);
                     return [2 /*return*/];
                 case 7:
                     socket = new sip.Socket(webSocket, true, {
-                        "remoteAddress": "web." + env_1.baseDomain,
+                        "remoteAddress": "web." + env_1.env.baseDomain,
                         "remotePort": 443
                     }, 20000);
                     apiServer.startListening(socket);
@@ -220,7 +218,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                             if (events_1.evtOpenElsewhere.postCount !== 0) {
                                 return [2 /*return*/];
                             }
-                            connectRecursive(requestTurnCred, getPrLoggedIn);
+                            connectRecursive(requestTurnCred, login);
                             return [2 /*return*/];
                         });
                     }); });

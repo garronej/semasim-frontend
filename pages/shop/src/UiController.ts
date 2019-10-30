@@ -3,7 +3,7 @@ import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { UiCart } from "./UiCart";
 import { UiProduct } from "./UiProduct";
 import { getProducts } from "frontend-shared/dist/lib/shopProducts";
-import * as env from "frontend-shared/dist/lib/env";
+import { env } from "frontend-shared/dist/lib/env";
 import { UiShipTo } from "./UiShipTo";
 import { getCountryCurrency } from "frontend-shared/dist/tools/currency";
 import { UiCurrency } from "./UiCurrency";

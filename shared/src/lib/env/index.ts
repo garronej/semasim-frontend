@@ -1,5 +1,6 @@
 
 
+/*
 import { jsRuntimeEnv } from "./jsRuntimeEnv";
 
 export { jsRuntimeEnv };
@@ -12,3 +13,37 @@ export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "r
     (isDevEnv ? "dev.semasim.com" : "semasim.com") :
     window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any
     ;
+    */
+
+
+export type Env = Env.Browser | Env.ReactNative;
+
+export namespace Env {
+
+    type _Common = {
+        assetsRoot: string;
+        isDevEnv: boolean;
+        baseDomain: "semasim.com" | "dev.semasim.com";
+    }
+
+    export type Browser = _Common & {
+        jsRuntimeEnv: "browser";
+        hostOs: undefined;
+    };
+
+    export type ReactNative = _Common & {
+        jsRuntimeEnv: "react-native";
+        hostOs: "android" | "iOS"
+    };
+
+}
+
+import env from "./impl";
+
+export { env };
+
+
+
+
+
+

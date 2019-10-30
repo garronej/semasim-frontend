@@ -1,28 +1,56 @@
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
 import { types as gwTypes } from "../gateway/types";
-import * as cryptoLib from "crypto-lib/dist/sync/types";
+import * as sip from "ts-sip";
 declare type phoneNumber = import("phone-number/dist/lib").phoneNumber;
+declare type Encryptor = import("./crypto/cryptoLibProxy").Encryptor;
+declare type Decryptor = import("./crypto/cryptoLibProxy").Decryptor;
+export declare type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+declare type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (...args: any) => Promise<infer R> ? R : any;
+export declare function uaInstantiationHelper(params: {
+    cryptoRelatedParams: AsyncReturnType<typeof import("./crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa")["setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"]>;
+    pushNotificationToken: string;
+}): Promise<Ua>;
 export declare class Ua {
+    private towardUserDecryptor;
+    private evtUnregisteredByGateway;
+    private getTowardSimEncryptor;
+    private getJsSipSocket;
+    private getRtcIceServer;
+    descriptor: gwTypes.Ua;
+    /** evtUnregisteredByGateway should post when a sim that was previously
+     * reachable goes unreachable, when this happen SIP packets can no longer be
+     * routed to the gateway and the gateway unregister all the SIP contact
+     * It happen also when an user lose access to sim or need to refresh sim password.
+     * */
+    constructor(uaDescriptorWithoutPlatform: Omit<gwTypes.Ua, "platform">, towardUserDecryptor: Decryptor, evtUnregisteredByGateway: SyncEvent<{
+        imsi: string;
+    }>, getTowardSimEncryptor: (usableUserSim: {
+        towardSimEncryptKeyStr: string;
+    }) => {
+        towardSimEncryptor: Encryptor;
+    }, getJsSipSocket: (imsi: string) => JsSipSocket, getRtcIceServer: () => Promise<RTCIceServer>);
+    newUaSim(usableUserSim: {
+        sim: {
+            imsi: string;
+        };
+        password: string;
+        towardSimEncryptKeyStr: string;
+    }): UaSim;
+}
+export declare class UaSim {
+    readonly uaDescriptor: gwTypes.Ua;
+    private readonly towardUserDecryptor;
+    private getRtcIceServer;
+    private readonly jsSipSocket;
     private readonly towardSimEncryptor;
-    /** Must be set before use in webphone.ts */
-    static session: {
-        email: string;
-        instanceId: string;
-        towardUserEncryptKeyStr: string;
-        towardUserDecryptor: cryptoLib.Decryptor;
-    };
     /** post isRegistered */
     readonly evtRegistrationStateChanged: SyncEvent<boolean>;
     private readonly jsSipUa;
     private evtRingback;
-    private readonly jsSipSocket;
-    constructor(imsi: string, sipPassword: string, towardSimEncryptor: cryptoLib.Encryptor, disabledMessage?: false | "DISABLE MESSAGES");
+    /** Use UA.prototype.newUaSim to instantiate an UaSim */
+    constructor(uaDescriptor: gwTypes.Ua, towardUserDecryptor: Decryptor, getRtcIceServer: () => Promise<RTCIceServer>, evtUnregisteredByGateway: VoidSyncEvent, jsSipSocket: JsSipSocket, imsi: string, sipPassword: string, towardSimEncryptor: Encryptor);
     isRegistered: boolean;
     register(): void;
-    /**
-     * Do not actually send a REGISTER expire=0.
-     * Assert no packet will arrive to this UA until next register.
-     * */
     unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
@@ -32,14 +60,13 @@ export declare class Ua {
     private onMessage;
     private postEvtIncomingMessage;
     sendMessage(number: phoneNumber, bundledData: gwTypes.BundledData.ClientToServer): Promise<void>;
-    /** return exactSendDate to match with sendReport and statusReport */
     readonly evtIncomingCall: SyncEvent<{
         fromNumber: string;
         terminate(): void;
         prTerminated: Promise<void>;
         onAccepted(): Promise<{
             state: "ESTABLISHED";
-            sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+            sendDtmf(signal: DtmFSignal, duration: number): void;
         }>;
     }>;
     private onIncomingCall;
@@ -50,12 +77,54 @@ export declare class Ua {
             state: "RINGBACK";
             prNextState: Promise<{
                 state: "ESTABLISHED";
-                sendDtmf(signal: Ua.DtmFSignal, duration: number): void;
+                sendDtmf(signal: DtmFSignal, duration: number): void;
             }>;
         }>;
     }>;
 }
-export declare namespace Ua {
-    type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
+/** The socket interface that jsSIP UA take as constructor parameter  */
+interface IjsSipSocket {
+    via_transport: string;
+    url: string;
+    sip_uri: string;
+    connect(): void;
+    disconnect(): void;
+    send(data: string): boolean;
+    onconnect(): void;
+    ondisconnect(error: boolean, code?: number, reason?: string): void;
+    ondata(data: string): boolean;
+}
+declare class JsSipSocket implements IjsSipSocket {
+    private readonly connection;
+    readonly evtSipPacket: SyncEvent<sip.Packet>;
+    readonly via_transport: sip.TransportProtocol;
+    readonly url: string;
+    private sdpHacks;
+    readonly sip_uri: string;
+    constructor(imsi: string, connection: {
+        url: string;
+        evtConnect: SyncEvent<sip.Socket>;
+        get: () => Promise<sip.Socket> | sip.Socket;
+    });
+    connect(): void;
+    disconnect(): void;
+    private messageOkDelays;
+    /**
+     * To call when receiving as SIP MESSAGE
+     * to prevent directly sending the 200 OK
+     * response immediately but rather wait
+     * until some action have been completed.
+     *
+     * @param request the request prop of the
+     * eventData emitted by JsSIP UA for the
+     * "newMessage" event. ( when originator === remote )
+     * @param pr The response to the SIP MESSAGE
+     * will not be sent until this promise resolve.
+     */
+    setMessageOkDelay(request: any, pr: Promise<void>): void;
+    send(data: string): true;
+    onconnect(): void;
+    ondisconnect(error: boolean, code?: number, reason?: string): void;
+    ondata(data: string): boolean;
 }
 export {};

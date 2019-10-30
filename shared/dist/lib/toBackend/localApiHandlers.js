@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var ts_events_extended_1 = require("ts-events-extended");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
-var env = require("../env");
+var env_1 = require("../env");
 var events_1 = require("./events");
 //NOTE: Global JS deps.
 var dialog_1 = require("../../tools/modal/dialog");
@@ -72,7 +72,7 @@ var getUsableUserSim = function (imsi) { return getRemoteApiCaller()
                             if (hadOngoingCall) {
                                 events_1.evtOngoingCall.post(userSim);
                             }
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -94,7 +94,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
         "handler": function (_a) {
             var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation, isGsmConnectivityOk = _a.isGsmConnectivityOk, cellSignalStrength = _a.cellSignalStrength;
             return __awaiter(void 0, void 0, void 0, function () {
-                var userSim;
+                var userSim, wasAlreadyReachable, hasPasswordChanged;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -107,13 +107,22 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                                 restartApp_1.restartApp();
                                 return [2 /*return*/];
                             }
+                            wasAlreadyReachable = userSim.reachableSimState !== undefined;
                             userSim.reachableSimState = isGsmConnectivityOk ?
                                 ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
                                 ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
+                            hasPasswordChanged = userSim.password !== password;
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            if (wasAlreadyReachable && hasPasswordChanged) {
+                                events_1.evtSimPasswordChanged.post(userSim);
+                                return [2 /*return*/, undefined];
+                            }
+                            if (wasAlreadyReachable) {
+                                return [2 /*return*/, undefined];
+                            }
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -495,7 +504,7 @@ evtOngoingCall.attach(userSim => {
                     ].join("<br>");
                     return [4 /*yield*/, new Promise(function (resolve) { return dialogApi.create("dialog", {
                             "title": "SIM ready to be registered",
-                            "message": env.jsRuntimeEnv === "browser" ?
+                            "message": env_1.env.jsRuntimeEnv === "browser" ?
                                 "<p class=\"text-center\">" + shouldAdd_message + "</p>" :
                                 shouldAdd_message,
                             "buttons": {

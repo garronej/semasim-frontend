@@ -6,7 +6,7 @@ import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import * as types from "frontend-shared/dist/lib/types/subscription";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
-import { assetsRoot } from "frontend-shared/dist/lib/env";
+import { env } from "frontend-shared/dist/lib/env";
 import { AuthenticatedSessionDescriptorSharedData } from "frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData";
 
 import { UiMySubscription } from "./UiMySubscription";
@@ -95,7 +95,7 @@ export class UiController {
             AuthenticatedSessionDescriptorSharedData.get().then(
                 email => handler = StripeCheckout.configure({
                     "key": subscriptionInfos.stripePublicApiKey,
-                    "image": `${assetsRoot}img/shop.png`,
+                    "image": `${env.assetsRoot}img/shop.png`,
                     "locale": "auto",
                     "allowRememberMe": false,
                     "name": 'Semasim',

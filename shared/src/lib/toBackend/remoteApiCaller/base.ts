@@ -8,7 +8,7 @@ import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import * as connection from "../connection";
 import { restartApp } from "../../restartApp";
 
-import { evtSimIsOnlineStatusChange, evtUsableSim } from "../events";
+import { evtSimReachabilityStatusChange, evtUsableSim } from "../events";
 
 
 //TODO: Fix, it's called two times!!
@@ -67,7 +67,7 @@ export const getUsableUserSims = (() => {
 
             if (!!userSim.reachableSimState) {
 
-                evtSimIsOnlineStatusChange.post(userSim);
+                evtSimReachabilityStatusChange.post(userSim);
 
             }
 
@@ -89,7 +89,7 @@ export const getUsableUserSims = (() => {
 
                             userSim.reachableSimState = undefined;
 
-                            evtSimIsOnlineStatusChange.post(userSim);
+                            evtSimReachabilityStatusChange.post(userSim);
 
                         }
 

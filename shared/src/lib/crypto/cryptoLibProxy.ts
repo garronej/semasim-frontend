@@ -1,8 +1,8 @@
 import * as cryptoLib from "crypto-lib";
 import * as hostCrypto from "../nativeModules/hostCryptoLib";
-import * as env from "../env";
+import { env } from "../env";
 
-export { Decryptor, WorkerThreadId, RsaKey, scrypt, aes, toBuffer, workerThreadPool } from "crypto-lib";
+export { Encryptor, Decryptor, WorkerThreadId, RsaKey, scrypt, aes, toBuffer, workerThreadPool } from "crypto-lib";
 
 
 declare const Buffer: any;

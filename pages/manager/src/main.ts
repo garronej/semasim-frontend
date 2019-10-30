@@ -40,7 +40,7 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 async function onLoggedIn(): Promise<UiController> {
 
-    connection.connect("DO NOT REQUEST TURN CRED", undefined);
+    connection.connect({ "requestTurnCred": false });
 
     const uiController = new UiController(
         await remoteApiCaller.getUsableUserSims()

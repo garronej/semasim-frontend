@@ -71,18 +71,110 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var bundledData_1 = require("../gateway/bundledData");
 var readImsi_1 = require("../gateway/readImsi");
-var RegistrationParams_1 = require("../gateway/RegistrationParams");
+var serializedUaObjectCarriedOverSipContactParameter = require("../gateway/serializedUaObjectCarriedOverSipContactParameter");
 var sip = require("ts-sip");
 var runExclusive = require("run-exclusive");
-var connection = require("./toBackend/connection");
-var events_1 = require("./toBackend/events");
 var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-var Ua = /** @class */ (function () {
-    function Ua(imsi, sipPassword, towardSimEncryptor, disabledMessage) {
+function uaInstantiationHelper(params) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, towardUserDecryptor, towardUserEncryptKeyStr, getTowardSimEncryptor, pushNotificationToken, _b, AuthenticatedSessionDescriptorSharedData, backendEvents, connection, _c;
         var _this = this;
-        if (disabledMessage === void 0) { disabledMessage = false; }
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    _a = params.cryptoRelatedParams, towardUserDecryptor = _a.towardUserDecryptor, towardUserEncryptKeyStr = _a.towardUserEncryptKeyStr, getTowardSimEncryptor = _a.getTowardSimEncryptor, pushNotificationToken = params.pushNotificationToken;
+                    return [4 /*yield*/, Promise.all([
+                            Promise.resolve().then(function () { return require("./localStorage/AuthenticatedSessionDescriptorSharedData"); }),
+                            Promise.resolve().then(function () { return require("./toBackend/events"); }),
+                            Promise.resolve().then(function () { return require("./toBackend/connection"); })
+                        ])];
+                case 1:
+                    _b = __read.apply(void 0, [_d.sent(), 3]), AuthenticatedSessionDescriptorSharedData = _b[0].AuthenticatedSessionDescriptorSharedData, backendEvents = _b[1], connection = _b[2];
+                    _c = Ua.bind;
+                    return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, email, uaInstanceId;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.get()];
+                                    case 1:
+                                        _a = _b.sent(), email = _a.email, uaInstanceId = _a.uaInstanceId;
+                                        return [2 /*return*/, {
+                                                "instance": uaInstanceId,
+                                                "pushToken": pushNotificationToken,
+                                                towardUserEncryptKeyStr: towardUserEncryptKeyStr,
+                                                "userEmail": email
+                                            }];
+                                }
+                            });
+                        }); })()];
+                case 2: return [2 /*return*/, new (_c.apply(Ua, [void 0, _d.sent(),
+                        towardUserDecryptor,
+                        (function () {
+                            var evtUnregisteredByGateway = new ts_events_extended_1.SyncEvent();
+                            var onEvt = function (_a) {
+                                var imsi = _a.sim.imsi;
+                                return evtUnregisteredByGateway.post({ imsi: imsi });
+                            };
+                            backendEvents.evtSimPasswordChanged.attach(onEvt);
+                            backendEvents.evtSimPermissionLost.attach(onEvt);
+                            backendEvents.evtSimReachabilityStatusChange.attach(function (_a) {
+                                var reachableSimState = _a.reachableSimState;
+                                return reachableSimState === undefined;
+                            }, onEvt);
+                            return evtUnregisteredByGateway;
+                        })(),
+                        getTowardSimEncryptor,
+                        function (imsi) { return new JsSipSocket(imsi, connection); },
+                        function () { return backendEvents.rtcIceEServer.getCurrent(); }]))()];
+            }
+        });
+    });
+}
+exports.uaInstantiationHelper = uaInstantiationHelper;
+var Ua = /** @class */ (function () {
+    /** evtUnregisteredByGateway should post when a sim that was previously
+     * reachable goes unreachable, when this happen SIP packets can no longer be
+     * routed to the gateway and the gateway unregister all the SIP contact
+     * It happen also when an user lose access to sim or need to refresh sim password.
+     * */
+    function Ua(uaDescriptorWithoutPlatform, towardUserDecryptor, evtUnregisteredByGateway, getTowardSimEncryptor, getJsSipSocket, getRtcIceServer) {
+        this.towardUserDecryptor = towardUserDecryptor;
+        this.evtUnregisteredByGateway = evtUnregisteredByGateway;
+        this.getTowardSimEncryptor = getTowardSimEncryptor;
+        this.getJsSipSocket = getJsSipSocket;
+        this.getRtcIceServer = getRtcIceServer;
+        this.descriptor = __assign(__assign({}, uaDescriptorWithoutPlatform), { "platform": (function () {
+                switch (env_1.env.jsRuntimeEnv) {
+                    case "browser": return "web";
+                    case "react-native": return env_1.env.hostOs;
+                }
+            })() });
+    }
+    Ua.prototype.newUaSim = function (usableUserSim) {
+        var _this = this;
+        var sim = usableUserSim.sim;
+        return new UaSim(this.descriptor, this.towardUserDecryptor, this.getRtcIceServer, (function () {
+            var out = new ts_events_extended_1.VoidSyncEvent();
+            _this.evtUnregisteredByGateway.attach(function (_a) {
+                var imsi = _a.imsi;
+                return imsi === sim.imsi;
+            }, function () { return out.post(); });
+            return out;
+        })(), this.getJsSipSocket(sim.imsi), sim.imsi, usableUserSim.password, this.getTowardSimEncryptor(usableUserSim).towardSimEncryptor);
+    };
+    return Ua;
+}());
+exports.Ua = Ua;
+var UaSim = /** @class */ (function () {
+    /** Use UA.prototype.newUaSim to instantiate an UaSim */
+    function UaSim(uaDescriptor, towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, jsSipSocket, imsi, sipPassword, towardSimEncryptor) {
+        var _this = this;
+        this.uaDescriptor = uaDescriptor;
+        this.towardUserDecryptor = towardUserDecryptor;
+        this.getRtcIceServer = getRtcIceServer;
+        this.jsSipSocket = jsSipSocket;
         this.towardSimEncryptor = towardSimEncryptor;
         /** post isRegistered */
         this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
@@ -95,66 +187,45 @@ var Ua = /** @class */ (function () {
             _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { "onProcessed": onProcessed }));
             return pr;
         });
-        /*
-        public sendMessage(
-            number: phoneNumber,
-            text: string,
-            exactSendDate: Date,
-            appendPromotionalMessage: boolean
-        ): Promise<void> {
-            return new Promise<void>(
-                async (resolve, reject) => this.jsSipUa.sendMessage(
-                    `sip:${number}@${baseDomain}`,
-                    "| encrypted message bundled in header |",
-                    {
-                        "contentType": "text/plain; charset=UTF-8",
-                        "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
-                            {
-                                "type": "MESSAGE",
-                                "textB64": Buffer.from(text, "utf8").toString("base64"),
-                                "exactSendDateTime": exactSendDate.getTime(),
-                                appendPromotionalMessage
-                            },
-                            this.towardSimEncryptor
-                        ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
-                        "eventHandlers": {
-                            "succeeded": () => resolve(),
-                            "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
-                        }
-                    }
-                )
-            );
-        }
-        */
-        /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
-        var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
-        this.jsSipSocket = new JsSipSocket(imsi, uri);
-        /*
-        NOTE: It is important to call enableKeepAlive with a period shorter than the register_expires
-        so that if the reREGISTER can not be send in time because the app was in the background it
-        does not matter because the connection will be closed anyway.
-        Remember that when the registration has expired the GW will ignore all SIP messages coming from
-        the connection, it is then mandatory to establish a new websocket connection and re register.
-        Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
-        */
+        var uri = this.jsSipSocket.sip_uri;
+        var register_expires = 61;
+        //NOTE: Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri: uri,
             "authorization_user": imsi,
             "password": sipPassword,
-            "instance_id": Ua.session.instanceId.match(/"<urn:([^>]+)>"$/)[1],
+            //NOTE: The ua instance id is also bundled in the contact uri but
+            //but jsSip does not allow us to not include an instance id
+            //if we don't provide one it will generate one for us.
+            //So we are providing it for consistency.
+            "instance_id": uaDescriptor.instance.match(/"<urn:([^>]+)>"$/)[1],
             "register": false,
-            "contact_uri": [
-                uri,
-                RegistrationParams_1.RegistrationParams.build({
-                    "userEmail": Ua.session.email,
-                    "towardUserEncryptKeyStr": Ua.session.towardUserEncryptKeyStr,
-                    "messagesEnabled": !disabledMessage
-                })
-            ].join(";"),
-            "register_expires": 61
+            "contact_uri": uri + ";" + serializedUaObjectCarriedOverSipContactParameter.buildParameter(uaDescriptor),
+            register_expires: register_expires
         });
+        var lastRegisterTime = 0;
+        this.jsSipUa.on("registrationExpiring", function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (!this.isRegistered) {
+                    return [2 /*return*/];
+                }
+                //NOTE: For react native, jsSIP does not post "unregistered" event when registration
+                //actually expire.
+                if (Date.now() - lastRegisterTime >= register_expires * 1000) {
+                    console.log("Sip registration has expired while app was in the background");
+                    this.jsSipUa.emit("unregistered");
+                }
+                else {
+                    console.log("Ua registration expiring for " + imsi);
+                }
+                console.log("re-registering");
+                this.jsSipUa.register();
+                return [2 /*return*/];
+            });
+        }); });
+        evtUnregisteredByGateway.attach(function () { return _this.jsSipUa.emit("unregistered"); });
         /*
         evt 'registered' is posted only when register change
         so we use this instead.
@@ -162,39 +233,42 @@ var Ua = /** @class */ (function () {
         this.jsSipSocket.evtSipPacket.attach(function (sipPacket) { return (!sip.matchRequest(sipPacket) &&
             sipPacket.headers.cseq.method === "REGISTER" &&
             sipPacket.status === 200); }, function () {
+            lastRegisterTime = Date.now();
             _this.isRegistered = true;
             _this.evtRegistrationStateChanged.post(true);
         });
         this.jsSipUa.on("unregistered", function () {
+            console.log("ua sim unregistered");
             _this.isRegistered = false;
             _this.evtRegistrationStateChanged.post(false);
         });
         this.jsSipUa.on("newMessage", function (_a) {
             var originator = _a.originator, request = _a.request;
-            if (originator === "remote") {
-                _this.onMessage(request);
+            if (originator !== "remote") {
+                return;
             }
+            _this.onMessage(request);
         });
         this.jsSipUa.on("newRTCSession", function (_a) {
             var originator = _a.originator, session = _a.session, request = _a.request;
-            if (originator === "remote") {
-                _this.onIncomingCall(session, request);
+            if (originator !== "remote") {
+                return;
             }
+            _this.onIncomingCall(session, request);
         });
         this.jsSipUa.start();
     }
     //TODO: If no response to register do something
-    Ua.prototype.register = function () {
+    UaSim.prototype.register = function () {
         this.jsSipUa.register();
     };
-    /**
-     * Do not actually send a REGISTER expire=0.
-     * Assert no packet will arrive to this UA until next register.
-     * */
-    Ua.prototype.unregister = function () {
-        this.jsSipUa.emit("unregistered");
+    UaSim.prototype.unregister = function () {
+        if (!this.isRegistered) {
+            return;
+        }
+        this.jsSipUa.unregister();
     };
-    Ua.prototype.onMessage = function (request) {
+    UaSim.prototype.onMessage = function (request) {
         return __awaiter(this, void 0, void 0, function () {
             var bundledData, fromNumber, pr;
             return __generator(this, function (_a) {
@@ -205,7 +279,7 @@ var Ua = /** @class */ (function () {
                                 out[key] = request.headers[key][0].raw;
                             }
                             return out;
-                        })(), Ua.session.towardUserDecryptor)];
+                        })(), this.towardUserDecryptor)];
                     case 1:
                         bundledData = _a.sent();
                         fromNumber = request.from.uri.user;
@@ -223,7 +297,7 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    Ua.prototype.sendMessage = function (number, bundledData) {
+    UaSim.prototype.sendMessage = function (number, bundledData) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e;
@@ -231,7 +305,7 @@ var Ua = /** @class */ (function () {
                 switch (_f.label) {
                     case 0:
                         _b = (_a = this.jsSipUa).sendMessage;
-                        _c = ["sip:" + number + "@" + env_1.baseDomain,
+                        _c = ["sip:" + number + "@" + env_1.env.baseDomain,
                             "| encrypted message bundled in header |"];
                         _d = {
                             "contentType": "text/plain; charset=UTF-8"
@@ -251,7 +325,7 @@ var Ua = /** @class */ (function () {
             });
         }); });
     };
-    Ua.prototype.onIncomingCall = function (jsSipRtcSession, request) {
+    UaSim.prototype.onIncomingCall = function (jsSipRtcSession, request) {
         var _this = this;
         var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
         var evtAccepted = new ts_events_extended_1.VoidSyncEvent();
@@ -267,7 +341,7 @@ var Ua = /** @class */ (function () {
             var rtcIceServer;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
+                    case 0: return [4 /*yield*/, this.getRtcIceServer()];
                     case 1:
                         rtcIceServer = _a.sent();
                         jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
@@ -310,7 +384,7 @@ var Ua = /** @class */ (function () {
             }); }
         });
     };
-    Ua.prototype.placeOutgoingCall = function (number) {
+    UaSim.prototype.placeOutgoingCall = function (number) {
         return __awaiter(this, void 0, void 0, function () {
             var evtEstablished, evtTerminated, evtDtmf, evtRequestTerminate, evtRingback, rtcICEServer;
             var _this = this;
@@ -322,10 +396,10 @@ var Ua = /** @class */ (function () {
                         evtDtmf = new ts_events_extended_1.SyncEvent();
                         evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
                         evtRingback = new ts_events_extended_1.VoidSyncEvent();
-                        return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
+                        return [4 /*yield*/, this.getRtcIceServer()];
                     case 1:
                         rtcICEServer = _a.sent();
-                        this.jsSipUa.call("sip:" + number + "@" + env_1.baseDomain, {
+                        this.jsSipUa.call("sip:" + number + "@" + env_1.env.baseDomain, {
                             "mediaConstraints": { "audio": true, "video": false },
                             "pcConfig": {
                                 "iceServers": [rtcICEServer]
@@ -407,22 +481,23 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    return Ua;
+    return UaSim;
 }());
-exports.Ua = Ua;
+exports.UaSim = UaSim;
 function playAudioStream(stream) {
     var audio = document.createElement("audio");
     audio.autoplay = true;
     audio.srcObject = stream;
 }
 var JsSipSocket = /** @class */ (function () {
-    function JsSipSocket(imsi, sip_uri) {
+    function JsSipSocket(imsi, connection) {
         var _this = this;
-        this.sip_uri = sip_uri;
+        this.connection = connection;
         this.evtSipPacket = new ts_events_extended_1.SyncEvent();
         this.via_transport = "WSS";
-        this.url = connection.url;
+        this.url = this.connection.url;
         this.messageOkDelays = new Map();
+        this.sip_uri = "sip:" + imsi + "@" + env_1.env.baseDomain;
         var onBackedSocketConnect = function (backendSocket) {
             {
                 var onSipPacket = function (sipPacket) {
@@ -512,7 +587,7 @@ var JsSipSocket = /** @class */ (function () {
     JsSipSocket.prototype.send = function (data) {
         var _this = this;
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a;
+            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a, isSent;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -529,7 +604,8 @@ var JsSipSocket = /** @class */ (function () {
                         this.messageOkDelays.delete(callId);
                         _b.label = 2;
                     case 2:
-                        socketOrPrSocket = connection.get();
+                        if (!true) return [3 /*break*/, 7];
+                        socketOrPrSocket = this.connection.get();
                         if (!(socketOrPrSocket instanceof Promise)) return [3 /*break*/, 4];
                         return [4 /*yield*/, socketOrPrSocket];
                     case 3:
@@ -540,8 +616,15 @@ var JsSipSocket = /** @class */ (function () {
                         _b.label = 5;
                     case 5:
                         socket = _a;
-                        socket.write(sip.parse(Buffer.from(data, "utf8")));
-                        return [2 /*return*/];
+                        return [4 /*yield*/, socket.write(sip.parse(Buffer.from(data, "utf8")))];
+                    case 6:
+                        isSent = _b.sent();
+                        if (!isSent) {
+                            console.log("WARNING: websocket sip data was not sent successfully", data);
+                            return [3 /*break*/, 2];
+                        }
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/];
                 }
             });
         }); })();

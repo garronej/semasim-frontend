@@ -17,7 +17,8 @@
         "noUnusedParameters": false,
         "strictPropertyInitialization": true,
         "strictFunctionTypes": true,
-        "incremental": true
+        "incremental": true,
+        "noImplicitAny": true
     },
     "filesGlob": [
         "./src/**/*.ts"

@@ -37,10 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var hostKfd = require("../nativeModules/hostKfd");
 var cryptoLibProxy_1 = require("./cryptoLibProxy");
-exports.kfd = env.jsRuntimeEnv === "browser" ?
+exports.kfd = env_1.env.jsRuntimeEnv === "browser" ?
     (function (password, salt, iterations) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, _b, _c, _d;
         return __generator(this, function (_e) {

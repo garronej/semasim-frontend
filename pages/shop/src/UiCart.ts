@@ -2,7 +2,7 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import * as types from "frontend-shared/dist/lib/types/shop";
-import { assetsRoot } from "frontend-shared/dist/lib/env";
+import { env } from "frontend-shared/dist/lib/env";
 import { solve as solveShipping } from "frontend-shared/dist/lib/shipping";
 import { convertFromEuro } from "frontend-shared/dist/tools/currency";
 
@@ -192,13 +192,13 @@ class UiCartEntry {
 
         this.structure.find(".delete-btn").css(
             "background",
-            `url("${assetsRoot}svg/delete-icn.svg") no-repeat center`
+            `url("${env.assetsRoot}svg/delete-icn.svg") no-repeat center`
         );
 
         for (const selector of ["plus", "minus"]) {
             this.structure.find(`.${selector}-btn img`).attr(
                 "src",
-                `${assetsRoot}svg/${selector}.svg`
+                `${env.assetsRoot}svg/${selector}.svg`
             );
         }
 

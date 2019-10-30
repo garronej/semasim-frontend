@@ -38,14 +38,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
 var TowardUserKeys_1 = require("./TowardUserKeys");
-exports.key = "just-registered";
+var key = "just-registered";
 var JustRegistered;
 (function (JustRegistered) {
     function store(justRegistered) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, JSON.stringify(justRegistered, function (key, value) { return key === "towardUserKeys" ?
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(justRegistered, function (key, value) { return key === "towardUserKeys" ?
                             TowardUserKeys_1.TowardUserKeys.stringify(value) :
                             value; }))];
                     case 1:
@@ -62,13 +62,13 @@ var JustRegistered;
             var justRegisteredStr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         justRegisteredStr = _a.sent();
                         if (justRegisteredStr === null) {
                             return [2 /*return*/, undefined];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/, JSON.parse(justRegisteredStr, function (key, value) { return key === "towardUserKeys" ?

@@ -1,4 +1,4 @@
-export declare const key = "credentials";
+/** Soult be used only with react-native */
 export declare type Credentials = Omit<import("../../web_api_declaration").loginUser.Params, "uaInstanceId"> & {
     uaInstanceId: string;
 };

@@ -2,7 +2,7 @@
 
 //export const kfdIterations = 100000;
 
-import * as env from "../env";
+import { env } from "../env";
 import * as hostKfd from "../nativeModules/hostKfd";
 import { toBuffer } from "./cryptoLibProxy";
 declare const Buffer: any;

@@ -178,7 +178,7 @@ export class UiConversation {
             "railVisible": true,
             "height": '400px',
             "start": "bottom"
-        }).bind("slimscroll", ((_e, pos) => {
+        }).bind("slimscroll", ((_e: any, pos: string) => {
 
             if (pos !== "top") {
                 return;
@@ -235,7 +235,7 @@ export class UiConversation {
                 }
 
 
-                this.textarea["autosize"]();
+                (this.textarea as any)["autosize"]();
 
             }
         });

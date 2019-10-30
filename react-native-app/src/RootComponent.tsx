@@ -3,11 +3,14 @@ import { Dialog } from "./globalComponents/Dialog";
 import { LoginRouter } from "./loginScreens/LoginRouter";
 import { PhoneScreen } from "./PhoneScreen";
 import * as backendConnection from "frontend-shared/dist/lib/toBackend/connection";
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import { NoBackendConnectionBanner } from "./globalComponents/NoBackendConnectionBanner";
+import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotification";
 
-const log: typeof console.log = false ? console.log.bind(console) : () => { };
+
+const log: typeof console.log = true ?
+    ((...args: any[]) => console.log.apply(console, ["[RootComponent]", ...args])) :
+    (() => { });
 
 
 log("[RootComponent] imported");
@@ -15,16 +18,30 @@ log("[RootComponent] imported");
 const evtNeedLogin = new VoidSyncEvent();
 const evtLoggedIn= new VoidSyncEvent();
 
-backendConnection.connect(
-    "REQUEST TURN CRED",
-    () => {
+backendConnection.connect({
+    "requestTurnCred": true,
+    "login": () => {
 
-        evtNeedLogin.post();
+        (async () => {
+
+            if (evtLoggedIn.getHandlers().length === 0) {
+                await evtNeedLogin.evtAttach.waitFor();
+            }
+
+            evtNeedLogin.post();
+
+        })();
 
         return evtLoggedIn.waitFor();
 
     }
-);
+});
+
+evtBackgroundPushNotification.attach(notYetDefined => {
+
+    log("Backend push notification! ", notYetDefined);
+
+});
 
 export type State = { isLoggedIn: boolean; };
 
@@ -76,10 +93,10 @@ export class RootComponent extends React.Component<{}, State> {
     };
 
     public render = () => [
-        <Dialog key={0}/>,
-        <NoBackendConnectionBanner key={1}/>,
+        <Dialog key={0} />,
+        <NoBackendConnectionBanner key={1} />,
         this.state.isLoggedIn ?
-            <PhoneScreen key={2}/>
+            <PhoneScreen key={2} />
             :
             <LoginRouter key={2} onLoggedIn={() => this.setState({ "isLoggedIn": true })} />
     ];

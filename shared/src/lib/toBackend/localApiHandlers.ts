@@ -4,9 +4,10 @@ import * as sipLibrary from "ts-sip";
 import { SyncEvent } from "ts-events-extended";
 import * as types from "../types/userSim";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as env from "../env";
+import { env } from "../env";
 import { 
-    evtSimIsOnlineStatusChange, 
+    evtSimReachabilityStatusChange, 
+    evtSimPasswordChanged,
     evtSimGsmConnectivityChange, 
     evtOngoingCall,
     evtSimCellSignalStrengthChange,
@@ -59,7 +60,7 @@ const getUsableUserSim = (imsi: string) => getRemoteApiCaller()
 
             }
 
-            evtSimIsOnlineStatusChange.post(userSim);
+            evtSimReachabilityStatusChange.post(userSim);
 
             return undefined;
 
@@ -105,10 +106,16 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
 
             }
 
+
+            //NOTE: True when password changed for example.
+            const wasAlreadyReachable= userSim.reachableSimState !== undefined;
+
             userSim.reachableSimState = isGsmConnectivityOk ?
                 ({ "isGsmConnectivityOk": true, cellSignalStrength, "ongoingCall": undefined }) :
                 ({ "isGsmConnectivityOk": false, cellSignalStrength })
                 ;
+            
+            const hasPasswordChanged= userSim.password !== password;
 
             userSim.password = password;
 
@@ -116,7 +123,16 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
 
             userSim.gatewayLocation = gatewayLocation;
 
-            evtSimIsOnlineStatusChange.post(userSim);
+            if( wasAlreadyReachable && hasPasswordChanged ){
+                evtSimPasswordChanged.post(userSim);
+                return undefined;
+            }
+
+            if( wasAlreadyReachable ){
+                return undefined;
+            }
+
+            evtSimReachabilityStatusChange.post(userSim);
 
             return undefined;
 
