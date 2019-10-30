@@ -50,9 +50,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
             currentModal = modal;
 
             Promise.all<unknown>([
-                //NOTE: It's probably unnecessary, ref should always be defined.
-                ref ||
-                evtRef.waitFor(),
+                ref || evtRef.waitFor(),
                 rn.AppState.currentState === "active" ||
                 evtNewAppState.attachOnce(newAppState => newAppState === "active", modal, () => { })
             ]).then(() => ref!.setState({
@@ -66,10 +64,14 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
 
             evtNewAppState.detach(modal);
 
-            ref!.setState(
-                { "isVisible": false },
-                () => modal.evtHidden.post()
-            );
+            if (ref !== undefined) {
+
+                ref.setState(
+                    { "isVisible": false },
+                    () => modal.evtHidden.post()
+                );
+
+            }
 
             modal.evtHide.post();
 

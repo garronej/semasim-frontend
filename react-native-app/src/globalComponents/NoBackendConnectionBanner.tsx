@@ -41,7 +41,7 @@ notConnectedUserFeedback.provideCustomImplementation(state =>
 
         const setState = () => Promise.resolve(
             ref ||
-            evtRef.waitFor((ref): ref is NoBackendConnectionBanner => !!ref)
+            evtRef.waitFor((ref): ref is NonNullable<typeof ref> => !!ref)
         ).then(ref =>
             ref.setState({
                 "isVisible": state.isVisible,
@@ -66,7 +66,6 @@ notConnectedUserFeedback.provideCustomImplementation(state =>
 
 export type Props = {};
 
-//export type State = State.Generic<DialogType>;
 export type State = {
     isVisible: boolean;
     message: string;
