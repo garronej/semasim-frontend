@@ -33,7 +33,7 @@ export namespace Env {
 
     export type ReactNative = _Common & {
         jsRuntimeEnv: "react-native";
-        hostOs: "android" | "iOS"
+        hostOs: "android" | "ios"
     };
 
 }

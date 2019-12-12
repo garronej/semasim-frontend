@@ -161,8 +161,7 @@ async function program_action_build_pages(options) {
 
 
     for (const page_name of fs.readdirSync(pages_dir_path)
-        .filter(entry => fs.statSync(path.join(pages_dir_path, entry))
-            .isDirectory())
+        .filter(entry => fs.statSync(path.join(pages_dir_path, entry)).isDirectory())
     ) {
 
         build_page(
@@ -172,6 +171,8 @@ async function program_action_build_pages(options) {
 
     }
 
+    
+
 }
 
 async function program_action_install_pages() {
@@ -180,6 +181,7 @@ async function program_action_install_pages() {
         [
             "shared",
             ...fs.readdirSync(pages_dir_path)
+                .filter(entry => fs.statSync(path.join(pages_dir_path, entry)).isDirectory())
                 .map(page_name => path.join("pages", page_name))
         ]
             .map(relative_path => path.join(frontend_root_dir_path, relative_path))

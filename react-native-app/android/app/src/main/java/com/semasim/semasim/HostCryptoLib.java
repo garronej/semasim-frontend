@@ -31,6 +31,33 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
         return "HostCryptoLib";
     }
 
+    @ReactMethod
+    public void aesEncryptOrDecrypt(
+            String action,
+            String keyB64,
+            String inputDataB64,
+            int callRef
+    ){
+
+        HostCryptoLib.aesEncryptOrDecrypt(action, keyB64, inputDataB64)
+                .done((DoneCallback<String>) outputDataB64 -> {
+
+                    WritableArray params = Arguments.createArray();
+
+                    params.pushInt(callRef);
+                    params.pushString(outputDataB64);
+
+                    ApiExposedToHostCaller.invokeFunction(
+                            reactContext,
+                            "onAesEncryptOrDecryptResult",
+                            params
+                    );
+
+
+                });
+
+    }
+
 
 
     @ReactMethod
@@ -91,7 +118,43 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
     static final String scriptPath= "crypto-lib-standalone.js";
 
     //NOTE: Single thread as we need the messages to be decrypted in order.
+    //And well we use the same executor for aes only for convenience.
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private  static Promise<String, ?, ?> aesEncryptOrDecrypt(
+            String action,
+            String keyB64,
+            String inputDataB64
+
+    ) {
+
+        Deferred<String, ?, ?> d= new AndroidDeferredObject<>();
+
+        executor.execute(()-> d.resolve(
+                JsCaller.callJsFunction(
+                        scriptPath,
+                        "aesEncryptOrDecrypt",
+                        (args, jsContext) -> {
+
+                            for( String arg: new String[]{ action, keyB64, inputDataB64 }){
+
+                                args.add(
+                                        new JSValue(
+                                                jsContext,
+                                                arg
+                                        )
+                                );
+
+                            }
+
+
+                        }
+                ).toString()
+        ));
+
+        return d.promise();
+
+    }
 
     private  static Promise<String, ?, ?> rsaEncryptOrDecrypt(
             String action,

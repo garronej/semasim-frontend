@@ -97,39 +97,6 @@ function decryptChat(decryptor, chat) {
     });
 }
 exports.decryptChat = decryptChat;
-/** If input message have no id so will the output message */
-function encryptMessage(encryptor, message) {
-    return __awaiter(this, void 0, void 0, function () {
-        var stringifyThenEncrypt, encryptedMessage, _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-        return __generator(this, function (_m) {
-            switch (_m.label) {
-                case 0:
-                    stringifyThenEncrypt = serializer_1.stringifyThenEncryptFactory(encryptor);
-                    _a = [__assign({}, message)];
-                    _b = {};
-                    _c = "text";
-                    _d = {};
-                    _e = "encrypted_string";
-                    return [4 /*yield*/, stringifyThenEncrypt(message.text)];
-                case 1:
-                    encryptedMessage = __assign.apply(void 0, _a.concat([(_b[_c] = (_d[_e] = _m.sent(), _d), _b)]));
-                    if (!("sentBy" in message && message.sentBy.who === "OTHER")) return [3 /*break*/, 3];
-                    _f = encryptedMessage;
-                    _g = [__assign({}, message.sentBy)];
-                    _h = {};
-                    _j = "email";
-                    _k = {};
-                    _l = "encrypted_string";
-                    return [4 /*yield*/, stringifyThenEncrypt(message.sentBy.email)];
-                case 2:
-                    _f.sentBy = __assign.apply(void 0, _g.concat([(_h[_j] = (_k[_l] = _m.sent(), _k), _h)]));
-                    _m.label = 3;
-                case 3: return [2 /*return*/, encryptedMessage];
-            }
-        });
-    });
-}
-exports.encryptMessage = encryptMessage;
 function decryptMessage(decryptor, encryptedMessage) {
     return __awaiter(this, void 0, void 0, function () {
         var decryptThenParse, message, _a, _b, _c, _d, _e, _f, _g;
@@ -159,20 +126,27 @@ function decryptMessage(decryptor, encryptedMessage) {
 }
 exports.decryptMessage = decryptMessage;
 /** Best guess on previously opened chat: */
-function getChatWithLatestActivity(wdInstance) {
+function getChatWithLatestActivity(wdChats) {
     var e_1, _a;
     //TODO: what if last seen message not loaded.
-    var findMessageByIdAndGetTime = function (wdChat, message_id) {
-        if (message_id === null) {
+    var findMessageByIdAndGetTime = function (wdChat, messageRef) {
+        if (messageRef === null) {
             return 0;
         }
         for (var i = wdChat.messages.length - 1; i >= 0; i--) {
             var message = wdChat.messages[i];
-            if (message.id_ === message_id) {
-                return message.time;
+            if (message.ref === messageRef) {
+                return (message.direction === "OUTGOING" &&
+                    message.status === "STATUS REPORT RECEIVED" &&
+                    message.sentBy.who === "OTHER" &&
+                    message.deliveredTime !== null) ? message.deliveredTime : message.time;
             }
         }
-        return 0;
+        //return 0;
+        //NOTE: If we did not find the message in the chat it mean that
+        //a message that we have not yet received on the device the last
+        //message seen.
+        return Date.now();
     };
     var findLastMessageSentByUserAndGetTime = function (chat) {
         for (var i = chat.messages.length - 1; i >= 0; i--) {
@@ -188,9 +162,9 @@ function getChatWithLatestActivity(wdInstance) {
     var max = 0;
     var chat = undefined;
     try {
-        for (var _b = __values(wdInstance.chats), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var _chat = _c.value;
-            var curr = Math.max(findMessageByIdAndGetTime(_chat, _chat.idOfLastMessageSeen), findLastMessageSentByUserAndGetTime(_chat));
+        for (var wdChats_1 = __values(wdChats), wdChats_1_1 = wdChats_1.next(); !wdChats_1_1.done; wdChats_1_1 = wdChats_1.next()) {
+            var _chat = wdChats_1_1.value;
+            var curr = Math.max(findMessageByIdAndGetTime(_chat, _chat.refOfLastMessageSeen), findLastMessageSentByUserAndGetTime(_chat));
             if (curr > max) {
                 max = curr;
                 chat = _chat;
@@ -200,7 +174,7 @@ function getChatWithLatestActivity(wdInstance) {
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            if (wdChats_1_1 && !wdChats_1_1.done && (_a = wdChats_1.return)) _a.call(wdChats_1);
         }
         finally { if (e_1) throw e_1.error; }
     }
@@ -217,28 +191,39 @@ exports.getChatWithLatestActivity = getChatWithLatestActivity;
  * real temporality of a conversation.
  *
  */
-function compareMessage(message1, message2) {
-    var getOrderingTime = function (message) {
-        if (message.direction === "OUTGOING") {
+exports.compareMessage = (function () {
+    var getContextualOrderingTime = (function () {
+        var getContextFreeOrderingTime = function (message) {
+            var _a;
+            if (message.direction === "INCOMING") {
+                return message.time;
+            }
             if (message.status === "STATUS REPORT RECEIVED") {
-                if (message.deliveredTime !== null) {
-                    return message.deliveredTime;
+                return _a = message.deliveredTime, (_a !== null && _a !== void 0 ? _a : message.time);
+            }
+            return undefined;
+        };
+        return function (message, messageComparingAgainst) {
+            {
+                var t1 = getContextFreeOrderingTime(message);
+                if (t1 !== undefined) {
+                    return t1;
                 }
             }
-            else if (!(message.status === "SEND REPORT RECEIVED" && !message.isSentSuccessfully)) {
-                var time = message.time + 60 * 1000;
-                if (time > Date.now()) {
-                    return time;
+            {
+                var t2 = getContextFreeOrderingTime(messageComparingAgainst);
+                if (t2 !== undefined) {
+                    return t2 + 1;
                 }
             }
-        }
-        return message.time;
+            return message.time;
+        };
+    })();
+    return function (message1, message2) {
+        var diff = getContextualOrderingTime(message1, message2) - getContextualOrderingTime(message2, message1);
+        return diff !== 0 ? (diff > 0 ? 1 : -1) : 0;
     };
-    //return Math.sign(getOrderingTime(message1) - getOrderingTime(message2)) as (-1 | 0 | 1);
-    var diff = getOrderingTime(message1) - getOrderingTime(message2);
-    return diff !== 0 ? (diff > 0 ? 1 : -1) : 0;
-}
-exports.compareMessage = compareMessage;
+})();
 /**
  *
  * chat1  <  chat2  => -1
@@ -267,7 +252,7 @@ function compareChat(chat1, chat2) {
             return 1;
         }
         //Assuming message are already ordered within chat.
-        return compareMessage(chat1.messages.slice(-1).pop(), chat2.messages.slice(-1).pop());
+        return exports.compareMessage(chat1.messages.slice(-1).pop(), chat2.messages.slice(-1).pop());
     }
     else if (hasContactName(chat1) || hasContactName(chat2)) {
         if (!hasContactName(chat1)) {
@@ -290,7 +275,7 @@ function getUnreadMessagesCount(wdChat) {
         if (message.direction === "INCOMING" ||
             (message.status === "STATUS REPORT RECEIVED" &&
                 message.sentBy.who === "OTHER")) {
-            if (wdChat.idOfLastMessageSeen === message.id_) {
+            if (wdChat.refOfLastMessageSeen === message.ref) {
                 break;
             }
             count++;

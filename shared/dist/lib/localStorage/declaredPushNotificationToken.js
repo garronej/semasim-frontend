@@ -68,3 +68,24 @@ function set(value) {
     });
 }
 exports.set = set;
+function remove() {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _a = null;
+                    return [4 /*yield*/, get()];
+                case 1:
+                    if (_a === (_b.sent())) {
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, localStorageApi.removeItem(key)];
+                case 2:
+                    _b.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.remove = remove;

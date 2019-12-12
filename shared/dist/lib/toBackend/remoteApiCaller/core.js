@@ -67,7 +67,7 @@ var sendRequest_1 = require("./sendRequest");
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
 var connection = require("../connection");
 var restartApp_1 = require("../../restartApp");
-var events_1 = require("../events");
+var appEvts_1 = require("../appEvts");
 //TODO: Fix, it's called two times!!
 exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
@@ -88,7 +88,7 @@ exports.getUsableUserSims = (function () {
             */
             if (!userSim ||
                 userSim.sim.storage.digest !== newUserSim.sim.storage.digest) {
-                restartApp_1.restartApp();
+                restartApp_1.restartApp("Sim internal storage changed (subsequent getUsableSim)");
                 return { value: void 0 };
             }
             /*
@@ -103,7 +103,7 @@ exports.getUsableUserSims = (function () {
             userSim.dongle = newUserSim.dongle;
             userSim.gatewayLocation = newUserSim.gatewayLocation;
             if (!!userSim.reachableSimState) {
-                events_1.evtSimReachabilityStatusChange.post(userSim);
+                appEvts_1.appEvts.evtSimReachabilityStatusChange.post(userSim);
             }
         };
         try {
@@ -140,7 +140,7 @@ exports.getUsableUserSims = (function () {
                             if (!!_b.done) return [3 /*break*/, 4];
                             userSim = _b.value;
                             userSim.reachableSimState = undefined;
-                            events_1.evtSimReachabilityStatusChange.post(userSim);
+                            appEvts_1.appEvts.evtSimReachabilityStatusChange.post(userSim);
                             _d.label = 3;
                         case 3:
                             _b = _a.next();
@@ -195,7 +195,7 @@ exports.registerSim = (function () {
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
                         (_a.sent()).push(userSim);
-                        events_1.evtUsableSim.post(userSim);
+                        appEvts_1.appEvts.evtUsableSim.post(userSim);
                         return [2 /*return*/];
                 }
             });
@@ -343,7 +343,7 @@ exports.acceptSharingRequest = (function () {
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
                         (_a.sent()).push(userSim);
-                        events_1.evtUsableSim.post(userSim);
+                        appEvts_1.appEvts.evtUsableSim.post(userSim);
                         return [2 /*return*/];
                 }
             });

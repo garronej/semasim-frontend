@@ -3,13 +3,10 @@ import "frontend-shared/dist/tools/polyfills/Object.assign";
 import { JustRegistered } from "frontend-shared/dist/lib/localStorage/JustRegistered";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
-import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
 import * as loginPageLogic from "frontend-shared/dist/lib/pageLogic/loginPageLogic";
 import { TowardUserKeys } from "frontend-shared/dist/lib/localStorage/TowardUserKeys";
 import * as cryptoLib from "frontend-shared/node_modules/crypto-lib";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
-
-notifyHostWhenPageIsReady();
 
 let justRegistered: JustRegistered | undefined;
 

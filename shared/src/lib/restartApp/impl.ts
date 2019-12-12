@@ -1,13 +1,15 @@
 
 import { env } from "../env";
 
-const default_: import("./index").Default = ()=> { 
+const default_: import("./index").Default = reason=> { 
 
     if( env.isDevEnv ){
-        throw new Error("In prod the app would have been restarted");
+        alert(`About to restart app, reason: ${reason}`);
     }
 
     location.reload();
+
+    return new Promise<never>(()=>{});
 
 }
 

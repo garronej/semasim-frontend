@@ -36,3 +36,6 @@ AppRegistry.registerHeadlessTask("RNCallKeepBackgroundMessage", () => ({ name, c
 
 });
 
+
+AppRegistry.registerHeadlessTask("EndlessPhonyTask", () => () => new Promise<never>(() => { }));
+

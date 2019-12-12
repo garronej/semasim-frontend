@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -16,7 +17,7 @@ const scriptTools = require("scripting-tools");
 if (require.main === module) {
     process.once("unhandledRejection", error => { throw error; });
     process.setMaxListeners(70);
-    Promise.resolve().then(() => require("commander")).then((program) => __awaiter(this, void 0, void 0, function* () {
+    Promise.resolve().then(() => require("commander")).then((program) => __awaiter(void 0, void 0, void 0, function* () {
         program
             .command("build_page")
             .description("Build a specific page, to be called from the page root dir")
@@ -62,7 +63,7 @@ const build_page = (target_module_dir_path, watch) => {
             })()
         ].join("\n"), "utf8"));
     }
-    (() => __awaiter(this, void 0, void 0, function* () {
+    (() => __awaiter(void 0, void 0, void 0, function* () {
         yield buildTools.tsc(path.join(target_module_dir_path, "tsconfig.json"), watch);
         const bundle_file_path = path.join(__dirname, "..", "..", "static.semasim.com", `${path.basename(target_module_dir_path)}-${page_version}.js`);
         yield buildTools.browserify(["--entry", path.join(target_module_dir_path, "dist", "main.js")], ["--outfile", bundle_file_path], undefined, watch);
@@ -90,8 +91,7 @@ function program_action_build_pages(options) {
         console.log(path.join(frontend_root_dir_path, "shared", "tsconfig.json"));
         yield buildTools.tsc(path.join(frontend_root_dir_path, "shared", "tsconfig.json"), watch);
         for (const page_name of fs.readdirSync(pages_dir_path)
-            .filter(entry => fs.statSync(path.join(pages_dir_path, entry))
-            .isDirectory())) {
+            .filter(entry => fs.statSync(path.join(pages_dir_path, entry)).isDirectory())) {
             build_page(path.join(pages_dir_path, page_name), watch);
         }
     });
@@ -101,6 +101,7 @@ function program_action_install_pages() {
         yield Promise.all([
             "shared",
             ...fs.readdirSync(pages_dir_path)
+                .filter(entry => fs.statSync(path.join(pages_dir_path, entry)).isDirectory())
                 .map(page_name => path.join("pages", page_name))
         ]
             .map(relative_path => path.join(frontend_root_dir_path, relative_path))

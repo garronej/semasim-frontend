@@ -8,8 +8,9 @@ import * as urlGetParameters from "../../tools/urlGetParameters";
 import { env } from "../env";
 import { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
 import { tryLoginFromStoredCredentials } from "../tryLoginFromStoredCredentials";
-import { evtOpenElsewhere } from "./events";
+import { appEvts } from "./appEvts";
 import { restartApp } from "../restartApp";
+import * as networkStateMonitoring from "../networkStateMonitoring";
 
 export const url = `wss://web.${env.baseDomain}`;
 
@@ -28,19 +29,17 @@ const log: typeof console.log = true ?
     (() => { });
 
 
-
-
-
-export namespace notConnectedUserFeedback {
+namespace notConnectedUserFeedback {
 
     export type State = { isVisible: true, message: string } | { isVisible: false };
+
 
     let setVisibilityWithMessage: (state: State) => void;
 
     export function setVisibility(isVisible: boolean) {
 
         const state: State = isVisible ?
-            ({ isVisible, "message": "Connecting to Semasim..." }) :
+            ({ isVisible, "message": "Connecting..." }) :
             ({ isVisible })
             ;
 
@@ -48,7 +47,6 @@ export namespace notConnectedUserFeedback {
 
     }
 
-    /** NOTE: To call from react-native project */
     export function provideCustomImplementation(
         setVisibilityWithMessageImpl: typeof setVisibilityWithMessage
     ) {
@@ -57,20 +55,6 @@ export namespace notConnectedUserFeedback {
 
 }
 
-notConnectedUserFeedback.provideCustomImplementation(state => {
-
-    if (state.isVisible) {
-
-        dialogApi.loading(state.message, 1200);
-
-    } else {
-
-
-        dialogApi.dismissLoading();
-
-    }
-
-});
 
 const apiServer = new sip.api.Server(
     localApiHandlers.handlers,
@@ -80,6 +64,26 @@ const apiServer = new sip.api.Server(
         "hideKeepAlive": true
     })
 );
+
+export type ConnectParams = ConnectParams.Browser | ConnectParams.ReactNative;
+
+export namespace ConnectParams {
+
+    export type _Common = {
+        requestTurnCred: boolean;
+    };
+
+    export type Browser = _Common & {
+        assertJsRuntimeEnv: "browser";
+    };
+
+    export type ReactNative = _Common & {
+        assertJsRuntimeEnv: "react-native";
+        notConnectedUserFeedback: (state: notConnectedUserFeedback.State) => void;
+    };
+
+
+}
 
 
 /** login is called when the user
@@ -92,22 +96,58 @@ export const connect = (() => {
 
     let hasBeenInvoked = false;
 
-    return (params: {
-        requestTurnCred: boolean;
-        login?: () => Promise<void>;
-    }) => {
+    return function connect(params: ConnectParams) {
 
         if (hasBeenInvoked) {
-            return;
+            throw new Error("Should be invoked only once");
         }
 
         hasBeenInvoked = true;
 
-        //We register 'offline' event only on the first call of connect()
-        //TODO: React native.
-        if (env.jsRuntimeEnv === "browser") {
+        if (params.assertJsRuntimeEnv !== env.jsRuntimeEnv) {
+            throw new Error("Wrong params for js runtime environnement");
+        }
 
-            window.addEventListener("offline", () => {
+        notConnectedUserFeedback.provideCustomImplementation(
+            params.assertJsRuntimeEnv === "react-native" ?
+                params.notConnectedUserFeedback :
+                (state => {
+
+                    if (state.isVisible) {
+
+                        dialogApi.loading(state.message, 1200);
+
+                    } else {
+
+                        dialogApi.dismissLoading();
+
+                    }
+
+                })
+        );
+
+
+        //TODO: See if of any use
+        networkStateMonitoring.getApi().then(api =>
+            api.evtStateChange.attach(
+                () => !api.getIsOnline(),
+                () => {
+
+                    const socket = get();
+
+                    if (socket instanceof Promise) {
+                        return;
+                    }
+
+                    socket.destroy("Internet connection lost");
+
+                }
+            )
+        );
+
+        AuthenticatedSessionDescriptorSharedData.evtChange.attach(
+            authenticatedSessionDescriptorSharedData => !authenticatedSessionDescriptorSharedData,
+            () => {
 
                 const socket = get();
 
@@ -115,16 +155,12 @@ export const connect = (() => {
                     return;
                 }
 
-                socket.destroy("Browser is offline");
+                socket.destroy("User no longer authenticated");
 
-            });
-
-        }
-
-        connectRecursive(
-            params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED",
-            params.login
+            }
         );
+
+        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED");
 
     };
 
@@ -134,48 +170,25 @@ export const evtConnect = new SyncEvent<sip.Socket>();
 
 let socketCurrent: sip.Socket | undefined = undefined;
 
-
-
+/** Assert user logged in, will restart app as soon as user is detected as no longer logged in */
 async function connectRecursive(
-    requestTurnCred: WebsocketConnectionParams["requestTurnCred"],
-    login: (() => Promise<void>) | undefined,
+    requestTurnCred: WebsocketConnectionParams["requestTurnCred"]
 ) {
-
 
     notConnectedUserFeedback.setVisibility(true);
 
+    const loginAttemptResult = await tryLoginFromStoredCredentials();
 
-    {
+    if (loginAttemptResult !== "LOGGED IN") {
 
-        const result = await tryLoginFromStoredCredentials();
+        restartApp("User is no longer logged in");
 
-        if (result === "NO VALID CREDENTIALS") {
-
-            if (!!login) {
-
-                notConnectedUserFeedback.setVisibility(false);
-
-                await login();
-
-                notConnectedUserFeedback.setVisibility(true);
-
-
-            } else {
-
-                if (env.jsRuntimeEnv === "react-native") {
-                    throw new Error("never: no login function provided");
-                }
-
-                restartApp();
-                return;
-
-
-            }
-
-
-        }
+        return;
 
     }
+
+
+    const { connect_sid } = await AuthenticatedSessionDescriptorSharedData.get();
 
     let webSocket: WebSocket;
 
@@ -185,7 +198,7 @@ async function connectRecursive(
             urlGetParameters.buildUrl<WebsocketConnectionParams>(
                 url,
                 {
-                    "connect_sid": (await AuthenticatedSessionDescriptorSharedData.get()).connect_sid,
+                    connect_sid,
                     requestTurnCred
                 }
             ), "SIP"
@@ -195,8 +208,7 @@ async function connectRecursive(
 
         log("WebSocket construction error: " + error.message);
 
-        //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-        connectRecursive(requestTurnCred, login);
+        connectRecursive(requestTurnCred);
 
         return;
 
@@ -245,18 +257,18 @@ async function connectRecursive(
 
         notConnectedUserFeedback.setVisibility(false);
 
+        evtConnect.post(socket);
 
-        evtConnect.post(socket)
 
     });
 
     socket.evtClose.attachOnce(async () => {
 
-        if (evtOpenElsewhere.postCount !== 0) {
+        if (appEvts.evtOpenElsewhere.postCount !== 0) {
             return;
         }
 
-        connectRecursive(requestTurnCred, login);
+        connectRecursive(requestTurnCred);
 
     });
 

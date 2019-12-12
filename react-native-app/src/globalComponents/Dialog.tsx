@@ -5,7 +5,7 @@ import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
-import { baseTypes as types, provideCustomImplementationOfBaseApi } from "frontend-shared/dist/tools/modal/dialog";
+import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
 const log: typeof console.log = false ? console.log.bind(console) : () => { };
 
@@ -17,7 +17,7 @@ let ref: Dialog | undefined = undefined;
 
 evtRef.attach(newRef => ref = newRef);
 
-const api: types.Api = {
+export const api: types.Api = {
     "create": (dialogType, options) => createModal(dialogType, options),
     "createLoading": message => api.create(
         "dialog",
@@ -31,7 +31,6 @@ const api: types.Api = {
     )
 };
 
-provideCustomImplementationOfBaseApi(api);
 
 function createModal<T extends types.Type>(dialogType: T, options: types.Options<T>): types.Modal {
 

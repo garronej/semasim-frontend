@@ -1,6 +1,5 @@
 
-//TODO: See if it return never, it would be cleaner.
-export type Default = ()=>void;
+export type Default = (reason: string)=>Promise<never>;
 
 import restartApp from "./impl";
 

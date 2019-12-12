@@ -4,7 +4,7 @@ import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
 import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
-type DtmFSignal = import("frontend-shared/dist/lib/Ua").Ua.DtmFSignal;
+type DtmFSignal = import("frontend-shared/dist/lib/Ua").DtmFSignal;
 import { default as RNCallKeep, Events as RNCallKeepEventType } from "react-native-callkeep";
 import { default as uuid } from "uuid";
 
@@ -213,6 +213,10 @@ export class UiVoiceCall {
 
                         evts.endCall.detach(callRef);
 
+                        //NOTE: For android
+                        (RNCallKeep.setCurrentCallActive as any)(callRef.uuid);
+
+                        //NOTE: For ios
                         RNCallKeep.reportConnectedOutgoingCallWithUUID(callRef.uuid);
 
                         return this.onEstablished(callRef)

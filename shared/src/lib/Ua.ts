@@ -12,8 +12,20 @@ import * as runExclusive from "run-exclusive";
 import { env } from "./env";
 
 type phoneNumber = import("phone-number/dist/lib").phoneNumber;
-type Encryptor= import("./crypto/cryptoLibProxy").Encryptor;
-type Decryptor= import("./crypto/cryptoLibProxy").Decryptor;
+type Encryptor = import("./crypto/cryptoLibProxy").Encryptor;
+type Decryptor = import("./crypto/cryptoLibProxy").Decryptor;
+type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (...args: any) => Promise<infer R> ? R : any;
+type ParamsNeededToInstantiateUa = AsyncReturnType<
+    typeof import(
+    "./crypto/appCryptoSetupHelper"
+    )["appCryptoSetupHelper"]
+>["paramsNeededToInstantiateUa"];
+type ConnectionApi = {
+    url: string;
+    evtConnect: SyncEvent<sip.Socket>;
+    get: () => Promise<sip.Socket> | sip.Socket;
+};
+type UsableUserSim = import("./types/userSim").UserSim.Usable;
 
 declare const JsSIP: any;
 declare const Buffer: any;
@@ -22,76 +34,70 @@ declare const Buffer: any;
 JsSIP.debug.disable("JsSIP:*");
 
 
+
 export type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 
-type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (...args: any) => Promise<infer R> ? R : any;
+export class Ua {
 
-export async function uaInstantiationHelper(params: {
-    cryptoRelatedParams: AsyncReturnType<
-        typeof import(
-        "./crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"
-        )["setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"]
-    >,
-    pushNotificationToken: string;
-}): Promise<Ua> {
+    public static instantiate(
+        params: {
+            email: string,
+            uaInstanceId: string,
+            cryptoRelatedParams: ParamsNeededToInstantiateUa;
+            pushNotificationToken: string;
+            connection: ConnectionApi;
+            fromBackendEvents: import("./toBackend/appEvts").SubsetOfAppEvts<
+            "evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer"
+            >
+        }
+    ): Ua {
 
-    const {
-        cryptoRelatedParams: {
-            towardUserDecryptor,
-            towardUserEncryptKeyStr,
-            getTowardSimEncryptor
-        },
-        pushNotificationToken
-    } = params;
+        const {
+            uaInstanceId,
+            email,
+            cryptoRelatedParams: {
+                towardUserDecryptor,
+                towardUserEncryptKeyStr,
+                getTowardSimEncryptor
+            },
+            pushNotificationToken,
+            connection,
+            fromBackendEvents
+        } = params;
 
-    const [{ AuthenticatedSessionDescriptorSharedData }, backendEvents, connection] = await Promise.all([
-        import("./localStorage/AuthenticatedSessionDescriptorSharedData"),
-        import("./toBackend/events"),
-        import("./toBackend/connection")
-    ])
-
-    return new Ua(
-        await (async () => {
-
-            const { email, uaInstanceId } =
-                await AuthenticatedSessionDescriptorSharedData.get();
-
-            return {
+        return new Ua(
+            {
                 "instance": uaInstanceId,
                 "pushToken": pushNotificationToken,
                 towardUserEncryptKeyStr,
                 "userEmail": email
-            };
+            },
+            towardUserDecryptor,
+            (() => {
 
-        })(),
-        towardUserDecryptor,
-        (() => {
+                const evtUnregisteredByGateway = new SyncEvent<{ imsi: string; }>();
 
-            const evtUnregisteredByGateway = new SyncEvent<{ imsi: string; }>();
+                const onEvt = ({ sim: { imsi } }: UsableUserSim) => evtUnregisteredByGateway.post({ imsi })
 
-            const onEvt = ({ sim: { imsi } }: import("./types/userSim").UserSim.Usable) => evtUnregisteredByGateway.post({ imsi })
+                fromBackendEvents.evtSimPasswordChanged.attach(onEvt);
 
-            backendEvents.evtSimPasswordChanged.attach(onEvt);
+                fromBackendEvents.evtSimPermissionLost.attach(onEvt);
 
-            backendEvents.evtSimPermissionLost.attach(onEvt);
+                fromBackendEvents.evtSimReachabilityStatusChange.attach(
+                    ({ reachableSimState }) => reachableSimState === undefined,
+                    onEvt
+                );
 
-            backendEvents.evtSimReachabilityStatusChange.attach(
-                ({ reachableSimState }) => reachableSimState === undefined,
-                onEvt
-            );
+                return evtUnregisteredByGateway;
 
-            return evtUnregisteredByGateway;
-
-        })(),
-        getTowardSimEncryptor,
-        (imsi: string) => new JsSipSocket(imsi, connection),
-        () => backendEvents.rtcIceEServer.getCurrent()
-    );
-
-}
+            })(),
+            getTowardSimEncryptor,
+            imsi => new JsSipSocket(imsi, connection),
+            () => fromBackendEvents.rtcIceEServer.getCurrent()
+        );
 
 
-export class Ua {
+    }
 
     public descriptor: gwTypes.Ua;
 
@@ -100,7 +106,7 @@ export class Ua {
      * routed to the gateway and the gateway unregister all the SIP contact
      * It happen also when an user lose access to sim or need to refresh sim password.
      * */
-    public constructor(
+    private constructor(
         uaDescriptorWithoutPlatform: Omit<gwTypes.Ua, "platform">,
         private towardUserDecryptor: Decryptor,
         private evtUnregisteredByGateway: SyncEvent<{ imsi: string; }>,
@@ -169,8 +175,7 @@ export class UaSim {
 
     /** Use UA.prototype.newUaSim to instantiate an UaSim */
     constructor(
-
-        public readonly uaDescriptor: gwTypes.Ua,
+        uaDescriptor: gwTypes.Ua,
         private readonly towardUserDecryptor: Decryptor,
         private getRtcIceServer: () => Promise<RTCIceServer>,
         evtUnregisteredByGateway: VoidSyncEvent,
@@ -183,9 +188,9 @@ export class UaSim {
 
         const uri = this.jsSipSocket.sip_uri;
 
-        const register_expires= 61;
+        const register_expires = 61;
 
-        //NOTE: Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
+        //NOTE: Do not put more less than 60 or more than 7200 for register expire ( asterisk will respond with 60 or 7200 )
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri,
@@ -205,23 +210,19 @@ export class UaSim {
 
         this.jsSipUa.on("registrationExpiring", async () => {
 
-            if( !this.isRegistered ){
+            if (!this.isRegistered) {
                 return;
             }
 
             //NOTE: For react native, jsSIP does not post "unregistered" event when registration
             //actually expire.
-            if( Date.now() - lastRegisterTime >= register_expires * 1000 ){
+            if (Date.now() - lastRegisterTime >= register_expires * 1000) {
 
                 console.log("Sip registration has expired while app was in the background");
 
                 this.jsSipUa.emit("unregistered");
 
-            }else{
-                console.log(`Ua registration expiring for ${imsi}`);
             }
-
-            console.log("re-registering");
 
             this.jsSipUa.register();
 
@@ -231,35 +232,33 @@ export class UaSim {
             () => this.jsSipUa.emit("unregistered")
         );
 
-
         /* 
-        evt 'registered' is posted only when register change 
+        event 'registered' is posted only when register change 
         so we use this instead.
         */
-        this.jsSipSocket.evtSipPacket.attach(
-            sipPacket => (
-                !sip.matchRequest(sipPacket) &&
-                sipPacket.headers.cseq.method === "REGISTER" &&
-                sipPacket.status === 200
-            ),
-            () => {
+        this.jsSipSocket.evtSipRegistrationSuccess.attach(()=>{
 
-                lastRegisterTime= Date.now();
+                lastRegisterTime = Date.now();
+
+                if( this.isRegistered ){
+                    return;
+                }
 
                 this.isRegistered = true;
 
-                this.evtRegistrationStateChanged.post(true);
+                this.evtRegistrationStateChanged.post(this.isRegistered);
 
-            }
-        );
+        });
 
         this.jsSipUa.on("unregistered", () => {
 
-            console.log("ua sim unregistered");
+            if( !this.isRegistered ){
+                return;
+            }
 
             this.isRegistered = false;
 
-            this.evtRegistrationStateChanged.post(false);
+            this.evtRegistrationStateChanged.post(this.isRegistered);
 
         });
 
@@ -289,10 +288,30 @@ export class UaSim {
 
     public isRegistered = false;
 
+    /*
     //TODO: If no response to register do something
     public register() {
 
         this.jsSipUa.register();
+
+    }
+    */
+
+    public register() {
+
+        this.jsSipUa.register();
+
+        Promise.race([
+            this.jsSipSocket.evtUnderlyingSocketClose.waitFor()
+                .then(() => { throw new Error("Closed before registered") }),
+            this.jsSipSocket.evtSipRegistrationSuccess.waitFor()
+        ]).catch(() => {
+
+            console.log("[Ua] socket closed while a SIP registration was ongoing, retrying SIP REGISTER");
+
+            this.register();
+
+        });
 
     }
 
@@ -312,7 +331,7 @@ export class UaSim {
     public readonly evtIncomingMessage = new SyncEvent<{
         fromNumber: phoneNumber;
         bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
-        onProcessed: () => void;
+        handlerCb: () => void;
     }>();
 
     private async onMessage(request): Promise<void> {
@@ -355,13 +374,13 @@ export class UaSim {
     private postEvtIncomingMessage = runExclusive.buildMethod(
         (evtData: Pick<SyncEvent.Type<typeof UaSim.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
 
-            let onProcessed: () => void;
+            let handlerCb!: () => void;
 
-            const pr = new Promise<void>(resolve => onProcessed = resolve);
+            const pr = new Promise<void>(resolve => handlerCb = resolve);
 
             this.evtIncomingMessage.post({
                 ...evtData,
-                "onProcessed": onProcessed!
+                handlerCb
             });
 
             return pr;
@@ -605,9 +624,34 @@ interface IjsSipSocket {
 
 }
 
-class JsSipSocket implements IjsSipSocket {
+interface Hacks {
 
-    public readonly evtSipPacket = new SyncEvent<sip.Packet>();
+
+    /** Posted when a OK response to a REGISTER request is received */
+    readonly evtSipRegistrationSuccess: VoidSyncEvent;
+
+    /**
+     * To call when receiving as SIP MESSAGE 
+     * to prevent immediately sending the 200 OK 
+     * response but rather wait
+     * until some action have been completed.
+     * 
+     * @param request the request prop of the 
+     * eventData emitted by JsSIP UA for the 
+     * "newMessage" event. ( when originator === remote )
+     * @param pr The response to the SIP MESSAGE
+     * will not be sent until this promise resolve.
+     */
+    setMessageOkDelay(request: any, pr: Promise<void>): void;
+
+    readonly evtUnderlyingSocketClose: VoidSyncEvent;
+
+}
+
+class JsSipSocket implements IjsSipSocket, Hacks {
+
+    public readonly evtSipRegistrationSuccess= new VoidSyncEvent();
+    public readonly evtUnderlyingSocketClose = new VoidSyncEvent();
 
     public readonly via_transport: sip.TransportProtocol = "WSS";
 
@@ -697,16 +741,14 @@ class JsSipSocket implements IjsSipSocket {
 
     constructor(
         imsi: string,
-        private readonly connection: {
-            url: string;
-            evtConnect: SyncEvent<sip.Socket>;
-            get: () => Promise<sip.Socket> | sip.Socket;
-        }
+        private readonly connection: ConnectionApi
     ) {
 
         this.sip_uri = `sip:${imsi}@${env.baseDomain}`;
 
         const onBackedSocketConnect = (backendSocket: sip.Socket) => {
+
+            backendSocket.evtClose.attachOnce(() => this.evtUnderlyingSocketClose.post());
 
             {
 
@@ -718,11 +760,15 @@ class JsSipSocket implements IjsSipSocket {
 
                     this.sdpHacks("INCOMING", sipPacket);
 
-                    this.evtSipPacket.post(sipPacket);
+                    this.ondata(sip.toData(sipPacket).toString("utf8"));
 
-                    this.ondata(
-                        sip.toData(sipPacket).toString("utf8")
-                    );
+                    if (
+                        !sip.matchRequest(sipPacket) &&
+                        sipPacket.headers.cseq.method === "REGISTER" &&
+                        sipPacket.status === 200
+                    ) {
+                        this.evtSipRegistrationSuccess.post();
+                    }
 
                 }
 
@@ -758,18 +804,6 @@ class JsSipSocket implements IjsSipSocket {
 
     private messageOkDelays = new Map<string, Promise<void>>();
 
-    /**
-     * To call when receiving as SIP MESSAGE 
-     * to prevent directly sending the 200 OK 
-     * response immediately but rather wait
-     * until some action have been completed.
-     * 
-     * @param request the request prop of the 
-     * eventData emitted by JsSIP UA for the 
-     * "newMessage" event. ( when originator === remote )
-     * @param pr The response to the SIP MESSAGE
-     * will not be sent until this promise resolve.
-     */
     public setMessageOkDelay(request: any, pr: Promise<void>): void {
         this.messageOkDelays.set(
             request.getHeader("Call-ID"),

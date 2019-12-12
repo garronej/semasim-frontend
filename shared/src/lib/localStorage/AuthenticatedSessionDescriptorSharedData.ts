@@ -1,4 +1,5 @@
 
+import { SyncEvent } from "ts-events-extended";
 import * as localStorageApi from "./localStorageApi";
 
 const key = "authenticated-session-descriptor-shared-data";
@@ -14,6 +15,9 @@ export type AuthenticatedSessionDescriptorSharedData = {
 
 export namespace AuthenticatedSessionDescriptorSharedData {
 
+    /** Can be used to track when the user is logged in */
+    export const evtChange = new SyncEvent<AuthenticatedSessionDescriptorSharedData | undefined>();
+
     export async function isPresent(): Promise<boolean> {
 
         const value= await localStorageApi.getItem(key);
@@ -22,6 +26,8 @@ export namespace AuthenticatedSessionDescriptorSharedData {
     }
 
     export async function remove() {
+
+        evtChange.post(undefined);
 
         if( !(await isPresent())){
             return;
@@ -58,6 +64,8 @@ export namespace AuthenticatedSessionDescriptorSharedData {
                 "utf8"
             ).toString("hex")
         );
+
+        evtChange.post(authenticatedSessionDescriptorSharedData);
 
     }
 

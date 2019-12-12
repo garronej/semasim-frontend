@@ -37,9 +37,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
+var evtAesEncryptOrDecryptResult = new ts_events_extended_1.SyncEvent();
 var evtRsaEncryptOrDecryptResult = new ts_events_extended_1.SyncEvent();
 var evtRsaGenerateKeysResult = new ts_events_extended_1.SyncEvent();
 exports.apiExposedToHost = {
+    "onAesEncryptOrDecryptResult": function (callRef, outputDataB64) {
+        return evtAesEncryptOrDecryptResult.post({ callRef: callRef, outputDataB64: outputDataB64 });
+    },
     "onRsaEncryptOrDecryptResult": function (callRef, outputDataB64) {
         return evtRsaEncryptOrDecryptResult.post({ callRef: callRef, outputDataB64: outputDataB64 });
     },
@@ -51,6 +55,26 @@ var getCounter = (function () {
     var counter = 0;
     return function () { return counter++; };
 })();
+function aesEncryptOrDecrypt(action, keyB64, inputDataB64) {
+    return __awaiter(this, void 0, void 0, function () {
+        var callRef, outputDataB64;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    callRef = getCounter();
+                    apiExposedByHost.aesEncryptOrDecrypt(action, keyB64, inputDataB64, callRef);
+                    return [4 /*yield*/, evtAesEncryptOrDecryptResult.waitFor(function (_a) {
+                            var callRef_ = _a.callRef;
+                            return callRef_ === callRef;
+                        })];
+                case 1:
+                    outputDataB64 = (_a.sent()).outputDataB64;
+                    return [2 /*return*/, { outputDataB64: outputDataB64 }];
+            }
+        });
+    });
+}
+exports.aesEncryptOrDecrypt = aesEncryptOrDecrypt;
 function rsaEncryptOrDecrypt(action, keyStr, inputDataB64) {
     return __awaiter(this, void 0, void 0, function () {
         var callRef, outputDataB64;

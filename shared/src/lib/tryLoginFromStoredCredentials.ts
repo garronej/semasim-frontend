@@ -5,16 +5,15 @@ import { Credentials } from "./localStorage/Credentials";
 
 export type Result = "LOGGED IN" | "NO VALID CREDENTIALS";
 
-let prResult: Promise<Result> | undefined = undefined;
+let prCurrentRequestResult: Promise<Result> | undefined = undefined;
 
 export function tryLoginFromStoredCredentials(): Promise<Result> {
 
-    if (prResult !== undefined) {
-        return prResult;
+    if (prCurrentRequestResult !== undefined) {
+        return prCurrentRequestResult;
     }
 
-    prResult = (async function callee(): Promise<Result> {
-
+    prCurrentRequestResult = (async function callee(): Promise<Result> {
 
         {
 
@@ -107,7 +106,7 @@ export function tryLoginFromStoredCredentials(): Promise<Result> {
 
     })();
 
-    prResult.then(() => prResult = undefined);
+    prCurrentRequestResult.then(() => prCurrentRequestResult = undefined);
 
     return tryLoginFromStoredCredentials();
 

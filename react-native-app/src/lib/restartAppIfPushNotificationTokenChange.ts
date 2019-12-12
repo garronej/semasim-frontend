@@ -24,7 +24,7 @@ export const testForegroundPushNotification: AppLifeCycleListener = ({ evtCompon
 
 };
 
-export const restartAppIfPushNotificationTockenChange: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount })=>{
+export const restartAppIfPushNotificationTokenChange: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount })=>{
 
     if( rn.Platform.OS === "ios") {
         return;
@@ -36,14 +36,15 @@ export const restartAppIfPushNotificationTockenChange: AppLifeCycleListener = ({
 
     evtComponentDidMount.attach(()=>{
 
-        const unsubscribe= firebaseCloudMessaging.onTokenRefresh(async token => {
+        const unsubscribe= firebaseCloudMessaging.onTokenRefresh(async ({token}: any) => {
 
-            if( token === await prToken ){
+            const previousToken= await prToken;
+
+            if( token === previousToken ){
                 return;
             }
 
-            //TODO: restart app
-            restartApp();
+            restartApp(`Push notification token changed: new token: ${token}, previous token: ${previousToken}`);
 
         });
 

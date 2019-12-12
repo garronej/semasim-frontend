@@ -20,9 +20,7 @@ export async function sendRequest<Params, Response>(
 
     } catch (error) {
 
-        restartApp();
-
-        return new Promise<never>(()=>{});
+        return restartApp(`toBackend/remoteApiCaller/sendRequest ${methodName} error thrown: ${error.message}`);
 
     }
 

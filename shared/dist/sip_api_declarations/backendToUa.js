@@ -59,35 +59,39 @@ var shouldAppendPromotionalMessage;
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
 //WebphoneData Sync things:
-var getOrCreateInstance;
-(function (getOrCreateInstance) {
-    getOrCreateInstance.methodName = "getInstance";
-})(getOrCreateInstance = exports.getOrCreateInstance || (exports.getOrCreateInstance = {}));
-var newChat;
-(function (newChat) {
-    newChat.methodName = "newChat";
-})(newChat = exports.newChat || (exports.newChat = {}));
-var fetchOlderMessages;
-(function (fetchOlderMessages) {
-    fetchOlderMessages.methodName = "fetchOlderMessages";
-})(fetchOlderMessages = exports.fetchOlderMessages || (exports.fetchOlderMessages = {}));
-var updateChat;
-(function (updateChat) {
-    updateChat.methodName = "updateChat";
-})(updateChat = exports.updateChat || (exports.updateChat = {}));
-var destroyChat;
-(function (destroyChat) {
-    destroyChat.methodName = "destroyChat";
-})(destroyChat = exports.destroyChat || (exports.destroyChat = {}));
-var newMessage;
-(function (newMessage) {
-    newMessage.methodName = "newMessage";
-})(newMessage = exports.newMessage || (exports.newMessage = {}));
-var notifySendReportReceived;
-(function (notifySendReportReceived) {
-    notifySendReportReceived.methodName = "notifySendReportReceived";
-})(notifySendReportReceived = exports.notifySendReportReceived || (exports.notifySendReportReceived = {}));
-var notifyStatusReportReceived;
-(function (notifyStatusReportReceived) {
-    notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
-})(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
+var wd_getUserSimChats;
+(function (wd_getUserSimChats) {
+    wd_getUserSimChats.methodName = "wd_getUserSimChats";
+})(wd_getUserSimChats = exports.wd_getUserSimChats || (exports.wd_getUserSimChats = {}));
+var wd_newChat;
+(function (wd_newChat) {
+    wd_newChat.methodName = "wd_newChat";
+})(wd_newChat = exports.wd_newChat || (exports.wd_newChat = {}));
+var wd_fetchOlderMessages;
+(function (wd_fetchOlderMessages) {
+    wd_fetchOlderMessages.methodName = "wd_fetchOlderMessages";
+})(wd_fetchOlderMessages = exports.wd_fetchOlderMessages || (exports.wd_fetchOlderMessages = {}));
+var wd_updateChatLastMessageSeen;
+(function (wd_updateChatLastMessageSeen) {
+    wd_updateChatLastMessageSeen.methodName = "wd_updateChatLastMessageSeen";
+})(wd_updateChatLastMessageSeen = exports.wd_updateChatLastMessageSeen || (exports.wd_updateChatLastMessageSeen = {}));
+var wd_updateChatContactInfos;
+(function (wd_updateChatContactInfos) {
+    wd_updateChatContactInfos.methodName = "wd_updateChatContactInfos";
+})(wd_updateChatContactInfos = exports.wd_updateChatContactInfos || (exports.wd_updateChatContactInfos = {}));
+var wd_destroyChat;
+(function (wd_destroyChat) {
+    wd_destroyChat.methodName = "wd_destroyChat";
+})(wd_destroyChat = exports.wd_destroyChat || (exports.wd_destroyChat = {}));
+var wd_newMessage;
+(function (wd_newMessage) {
+    wd_newMessage.methodName = "wd_newMessage";
+})(wd_newMessage = exports.wd_newMessage || (exports.wd_newMessage = {}));
+var wd_notifySendReportReceived;
+(function (wd_notifySendReportReceived) {
+    wd_notifySendReportReceived.methodName = "wd_notifySendReportReceived";
+})(wd_notifySendReportReceived = exports.wd_notifySendReportReceived || (exports.wd_notifySendReportReceived = {}));
+var wd_notifyStatusReportReceived;
+(function (wd_notifyStatusReportReceived) {
+    wd_notifyStatusReportReceived.methodName = "wd_notifyStatusReportReceived";
+})(wd_notifyStatusReportReceived = exports.wd_notifyStatusReportReceived || (exports.wd_notifyStatusReportReceived = {}));

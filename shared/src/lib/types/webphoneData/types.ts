@@ -12,19 +12,13 @@ export type Encryptable = {
     }
 };
 
-export type Instance<E extends EncryptionState> = {
-    id_: number;
-    imsi: string;
-    chats: Chat<E>[];
-};
-
 export type Chat<E extends EncryptionState> = {
-    id_: number;
+    ref: string;
     contactNumber: Encryptable["string"][E]; /* type phoneNumber */
     contactName: Encryptable["string"][E];
     contactIndexInSim: Encryptable["number | null"][E]; //TODO: Should be encrypted somehow
     messages: Message<E>[];
-    idOfLastMessageSeen: number | null; /* id_ of last message not send by user */
+    refOfLastMessageSeen: string | null; 
 };
 
 export type Message<E extends EncryptionState> = Message.Incoming<E> | Message.Outgoing<E>;
@@ -32,8 +26,8 @@ export type Message<E extends EncryptionState> = Message.Incoming<E> | Message.O
 export namespace Message {
 
     export type _Base<E extends EncryptionState> = {
-        id_: number;
-        time: number;
+        ref: string;
+        time: number; /** Represent exact send time for outgoing messages and pdu time for incoming */
         direction: "INCOMING" | "OUTGOING";
         text: Encryptable["string"][E];
     };

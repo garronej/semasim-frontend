@@ -44,6 +44,7 @@ var Credentials_1 = require("../localStorage/Credentials");
 var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
+var declaredPushNotificationToken = require("../localStorage/declaredPushNotificationToken");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
@@ -53,7 +54,7 @@ evtError.attach(function (_a) {
             {
                 switch (httpErrorStatus) {
                     case 401:
-                        restartApp_1.restartApp();
+                        restartApp_1.restartApp("Wep api 401");
                         break;
                         ;
                     case 500:
@@ -71,8 +72,7 @@ evtError.attach(function (_a) {
             break;
         case "react-native":
             {
-                console.log("WebApi Error: " + methodName + " " + httpErrorStatus);
-                restartApp_1.restartApp();
+                restartApp_1.restartApp("WebApi Error: " + methodName + " " + httpErrorStatus);
             }
             break;
     }
@@ -147,12 +147,13 @@ exports.validateEmail = (function () {
         return sendRequest(methodName, { email: email, activationCode: activationCode });
     };
 })();
-/** uaInstanceId should be provided on android/iOS and undefined on the web */
+/** uaInstanceId should be provided on android/ios and undefined on the web */
 exports.loginUser = (function () {
     var methodName = apiDeclaration.loginUser.methodName;
     return function (email, secret, uaInstanceId) {
         return __awaiter(this, void 0, void 0, function () {
             var response;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -160,26 +161,62 @@ exports.loginUser = (function () {
                         return [4 /*yield*/, sendRequest(methodName, { email: email, secret: secret, uaInstanceId: uaInstanceId })];
                     case 1:
                         response = _a.sent();
-                        if (response.status !== "SUCCESS") {
-                            return [2 /*return*/, response];
-                        }
-                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
-                        return [4 /*yield*/, Credentials_1.Credentials.set({
-                                email: email,
-                                secret: secret,
-                                "uaInstanceId": uaInstanceId
-                            })];
+                        if (!(response.status !== "SUCCESS")) return [3 /*break*/, 4];
+                        if (!(response.status !== "RETRY STILL FORBIDDEN")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
+                    case 3: return [2 /*return*/, response];
+                    case 4:
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 6];
+                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var previousCred, _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
+                                        case 1:
+                                            if (!(_b.sent())) return [3 /*break*/, 3];
+                                            return [4 /*yield*/, Credentials_1.Credentials.get()];
+                                        case 2:
+                                            _a = _b.sent();
+                                            return [3 /*break*/, 4];
+                                        case 3:
+                                            _a = undefined;
+                                            _b.label = 4;
+                                        case 4:
+                                            previousCred = _a;
+                                            if (!!previousCred &&
+                                                previousCred.email === email &&
+                                                previousCred.secret === secret &&
+                                                previousCred.uaInstanceId === uaInstanceId) {
+                                                return [2 /*return*/];
+                                            }
+                                            return [4 /*yield*/, Promise.all([
+                                                    Credentials_1.Credentials.set({
+                                                        email: email,
+                                                        secret: secret,
+                                                        "uaInstanceId": uaInstanceId
+                                                    }),
+                                                    declaredPushNotificationToken.remove()
+                                                ])];
+                                        case 5:
+                                            _b.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); })()];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
                             "connect_sid": response.connect_sid,
                             email: email,
                             "encryptedSymmetricKey": response.encryptedSymmetricKey,
                             "uaInstanceId": uaInstanceId === undefined ?
                                 response.webUaInstanceId : uaInstanceId
                         })];
-                    case 4:
+                    case 7:
                         _a.sent();
                         return [2 /*return*/, { "status": response.status }];
                 }
@@ -194,15 +231,20 @@ exports.isUserLoggedIn = (function () {
             var isLoggedIn;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
                     case 1:
-                        isLoggedIn = _a.sent();
-                        if (!!isLoggedIn) return [3 /*break*/, 3];
-                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                        if (!(_a.sent())) {
+                            return [2 /*return*/, false];
+                        }
+                        return [4 /*yield*/, sendRequest(methodName, undefined)];
                     case 2:
+                        isLoggedIn = _a.sent();
+                        if (!!isLoggedIn) return [3 /*break*/, 4];
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 3:
                         _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, isLoggedIn];
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, isLoggedIn];
                 }
             });
         });

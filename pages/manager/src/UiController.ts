@@ -1,7 +1,7 @@
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import * as types from "frontend-shared/dist/lib/types/userSim";
-import * as backendEvents from "frontend-shared/dist/lib/toBackend/events";
-import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/base";
+import { appEvts } from "frontend-shared/dist/lib/toBackend/appEvts";
+import * as remoteCoreApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/core";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiButtonBar } from "./UiButtonBar";
@@ -10,12 +10,14 @@ import { UiSimRow } from "./UiSimRow";
 import { UiShareSim } from "./UiShareSim";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 
+
 declare const require: (path: string) => any;
 
 const html = loadUiClassHtml(
     require("../templates/UiController.html"),
     "UiController"
 );
+
 
 export class UiController {
 
@@ -31,11 +33,11 @@ export class UiController {
                 email: string;
             }>();
 
-            backendEvents.evtSharingRequestResponse.attach(
+            appEvts.evtSharingRequestResponse.attach(
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
 
-            backendEvents.evtOtherSimUserUnregisteredSim.attach(
+            appEvts.evtOtherSimUserUnregisteredSim.attach(
                 ({ userSim, email }) => evt.post({ userSim, email })
             );
 
@@ -96,7 +98,7 @@ export class UiController {
 
         });
 
-        backendEvents.evtSimReachabilityStatusChange.attach(
+        appEvts.evtSimReachabilityStatusChange.attach(
             userSim_ => userSim_ === userSim,
             () => {
 
@@ -118,8 +120,8 @@ export class UiController {
         );
 
         for (const evt of [
-            backendEvents.evtSimGsmConnectivityChange,
-            backendEvents.evtSimCellSignalStrengthChange
+            appEvts.evtSimGsmConnectivityChange,
+            appEvts.evtSimCellSignalStrengthChange
         ]) {
 
             evt.attach(
@@ -131,8 +133,8 @@ export class UiController {
 
         //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
         for (const evt of [
-            backendEvents.evtContactCreatedOrUpdated,
-            backendEvents.evtContactDeleted
+            appEvts.evtContactCreatedOrUpdated,
+            appEvts.evtContactDeleted
         ]) {
 
             evt.attach(
@@ -179,7 +181,7 @@ export class UiController {
 
         uiSimRow.structure.remove();
 
-        if ((await remoteApiCaller.getUsableUserSims()).length === 0) {
+        if ((await remoteCoreApiCaller.getUsableUserSims()).length === 0) {
 
             this.setState("NO SIM");
 
@@ -201,11 +203,11 @@ export class UiController {
 
         }
 
-        backendEvents.evtUsableSim.attach(
+        appEvts.evtUsableSim.attach(
             userSim => this.addUserSim(userSim)
         );
 
-        backendEvents.evtSimPermissionLost.attachOnce(
+        appEvts.evtSimPermissionLost.attachOnce(
             userSim => this.removeUserSim(userSim)
         );
 
@@ -237,7 +239,7 @@ export class UiController {
 
         uiPhonebook.evtClickCreateContact.attach(
             ({ name, number, onSubmitted }) =>
-                remoteApiCaller.createContact(
+                remoteCoreApiCaller.createContact(
                     userSim,
                     name,
                     number
@@ -247,7 +249,7 @@ export class UiController {
         uiPhonebook.evtClickDeleteContacts.attach(
             ({ contacts, onSubmitted }) => Promise.all(
                 contacts.map(
-                    contact => remoteApiCaller.deleteContact(
+                    contact => remoteCoreApiCaller.deleteContact(
                         userSim,
                         contact
                     )
@@ -257,26 +259,26 @@ export class UiController {
 
         uiPhonebook.evtClickUpdateContactName.attach(
             ({ contact, newName, onSubmitted }) =>
-                remoteApiCaller.updateContactName(
+                remoteCoreApiCaller.updateContactName(
                     userSim,
                     contact,
                     newName
                 ).then(() => onSubmitted())
         );
 
-        backendEvents.evtSimPermissionLost.attachOnce(
+        appEvts.evtSimPermissionLost.attachOnce(
             userSim_ => userSim_ === userSim,
             () => uiPhonebook.hideModal().then(() =>
                 uiPhonebook.structure.detach()
             )
         );
 
-        backendEvents.evtContactCreatedOrUpdated.attach(
+        appEvts.evtContactCreatedOrUpdated.attach(
             e => e.userSim === userSim,
             ({ contact }) => uiPhonebook.notifyContactChanged(contact)
         );
 
-        backendEvents.evtContactDeleted.attach(
+        appEvts.evtContactDeleted.attach(
             e => e.userSim === userSim,
             ({ contact }) => uiPhonebook.notifyContactChanged(contact)
         );
@@ -345,7 +347,7 @@ export class UiController {
 
             if (shouldProceed) {
 
-                await remoteApiCaller.unregisterSim(userSim);
+                await remoteCoreApiCaller.unregisterSim(userSim);
 
                 this.removeUserSim(userSim);
 
@@ -382,7 +384,7 @@ export class UiController {
 
             if (!!friendlyNameSubmitted) {
 
-                await remoteApiCaller.changeSimFriendlyName(
+                await remoteCoreApiCaller.changeSimFriendlyName(
                     uiSimRow.userSim,
                     friendlyNameSubmitted
                 );
@@ -415,7 +417,7 @@ export class UiController {
             NOTE: If the user was able to click on the reboot button
             the sim is necessary online.
             */
-            await remoteApiCaller.rebootDongle(
+            await remoteCoreApiCaller.rebootDongle(
                 userSim as types.Online<types.UserSim.Usable>
             );
 
@@ -438,7 +440,7 @@ export class UiController {
         this.uiShareSim.evtShare.attach(
             async ({ userSim, emails, message, onSubmitted }) => {
 
-                await remoteApiCaller.shareSim(userSim, emails, message);
+                await remoteCoreApiCaller.shareSim(userSim, emails, message);
 
                 onSubmitted();
 
@@ -448,7 +450,7 @@ export class UiController {
         this.uiShareSim.evtStopSharing.attach(
             async ({ userSim, emails, onSubmitted }) => {
 
-                await remoteApiCaller.stopSharingSim(userSim, emails);
+                await remoteCoreApiCaller.stopSharingSim(userSim, emails);
 
                 onSubmitted();
 

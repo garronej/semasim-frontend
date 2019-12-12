@@ -2,6 +2,7 @@ package com.semasim.semasim.tools;
 
 import android.content.Context;
 import org.liquidplayer.javascript.JSContext;
+import org.liquidplayer.javascript.JSFunction;
 import org.liquidplayer.javascript.JSObject;
 import org.liquidplayer.javascript.JSValue;
 
@@ -53,6 +54,18 @@ public class JsCaller {
         }
 
         final JSContext jsContext = new JSContext();
+
+
+        JSObject console = new JSObject(jsContext);
+        console.property("log", new JSFunction(jsContext, "log") {
+            public void log(JSValue message) {
+                Log.i("LiquidCoreLog", message.toJSON());
+            }
+        });
+        jsContext.property("console", console);
+
+
+
 
         Context appContext = JsCaller.appContextGetter.getContext();
 

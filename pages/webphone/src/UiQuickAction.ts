@@ -47,7 +47,7 @@ export class UiQuickAction {
     public notify() {
 
         this.structure.find(".id_sms")
-            .prop("disabled", !this.isRegistered())
+            .prop("disabled", !this.getIsSipRegistered())
             ;
 
         this.structure.find(".id_contact")
@@ -55,7 +55,7 @@ export class UiQuickAction {
             ;
 
         this.structure.find(".id_call") .prop("disabled", (
-            !this.isRegistered() || 
+            !this.getIsSipRegistered() || 
             !this.userSim.reachableSimState ||
             !this.userSim.reachableSimState.isGsmConnectivityOk ||
             !!this.userSim.reachableSimState.ongoingCall
@@ -65,7 +65,7 @@ export class UiQuickAction {
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        private readonly isRegistered: ()=> boolean
+        private readonly getIsSipRegistered: ()=> boolean
     ) {
 
         let input = this.structure.find("input.id_tel-input");

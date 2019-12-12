@@ -38,38 +38,43 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("./cryptoLibProxy");
 var crypto = require("./keysGeneration");
-var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var TowardUserKeys_1 = require("../localStorage/TowardUserKeys");
-var remoteApiCaller = require("../toBackend/remoteApiCaller");
 /** When creating a new Ua instance an encryptor must be provided
  * so we expose the reference of the rsa thread */
 var rsaWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 /**
  * ASSERT: User logged.
  * */
-function setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa() {
+function appCryptoSetupHelper(params) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _a, _b, _c, _d;
-        return __generator(this, function (_e) {
-            switch (_e.label) {
-                case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
-                case 1:
-                    encryptedSymmetricKey = (_e.sent()).encryptedSymmetricKey;
+        var towardUserKeys, encryptedSymmetricKey, towardUserDecryptor, _a, _b;
+        var _this = this;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    towardUserKeys = params.towardUserKeys, encryptedSymmetricKey = params.encryptedSymmetricKey;
                     //NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
                     cryptoLib.workerThreadPool.preSpawn(rsaWorkerThreadPoolId, 1);
-                    return [4 /*yield*/, TowardUserKeys_1.TowardUserKeys.retrieve()];
-                case 2:
-                    towardUserKeys = _e.sent();
                     towardUserDecryptor = cryptoLib.rsa.decryptorFactory(towardUserKeys.decryptKey, rsaWorkerThreadPoolId);
-                    aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
-                    cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
-                    _b = (_a = remoteApiCaller).setWebDataEncryptorDescriptor;
-                    _d = (_c = cryptoLib.aes).encryptorDecryptorFactory;
-                    return [4 /*yield*/, crypto.symmetricKey.decryptKey(towardUserDecryptor, encryptedSymmetricKey)];
-                case 3:
-                    _b.apply(_a, [_d.apply(_c, [_e.sent(),
-                            aesWorkerThreadPoolId])]);
-                    return [2 /*return*/, {
+                    _a = {};
+                    _b = "paramsNeededToEncryptDecryptWebphoneData";
+                    return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                            var aesWorkerThreadPoolId, symmetricKey;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
+                                        cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
+                                        return [4 /*yield*/, crypto.symmetricKey.decryptKey(towardUserDecryptor, encryptedSymmetricKey)];
+                                    case 1:
+                                        symmetricKey = _a.sent();
+                                        return [2 /*return*/, {
+                                                "encryptorDecryptor": cryptoLib.aes.encryptorDecryptorFactory(symmetricKey, aesWorkerThreadPoolId)
+                                            }];
+                                }
+                            });
+                        }); })()];
+                case 1: return [2 /*return*/, (_a[_b] = _c.sent(),
+                        _a["paramsNeededToInstantiateUa"] = {
                             "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
                             towardUserDecryptor: towardUserDecryptor,
                             "getTowardSimEncryptor": function (_a) {
@@ -78,9 +83,10 @@ function setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiat
                                     "towardSimEncryptor": cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(towardSimEncryptKeyStr), rsaWorkerThreadPoolId)
                                 });
                             }
-                        }];
+                        },
+                        _a)];
             }
         });
     });
 }
-exports.setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa = setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa;
+exports.appCryptoSetupHelper = appCryptoSetupHelper;

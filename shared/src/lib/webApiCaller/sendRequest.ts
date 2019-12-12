@@ -63,7 +63,7 @@ export async function sendRequest<Params, Response>(
 
     const resp: Response = serializer.parse(await fetchResp.text());
 
-    console.log(methodName, { params, resp });
+    console.log("(webApi call) methodName: " + methodName, { params, resp });
 
     return resp;
 

@@ -1,8 +1,9 @@
 
 package com.semasim.semasim;
 
-import android.content.Context;
-import android.media.AudioManager;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -11,6 +12,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 //import com.semasim.semasim.tools.Log;
 //import com.semasim.semasim.tools.WebViewManager;
+import com.semasim.semasim.tools.Log;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedByHost;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedByHostImpl;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedToHost;
@@ -24,10 +26,14 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         return "HostWebRtc";
     }
 
+    private ReactApplicationContext reactContext;
     private WebRTCApiExposedByHost webRTCApiExposedByHost;
 
     HostWebRtc(ReactApplicationContext reactContext) {
         super(reactContext);
+
+        this.reactContext= reactContext;
+
 
         /*
         Log.i("(not)ReactNativeJS hack mode in call <===================================================");
@@ -91,11 +97,22 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
 
     }
 
+    private static final Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+
     @ReactMethod
     public void createRTCPeerConnection(
             int rtcPeerConnectionRef,
             String rtcConfigurationJson
     ){
+
+        {
+            Log.i("Starting EndlessPhonyTask");
+
+            //NOTE: Keep the app alive while call ongoing ( so the timers callback are run )
+            reactContext.startService(new Intent(reactContext, EndlessPhonyTaskService.class));
+
+            //HeadlessJsTaskService.acquireWakeLockNow(reactContext);
+        }
 
         webRTCApiExposedByHost.createRTCPeerConnection(
                 rtcPeerConnectionRef,
@@ -133,9 +150,16 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
     @ReactMethod
     void closeRTCPeerConnection(int rtcPeerConnectionRef){
 
+        {
+            Log.i("End EndlessPhonyTask");
+
+            reactContext.stopService(new Intent(reactContext, EndlessPhonyTaskService.class));
+        }
+
         webRTCApiExposedByHost.closeRTCPeerConnection(
                 rtcPeerConnectionRef
         );
+
     }
 
 

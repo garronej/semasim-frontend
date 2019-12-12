@@ -8,7 +8,8 @@ import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import * as connection from "../connection";
 import { restartApp } from "../../restartApp";
 
-import { evtSimReachabilityStatusChange, evtUsableSim } from "../events";
+import { appEvts } from "../appEvts";
+
 
 
 //TODO: Fix, it's called two times!!
@@ -43,7 +44,7 @@ export const getUsableUserSims = (() => {
                 userSim.sim.storage.digest !== newUserSim.sim.storage.digest
             ) {
 
-                restartApp();
+                restartApp("Sim internal storage changed (subsequent getUsableSim)");
 
                 return;
 
@@ -67,7 +68,7 @@ export const getUsableUserSims = (() => {
 
             if (!!userSim.reachableSimState) {
 
-                evtSimReachabilityStatusChange.post(userSim);
+                appEvts.evtSimReachabilityStatusChange.post(userSim);
 
             }
 
@@ -89,7 +90,7 @@ export const getUsableUserSims = (() => {
 
                             userSim.reachableSimState = undefined;
 
-                            evtSimReachabilityStatusChange.post(userSim);
+                            appEvts.evtSimReachabilityStatusChange.post(userSim);
 
                         }
 
@@ -159,7 +160,7 @@ export const registerSim = (() => {
 
         (await getUsableUserSims()).push(userSim);
 
-        evtUsableSim.post(userSim);
+        appEvts.evtUsableSim.post(userSim);
 
     };
 
@@ -335,7 +336,7 @@ export const acceptSharingRequest = (() => {
 
         (await getUsableUserSims()).push(userSim);
 
-        evtUsableSim.post(userSim);
+        appEvts.evtUsableSim.post(userSim);
 
     };
 

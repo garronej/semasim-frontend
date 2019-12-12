@@ -16,7 +16,7 @@ const default_: import("./index").Env= {
     "hostOs": (()=>{
         switch(OS){
             case "android": return "android";
-            case "ios": return "iOS";
+            case "ios": return "ios";
             default: throw new Error("never");
         }
     })()

@@ -44,6 +44,8 @@
 
       <service android:name="io.wazo.callkeep.RNCallKeepBackgroundMessagingService" />
 
+      <service android:name="com.semasim.semasim.EndlessPhonyTaskService" />
+
 
     </application>
 

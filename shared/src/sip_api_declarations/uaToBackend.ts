@@ -199,3 +199,34 @@ export namespace notifyIceServer {
 
 }
 
+export namespace wd_notifyActionFromOtherUa {
+
+    export const methodName = "wd_notifyActionFromOtherUa";
+
+    export type Params = {
+        methodName: typeof import("./backendToUa").wd_newChat.methodName;
+        params: import("./backendToUa").wd_newChat.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_updateChatLastMessageSeen.methodName;
+        params: import("./backendToUa").wd_updateChatLastMessageSeen.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_updateChatContactInfos.methodName;
+        params: import("./backendToUa").wd_updateChatContactInfos.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_destroyChat.methodName;
+        params: import("./backendToUa").wd_destroyChat.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_newMessage.methodName;
+        params: import("./backendToUa").wd_newMessage.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_notifySendReportReceived.methodName;
+        params: import("./backendToUa").wd_notifySendReportReceived.Params
+    } | {
+        methodName: typeof import("./backendToUa").wd_notifyStatusReportReceived.methodName;
+        params: import("./backendToUa").wd_notifyStatusReportReceived.Params
+    };
+
+    export type Response = undefined;
+
+}
+

@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
-var default_ = function () {
+var default_ = function (reason) {
     if (env_1.env.isDevEnv) {
-        throw new Error("In prod the app would have been restarted");
+        alert("About to restart app, reason: " + reason);
     }
     location.reload();
+    return new Promise(function () { });
 };
 exports.default = default_;

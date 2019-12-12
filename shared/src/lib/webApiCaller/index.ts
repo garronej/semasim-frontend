@@ -6,12 +6,12 @@ import { Credentials } from "../localStorage/Credentials";
 import { env } from "../env";
 import { SyncEvent } from "ts-events-extended";
 import { restartApp } from "../restartApp";
+import * as declaredPushNotificationToken from "../localStorage/declaredPushNotificationToken";
 
 import * as networkStateMonitoring from "../networkStateMonitoring";
 
 
-
-export { WebApiError }
+export { WebApiError };
 
 const evtError = new SyncEvent<WebApiError>();
 
@@ -23,7 +23,7 @@ evtError.attach(
             case "browser": {
 
                 switch (httpErrorStatus) {
-                    case 401: restartApp(); break;;
+                    case 401: restartApp("Wep api 401"); break;;
                     case 500: alert("Internal server error"); break;
                     case 400: alert("Request malformed"); break;
                     case undefined: alert("Can't reach the server"); break;
@@ -34,9 +34,7 @@ evtError.attach(
             } break;
             case "react-native": {
 
-                console.log(`WebApi Error: ${methodName} ${httpErrorStatus}`);
-
-                restartApp();
+                restartApp(`WebApi Error: ${methodName} ${httpErrorStatus}`);
 
             } break;
         }
@@ -146,7 +144,7 @@ export const validateEmail = (() => {
 })();
 
 
-/** uaInstanceId should be provided on android/iOS and undefined on the web */
+/** uaInstanceId should be provided on android/ios and undefined on the web */
 export const loginUser = (() => {
 
     const { methodName } = apiDeclaration.loginUser;
@@ -167,16 +165,41 @@ export const loginUser = (() => {
         );
 
         if (response.status !== "SUCCESS") {
+
+            if( response.status !== "RETRY STILL FORBIDDEN" ){
+                await Credentials.remove();
+            }
+
             return response;
         }
 
         if (env.jsRuntimeEnv === "react-native") {
 
-            await Credentials.set({
-                email,
-                secret,
-                "uaInstanceId": uaInstanceId!
-            });
+            await (async () => {
+
+                const previousCred = await Credentials.isPresent() ?
+                    await Credentials.get() : undefined
+                    ;
+
+                if (
+                    !!previousCred &&
+                    previousCred.email === email &&
+                    previousCred.secret === secret &&
+                    previousCred.uaInstanceId === uaInstanceId
+                ) {
+                    return;
+                }
+
+                await Promise.all([
+                    Credentials.set({
+                        email,
+                        secret,
+                        "uaInstanceId": uaInstanceId!
+                    }),
+                    declaredPushNotificationToken.remove()
+                ]);
+
+            })();
 
         }
 
@@ -203,16 +226,30 @@ export const isUserLoggedIn = (() => {
 
     return async function () {
 
+        if (!(await AuthenticatedSessionDescriptorSharedData.isPresent())) {
+            return false;
+        }
+
         const isLoggedIn = await sendRequest<Params, Response>(
             methodName,
             undefined
         );
+
+        /*
+        //NOTE: In case the local storage data have been removed but the sid cookie is 
+        //still present.
+        if( isLoggedIn && !(await AuthenticatedSessionDescriptorSharedData.isPresent()) ){
+            await logoutUser();
+            return false;
+        }
+        */
 
         if (!isLoggedIn) {
 
             await AuthenticatedSessionDescriptorSharedData.remove();
 
         }
+
 
         return isLoggedIn;
 

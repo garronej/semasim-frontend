@@ -108,7 +108,7 @@ function sendRequest(methodName, params, connectSid) {
                     return [4 /*yield*/, fetchResp.text()];
                 case 2:
                     resp = _b.apply(_a, [_d.sent()]);
-                    console.log(methodName, { params: params, resp: resp });
+                    console.log("(webApi call) methodName: " + methodName, { params: params, resp: resp });
                     return [2 /*return*/, resp];
             }
         });

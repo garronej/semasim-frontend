@@ -4,7 +4,7 @@ import * as rn from "react-native";
 import { h } from "../lib/dimensions";
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
-import { notConnectedUserFeedback } from "frontend-shared/dist/lib/toBackend/connection";
+//import { notConnectedUserFeedback } from "frontend-shared/dist/lib/toBackend/connection";
 
 
 const log: typeof console.log = false ? console.log.bind(console) : () => { };
@@ -29,11 +29,16 @@ notConnectedUserFeedback.provideCustomImplementation(state =>
 );
 */
 
-{
+type NotConnectedUserFeedback = import("frontend-shared/dist/lib/toBackend/connection")
+    .ConnectParams
+    .ReactNative["notConnectedUserFeedback"]
+    ;
+
+export const notConnectedUserFeedback: NotConnectedUserFeedback = (()=>{
 
     let timer: NodeJS.Timer | undefined = undefined;
 
-    notConnectedUserFeedback.provideCustomImplementation(state => {
+    return (state: Parameters<NotConnectedUserFeedback>[0])=>{
 
         if (timer !== undefined) {
             clearTimeout(timer);
@@ -60,9 +65,11 @@ notConnectedUserFeedback.provideCustomImplementation(state =>
 
         }
 
-    });
+    };
 
-}
+
+})();
+
 
 export type Props = {};
 

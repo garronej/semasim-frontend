@@ -2,16 +2,23 @@
 import { SyncEvent } from "ts-events-extended";
 
 type ApiExposedByHost = {
+    aesEncryptOrDecrypt(action: "ENCRYPT" | "DECRYPT", keyB64: string, inputDataB64: string, callRef: number): void;
     rsaEncryptOrDecrypt(action: "ENCRYPT" | "DECRYPT", keyStr: string, inputDataB64: string, callRef: number): void;
     rsaGenerateKeys(seedB64: string, keysLengthBytes: number, callRef: number): void;
 };
 
 type ApiExposedToHost = {
+    onAesEncryptOrDecryptResult(callRef: number, outputDataB64: string): void;
     onRsaEncryptOrDecryptResult(callRef: number, outputDataB64: string): void;
     onRsaGenerateKeysResult(callRef: number, publicKeyStr: string, privateKeyStr: string): void;
 };
 
 declare const apiExposedByHost: ApiExposedByHost;
+
+const evtAesEncryptOrDecryptResult = new SyncEvent<{
+    callRef: number;
+    outputDataB64: string;
+}>();
 
 const evtRsaEncryptOrDecryptResult = new SyncEvent<{
     callRef: number;
@@ -26,6 +33,8 @@ const evtRsaGenerateKeysResult= new SyncEvent<{
 
 
 export const apiExposedToHost: ApiExposedToHost = {
+    "onAesEncryptOrDecryptResult": (callRef, outputDataB64) =>
+        evtAesEncryptOrDecryptResult.post({ callRef, outputDataB64 }),
     "onRsaEncryptOrDecryptResult": (callRef, outputDataB64) => 
         evtRsaEncryptOrDecryptResult.post({ callRef, outputDataB64 }),
     "onRsaGenerateKeysResult": (callRef, publicKeyStr, privateKeyStr) => 
@@ -39,6 +48,29 @@ const getCounter = (() => {
 	return () => counter++;
 
 })();
+
+export async function aesEncryptOrDecrypt(
+    action: "ENCRYPT" | "DECRYPT",
+    keyB64: string,
+    inputDataB64: string
+): Promise<{ outputDataB64: string; }> {
+
+    const callRef= getCounter();
+
+    apiExposedByHost.aesEncryptOrDecrypt(
+        action,
+        keyB64,
+        inputDataB64,
+        callRef
+    );
+
+    const { outputDataB64 } = await evtAesEncryptOrDecryptResult.waitFor(
+        ({ callRef: callRef_ }) => callRef_ === callRef
+    );
+
+    return { outputDataB64 };
+
+}
 
 export async function rsaEncryptOrDecrypt(
     action: "ENCRYPT" | "DECRYPT",
@@ -84,6 +116,5 @@ export async function rsaGenerateKeys(
     );
 
     return { publicKeyStr, privateKeyStr };
-
 
 }

@@ -4,6 +4,8 @@ import * as cryptoLib from "crypto-lib";
 
 import { standalone_script_export_module, standalone_script_path_local } from "../bin/buildAndInstall";
 
+console.log("The waring about using Buffer() can be ignored, it is used only to bundle the crypto sync code and present no security issue");
+
 const setTimeoutBack= setTimeout;
 
 //NOTE: Simulate LiquidCore
@@ -50,7 +52,7 @@ global.setTimeout= setTimeoutBack;
         })()
     );
 
-    console.log("PASS");
+    console.log("PASS GENERATE KES RSA");
 
 }
 
@@ -75,7 +77,7 @@ global.setTimeout= setTimeoutBack;
     }
 
 
-    console.log("PASS");
+    console.log("PASS ENCRYPT RSA");
 
 }
 
@@ -102,8 +104,56 @@ global.setTimeout= setTimeoutBack;
     }
 
 
-    console.log("PASS");
+    console.log("PASS DECRYPT RSA");
 
 }
 
+(async()=>{
+
+    const key = await cryptoLib.aes.generateKey();
+    const inputData = Buffer.from("plain text", "utf8");
+
+    const outputData = cryptoLib.aes.syncEncryptorDecryptorFactory(key).encrypt(inputData);
+
+    const restoredInputData = Buffer.from(
+        lib.aesEncryptOrDecrypt(
+            "DECRYPT",
+            cryptoLib.toBuffer(key).toString("base64"),
+            cryptoLib.toBuffer(outputData).toString("base64")
+        ),
+        "base64"
+    );
+
+    if( cryptoLib.toBuffer(inputData).toString("hex") !== cryptoLib.toBuffer(restoredInputData).toString("hex") ){
+        throw new Error("fail!");
+    }
+
+
+    console.log("PASS DECRYPT AES");
+
+})();
+
+(async ()=>{
+
+    const key = await cryptoLib.aes.getTestKey();
+    const inputData = Buffer.from("plain text", "utf8");
+
+    const outputData = Buffer.from(
+        lib.aesEncryptOrDecrypt(
+            "ENCRYPT",
+            cryptoLib.toBuffer(key).toString("base64"),
+            inputData.toString("base64")
+        ),
+        "base64"
+    );
+
+    const restoredInputData = cryptoLib.aes.syncEncryptorDecryptorFactory(key).decrypt(outputData);
+
+    if( cryptoLib.toBuffer(inputData).toString("hex") !== cryptoLib.toBuffer(restoredInputData).toString("hex") ){
+        throw new Error("fail!");
+    }
+
+    console.log("PASS ENCRYPT AES");
+
+})();
 

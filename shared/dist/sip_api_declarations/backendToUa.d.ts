@@ -142,77 +142,90 @@ export declare namespace shouldAppendPromotionalMessage {
     type Params = undefined;
     type Response = boolean;
 }
-export declare namespace getOrCreateInstance {
-    const methodName = "getInstance";
+export declare namespace wd_getUserSimChats {
+    const methodName = "wd_getUserSimChats";
+    /** If maxMessageCountByChat is undefined all message history will be pulled */
     type Params = {
         imsi: string;
+        maxMessageCountByChat: number;
     };
-    type Response = {
-        instance_id: number;
-        chats: wd.Chat<"ENCRYPTED">[];
-    };
+    type Response = wd.Chat<"ENCRYPTED">[];
 }
-export declare namespace newChat {
-    const methodName = "newChat";
+export declare namespace wd_newChat {
+    const methodName = "wd_newChat";
     type Params = {
-        instance_id: number;
+        imsi: string;
+        chatRef: string;
         contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
         contactName: wd.Chat<"ENCRYPTED">["contactName"];
         contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
-    type Response = {
-        chat_id: number;
-    };
+    type Response = undefined;
 }
-export declare namespace fetchOlderMessages {
-    const methodName = "fetchOlderMessages";
+export declare namespace wd_fetchOlderMessages {
+    const methodName = "wd_fetchOlderMessages";
     type Params = {
-        chat_id: number;
-        olderThanMessageId: number;
+        imsi: string;
+        chatRef: string;
+        olderThanTime: number;
+        maxMessageCount: number;
     };
-    /** Message are sorted from the older to the newest */
     type Response = wd.Message<"ENCRYPTED">[];
 }
-export declare namespace updateChat {
-    const methodName = "updateChat";
+export declare namespace wd_updateChatLastMessageSeen {
+    const methodName = "wd_updateChatLastMessageSeen";
     type Params = {
-        chat_id: number;
+        imsi: string;
+        chatRef: string;
+        refOfLastMessageSeen: string;
+    };
+    type Response = undefined;
+}
+export declare namespace wd_updateChatContactInfos {
+    const methodName = "wd_updateChatContactInfos";
+    type Params = {
+        imsi: string;
+        chatRef: string;
         contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
         contactName?: wd.Chat<"ENCRYPTED">["contactName"];
-        idOfLastMessageSeen?: number | null;
     };
     type Response = undefined;
 }
-export declare namespace destroyChat {
-    const methodName = "destroyChat";
+export declare namespace wd_destroyChat {
+    const methodName = "wd_destroyChat";
     type Params = {
-        chat_id: number;
+        imsi: string;
+        chatRef: string;
     };
     type Response = undefined;
 }
-export declare namespace newMessage {
-    const methodName = "newMessage";
+export declare namespace wd_newMessage {
+    const methodName = "wd_newMessage";
     type Params = {
-        chat_id: number;
-        message: wd.NoId<wd.Message.Incoming<"ENCRYPTED"> | wd.Message.Outgoing.Pending<"ENCRYPTED"> | wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">>;
+        imsi: string;
+        chatRef: string;
+        message: wd.Message.Incoming<"ENCRYPTED"> | wd.Message.Outgoing.Pending<"ENCRYPTED">;
     };
-    type Response = {
-        message_id: number;
-    };
+    type Response = undefined;
 }
-export declare namespace notifySendReportReceived {
-    const methodName = "notifySendReportReceived";
+export declare namespace wd_notifySendReportReceived {
+    const methodName = "wd_notifySendReportReceived";
     type Params = {
-        message_id: number;
+        imsi: string;
+        chatRef: string;
+        messageRef: string;
         isSentSuccessfully: boolean;
     };
     type Response = undefined;
 }
-export declare namespace notifyStatusReportReceived {
-    const methodName = "notifyStatusReportReceived";
+export declare namespace wd_notifyStatusReportReceived {
+    const methodName = "wd_notifyStatusReportReceived";
     type Params = {
-        message_id: number;
+        imsi: string;
+        chatRef: string;
+        messageRef: string;
         deliveredTime: number | null;
+        sentBy: wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
     };
     type Response = undefined;
 }

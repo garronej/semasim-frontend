@@ -1,18 +1,20 @@
 import * as React from "react";
-import * as rn from "react-native";
 import { LoginScreen } from "./LoginScreen/LoginScreen";
 import { RegisterScreen } from './RegisterScreen';
 import * as imageAssets from "../lib/imageAssets";
 import { tryLoginFromStoredCredentials } from "frontend-shared/dist/lib/tryLoginFromStoredCredentials";
+import { SplashImage } from "../genericComponents/SplashImage";
 
-const log: typeof console.log = false ? console.log.bind(console) : () => { };
+
+const log: typeof console.log = true ?
+    ((...args: any[]) => console.log.apply(console, ["[LoginRouter]", ...args])) :
+    (() => { });
 
 export type Props = {
-  onLoggedIn: () => void;
 } & typeof defaultProps;
 
 const defaultProps = {
-  backgroundImage: null as (rn.ImageSourcePropType | null)
+  onLoggedIn: undefined as ((() => void) | undefined)
 };
 
 export type State = {
@@ -36,24 +38,27 @@ export class LoginRouter extends React.Component<Props, State> {
 
   public componentDidMount = () => {
 
-    log("[LoginRouter] componentDidMount");
+    log("componentDidMount");
 
   };
 
   public componentWillUnmount = () => {
 
-    log("[LoginRouter] componentWillUnmount");
+    log("componentWillUnmount");
 
   };
 
   constructor(props: any) {
     super(props);
 
-    log("[LoginRouter] constructor");
+    log("constructor");
 
     tryLoginFromStoredCredentials().then(loginResult => {
+
+      log({loginResult});
+
       switch (loginResult) {
-        case "LOGGED IN": this.props.onLoggedIn(); break;
+        case "LOGGED IN": this.props.onLoggedIn?.(); break;
         case "NO VALID CREDENTIALS": this.setState({ "currentScreen": "login" }); break;
       }
     });
@@ -64,16 +69,12 @@ export class LoginRouter extends React.Component<Props, State> {
 
     switch (this.state.currentScreen) {
       case "checking":
-        return <rn.Image
-          style={({ "width": "100%", "height": "100%" })}
-          resizeMode="contain"
-          source={imageAssets.semasimLogo}
-        />
+        return <SplashImage imageSource={imageAssets.semasimLogo3} />;
       case "login":
         return <LoginScreen
           email={this.state.email}
           goToRegister={() => this.setState({ "currentScreen": "register" })}
-          onLoggedIn={this.props.onLoggedIn}
+          onLoggedIn={this.props.onLoggedIn ?? (() => { })}
         />;
       case "register":
         return <RegisterScreen

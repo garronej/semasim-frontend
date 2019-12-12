@@ -20,9 +20,10 @@ require("../templates/UiConversation.less");
 declare const Buffer: any;
 
 
-//const checkMark= "\u221a";
-const checkMark: string = Buffer.from("e29c93", "hex").toString("utf8");
-const crossMark: string = Buffer.from("e29d8c", "hex").toString("utf8");
+
+const [ checkMark, crossMark ] = [ "e29c93", "e29d8c" ]
+    .map(unicode => Buffer.from(unicode, "hex").toString("utf8") as string)
+    ;
 
 export class UiConversation {
 
@@ -33,8 +34,7 @@ export class UiConversation {
     public readonly evtSendText = new SyncEvent<string>();
     public readonly evtDelete = new VoidSyncEvent();
 
-    //public readonly evtChecked = new SyncEvent<{ from: "OTHER UA" | "THIS UA"; }>();
-    public readonly evtChecked = new SyncEvent<{ from: "THIS UA"; } | { from: "OTHER UA"; onProcessed: () => void; }>();
+    public readonly evtChecked = new VoidSyncEvent();
 
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
@@ -46,6 +46,9 @@ export class UiConversation {
     private readonly isDialable: boolean;
 
     
+    //TODO: See if should be optimized, it is called every times
+    //the chat notification count change ( e.g. every incoming message )
+    //but it current implementation nothing is done in this case.
     /** To call whenever the widget should be updated */
     public notify() {
 
@@ -91,14 +94,12 @@ export class UiConversation {
 
     }
 
-    public readonly evtLoadMore = new SyncEvent<{
-        onLoaded: (wdMessages: wd.Message<"PLAIN">[]) => void;
-    }>();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
         private readonly isRegistered: () => boolean,
-        public readonly wdChat: wd.Chat<"PLAIN">
+        public readonly wdChat: wd.Chat<"PLAIN">,
+        private readonly fetchOlderWdMessages: ()=> Promise<wd.Message<"PLAIN">[]>
     ) {
 
         const prettyNumber = phoneNumber.prettyPrint(
@@ -159,7 +160,7 @@ export class UiConversation {
         this.textarea
             .on("keypress", event => {
 
-                this.evtChecked.post({"from": "THIS UA"});
+                this.evtChecked.post();
 
                 if (event.key === "Enter" && !event.shiftKey) {
 
@@ -169,7 +170,7 @@ export class UiConversation {
                 }
 
             })
-            .on("focus", () => this.evtChecked.post({"from": "THIS UA"}))
+            .on("focus", () => this.evtChecked.post())
             ;
 
         this.ul.slimScroll({
@@ -178,39 +179,35 @@ export class UiConversation {
             "railVisible": true,
             "height": '400px',
             "start": "bottom"
-        }).bind("slimscroll", ((_e: any, pos: string) => {
+        }).bind("slimscroll", (async (_e: any, pos: string) => {
 
             if (pos !== "top") {
                 return;
             }
 
-            this.evtLoadMore.post({
-                "onLoaded": wdMessages => {
+            const wdMessages = await this.fetchOlderWdMessages();
 
-                    if (wdMessages.length === 0) {
-                        return;
-                    }
+            if (wdMessages.length === 0) {
+                return;
+            }
 
-                    const li = this.ul.find("li:first");
-
-
-                    for (const wdMessage of wdMessages) {
-                        this.newMessage(wdMessage, "MUTE");
-                    }
+            const li = this.ul.find("li:first");
 
 
-                    this.ul.slimScroll({ "scrollTo": `${li.position().top}px` });
+            for (const wdMessage of wdMessages) {
+                this.newOrUpdatedMessage(wdMessage, "MUTE");
+            }
 
 
-                }
-            });
+            this.ul.slimScroll({ "scrollTo": `${li.position().top}px` });
+
 
         }) as any);
 
 
         for (let wdMessage of this.wdChat.messages) {
 
-            this.newMessage(wdMessage, "MUTE");
+            this.newOrUpdatedMessage(wdMessage, "MUTE");
 
         }
 
@@ -229,7 +226,7 @@ export class UiConversation {
 
                 //NOTE: So that SMS from with no number to reply to can be marked as read.
                 if (!!this.textarea.attr("disabled")) {
-                    this.evtChecked.post({"from": "THIS UA"});
+                    this.evtChecked.post();
                 } else {
                     this.textarea.trigger("focus");
                 }
@@ -254,8 +251,9 @@ export class UiConversation {
     }
 
 
-    /** indexed by wd.Message.id_ */
-    private readonly uiBubbles = new Map<number, UiBubble>();
+    //TODO: Use object references instead of refs.
+    /** indexed by wd.Message.ref */
+    private readonly uiBubbles = new Map<string, UiBubble>();
 
     /** 
      * Place uiBubble in the structure, assume all bubbles already sorted 
@@ -305,13 +303,13 @@ export class UiConversation {
     }
 
     /** new Message or update existing one */
-    public newMessage(wdMessage: wd.Message<"PLAIN">, mute: "MUTE" | undefined = undefined) {
+    public newOrUpdatedMessage(wdMessage: wd.Message<"PLAIN">, mute: "MUTE" | undefined = undefined) {
 
-        if (this.uiBubbles.has(wdMessage.id_)) {
+        if (this.uiBubbles.has(wdMessage.ref)) {
 
-            this.uiBubbles.get(wdMessage.id_)!.structure.remove();
+            this.uiBubbles.get(wdMessage.ref)!.structure.remove();
 
-            this.uiBubbles.delete(wdMessage.id_);
+            this.uiBubbles.delete(wdMessage.ref);
 
         }
 
@@ -350,7 +348,7 @@ export class UiConversation {
 
         }
 
-        this.uiBubbles.set(wdMessage.id_, uiBubble);
+        this.uiBubbles.set(wdMessage.ref, uiBubble);
 
         const isAtBottom = this.placeUiBubble(uiBubble);
 

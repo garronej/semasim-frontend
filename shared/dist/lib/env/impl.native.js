@@ -12,7 +12,7 @@ var default_ = {
     "hostOs": (function () {
         switch (OS) {
             case "android": return "android";
-            case "ios": return "iOS";
+            case "ios": return "ios";
             default: throw new Error("never");
         }
     })()

@@ -48,7 +48,7 @@ export declare namespace isUserLoggedIn {
 export declare namespace declareUa {
     const methodName = "declareUa";
     type Params = {
-        platform: "iOS" | "android";
+        platform: "android" | "ios";
         pushNotificationToken: string;
     };
     type Response = undefined;

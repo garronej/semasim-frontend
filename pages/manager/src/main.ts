@@ -8,12 +8,12 @@ import "frontend-shared/dist/tools/polyfills/Object.assign";
 import * as connection from "frontend-shared/dist/lib/toBackend/connection";
 import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { UiController } from "./UiController";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/base";
-import * as availablePages from "frontend-shared/dist/lib/availablePages";
-import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
+import { dialogApi, startMultiDialogProcess } from "frontend-shared/dist/tools/modal/dialog";
+import * as remoteCoreApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/core";
+import { registerInteractiveAppEvtHandlers } from "frontend-shared/dist/lib/interactiveAppEvtHandlers";
+import { appEvts } from "frontend-shared/dist/lib/toBackend/appEvts";
+import { restartApp } from "frontend-shared/dist/lib/restartApp";
 
-notifyHostWhenPageIsReady();
 
 declare const __dirname: any;
 
@@ -40,10 +40,27 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 async function onLoggedIn(): Promise<UiController> {
 
-    connection.connect({ "requestTurnCred": false });
+    connection.connect(((): connection.ConnectParams => {
+
+        const out: connection.ConnectParams.Browser = {
+            "assertJsRuntimeEnv": "browser",
+            "requestTurnCred": false
+        };
+
+        return out;
+
+    })());
+
+    registerInteractiveAppEvtHandlers(
+        appEvts,
+        remoteCoreApiCaller,
+        dialogApi,
+        startMultiDialogProcess,
+        restartApp
+    );
 
     const uiController = new UiController(
-        await remoteApiCaller.getUsableUserSims()
+        await remoteCoreApiCaller.getUsableUserSims()
     );
 
     $("#page-payload").html("").append(uiController.structure);
@@ -146,13 +163,7 @@ $(document).ready(() => {
         return;
     }
 
-    $("#logout").click(async () => {
-
-        await webApiCaller.logoutUser();
-
-        location.href = `/${availablePages.PageName.login}`
-
-    });
+	$("#logout").click(() => webApiCaller.logoutUser());
 
     onLoggedIn();
 

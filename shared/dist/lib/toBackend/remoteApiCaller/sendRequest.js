@@ -57,8 +57,7 @@ function sendRequest(methodName, params) {
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _c.sent();
-                    restartApp_1.restartApp();
-                    return [2 /*return*/, new Promise(function () { })];
+                    return [2 /*return*/, restartApp_1.restartApp("toBackend/remoteApiCaller/sendRequest " + methodName + " error thrown: " + error_1.message)];
                 case 4: return [2 /*return*/, response];
             }
         });

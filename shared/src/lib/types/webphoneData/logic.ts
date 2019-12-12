@@ -1,10 +1,10 @@
 export * from "./types";
 
 import * as types from "./types";
-import {  decryptThenParseFactory,  stringifyThenEncryptFactory } from "crypto-lib/dist/async/serializer";
+import { decryptThenParseFactory } from "crypto-lib/dist/async/serializer";
 type Decryptor= import("crypto-lib").Decryptor;
-type Encryptor= import ("crypto-lib").Encryptor;
 import { isAscendingAlphabeticalOrder } from "../../../tools/isAscendingAlphabeticalOrder";
+
 
 export async function decryptChat(
     decryptor: Decryptor,
@@ -21,35 +21,9 @@ export async function decryptChat(
             Promise.all(
                 chat.messages.map(message => decryptMessage(decryptor, message))
             )
-        ]);
+        ] as const);
 
     return { ...chat, contactNumber, contactName, contactIndexInSim, messages };
-
-}
-
-/** If input message have no id so will the output message */
-export async function encryptMessage(
-    encryptor: Encryptor,
-    message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>
-): Promise<types.Message<"ENCRYPTED">> {
-
-    const stringifyThenEncrypt = stringifyThenEncryptFactory(encryptor);
-
-    const encryptedMessage: types.Message<"ENCRYPTED"> = {
-        ...message,
-        "text": { "encrypted_string": await stringifyThenEncrypt(message.text) }
-    } as any;
-
-    if ("sentBy" in message && message.sentBy.who === "OTHER") {
-
-        (encryptedMessage as types.Message.Outgoing.StatusReportReceived.SentByOther<"ENCRYPTED">).sentBy = {
-            ...message.sentBy,
-            "email": { "encrypted_string": await stringifyThenEncrypt(message.sentBy.email) }
-        };
-
-    }
-
-    return encryptedMessage;
 
 }
 
@@ -82,16 +56,16 @@ export async function decryptMessage(
 
 /** Best guess on previously opened chat: */
 export function getChatWithLatestActivity(
-    wdInstance: types.Instance<"PLAIN">
+    wdChats: types.Chat<"PLAIN">[]
 ): types.Chat<"PLAIN"> | undefined {
 
     //TODO: what if last seen message not loaded.
     const findMessageByIdAndGetTime = (
         wdChat: types.Chat<"PLAIN">,
-        message_id: number | null
+        messageRef: string | null
     ): number => {
 
-        if (message_id === null) {
+        if (messageRef === null) {
             return 0;
         }
 
@@ -99,13 +73,24 @@ export function getChatWithLatestActivity(
 
             const message = wdChat.messages[i];
 
-            if (message.id_ === message_id) {
-                return message.time;
+            if (message.ref === messageRef) {
+
+                return ( 
+                    message.direction === "OUTGOING" && 
+                    message.status === "STATUS REPORT RECEIVED" && 
+                    message.sentBy.who === "OTHER" &&
+                    message.deliveredTime !== null
+                ) ? message.deliveredTime : message.time;
+
             }
 
         }
 
-        return 0;
+        //return 0;
+        //NOTE: If we did not find the message in the chat it mean that
+        //a message that we have not yet received on the device the last
+        //message seen.
+        return Date.now();
 
     };
 
@@ -134,10 +119,10 @@ export function getChatWithLatestActivity(
     let max = 0;
     let chat: types.Chat<"PLAIN"> | undefined = undefined;
 
-    for (const _chat of wdInstance.chats) {
+    for (const _chat of wdChats) {
 
         const curr = Math.max(
-            findMessageByIdAndGetTime(_chat, _chat.idOfLastMessageSeen),
+            findMessageByIdAndGetTime(_chat, _chat.refOfLastMessageSeen),
             findLastMessageSentByUserAndGetTime(_chat)
         );
 
@@ -163,45 +148,62 @@ export function getChatWithLatestActivity(
  * real temporality of a conversation.
  *
  */
-export function compareMessage(message1: types.Message<"PLAIN">, message2: types.Message<"PLAIN">): -1 | 0 | 1 {
+export const compareMessage = (() => {
 
-    const getOrderingTime = (message: types.Message<"PLAIN">): number => {
+    const getContextualOrderingTime = (() => {
 
-        if (message.direction === "OUTGOING") {
+        const getContextFreeOrderingTime = (message: types.Message<"PLAIN">): number | undefined => {
+
+            if (message.direction === "INCOMING") {
+                return message.time;
+            }
 
             if (message.status === "STATUS REPORT RECEIVED") {
+                return message.deliveredTime ?? message.time;
+            }
 
-                if (message.deliveredTime !== null) {
+            return undefined;
 
-                    return message.deliveredTime;
+        };
 
-                }
+        return (message: types.Message<"PLAIN">, messageComparingAgainst: types.Message<"PLAIN">): number => {
 
-            } else if (!(message.status === "SEND REPORT RECEIVED" && !message.isSentSuccessfully)) {
+            {
 
-                const time = message.time + 60 * 1000;
+                const t1 = getContextFreeOrderingTime(message);
 
-                if (time > Date.now()) {
-
-                    return time;
-
+                if (t1 !== undefined) {
+                    return t1;
                 }
 
             }
 
-        }
+            {
 
-        return message.time;
+                const t2 = getContextFreeOrderingTime(messageComparingAgainst);
+
+                if (t2 !== undefined) {
+                    return t2 + 1;
+                }
+
+            }
+
+            return message.time;
+
+        };
+
+    })();
+
+    return (message1: types.Message<"PLAIN">, message2: types.Message<"PLAIN">): -1 | 0 | 1 => {
+
+        const diff = getContextualOrderingTime(message1, message2) - getContextualOrderingTime(message2, message1);
+
+        return diff !== 0 ? (diff > 0 ? 1 : -1) : 0;
 
     };
 
-    //return Math.sign(getOrderingTime(message1) - getOrderingTime(message2)) as (-1 | 0 | 1);
+})();
 
-    const diff = getOrderingTime(message1) - getOrderingTime(message2);
-
-    return diff !== 0 ? (diff > 0 ? 1 : -1) : 0;
-
-}
 
 /**
  * 
@@ -281,7 +283,7 @@ export function getUnreadMessagesCount(wdChat: types.Chat<"PLAIN">): number {
             )
         ) {
 
-            if (wdChat.idOfLastMessageSeen === message.id_) {
+            if (wdChat.refOfLastMessageSeen === message.ref) {
                 break;
             }
 

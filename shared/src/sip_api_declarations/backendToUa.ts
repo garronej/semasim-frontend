@@ -216,97 +216,115 @@ export namespace shouldAppendPromotionalMessage {
 
 //WebphoneData Sync things:
 
-export namespace getOrCreateInstance {
 
-    export const methodName = "getInstance";
+export namespace wd_getUserSimChats {
 
-    export type Params = { imsi: string; };
+    export const methodName = "wd_getUserSimChats";
 
-    export type Response = {
-        instance_id: number;
-        chats: wd.Chat<"ENCRYPTED">[];
-    };
+    /** If maxMessageCountByChat is undefined all message history will be pulled */
+    export type Params = { imsi: string; maxMessageCountByChat: number; };
+
+    export type Response = wd.Chat<"ENCRYPTED">[];
 
 }
 
-export namespace newChat {
+export namespace wd_newChat {
 
-    export const methodName = "newChat";
+    export const methodName = "wd_newChat";
 
     export type Params = {
-        instance_id: number;
+        imsi: string;
+        chatRef: string;
         contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
         contactName: wd.Chat<"ENCRYPTED">["contactName"];
         contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
 
-    export type Response = { chat_id: number; };
+    export type Response = undefined;
 
 }
 
-export namespace fetchOlderMessages {
+export namespace wd_fetchOlderMessages {
 
-    export const methodName = "fetchOlderMessages";
+    export const methodName = "wd_fetchOlderMessages";
 
     export type Params = {
-        chat_id: number;
-        olderThanMessageId: number;
+        imsi: string;
+        chatRef: string;
+        olderThanTime: number;
+        maxMessageCount: number;
     };
 
-    /** Message are sorted from the older to the newest */
+    //Message are sorted from the older to the newest ( but just by message time )
     export type Response = wd.Message<"ENCRYPTED">[];
 
 }
 
-export namespace updateChat {
+export namespace wd_updateChatLastMessageSeen {
 
-    export const methodName = "updateChat";
+    export const methodName = "wd_updateChatLastMessageSeen";
 
     export type Params = {
-        chat_id: number;
+        imsi: string;
+        chatRef: string;
+        refOfLastMessageSeen: string; 
+    };
+
+    export type Response = undefined;
+
+}
+
+export namespace wd_updateChatContactInfos {
+
+    export const methodName = "wd_updateChatContactInfos";
+
+    export type Params = {
+        imsi: string;
+        chatRef: string;
         contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
         contactName?: wd.Chat<"ENCRYPTED">["contactName"];
-        idOfLastMessageSeen?: number | null; /* id_ of last message not send by user */
     };
 
     export type Response = undefined;
 
 }
 
-export namespace destroyChat {
+export namespace wd_destroyChat {
 
-    export const methodName = "destroyChat";
+    export const methodName = "wd_destroyChat";
 
-    export type Params = { chat_id: number; };
+    export type Params = { imsi: string; chatRef: string; };
 
     export type Response = undefined;
 
 }
 
-export namespace newMessage {
 
-    export const methodName = "newMessage";
+export namespace wd_newMessage {
+
+    export const methodName = "wd_newMessage";
 
     export type Params = {
-        chat_id: number;
-        message: wd.NoId<
+        imsi: string;
+        chatRef: string;
+        message: 
             wd.Message.Incoming<"ENCRYPTED"> |
-            wd.Message.Outgoing.Pending<"ENCRYPTED"> |
-            wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">
-        >;
+            wd.Message.Outgoing.Pending<"ENCRYPTED">
+        ;
     };
 
-    export type Response = { message_id: number; };
+    export type Response = undefined;
 
 }
 
+export namespace wd_notifySendReportReceived {
 
-export namespace notifySendReportReceived {
-
-    export const methodName = "notifySendReportReceived";
+    export const methodName = "wd_notifySendReportReceived";
 
     export type Params = {
-        message_id: number;
+        imsi: string;
+        chatRef: string;
+        messageRef: string;
         isSentSuccessfully: boolean;
     };
 
@@ -314,13 +332,16 @@ export namespace notifySendReportReceived {
 
 }
 
-export namespace notifyStatusReportReceived {
+export namespace wd_notifyStatusReportReceived {
 
-    export const methodName = "notifyStatusReportReceived";
+    export const methodName = "wd_notifyStatusReportReceived";
 
     export type Params = {
-        message_id: number;
+        imsi: string;
+        chatRef: string;
+        messageRef: string;
         deliveredTime: number | null;
+        sentBy: wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
     };
 
     export type Response = undefined;

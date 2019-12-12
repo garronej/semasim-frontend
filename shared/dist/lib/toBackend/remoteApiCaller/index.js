@@ -1,7 +1,11 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./base"));
-__export(require("./webphoneData"));
+var core = require("./core");
+exports.core = core;
+var webphoneData = require("./webphoneData");
+var sendRequest_1 = require("./sendRequest");
+var appEvts_1 = require("../appEvts");
+var getWdApiCallerForSpecificSimFactory = function (encryptorDecryptor, userEmail) {
+    return webphoneData.getApiCallerForSpecificSimFactory(sendRequest_1.sendRequest, appEvts_1.appEvts, encryptorDecryptor, userEmail);
+};
+exports.getWdApiCallerForSpecificSimFactory = getWdApiCallerForSpecificSimFactory;

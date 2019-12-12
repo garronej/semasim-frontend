@@ -1,13 +1,10 @@
 export * from "./types";
 import * as types from "./types";
 declare type Decryptor = import("crypto-lib").Decryptor;
-declare type Encryptor = import("crypto-lib").Encryptor;
 export declare function decryptChat(decryptor: Decryptor, chat: types.Chat<"ENCRYPTED">): Promise<types.Chat<"PLAIN">>;
-/** If input message have no id so will the output message */
-export declare function encryptMessage(encryptor: Encryptor, message: types.Message<"PLAIN"> | types.NoId<types.Message<"PLAIN">>): Promise<types.Message<"ENCRYPTED">>;
 export declare function decryptMessage(decryptor: Decryptor, encryptedMessage: types.Message<"ENCRYPTED">): Promise<types.Message<"PLAIN">>;
 /** Best guess on previously opened chat: */
-export declare function getChatWithLatestActivity(wdInstance: types.Instance<"PLAIN">): types.Chat<"PLAIN"> | undefined;
+export declare function getChatWithLatestActivity(wdChats: types.Chat<"PLAIN">[]): types.Chat<"PLAIN"> | undefined;
 /**
  *
  * message1  < ( older than )  message1  => -1
@@ -18,7 +15,7 @@ export declare function getChatWithLatestActivity(wdInstance: types.Instance<"PL
  * real temporality of a conversation.
  *
  */
-export declare function compareMessage(message1: types.Message<"PLAIN">, message2: types.Message<"PLAIN">): -1 | 0 | 1;
+export declare const compareMessage: (message1: types.Message<"PLAIN">, message2: types.Message<"PLAIN">) => 0 | 1 | -1;
 /**
  *
  * chat1  <  chat2  => -1

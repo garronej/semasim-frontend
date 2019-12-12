@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
@@ -22,7 +22,7 @@ export class UiHeader {
 
         this.structure.find(".id_sip_registration_in_progress")[(
             !this.userSim.reachableSimState ||
-            this.isRegistered()
+            this.getIsSipRegistered()
         ) ? "hide" : "show"]();
 
         {
@@ -75,37 +75,7 @@ export class UiHeader {
 
             });
 
-        (() => {
-
-            const $i = this.structure.find(".id_sip_registration_in_progress");
-
-            if (!this.userSim.reachableSimState) {
-
-                $i.hide();
-
-                return;
-
-            }
-
-            if ($i.css("display") === "none") {
-            }
-
-
-        })();
-
-        {
-
-            const $i = this.structure.find(".id_sip_registration_in_progress");
-
-            if (!this.userSim.reachableSimState) {
-                $i.hide();
-            } else if (!this.isSimOnlinePreviousState) {
-                $i.show();
-            }
-
-        }
-
-        this.isSimOnlinePreviousState = !!this.userSim.reachableSimState;
+        console.log(JSON.stringify(this.userSim, null, 2));
 
         (() => {
 
@@ -180,9 +150,9 @@ export class UiHeader {
 
             })());
 
-            const $button= divConf.find("button");
+            const $button = divConf.find("button");
 
-            if( ongoingCall.isUserInCall ){
+            if (ongoingCall.isUserInCall) {
                 $button.hide();
                 return;
             }
@@ -198,11 +168,10 @@ export class UiHeader {
 
     }
 
-    private isSimOnlinePreviousState = false;
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        private readonly isRegistered: () => boolean
+        private readonly getIsSipRegistered: () => boolean
     ) {
 
         this.notify();

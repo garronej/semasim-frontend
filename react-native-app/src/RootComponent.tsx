@@ -1,106 +1,100 @@
-import * as React from "react";
-import { Dialog } from "./globalComponents/Dialog";
-import { LoginRouter } from "./loginScreens/LoginRouter";
-import { PhoneScreen } from "./PhoneScreen";
-import * as backendConnection from "frontend-shared/dist/lib/toBackend/connection";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import { NoBackendConnectionBanner } from "./globalComponents/NoBackendConnectionBanner";
-import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotification";
 
+import * as React from "react";
+import * as rn from "react-native";
+import { appLifeCycleEvents, addAppLifeCycleListeners } from "./lib/appLifeCycle";
+import { redrawOnRotate } from "./lib/redrawOnRotate";
+import { fixDimensions } from "./lib/dimensions";
+import { restartAppIfPushNotificationTokenChange, testForegroundPushNotification } from "./lib/restartAppIfPushNotificationTokenChange";
+import * as imageAssets from "./lib/imageAssets";
+import { SplashImage } from "./genericComponents/SplashImage";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log.apply(console, ["[RootComponent]", ...args])) :
     (() => { });
 
+let SplashScreenComponent: typeof import("./SplashScreenComponent").SplashScreenComponent;
 
-log("[RootComponent] imported");
+log("imported");
 
-const evtNeedLogin = new VoidSyncEvent();
-const evtLoggedIn= new VoidSyncEvent();
+const prDoneImporting = (async () => {
 
-backendConnection.connect({
-    "requestTurnCred": true,
-    "login": () => {
+    const start = Date.now();
 
-        (async () => {
+    log("Start Importing app logic");
 
-            if (evtLoggedIn.getHandlers().length === 0) {
-                await evtNeedLogin.evtAttach.waitFor();
-            }
+    await import("./lib/importPolyfills")
+        .then(({ run }) => run())
 
-            evtNeedLogin.post();
+    await Promise.all(
+        [
+            import("./lib/evalDependencies"),
+            import("./lib/exposeNativeModules")
+        ].map(pr => pr.then(({ run }) => run()))
+    );
 
-        })();
+    log(`Done pre importing ${Date.now() - start} !`);
 
-        return evtLoggedIn.waitFor();
+    SplashScreenComponent = (await import("./SplashScreenComponent")).SplashScreenComponent;
 
-    }
-});
+})();
 
-evtBackgroundPushNotification.attach(notYetDefined => {
 
-    log("Backend push notification! ", notYetDefined);
+addAppLifeCycleListeners([
+    redrawOnRotate,
+    fixDimensions,
+    restartAppIfPushNotificationTokenChange,
+    testForegroundPushNotification
+]);
 
-});
+type State = { isDoneImporting: boolean; };
 
-export type State = { isLoggedIn: boolean; };
+class RootComponent extends React.Component<{}, State> {
 
-export class RootComponent extends React.Component<{}, State> {
-
-    public readonly state: Readonly<State> = { "isLoggedIn": false };
-
-    public setState<K extends keyof State>(
-        state: Pick<State, K>,
-        callback?: () => void
-    ): void {
-
-        super.setState(state, () => {
-
-            if (this.state.isLoggedIn) {
-                evtLoggedIn.post();
-            }
-
-            if (!!callback) {
-                callback();
-            }
-
-        });
-
-    }
-
+    public readonly state: Readonly<State> = { "isDoneImporting": false };
 
     constructor(props: any) {
+
         super(props);
 
-        log("[RootComponent] constructor");
+        log("constructor");
+
+        appLifeCycleEvents.evtConstructor.post(this);
+
+        prDoneImporting.then(() => this.setState({ "isDoneImporting": true }));
 
     }
 
     public componentDidMount = () => {
 
-        log("[RootComponent] componentDidMount");
+        log("componentDidMount");
 
-        evtNeedLogin.attach(this, () => this.setState({ "isLoggedIn": false }));
+        appLifeCycleEvents.evtComponentDidMount.post(this);
 
     };
 
     public componentWillUnmount = () => {
 
-        log("[RootComponent] componentWillUnmount");
+        log("componentWillUnmount");
 
-        evtNeedLogin.detach(this);
+        appLifeCycleEvents.evtComponentWillUnmount.post(this);
 
     };
 
-    public render = () => [
-        <Dialog key={0} />,
-        <NoBackendConnectionBanner key={1} />,
-        this.state.isLoggedIn ?
-            <PhoneScreen key={2} />
-            :
-            <LoginRouter key={2} onLoggedIn={() => this.setState({ "isLoggedIn": true })} />
-    ];
+    public render = () => (
+        <rn.View
+            style={{ flex: 1 /*, backgroundColor: "#1c17ad"*/ }}
+            onLayout={layoutChangeEvent => appLifeCycleEvents.evtRootViewOnLayout.post({ layoutChangeEvent, "component": this })}
+        >
+            {!this.state.isDoneImporting ?
+                <SplashImage imageSource={imageAssets.semasimLogo1} /> :
+                <SplashScreenComponent />}
+        </rn.View>
+    );
 
 }
 
+
+            //{/*this.state.isDoneImporting && <SplashScreenComponent />*/}
+
+export const componentProvider: rn.ComponentProvider = () => () => <RootComponent />;
 

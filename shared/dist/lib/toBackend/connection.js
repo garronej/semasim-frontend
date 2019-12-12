@@ -64,8 +64,9 @@ var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var tryLoginFromStoredCredentials_1 = require("../tryLoginFromStoredCredentials");
-var events_1 = require("./events");
+var appEvts_1 = require("./appEvts");
 var restartApp_1 = require("../restartApp");
+var networkStateMonitoring = require("../networkStateMonitoring");
 exports.url = "wss://web." + env_1.env.baseDomain;
 var idString = "toBackend";
 env_1.env.isDevEnv;
@@ -88,25 +89,16 @@ var notConnectedUserFeedback;
     var setVisibilityWithMessage;
     function setVisibility(isVisible) {
         var state = isVisible ?
-            ({ isVisible: isVisible, "message": "Connecting to Semasim..." }) :
+            ({ isVisible: isVisible, "message": "Connecting..." }) :
             ({ isVisible: isVisible });
         setVisibilityWithMessage(state);
     }
     notConnectedUserFeedback.setVisibility = setVisibility;
-    /** NOTE: To call from react-native project */
     function provideCustomImplementation(setVisibilityWithMessageImpl) {
         setVisibilityWithMessage = setVisibilityWithMessageImpl;
     }
     notConnectedUserFeedback.provideCustomImplementation = provideCustomImplementation;
-})(notConnectedUserFeedback = exports.notConnectedUserFeedback || (exports.notConnectedUserFeedback = {}));
-notConnectedUserFeedback.provideCustomImplementation(function (state) {
-    if (state.isVisible) {
-        dialog_1.dialogApi.loading(state.message, 1200);
-    }
-    else {
-        dialog_1.dialogApi.dismissLoading();
-    }
-});
+})(notConnectedUserFeedback || (notConnectedUserFeedback = {}));
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
     log: log,
@@ -120,72 +112,76 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
  */
 exports.connect = (function () {
     var hasBeenInvoked = false;
-    return function (params) {
+    return function connect(params) {
         if (hasBeenInvoked) {
-            return;
+            throw new Error("Should be invoked only once");
         }
         hasBeenInvoked = true;
-        //We register 'offline' event only on the first call of connect()
-        //TODO: React native.
-        if (env_1.env.jsRuntimeEnv === "browser") {
-            window.addEventListener("offline", function () {
+        if (params.assertJsRuntimeEnv !== env_1.env.jsRuntimeEnv) {
+            throw new Error("Wrong params for js runtime environnement");
+        }
+        notConnectedUserFeedback.provideCustomImplementation(params.assertJsRuntimeEnv === "react-native" ?
+            params.notConnectedUserFeedback :
+            (function (state) {
+                if (state.isVisible) {
+                    dialog_1.dialogApi.loading(state.message, 1200);
+                }
+                else {
+                    dialog_1.dialogApi.dismissLoading();
+                }
+            }));
+        //TODO: See if of any use
+        networkStateMonitoring.getApi().then(function (api) {
+            return api.evtStateChange.attach(function () { return !api.getIsOnline(); }, function () {
                 var socket = get();
                 if (socket instanceof Promise) {
                     return;
                 }
-                socket.destroy("Browser is offline");
+                socket.destroy("Internet connection lost");
             });
-        }
-        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED", params.login);
+        });
+        AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.evtChange.attach(function (authenticatedSessionDescriptorSharedData) { return !authenticatedSessionDescriptorSharedData; }, function () {
+            var socket = get();
+            if (socket instanceof Promise) {
+                return;
+            }
+            socket.destroy("User no longer authenticated");
+        });
+        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED");
     };
 })();
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 var socketCurrent = undefined;
-function connectRecursive(requestTurnCred, login) {
+/** Assert user logged in, will restart app as soon as user is detected as no longer logged in */
+function connectRecursive(requestTurnCred) {
     return __awaiter(this, void 0, void 0, function () {
-        var result, webSocket, _a, _b, _c, _d, _e, _f, error_1, socket;
+        var loginAttemptResult, connect_sid, webSocket, socket;
         var _this = this;
-        return __generator(this, function (_g) {
-            switch (_g.label) {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     notConnectedUserFeedback.setVisibility(true);
                     return [4 /*yield*/, tryLoginFromStoredCredentials_1.tryLoginFromStoredCredentials()];
                 case 1:
-                    result = _g.sent();
-                    if (!(result === "NO VALID CREDENTIALS")) return [3 /*break*/, 4];
-                    if (!!!login) return [3 /*break*/, 3];
-                    notConnectedUserFeedback.setVisibility(false);
-                    return [4 /*yield*/, login()];
-                case 2:
-                    _g.sent();
-                    notConnectedUserFeedback.setVisibility(true);
-                    return [3 /*break*/, 4];
-                case 3:
-                    if (env_1.env.jsRuntimeEnv === "react-native") {
-                        throw new Error("never: no login function provided");
+                    loginAttemptResult = _a.sent();
+                    if (loginAttemptResult !== "LOGGED IN") {
+                        restartApp_1.restartApp("User is no longer logged in");
+                        return [2 /*return*/];
                     }
-                    restartApp_1.restartApp();
-                    return [2 /*return*/];
-                case 4:
-                    _g.trys.push([4, 6, , 7]);
-                    _a = WebSocket.bind;
-                    _c = (_b = urlGetParameters).buildUrl;
-                    _d = [exports.url];
-                    _e = {};
-                    _f = "connect_sid";
                     return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
-                case 5:
-                    webSocket = new (_a.apply(WebSocket, [void 0, _c.apply(_b, _d.concat([(_e[_f] = (_g.sent()).connect_sid,
-                                _e.requestTurnCred = requestTurnCred,
-                                _e)])), "SIP"]))();
-                    return [3 /*break*/, 7];
-                case 6:
-                    error_1 = _g.sent();
-                    log("WebSocket construction error: " + error_1.message);
-                    //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-                    connectRecursive(requestTurnCred, login);
-                    return [2 /*return*/];
-                case 7:
+                case 2:
+                    connect_sid = (_a.sent()).connect_sid;
+                    try {
+                        webSocket = new WebSocket(urlGetParameters.buildUrl(exports.url, {
+                            connect_sid: connect_sid,
+                            requestTurnCred: requestTurnCred
+                        }), "SIP");
+                    }
+                    catch (error) {
+                        log("WebSocket construction error: " + error.message);
+                        connectRecursive(requestTurnCred);
+                        return [2 /*return*/];
+                    }
                     socket = new sip.Socket(webSocket, true, {
                         "remoteAddress": "web." + env_1.env.baseDomain,
                         "remotePort": 443
@@ -215,10 +211,10 @@ function connectRecursive(requestTurnCred, login) {
                     });
                     socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
-                            if (events_1.evtOpenElsewhere.postCount !== 0) {
+                            if (appEvts_1.appEvts.evtOpenElsewhere.postCount !== 0) {
                                 return [2 /*return*/];
                             }
-                            connectRecursive(requestTurnCred, login);
+                            connectRecursive(requestTurnCred);
                             return [2 /*return*/];
                         });
                     }); });

@@ -5,9 +5,6 @@ import { UiController } from "./UiController";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import "frontend-shared/dist/tools/polyfills/Object.assign";
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
-import { notifyHostWhenPageIsReady } from "frontend-shared/dist/lib/notifyHostWhenPageIsReady";
-
-notifyHostWhenPageIsReady();
 
 declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;

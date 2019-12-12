@@ -39,12 +39,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("./env");
 var webApiCaller = require("./webApiCaller");
 var Credentials_1 = require("./localStorage/Credentials");
-var prResult = undefined;
+var prCurrentRequestResult = undefined;
 function tryLoginFromStoredCredentials() {
-    if (prResult !== undefined) {
-        return prResult;
+    if (prCurrentRequestResult !== undefined) {
+        return prCurrentRequestResult;
     }
-    prResult = (function callee() {
+    prCurrentRequestResult = (function callee() {
         return __awaiter(this, void 0, void 0, function () {
             var isUserLoggedIn, error_1, _a, email, secret, uaInstanceId, resp_1;
             return __generator(this, function (_b) {
@@ -116,7 +116,7 @@ function tryLoginFromStoredCredentials() {
             });
         });
     })();
-    prResult.then(function () { return prResult = undefined; });
+    prCurrentRequestResult.then(function () { return prCurrentRequestResult = undefined; });
     return tryLoginFromStoredCredentials();
 }
 exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;

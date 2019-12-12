@@ -77,62 +77,6 @@ var runExclusive = require("run-exclusive");
 var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-function uaInstantiationHelper(params) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, towardUserDecryptor, towardUserEncryptKeyStr, getTowardSimEncryptor, pushNotificationToken, _b, AuthenticatedSessionDescriptorSharedData, backendEvents, connection, _c;
-        var _this = this;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
-                case 0:
-                    _a = params.cryptoRelatedParams, towardUserDecryptor = _a.towardUserDecryptor, towardUserEncryptKeyStr = _a.towardUserEncryptKeyStr, getTowardSimEncryptor = _a.getTowardSimEncryptor, pushNotificationToken = params.pushNotificationToken;
-                    return [4 /*yield*/, Promise.all([
-                            Promise.resolve().then(function () { return require("./localStorage/AuthenticatedSessionDescriptorSharedData"); }),
-                            Promise.resolve().then(function () { return require("./toBackend/events"); }),
-                            Promise.resolve().then(function () { return require("./toBackend/connection"); })
-                        ])];
-                case 1:
-                    _b = __read.apply(void 0, [_d.sent(), 3]), AuthenticatedSessionDescriptorSharedData = _b[0].AuthenticatedSessionDescriptorSharedData, backendEvents = _b[1], connection = _b[2];
-                    _c = Ua.bind;
-                    return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                            var _a, email, uaInstanceId;
-                            return __generator(this, function (_b) {
-                                switch (_b.label) {
-                                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.get()];
-                                    case 1:
-                                        _a = _b.sent(), email = _a.email, uaInstanceId = _a.uaInstanceId;
-                                        return [2 /*return*/, {
-                                                "instance": uaInstanceId,
-                                                "pushToken": pushNotificationToken,
-                                                towardUserEncryptKeyStr: towardUserEncryptKeyStr,
-                                                "userEmail": email
-                                            }];
-                                }
-                            });
-                        }); })()];
-                case 2: return [2 /*return*/, new (_c.apply(Ua, [void 0, _d.sent(),
-                        towardUserDecryptor,
-                        (function () {
-                            var evtUnregisteredByGateway = new ts_events_extended_1.SyncEvent();
-                            var onEvt = function (_a) {
-                                var imsi = _a.sim.imsi;
-                                return evtUnregisteredByGateway.post({ imsi: imsi });
-                            };
-                            backendEvents.evtSimPasswordChanged.attach(onEvt);
-                            backendEvents.evtSimPermissionLost.attach(onEvt);
-                            backendEvents.evtSimReachabilityStatusChange.attach(function (_a) {
-                                var reachableSimState = _a.reachableSimState;
-                                return reachableSimState === undefined;
-                            }, onEvt);
-                            return evtUnregisteredByGateway;
-                        })(),
-                        getTowardSimEncryptor,
-                        function (imsi) { return new JsSipSocket(imsi, connection); },
-                        function () { return backendEvents.rtcIceEServer.getCurrent(); }]))()];
-            }
-        });
-    });
-}
-exports.uaInstantiationHelper = uaInstantiationHelper;
 var Ua = /** @class */ (function () {
     /** evtUnregisteredByGateway should post when a sim that was previously
      * reachable goes unreachable, when this happen SIP packets can no longer be
@@ -152,6 +96,28 @@ var Ua = /** @class */ (function () {
                 }
             })() });
     }
+    Ua.instantiate = function (params) {
+        var uaInstanceId = params.uaInstanceId, email = params.email, _a = params.cryptoRelatedParams, towardUserDecryptor = _a.towardUserDecryptor, towardUserEncryptKeyStr = _a.towardUserEncryptKeyStr, getTowardSimEncryptor = _a.getTowardSimEncryptor, pushNotificationToken = params.pushNotificationToken, connection = params.connection, fromBackendEvents = params.fromBackendEvents;
+        return new Ua({
+            "instance": uaInstanceId,
+            "pushToken": pushNotificationToken,
+            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
+            "userEmail": email
+        }, towardUserDecryptor, (function () {
+            var evtUnregisteredByGateway = new ts_events_extended_1.SyncEvent();
+            var onEvt = function (_a) {
+                var imsi = _a.sim.imsi;
+                return evtUnregisteredByGateway.post({ imsi: imsi });
+            };
+            fromBackendEvents.evtSimPasswordChanged.attach(onEvt);
+            fromBackendEvents.evtSimPermissionLost.attach(onEvt);
+            fromBackendEvents.evtSimReachabilityStatusChange.attach(function (_a) {
+                var reachableSimState = _a.reachableSimState;
+                return reachableSimState === undefined;
+            }, onEvt);
+            return evtUnregisteredByGateway;
+        })(), getTowardSimEncryptor, function (imsi) { return new JsSipSocket(imsi, connection); }, function () { return fromBackendEvents.rtcIceEServer.getCurrent(); });
+    };
     Ua.prototype.newUaSim = function (usableUserSim) {
         var _this = this;
         var sim = usableUserSim.sim;
@@ -171,7 +137,6 @@ var UaSim = /** @class */ (function () {
     /** Use UA.prototype.newUaSim to instantiate an UaSim */
     function UaSim(uaDescriptor, towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, jsSipSocket, imsi, sipPassword, towardSimEncryptor) {
         var _this = this;
-        this.uaDescriptor = uaDescriptor;
         this.towardUserDecryptor = towardUserDecryptor;
         this.getRtcIceServer = getRtcIceServer;
         this.jsSipSocket = jsSipSocket;
@@ -182,15 +147,15 @@ var UaSim = /** @class */ (function () {
         this.isRegistered = false;
         this.evtIncomingMessage = new ts_events_extended_1.SyncEvent();
         this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
-            var onProcessed;
-            var pr = new Promise(function (resolve) { return onProcessed = resolve; });
-            _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { "onProcessed": onProcessed }));
+            var handlerCb;
+            var pr = new Promise(function (resolve) { return handlerCb = resolve; });
+            _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { handlerCb: handlerCb }));
             return pr;
         });
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var uri = this.jsSipSocket.sip_uri;
         var register_expires = 61;
-        //NOTE: Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
+        //NOTE: Do not put more less than 60 or more than 7200 for register expire ( asterisk will respond with 60 or 7200 )
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri: uri,
@@ -217,30 +182,29 @@ var UaSim = /** @class */ (function () {
                     console.log("Sip registration has expired while app was in the background");
                     this.jsSipUa.emit("unregistered");
                 }
-                else {
-                    console.log("Ua registration expiring for " + imsi);
-                }
-                console.log("re-registering");
                 this.jsSipUa.register();
                 return [2 /*return*/];
             });
         }); });
         evtUnregisteredByGateway.attach(function () { return _this.jsSipUa.emit("unregistered"); });
         /*
-        evt 'registered' is posted only when register change
+        event 'registered' is posted only when register change
         so we use this instead.
         */
-        this.jsSipSocket.evtSipPacket.attach(function (sipPacket) { return (!sip.matchRequest(sipPacket) &&
-            sipPacket.headers.cseq.method === "REGISTER" &&
-            sipPacket.status === 200); }, function () {
+        this.jsSipSocket.evtSipRegistrationSuccess.attach(function () {
             lastRegisterTime = Date.now();
+            if (_this.isRegistered) {
+                return;
+            }
             _this.isRegistered = true;
-            _this.evtRegistrationStateChanged.post(true);
+            _this.evtRegistrationStateChanged.post(_this.isRegistered);
         });
         this.jsSipUa.on("unregistered", function () {
-            console.log("ua sim unregistered");
+            if (!_this.isRegistered) {
+                return;
+            }
             _this.isRegistered = false;
-            _this.evtRegistrationStateChanged.post(false);
+            _this.evtRegistrationStateChanged.post(_this.isRegistered);
         });
         this.jsSipUa.on("newMessage", function (_a) {
             var originator = _a.originator, request = _a.request;
@@ -258,9 +222,25 @@ var UaSim = /** @class */ (function () {
         });
         this.jsSipUa.start();
     }
+    /*
     //TODO: If no response to register do something
-    UaSim.prototype.register = function () {
+    public register() {
+
         this.jsSipUa.register();
+
+    }
+    */
+    UaSim.prototype.register = function () {
+        var _this = this;
+        this.jsSipUa.register();
+        Promise.race([
+            this.jsSipSocket.evtUnderlyingSocketClose.waitFor()
+                .then(function () { throw new Error("Closed before registered"); }),
+            this.jsSipSocket.evtSipRegistrationSuccess.waitFor()
+        ]).catch(function () {
+            console.log("[Ua] socket closed while a SIP registration was ongoing, retrying SIP REGISTER");
+            _this.register();
+        });
     };
     UaSim.prototype.unregister = function () {
         if (!this.isRegistered) {
@@ -493,20 +473,26 @@ var JsSipSocket = /** @class */ (function () {
     function JsSipSocket(imsi, connection) {
         var _this = this;
         this.connection = connection;
-        this.evtSipPacket = new ts_events_extended_1.SyncEvent();
+        this.evtSipRegistrationSuccess = new ts_events_extended_1.VoidSyncEvent();
+        this.evtUnderlyingSocketClose = new ts_events_extended_1.VoidSyncEvent();
         this.via_transport = "WSS";
         this.url = this.connection.url;
         this.messageOkDelays = new Map();
         this.sip_uri = "sip:" + imsi + "@" + env_1.env.baseDomain;
         var onBackedSocketConnect = function (backendSocket) {
+            backendSocket.evtClose.attachOnce(function () { return _this.evtUnderlyingSocketClose.post(); });
             {
                 var onSipPacket = function (sipPacket) {
                     if (readImsi_1.readImsi(sipPacket) !== imsi) {
                         return;
                     }
                     _this.sdpHacks("INCOMING", sipPacket);
-                    _this.evtSipPacket.post(sipPacket);
                     _this.ondata(sip.toData(sipPacket).toString("utf8"));
+                    if (!sip.matchRequest(sipPacket) &&
+                        sipPacket.headers.cseq.method === "REGISTER" &&
+                        sipPacket.status === 200) {
+                        _this.evtSipRegistrationSuccess.post();
+                    }
                 };
                 backendSocket.evtRequest.attach(onSipPacket);
                 backendSocket.evtResponse.attach(onSipPacket);
@@ -569,18 +555,6 @@ var JsSipSocket = /** @class */ (function () {
     JsSipSocket.prototype.disconnect = function () {
         throw new Error("JsSip should not call disconnect");
     };
-    /**
-     * To call when receiving as SIP MESSAGE
-     * to prevent directly sending the 200 OK
-     * response immediately but rather wait
-     * until some action have been completed.
-     *
-     * @param request the request prop of the
-     * eventData emitted by JsSIP UA for the
-     * "newMessage" event. ( when originator === remote )
-     * @param pr The response to the SIP MESSAGE
-     * will not be sent until this promise resolve.
-     */
     JsSipSocket.prototype.setMessageOkDelay = function (request, pr) {
         this.messageOkDelays.set(request.getHeader("Call-ID"), pr);
     };

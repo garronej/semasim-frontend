@@ -36,10 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
 var localStorageApi = require("./localStorageApi");
 var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
+    /** Can be used to track when the user is logged in */
+    AuthenticatedSessionDescriptorSharedData.evtChange = new ts_events_extended_1.SyncEvent();
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
@@ -58,7 +61,9 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, isPresent()];
+                    case 0:
+                        AuthenticatedSessionDescriptorSharedData.evtChange.post(undefined);
+                        return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
@@ -97,6 +102,7 @@ var AuthenticatedSessionDescriptorSharedData;
                     case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
+                        AuthenticatedSessionDescriptorSharedData.evtChange.post(authenticatedSessionDescriptorSharedData);
                         return [2 /*return*/];
                 }
             });

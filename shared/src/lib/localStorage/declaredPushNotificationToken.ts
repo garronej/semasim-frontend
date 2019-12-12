@@ -24,5 +24,15 @@ export async function set(value: string): Promise<void> {
 
 }
 
+export async function remove() {
+
+    if (null === await get()) {
+        return;
+    }
+
+    await localStorageApi.removeItem(key);
+
+}
+
 
 

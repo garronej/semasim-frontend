@@ -71,7 +71,7 @@ export namespace declareUa {
     export const methodName = "declareUa";
 
     export type Params = { 
-        platform: "iOS" | "android";
+        platform: "android" | "ios";
         pushNotificationToken: string;
     };
 

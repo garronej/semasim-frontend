@@ -4,31 +4,35 @@ import * as sip from "ts-sip";
 declare type phoneNumber = import("phone-number/dist/lib").phoneNumber;
 declare type Encryptor = import("./crypto/cryptoLibProxy").Encryptor;
 declare type Decryptor = import("./crypto/cryptoLibProxy").Decryptor;
-export declare type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 declare type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (...args: any) => Promise<infer R> ? R : any;
-export declare function uaInstantiationHelper(params: {
-    cryptoRelatedParams: AsyncReturnType<typeof import("./crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa")["setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa"]>;
-    pushNotificationToken: string;
-}): Promise<Ua>;
+declare type ParamsNeededToInstantiateUa = AsyncReturnType<typeof import("./crypto/appCryptoSetupHelper")["appCryptoSetupHelper"]>["paramsNeededToInstantiateUa"];
+declare type ConnectionApi = {
+    url: string;
+    evtConnect: SyncEvent<sip.Socket>;
+    get: () => Promise<sip.Socket> | sip.Socket;
+};
+export declare type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 export declare class Ua {
     private towardUserDecryptor;
     private evtUnregisteredByGateway;
     private getTowardSimEncryptor;
     private getJsSipSocket;
     private getRtcIceServer;
+    static instantiate(params: {
+        email: string;
+        uaInstanceId: string;
+        cryptoRelatedParams: ParamsNeededToInstantiateUa;
+        pushNotificationToken: string;
+        connection: ConnectionApi;
+        fromBackendEvents: import("./toBackend/appEvts").SubsetOfAppEvts<"evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer">;
+    }): Ua;
     descriptor: gwTypes.Ua;
     /** evtUnregisteredByGateway should post when a sim that was previously
      * reachable goes unreachable, when this happen SIP packets can no longer be
      * routed to the gateway and the gateway unregister all the SIP contact
      * It happen also when an user lose access to sim or need to refresh sim password.
      * */
-    constructor(uaDescriptorWithoutPlatform: Omit<gwTypes.Ua, "platform">, towardUserDecryptor: Decryptor, evtUnregisteredByGateway: SyncEvent<{
-        imsi: string;
-    }>, getTowardSimEncryptor: (usableUserSim: {
-        towardSimEncryptKeyStr: string;
-    }) => {
-        towardSimEncryptor: Encryptor;
-    }, getJsSipSocket: (imsi: string) => JsSipSocket, getRtcIceServer: () => Promise<RTCIceServer>);
+    private constructor();
     newUaSim(usableUserSim: {
         sim: {
             imsi: string;
@@ -38,7 +42,6 @@ export declare class Ua {
     }): UaSim;
 }
 export declare class UaSim {
-    readonly uaDescriptor: gwTypes.Ua;
     private readonly towardUserDecryptor;
     private getRtcIceServer;
     private readonly jsSipSocket;
@@ -54,8 +57,8 @@ export declare class UaSim {
     unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.ConversationCheckedOutFromOtherUa;
-        onProcessed: () => void;
+        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+        handlerCb: () => void;
     }>;
     private onMessage;
     private postEvtIncomingMessage;
@@ -94,25 +97,13 @@ interface IjsSipSocket {
     ondisconnect(error: boolean, code?: number, reason?: string): void;
     ondata(data: string): boolean;
 }
-declare class JsSipSocket implements IjsSipSocket {
-    private readonly connection;
-    readonly evtSipPacket: SyncEvent<sip.Packet>;
-    readonly via_transport: sip.TransportProtocol;
-    readonly url: string;
-    private sdpHacks;
-    readonly sip_uri: string;
-    constructor(imsi: string, connection: {
-        url: string;
-        evtConnect: SyncEvent<sip.Socket>;
-        get: () => Promise<sip.Socket> | sip.Socket;
-    });
-    connect(): void;
-    disconnect(): void;
-    private messageOkDelays;
+interface Hacks {
+    /** Posted when a OK response to a REGISTER request is received */
+    readonly evtSipRegistrationSuccess: VoidSyncEvent;
     /**
      * To call when receiving as SIP MESSAGE
-     * to prevent directly sending the 200 OK
-     * response immediately but rather wait
+     * to prevent immediately sending the 200 OK
+     * response but rather wait
      * until some action have been completed.
      *
      * @param request the request prop of the
@@ -121,6 +112,21 @@ declare class JsSipSocket implements IjsSipSocket {
      * @param pr The response to the SIP MESSAGE
      * will not be sent until this promise resolve.
      */
+    setMessageOkDelay(request: any, pr: Promise<void>): void;
+    readonly evtUnderlyingSocketClose: VoidSyncEvent;
+}
+declare class JsSipSocket implements IjsSipSocket, Hacks {
+    private readonly connection;
+    readonly evtSipRegistrationSuccess: VoidSyncEvent;
+    readonly evtUnderlyingSocketClose: VoidSyncEvent;
+    readonly via_transport: sip.TransportProtocol;
+    readonly url: string;
+    private sdpHacks;
+    readonly sip_uri: string;
+    constructor(imsi: string, connection: ConnectionApi);
+    connect(): void;
+    disconnect(): void;
+    private messageOkDelays;
     setMessageOkDelay(request: any, pr: Promise<void>): void;
     send(data: string): true;
     onconnect(): void;

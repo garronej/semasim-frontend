@@ -24,7 +24,7 @@ export class UiPhonebook {
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdInstance: wd.Instance<"PLAIN">
+        public readonly wdChats: wd.Chat<"PLAIN">[]
     ) {
 
         this.structure.find("ul").slimScroll({
@@ -35,7 +35,7 @@ export class UiPhonebook {
             "size": "5px"
         });
 
-        for (let wdChat of this.wdInstance.chats) {
+        for (let wdChat of this.wdChats) {
 
             this.createUiContact(wdChat);
 
@@ -47,19 +47,19 @@ export class UiPhonebook {
 
     public triggerClickOnLastSeenChat() {
 
-        const wdChat= wd.getChatWithLatestActivity(this.wdInstance);
+        const wdChat= wd.getChatWithLatestActivity(this.wdChats);
 
         if (!wdChat) {
             return;
         }
 
-        this.uiContacts.get(wdChat.id_)!.evtClick.post();
+        this.uiContacts.get(wdChat.ref)!.evtClick.post();
 
     }
 
 
-    /** mapped by wdChat.id_ */
-    private readonly uiContacts = new Map<number, UiContact>();
+    /** mapped by wdChat.ref */
+    private readonly uiContacts = new Map<string, UiContact>();
 
     private createUiContact(wdChat: wd.Chat<"PLAIN">) {
 
@@ -86,7 +86,7 @@ export class UiPhonebook {
 
         });
 
-        this.uiContacts.set(wdChat.id_, uiContact);
+        this.uiContacts.set(wdChat.ref, uiContact);
 
         this.placeUiContact(uiContact);
 
@@ -166,12 +166,12 @@ export class UiPhonebook {
      * */
     public notifyContactChanged(wdChat: wd.Chat<"PLAIN">) {
 
-        const uiContact = this.uiContacts.get(wdChat.id_)!;
+        const uiContact = this.uiContacts.get(wdChat.ref)!;
 
-        if (this.wdInstance.chats.indexOf(wdChat) < 0) {
+        if (this.wdChats.indexOf(wdChat) < 0) {
 
             uiContact.structure.detach();
-            this.uiContacts.delete(wdChat.id_);
+            this.uiContacts.delete(wdChat.ref);
 
         } else {
 
@@ -187,7 +187,7 @@ export class UiPhonebook {
     }
 
     public triggerContactClick(wdChat: wd.Chat<"PLAIN">) {
-        this.uiContacts.get(wdChat.id_)!.evtClick.post();
+        this.uiContacts.get(wdChat.ref)!.evtClick.post();
     }
 
 }

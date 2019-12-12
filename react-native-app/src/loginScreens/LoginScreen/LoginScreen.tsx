@@ -5,7 +5,6 @@ import { w, h, getOrientation } from "../../lib/dimensions";
 import { GetStarted } from "./GetStarted";
 import * as imageAssets from "../../lib/imageAssets";
 import * as loginPageLogic from "frontend-shared/dist/lib/pageLogic/loginPageLogic";
-import { JustRegistered } from "frontend-shared/dist/lib/localStorage/JustRegistered";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
 import { default as DeviceInfo } from 'react-native-device-info';
@@ -65,7 +64,7 @@ export class LoginScreen extends React.Component<Props, State> {
     "isAwaitingLoginResponse": false
   };
 
-  private justRegistered: JustRegistered | undefined = undefined;
+  private justRegistered: Parameters<Parameters<typeof loginPageLogic.init>[1]["setJustRegistered"]>[0] | undefined = undefined;
 
 
   private emailInput: InputField | null = null;
