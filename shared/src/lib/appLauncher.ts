@@ -5,7 +5,7 @@ import * as remoteApiCaller from "./toBackend/remoteApiCaller";
 import { AuthenticatedSessionDescriptorSharedData } from "./localStorage/AuthenticatedSessionDescriptorSharedData";
 import * as declaredPushNotificationToken from "./localStorage/declaredPushNotificationToken";
 import { TowardUserKeys } from "./localStorage/TowardUserKeys";
-import { Ua } from "./Ua";
+import { sipUserAgentCreateFactory } from "./sipUserAgent";
 import { appEvts } from "./toBackend/appEvts";
 import { Webphone } from "./Webphone";
 import * as connection from "./toBackend/connection";
@@ -15,31 +15,16 @@ import { env } from "./env";
 import { baseTypes as dialogBaseTypes, provideCustomImplementationOfBaseApi, dialogApi, startMultiDialogProcess } from "../tools/modal/dialog";
 import * as webApiCaller from "./webApiCaller";
 import { registerInteractiveAppEvtHandlers } from "./interactiveAppEvtHandlers";
+import { getPushToken } from "./getPushToken";
+import { id } from "../tools/id";
+import * as types from "./types/userSimAndPhoneCallUi";
+
 
 const log: typeof console.log = true ?
 	((...args) => console.log.apply(console, ["[appLauncher]", ...args])) :
 	(() => { });
 
-
-export type Params = Params.Browser | Params.ReactNative;
-
-export namespace Params {
-
-	export type Browser =  {
-		assertJsRuntimeEnv: "browser";
-	};
-
-	export type ReactNative = {
-		assertJsRuntimeEnv: "react-native";
-		prPushNotificationToken: Promise<string>;
-		notConnectedUserFeedback: connection.ConnectParams.ReactNative["notConnectedUserFeedback"];
-		dialogBaseApi: dialogBaseTypes.Api
-	};
-
-}
-
-
-export async function appLauncher(params: Params): Promise<{
+export async function appLauncher(params: appLauncher.Params): Promise<{
 	needLogin: boolean; //NOTE: fow web will always be false.
 	prWebphones: Promise<Webphone[]>
 }> {
@@ -85,8 +70,33 @@ export async function appLauncher(params: Params): Promise<{
 
 }
 
+export namespace appLauncher {
+
+	export type Params = Params.Browser | Params.ReactNative;
+
+	export namespace Params {
+
+		 type Base_ = {
+            phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
+		 }
+
+
+		export type Browser = Base_ & {
+			assertJsRuntimeEnv: "browser";
+		};
+
+		export type ReactNative = Base_ & {
+			assertJsRuntimeEnv: "react-native";
+			notConnectedUserFeedback: connection.ConnectParams.ReactNative["notConnectedUserFeedback"];
+			dialogBaseApi: dialogBaseTypes.Api;
+		};
+
+	}
+
+}
+
 async function appLauncher_onceLoggedIn(
-	params: Params,
+	params: appLauncher.Params,
 	authenticatedSessionDescriptorSharedData: Pick<
 		AuthenticatedSessionDescriptorSharedData,
 		"encryptedSymmetricKey" | "email" | "uaInstanceId"
@@ -100,23 +110,11 @@ async function appLauncher_onceLoggedIn(
 		encryptedSymmetricKey
 	});
 
-	const getApiCallerForSpecificSim = (() => {
-
-		const { encryptorDecryptor } = paramsNeededToEncryptDecryptWebphoneData;
-
-		return remoteApiCaller.getWdApiCallerForSpecificSimFactory(
-			encryptorDecryptor,
-			email
-		);
-
-	})();
-
-
 
 	const pushNotificationToken = await (() => {
 		switch (params.assertJsRuntimeEnv) {
 			case "browser": return undefined;
-			case "react-native": return params.prPushNotificationToken
+			case "react-native": return getPushToken();
 		}
 	})();
 
@@ -146,45 +144,27 @@ async function appLauncher_onceLoggedIn(
 
 	})();
 
-	const ua = Ua.instantiate({
-		email,
-		uaInstanceId,
-		"cryptoRelatedParams": paramsNeededToInstantiateUa,
-		"pushNotificationToken": pushNotificationToken ?? "",
-		connection,
-		fromBackendEvents: appEvts
-	});
-
-	connection.connect(((): connection.ConnectParams => {
+	connection.connect((() => {
 
 		const requestTurnCred = true;
 
 		switch (params.assertJsRuntimeEnv) {
 			case "browser": {
-				const out: connection.ConnectParams.Browser = {
+				return id<connection.ConnectParams.Browser>({
 					"assertJsRuntimeEnv": "browser",
 					requestTurnCred
-				};
-				return out;
+				});
 			}
 			case "react-native": {
-				const out: connection.ConnectParams.ReactNative = {
+				return id<connection.ConnectParams.ReactNative>({
 					"assertJsRuntimeEnv": "react-native",
 					requestTurnCred,
 					"notConnectedUserFeedback": params.notConnectedUserFeedback
-				};
-				return out;
+				});
 			}
 		}
 
 	})());
-
-	const createWebphone = Webphone.createFactory(
-		ua,
-		appEvts,
-		getApiCallerForSpecificSim,
-		remoteApiCaller.core
-	);
 
 	appEvts.evtUsableSim.attachOnce(
 		() => restartApp("New usable sim")
@@ -206,9 +186,28 @@ async function appLauncher_onceLoggedIn(
 		restartApp
 	);
 
+	const prCreateWebphone = Webphone.createFactory({
+		"sipUserAgentCreate": sipUserAgentCreateFactory({
+			email,
+			uaInstanceId,
+			"cryptoRelatedParams": paramsNeededToInstantiateUa,
+			"pushNotificationToken": pushNotificationToken ?? "",
+			connection,
+			appEvts
+		}),
+		appEvts,
+		"getWdApiCallerForSpecificSim": remoteApiCaller.getWdApiCallerForSpecificSimFactory(
+			paramsNeededToEncryptDecryptWebphoneData.encryptorDecryptor,
+			email
+		),
+		"coreApiCaller": remoteApiCaller.core,
+		"phoneCallUiCreateFactory": params.phoneCallUiCreateFactory
+	});
+
+
 	return (await Promise.all(
 		(await remoteApiCaller.core.getUsableUserSims())
-			.map(userSim => createWebphone(userSim))
+			.map(userSim => prCreateWebphone.then(createWebphone => createWebphone(userSim)))
 	)).sort(Webphone.sortPutingFirstTheOnesWithMoreRecentActivity);
 
 }

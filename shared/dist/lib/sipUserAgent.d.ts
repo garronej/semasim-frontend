@@ -12,49 +12,32 @@ declare type ConnectionApi = {
     get: () => Promise<sip.Socket> | sip.Socket;
 };
 export declare type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
-export declare class Ua {
-    private towardUserDecryptor;
-    private evtUnregisteredByGateway;
-    private getTowardSimEncryptor;
-    private getJsSipSocket;
-    private getRtcIceServer;
-    static instantiate(params: {
-        email: string;
-        uaInstanceId: string;
-        cryptoRelatedParams: ParamsNeededToInstantiateUa;
-        pushNotificationToken: string;
-        connection: ConnectionApi;
-        fromBackendEvents: import("./toBackend/appEvts").SubsetOfAppEvts<"evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer">;
-    }): Ua;
-    descriptor: gwTypes.Ua;
-    /** evtUnregisteredByGateway should post when a sim that was previously
-     * reachable goes unreachable, when this happen SIP packets can no longer be
-     * routed to the gateway and the gateway unregister all the SIP contact
-     * It happen also when an user lose access to sim or need to refresh sim password.
-     * */
-    private constructor();
-    newUaSim(usableUserSim: {
-        sim: {
-            imsi: string;
-        };
-        password: string;
-        towardSimEncryptKeyStr: string;
-    }): UaSim;
-}
-export declare class UaSim {
+export declare function sipUserAgentCreateFactory(params: {
+    email: string;
+    uaInstanceId: string;
+    cryptoRelatedParams: ParamsNeededToInstantiateUa;
+    pushNotificationToken: string;
+    connection: ConnectionApi;
+    appEvts: import("./toBackend/appEvts").SubsetOfAppEvts<"evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer">;
+}): (usableUserSim: {
+    sim: {
+        imsi: string;
+    };
+    password: string;
+    towardSimEncryptKeyStr: string;
+}) => SipUserAgent;
+declare class SipUserAgent {
     private readonly towardUserDecryptor;
     private getRtcIceServer;
     private readonly jsSipSocket;
     private readonly towardSimEncryptor;
     /** post isRegistered */
-    readonly evtRegistrationStateChanged: SyncEvent<boolean>;
+    readonly evtRegistrationStateChange: SyncEvent<boolean>;
     private readonly jsSipUa;
     private evtRingback;
-    /** Use UA.prototype.newUaSim to instantiate an UaSim */
     constructor(uaDescriptor: gwTypes.Ua, towardUserDecryptor: Decryptor, getRtcIceServer: () => Promise<RTCIceServer>, evtUnregisteredByGateway: VoidSyncEvent, jsSipSocket: JsSipSocket, imsi: string, sipPassword: string, towardSimEncryptor: Encryptor);
     isRegistered: boolean;
     register(): void;
-    unregister(): void;
     readonly evtIncomingMessage: SyncEvent<{
         fromNumber: string;
         bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;

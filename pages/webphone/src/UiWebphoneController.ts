@@ -2,7 +2,6 @@ import { UiQuickAction } from "./UiQuickAction";
 import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
-import { UiVoiceCall } from "./UiVoiceCall";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
@@ -20,23 +19,21 @@ export class UiWebphoneController {
 
     public readonly structure = html.structure.clone();
 
-    private readonly uiVoiceCall: UiVoiceCall;
     private readonly uiHeader: UiHeader;
     private readonly uiQuickAction: UiQuickAction;
     private readonly uiPhonebook: UiPhonebook;
 
-
     public constructor(private readonly webphone: Webphone) {
 
-        const { userSim, wdChats, getIsSipRegistered } = webphone;
+        const { userSim } = webphone;
 
-        this.uiVoiceCall = new UiVoiceCall(userSim);
+        const getIsSipRegistered = () => webphone.obsIsSipRegistered.value;
 
         this.uiHeader = new UiHeader(userSim, getIsSipRegistered);
 
         this.uiQuickAction = new UiQuickAction(userSim, getIsSipRegistered);
 
-        this.uiPhonebook = new UiPhonebook(userSim, wdChats);
+        this.uiPhonebook = new UiPhonebook(userSim, webphone.wdChats);
 
         this.attachWebphoneEventHandlers();
 
@@ -94,7 +91,8 @@ export class UiWebphoneController {
         );
 
         this.webphone.wdEvts.evtNewOrUpdatedWdMessage.attach(
-            ({ wdChat, wdMessage }) => this.getOrCreateUiConversation(wdChat).newOrUpdatedMessage(wdMessage)
+            ({ wdChat, wdMessage }) => this.getOrCreateUiConversation(wdChat)
+                .newOrUpdatedMessage(wdMessage)
         );
 
         {
@@ -121,56 +119,13 @@ export class UiWebphoneController {
                 event => notify(event === "cellSignalStrengthChange" ? "ONLY HEADER" : undefined)
             );
 
-            this.webphone.evtIsSipRegisteredValueChanged.attach(() => notify());
+            this.webphone.obsIsSipRegistered.evtChange.attach(() => notify());
 
         }
 
 
 
 
-        this.webphone.evtIncomingCall.attach(
-            async ({ wdChat, terminate, prTerminated, onAccepted }) => {
-
-                this.uiPhonebook.triggerContactClick(wdChat);
-
-                const { onTerminated, prUserInput } = this.uiVoiceCall.onIncoming(wdChat);
-
-                prTerminated.then(() => onTerminated("Call ended"));
-
-
-                prUserInput.then(ua => {
-
-                    if (ua.userAction === "REJECT") {
-                        terminate();
-                        return;
-                    }
-
-                    const { onEstablished } = ua;
-
-                    onAccepted().then(({ sendDtmf }) => {
-
-                        const { evtUserInput } = onEstablished();
-
-                        evtUserInput.attach(
-                            (eventData): eventData is UiVoiceCall.InCallUserAction.Dtmf =>
-                                eventData.userAction === "DTMF",
-                            ({ signal, duration }) => sendDtmf(signal, duration)
-                        );
-
-                        evtUserInput.attachOnce(
-                            ({ userAction }) => userAction === "HANGUP",
-                            () => terminate()
-                        );
-
-                    });
-
-
-                });
-
-
-            }
-
-        );
 
     }
 
@@ -253,7 +208,7 @@ export class UiWebphoneController {
 
         const uiConversation = new UiConversation(
             this.webphone.userSim,
-            this.webphone.getIsSipRegistered,
+            () => this.webphone.obsIsSipRegistered.value,
             wdChat,
             () => this.webphone.fetchOlderWdMessages(wdChat, 100)
         );
@@ -271,67 +226,29 @@ export class UiWebphoneController {
             text => this.webphone.sendMessage(wdChat, text)
         );
 
-        uiConversation.evtVoiceCall.attach(
-            async () => {
+        /*
+        if (!DetectRTC.isRtpDataChannelsSupported) {
 
-                /*
-                if (!DetectRTC.isRtpDataChannelsSupported) {
+            let message = "Call not supported by this browser.";
 
-                    let message = "Call not supported by this browser.";
+            if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
 
-                    if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
+                message += " Android app available";
 
-                        message += " Android app available";
+            } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
 
-                    } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-
-                        message += " iOS app coming soon.";
-
-                    }
-
-                    bootbox_custom.alert(message);
-                    return;
-
-                }
-                */
-
-                const { terminate, prTerminated, prNextState } =
-                    await this.webphone.placeOutgoingCall(wdChat.contactNumber);
-
-                const { onTerminated, onRingback, prUserInput } =
-                    this.uiVoiceCall.onOutgoing(wdChat);
-
-                prTerminated.then(() => onTerminated("Call terminated"));
-
-                prUserInput.then(() => terminate());
-
-                prNextState.then(({ prNextState }) => {
-
-                    let { onEstablished, prUserInput } = onRingback();
-
-                    prUserInput.then(() => terminate());
-
-                    prNextState.then(({ sendDtmf }) => {
-
-                        let { evtUserInput } = onEstablished();
-
-                        evtUserInput.attach(
-                            (eventData): eventData is UiVoiceCall.InCallUserAction.Dtmf =>
-                                eventData.userAction === "DTMF",
-                            ({ signal, duration }) => sendDtmf(signal, duration)
-                        );
-
-                        evtUserInput.attachOnce(
-                            ({ userAction }) => userAction === "HANGUP",
-                            () => terminate()
-                        );
-
-                    });
-
-                });
-
+                message += " iOS app coming soon.";
 
             }
+
+            bootbox_custom.alert(message);
+            return;
+
+        }
+        */
+
+        uiConversation.evtVoiceCall.attach(
+            () => this.webphone.placeOutgoingCall(wdChat)
         );
 
         uiConversation.evtUpdateContact.attach(async () => {

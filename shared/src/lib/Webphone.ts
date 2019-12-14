@@ -1,12 +1,14 @@
 
 import { types as gwTypes } from "../gateway/types";
-import { SyncEvent, VoidSyncEvent } from "ts-events-extended";
-import * as types from "./types/userSim";
+import { SyncEvent } from "ts-events-extended";
+import * as types from "./types/userSimAndPhoneCallUi";
 import * as wd from "./types/webphoneData/logic";
 import { phoneNumber } from "phone-number/dist/lib";
+import { Observable, ObservableImpl } from "../tools/Observable";
+import { env } from "./env";
+import { id } from "../tools/id";
 
-type Ua = import("./Ua").Ua;
-type UaSimPrototype = (typeof import("./Ua")["UaSim"])["prototype"];
+type SipUserAgentCreate = ReturnType<(typeof import("./sipUserAgent"))["sipUserAgentCreateFactory"]>;
 type WdEvts= import("./toBackend/remoteApiCaller/webphoneData").WdEvts;
 export type GetWdApiCallerForSpecificSim = ReturnType<(typeof import("./toBackend/remoteApiCaller"))["getWdApiCallerForSpecificSimFactory"]>;
 export type WdApiCallerForSpecificSim = ReturnType<GetWdApiCallerForSpecificSim>;
@@ -44,14 +46,9 @@ export type Webphone = {
     >;
     wdChats: wd.Chat<"PLAIN">[];
     wdEvts: WdEvts;
-
-    evtIsSipRegisteredValueChanged: VoidSyncEvent;
-    getIsSipRegistered: () => boolean;
-
-    evtIncomingCall: SyncEvent<Omit<SyncEvent.Type<UaSimPrototype["evtIncomingCall"]>, "fromNumber"> & { wdChat: wd.Chat<"PLAIN">; }>;
-
+    obsIsSipRegistered: Observable<boolean>;
     sendMessage: (wdChat: wd.Chat<"PLAIN">, text: phoneNumber) => void;
-    placeOutgoingCall: UaSimPrototype["placeOutgoingCall"];
+    placeOutgoingCall: (wdChat: wd.Chat<"PLAIN">) => void;
     fetchOlderWdMessages: WdApiCallerForSpecificSim["fetchOlderMessages"];
     updateWdChatLastMessageSeen: (wdChat: wd.Chat<"PLAIN">)=>void;
     /** NOTE: the number does not need to be a valid phoneNumber */
@@ -63,37 +60,88 @@ export type Webphone = {
 
 export namespace Webphone {
 
-
-    export function createFactory(
-        ua: Ua,
-        appEvts: AppEvts,
-        getWdApiCallerForSpecificSim: GetWdApiCallerForSpecificSim,
-        coreApiCaller: CoreApiCaller
+    export async function createFactory(
+        params: {
+            sipUserAgentCreate: SipUserAgentCreate;
+            appEvts: AppEvts;
+            getWdApiCallerForSpecificSim: GetWdApiCallerForSpecificSim;
+            coreApiCaller: CoreApiCaller;
+            phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
+        }
     ) {
+
+        const {
+            sipUserAgentCreate,
+            appEvts,
+            getWdApiCallerForSpecificSim,
+            coreApiCaller,
+            phoneCallUiCreateFactory
+        } = params;
+
+        const obsSipRegistrationCount = new ObservableImpl<number>(0);
+
+        const phoneCallUiCreate = await phoneCallUiCreateFactory(
+            ((): types.PhoneCallUi.CreateFactory.Params => {
+                switch (env.jsRuntimeEnv) {
+                    case "browser": {
+                        return id<types.PhoneCallUi.CreateFactory.Params.Browser>({
+                            "assertJsRuntimeEnv": "browser"
+                        });
+                    }
+                    case "react-native": {
+                        return id<types.PhoneCallUi.CreateFactory.Params.ReactNative>({
+                            "assertJsRuntimeEnv": "react-native",
+                            "obsIsAtLeastOneSipRegistration": (() => {
+
+                                const getIsAtLeastOneSipRegistration = () => obsSipRegistrationCount.value !== 0;
+
+                                const out = new ObservableImpl<boolean>(getIsAtLeastOneSipRegistration());
+
+                                obsSipRegistrationCount.evtChange.attach(
+                                    () => out.onPotentialChange(getIsAtLeastOneSipRegistration())
+                                );
+
+                                return out;
+
+                            })()
+                        });
+                    }
+                }
+            })()
+        );
+
 
         return async function create(userSim: types.UserSim.Usable): Promise<Webphone> {
 
-            const uaSim = ua.newUaSim(userSim);
+            const phoneCallUi =  phoneCallUiCreate(userSim);
 
-            const wdApiCallerForSpecificSim= getWdApiCallerForSpecificSim(userSim.sim.imsi);
+            const sipUserAgent = sipUserAgentCreate(userSim);
+
+            const wdApiCallerForSpecificSim = getWdApiCallerForSpecificSim(userSim.sim.imsi);
 
             const { wdChats, wdEvts } = await wdApiCallerForSpecificSim.getUserSimChats(20);
 
             await synchronizeUserSimAndWdInstance(
-                userSim, 
-                wdChats, 
+                userSim,
+                wdChats,
                 wdApiCallerForSpecificSim
             );
 
+
+            const obsIsSipRegistered = new ObservableImpl(sipUserAgent.isRegistered);
+
+            obsIsSipRegistered.evtChange.attach(isRegistered =>
+                obsSipRegistrationCount.onPotentialChange(
+                    obsSipRegistrationCount.value + (isRegistered ? 1 : -1)
+                )
+            );
 
             const webphone: Webphone = {
                 userSim,
                 "evtUserSimUpdated": new SyncEvent(),
                 wdChats,
                 wdEvts,
-                "evtIsSipRegisteredValueChanged": new VoidSyncEvent(),
-                "getIsSipRegistered": () => uaSim.isRegistered,
-                "evtIncomingCall": new SyncEvent(),
+                obsIsSipRegistered,
                 "sendMessage": async (wdChat, text) => {
 
                     const bundledData: gwTypes.BundledData.ClientToServer.Message = {
@@ -113,7 +161,7 @@ export namespace Webphone {
 
                     try {
 
-                        await uaSim.sendMessage(
+                        await sipUserAgent.sendMessage(
                             wdChat.contactNumber,
                             bundledData
                         );
@@ -127,7 +175,57 @@ export namespace Webphone {
                     }
 
                 },
-                "placeOutgoingCall": number => uaSim.placeOutgoingCall(number),
+                "placeOutgoingCall": async wdChat => {
+
+                    //TODO: Ask for permissions.
+
+                    const {
+                        prNextState: logic_prNextState,
+                        prTerminated: logic_prTerminated,
+                        terminate: logic_terminate
+                    } = await sipUserAgent.placeOutgoingCall(wdChat.contactNumber);
+
+                    const {
+                        onTerminated: ui_onTerminated,
+                        prUserInput: ui_prUserInput,
+                        onRingback: ui_onRingback
+                    } = phoneCallUi.onOutgoing(wdChat);
+
+                    logic_prTerminated.then(() => ui_onTerminated("Call terminated"));
+
+                    ui_prUserInput.then(() => logic_terminate());
+
+                    logic_prNextState.then(({ prNextState: logic_prNextState }) => {
+
+                        const {
+                            onEstablished: ui_onEstablished,
+                            prUserInput: ui_prUserInput
+                        } = ui_onRingback();
+
+                        ui_prUserInput.then(() => logic_terminate());
+
+                        logic_prNextState.then(({ sendDtmf: logic_sendDtmf }) => {
+
+                            const { evtUserInput: ui_evtUserInput } = ui_onEstablished();
+
+                            ui_evtUserInput.attach(
+                                (eventData): eventData is types.PhoneCallUi.InCallUserAction.Dtmf =>
+                                    eventData.userAction === "DTMF",
+                                ({ signal, duration }) => logic_sendDtmf(signal, duration)
+                            );
+
+                            ui_evtUserInput.attachOnce(
+                                ({ userAction }) => userAction === "HANGUP",
+                                () => logic_terminate()
+                            );
+
+                        });
+
+                    });
+
+
+
+                },
                 "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
                 "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
                 "getAndOrCreateAndOrUpdateWdChat": async (number, contactName, contactIndexInSim) => {
@@ -150,9 +248,9 @@ export namespace Webphone {
                             contactIndexInSim === undefined ? null : contactIndexInSim
                         );
 
-                        wdChat= (await wdEvts.evtNewUpdatedOrDeletedWdChat.waitFor(
+                        wdChat = (await wdEvts.evtNewUpdatedOrDeletedWdChat.waitFor(
                             ({ wdChat, eventType }) => (
-                                eventType === "NEW" && 
+                                eventType === "NEW" &&
                                 wdChat.contactNumber === contactNumber
                             )
                         )).wdChat;
@@ -214,7 +312,8 @@ export namespace Webphone {
 
 
 
-            uaSim.evtIncomingMessage.attach(
+
+            sipUserAgent.evtIncomingMessage.attach(
                 async ({ fromNumber, bundledData, handlerCb }) => {
 
                     const wdChat = await webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber);
@@ -227,17 +326,17 @@ export namespace Webphone {
                             case "MISSED CALL":
                             case "MMS NOTIFICATION":
                                 return wdApiCallerForSpecificSim.newMessage(
-                                    wdChat, 
+                                    wdChat,
                                     { "type": "SERVER TO CLIENT", bundledData }
                                 );
                             case "SEND REPORT":
                                 return wdApiCallerForSpecificSim.notifySendReportReceived(
-                                    wdChat, 
+                                    wdChat,
                                     bundledData
                                 );
                             case "STATUS REPORT":
                                 return wdApiCallerForSpecificSim.notifyStatusReportReceived(
-                                    wdChat, 
+                                    wdChat,
                                     bundledData
                                 );
                         }
@@ -248,21 +347,57 @@ export namespace Webphone {
                 }
             );
 
-            uaSim.evtIncomingCall.attach(
-                async ({ fromNumber, terminate, prTerminated, onAccepted }) => {
+            sipUserAgent.evtIncomingCall.attach(async evtData => {
 
-                    const wdChat = await webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber);
+                const {
+                    fromNumber,
+                    terminate: logic_terminate,
+                    prTerminated: logic_prTerminated,
+                    onAccepted: logic_onAccepted
+                } = evtData;
 
-                    webphone.evtIncomingCall.post(
-                        { wdChat, terminate, prTerminated, onAccepted }
-                    );
+                const {
+                    onTerminated: ui_onTerminated,
+                    prUserInput: ui_prUserInput
+                } = phoneCallUi.onIncoming(
+                    await webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)
+                );
 
-                }
-            );
+                logic_prTerminated.then(() => ui_onTerminated("Call ended"));
+
+                ui_prUserInput.then(ui_userInput => {
+
+                    if (ui_userInput.userAction === "REJECT") {
+                        logic_terminate();
+                        return;
+                    }
+
+                    const { onEstablished: ui_onEstablished } = ui_userInput;
+
+                    logic_onAccepted().then(({ sendDtmf: logic_sendDtmf }) => {
+
+                        const { evtUserInput: ui_evtUserInput } = ui_onEstablished();
+
+                        ui_evtUserInput.attach(
+                            (eventData): eventData is types.PhoneCallUi.InCallUserAction.Dtmf =>
+                                eventData.userAction === "DTMF",
+                            ({ signal, duration }) => logic_sendDtmf(signal, duration)
+                        );
+
+                        ui_evtUserInput.attachOnce(
+                            ({ userAction }) => userAction === "HANGUP",
+                            () => logic_terminate()
+                        );
+
+                    });
 
 
-            uaSim.evtRegistrationStateChanged.attach(
-                () => webphone.evtIsSipRegisteredValueChanged.post()
+                });
+
+            });
+
+            sipUserAgent.evtRegistrationStateChange.attach(
+                () => obsIsSipRegistered.onPotentialChange(sipUserAgent.isRegistered)
             );
 
             appEvts.evtContactCreatedOrUpdated.attach(
@@ -289,7 +424,7 @@ export namespace Webphone {
 
                     if (!!userSim.reachableSimState) {
 
-                        uaSim.register();
+                        sipUserAgent.register();
 
                     }
 
@@ -315,7 +450,7 @@ export namespace Webphone {
 
             if (!!userSim.reachableSimState) {
 
-                uaSim.register();
+                sipUserAgent.register();
 
             }
 
@@ -324,6 +459,7 @@ export namespace Webphone {
         }
 
     }
+
 
     export function sortPutingFirstTheOnesWithMoreRecentActivity(webphone1: Webphone, webphone2: Webphone): -1 | 0 | 1 {
 
@@ -371,6 +507,7 @@ function findCorrespondingContactInUserSim(
     });
 
 }
+
 
 
 async function synchronizeUserSimAndWdInstance(

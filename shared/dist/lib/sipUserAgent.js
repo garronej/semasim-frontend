@@ -77,74 +77,71 @@ var runExclusive = require("run-exclusive");
 var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-var Ua = /** @class */ (function () {
-    /** evtUnregisteredByGateway should post when a sim that was previously
-     * reachable goes unreachable, when this happen SIP packets can no longer be
-     * routed to the gateway and the gateway unregister all the SIP contact
-     * It happen also when an user lose access to sim or need to refresh sim password.
-     * */
-    function Ua(uaDescriptorWithoutPlatform, towardUserDecryptor, evtUnregisteredByGateway, getTowardSimEncryptor, getJsSipSocket, getRtcIceServer) {
-        this.towardUserDecryptor = towardUserDecryptor;
-        this.evtUnregisteredByGateway = evtUnregisteredByGateway;
-        this.getTowardSimEncryptor = getTowardSimEncryptor;
-        this.getJsSipSocket = getJsSipSocket;
-        this.getRtcIceServer = getRtcIceServer;
-        this.descriptor = __assign(__assign({}, uaDescriptorWithoutPlatform), { "platform": (function () {
-                switch (env_1.env.jsRuntimeEnv) {
-                    case "browser": return "web";
-                    case "react-native": return env_1.env.hostOs;
-                }
-            })() });
-    }
-    Ua.instantiate = function (params) {
-        var uaInstanceId = params.uaInstanceId, email = params.email, _a = params.cryptoRelatedParams, towardUserDecryptor = _a.towardUserDecryptor, towardUserEncryptKeyStr = _a.towardUserEncryptKeyStr, getTowardSimEncryptor = _a.getTowardSimEncryptor, pushNotificationToken = params.pushNotificationToken, connection = params.connection, fromBackendEvents = params.fromBackendEvents;
-        return new Ua({
-            "instance": uaInstanceId,
-            "pushToken": pushNotificationToken,
-            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
-            "userEmail": email
-        }, towardUserDecryptor, (function () {
-            var evtUnregisteredByGateway = new ts_events_extended_1.SyncEvent();
-            var onEvt = function (_a) {
-                var imsi = _a.sim.imsi;
-                return evtUnregisteredByGateway.post({ imsi: imsi });
-            };
-            fromBackendEvents.evtSimPasswordChanged.attach(onEvt);
-            fromBackendEvents.evtSimPermissionLost.attach(onEvt);
-            fromBackendEvents.evtSimReachabilityStatusChange.attach(function (_a) {
-                var reachableSimState = _a.reachableSimState;
-                return reachableSimState === undefined;
-            }, onEvt);
-            return evtUnregisteredByGateway;
-        })(), getTowardSimEncryptor, function (imsi) { return new JsSipSocket(imsi, connection); }, function () { return fromBackendEvents.rtcIceEServer.getCurrent(); });
+function sipUserAgentCreateFactory(params) {
+    var uaDescriptor = {
+        "instance": params.uaInstanceId,
+        "pushToken": params.pushNotificationToken,
+        "towardUserEncryptKeyStr": params.cryptoRelatedParams.towardUserEncryptKeyStr,
+        "userEmail": params.email,
+        "platform": (function () {
+            switch (env_1.env.jsRuntimeEnv) {
+                case "browser": return "web";
+                case "react-native": return env_1.env.hostOs;
+            }
+        })()
     };
-    Ua.prototype.newUaSim = function (usableUserSim) {
-        var _this = this;
+    var evtUaSimUnregisteredByGateway = (function () {
+        var out = new ts_events_extended_1.SyncEvent();
+        var onEvt = function (_a) {
+            var imsi = _a.sim.imsi;
+            return out.post({ imsi: imsi });
+        };
+        params.appEvts.evtSimPasswordChanged.attach(onEvt);
+        params.appEvts.evtSimPermissionLost.attach(onEvt);
+        params.appEvts.evtSimReachabilityStatusChange.attach(function (_a) {
+            var reachableSimState = _a.reachableSimState;
+            return reachableSimState === undefined;
+        }, onEvt);
+        return out;
+    })();
+    var getJsSipSocket = function (imsi) { return new JsSipSocket(imsi, params.connection); };
+    var getRtcIceServer = function () { return params.appEvts.rtcIceEServer.getCurrent(); };
+    return function sipUserAgentCreate(usableUserSim) {
         var sim = usableUserSim.sim;
-        return new UaSim(this.descriptor, this.towardUserDecryptor, this.getRtcIceServer, (function () {
+        var evtUnregisteredByGateway = (function () {
             var out = new ts_events_extended_1.VoidSyncEvent();
-            _this.evtUnregisteredByGateway.attach(function (_a) {
+            evtUaSimUnregisteredByGateway.attach(function (_a) {
                 var imsi = _a.imsi;
                 return imsi === sim.imsi;
             }, function () { return out.post(); });
             return out;
-        })(), this.getJsSipSocket(sim.imsi), sim.imsi, usableUserSim.password, this.getTowardSimEncryptor(usableUserSim).towardSimEncryptor);
+        })();
+        return new SipUserAgent(uaDescriptor, params.cryptoRelatedParams.towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, getJsSipSocket(sim.imsi), sim.imsi, usableUserSim.password, params.cryptoRelatedParams.getTowardSimEncryptor(usableUserSim).towardSimEncryptor);
     };
-    return Ua;
-}());
-exports.Ua = Ua;
-var UaSim = /** @class */ (function () {
-    /** Use UA.prototype.newUaSim to instantiate an UaSim */
-    function UaSim(uaDescriptor, towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, jsSipSocket, imsi, sipPassword, towardSimEncryptor) {
+}
+exports.sipUserAgentCreateFactory = sipUserAgentCreateFactory;
+var SipUserAgent = /** @class */ (function () {
+    function SipUserAgent(uaDescriptor, towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, jsSipSocket, imsi, sipPassword, towardSimEncryptor) {
         var _this = this;
         this.towardUserDecryptor = towardUserDecryptor;
         this.getRtcIceServer = getRtcIceServer;
         this.jsSipSocket = jsSipSocket;
         this.towardSimEncryptor = towardSimEncryptor;
         /** post isRegistered */
-        this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
+        this.evtRegistrationStateChange = new ts_events_extended_1.SyncEvent();
         this.evtRingback = new ts_events_extended_1.SyncEvent();
         this.isRegistered = false;
+        /*
+        public unregister() {
+    
+            if (!this.isRegistered) {
+                return;
+            }
+    
+            this.jsSipUa.unregister();
+    
+        }
+        */
         this.evtIncomingMessage = new ts_events_extended_1.SyncEvent();
         this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
             var handlerCb;
@@ -197,14 +194,14 @@ var UaSim = /** @class */ (function () {
                 return;
             }
             _this.isRegistered = true;
-            _this.evtRegistrationStateChanged.post(_this.isRegistered);
+            _this.evtRegistrationStateChange.post(_this.isRegistered);
         });
         this.jsSipUa.on("unregistered", function () {
             if (!_this.isRegistered) {
                 return;
             }
             _this.isRegistered = false;
-            _this.evtRegistrationStateChanged.post(_this.isRegistered);
+            _this.evtRegistrationStateChange.post(_this.isRegistered);
         });
         this.jsSipUa.on("newMessage", function (_a) {
             var originator = _a.originator, request = _a.request;
@@ -230,7 +227,7 @@ var UaSim = /** @class */ (function () {
 
     }
     */
-    UaSim.prototype.register = function () {
+    SipUserAgent.prototype.register = function () {
         var _this = this;
         this.jsSipUa.register();
         Promise.race([
@@ -242,13 +239,7 @@ var UaSim = /** @class */ (function () {
             _this.register();
         });
     };
-    UaSim.prototype.unregister = function () {
-        if (!this.isRegistered) {
-            return;
-        }
-        this.jsSipUa.unregister();
-    };
-    UaSim.prototype.onMessage = function (request) {
+    SipUserAgent.prototype.onMessage = function (request) {
         return __awaiter(this, void 0, void 0, function () {
             var bundledData, fromNumber, pr;
             return __generator(this, function (_a) {
@@ -277,7 +268,7 @@ var UaSim = /** @class */ (function () {
             });
         });
     };
-    UaSim.prototype.sendMessage = function (number, bundledData) {
+    SipUserAgent.prototype.sendMessage = function (number, bundledData) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e;
@@ -305,7 +296,7 @@ var UaSim = /** @class */ (function () {
             });
         }); });
     };
-    UaSim.prototype.onIncomingCall = function (jsSipRtcSession, request) {
+    SipUserAgent.prototype.onIncomingCall = function (jsSipRtcSession, request) {
         var _this = this;
         var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
         var evtAccepted = new ts_events_extended_1.VoidSyncEvent();
@@ -364,7 +355,7 @@ var UaSim = /** @class */ (function () {
             }); }
         });
     };
-    UaSim.prototype.placeOutgoingCall = function (number) {
+    SipUserAgent.prototype.placeOutgoingCall = function (number) {
         return __awaiter(this, void 0, void 0, function () {
             var evtEstablished, evtTerminated, evtDtmf, evtRequestTerminate, evtRingback, rtcICEServer;
             var _this = this;
@@ -461,9 +452,8 @@ var UaSim = /** @class */ (function () {
             });
         });
     };
-    return UaSim;
+    return SipUserAgent;
 }());
-exports.UaSim = UaSim;
 function playAudioStream(stream) {
     var audio = document.createElement("audio");
     audio.autoplay = true;

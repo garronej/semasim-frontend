@@ -3,10 +3,8 @@
 import * as React from "react";
 import * as rn from "react-native";
 
-import { UiVoiceCall } from "./lib/UiVoiceCall";
 import RNRestart from "react-native-restart";
 
-import { askUserForPermissions } from "./lib/askUserForPermissions";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log.apply(console, ["[MainComponent]", ...args])) :
@@ -33,47 +31,10 @@ async function makeTestCall(webphone: Webphone){
 
     log("Making test call");
 
-    await askUserForPermissions();
 
     const wdChat = webphone.wdChats.find(o => o.contactNumber === "+33636786385")!;
 
-    const callLogic = await webphone.placeOutgoingCall(wdChat.contactNumber);
-
-    const callUi = (new UiVoiceCall(webphone.userSim)).onOutgoing(wdChat);
-
-
-
-    callLogic.prTerminated.then(() => callUi.onTerminated("Call terminated"));
-
-    callUi.prUserInput.then(() => callLogic.terminate());
-
-    callLogic.prNextState.then(({ prNextState: callLogic_prNextState }) => {
-
-        const { 
-            onEstablished: callUi_onEstablished, 
-            prUserInput: callUi_prUserInput 
-        } = callUi.onRingback();
-
-        callUi_prUserInput.then(() => callLogic.terminate());
-
-        callLogic_prNextState.then(({ sendDtmf: callLogic_sendDtmf }) => {
-
-            const { evtUserInput: callUi_evtUserInput } = callUi_onEstablished();
-
-            callUi_evtUserInput.attach(
-                (eventData): eventData is UiVoiceCall.InCallUserAction.Dtmf =>
-                    eventData.userAction === "DTMF",
-                ({ signal, duration }) => callLogic_sendDtmf(signal, duration)
-            );
-
-            callUi_evtUserInput.attachOnce(
-                ({ userAction }) => userAction === "HANGUP",
-                () => callLogic.terminate()
-            );
-
-        });
-
-    });
+    webphone.placeOutgoingCall(wdChat);
 
 }
 
@@ -85,12 +46,15 @@ function attachWebphoneListeners(webphone: Webphone){
         return;
     }
 
+    console.log("attachWebphoneListeners");
+
     attachWebphoneListeners.alreadyDone.push(webphone);
 
     console.log(JSON.stringify({ "wdChats": webphone.wdChats }, null, 2));
 
-    webphone.evtIsSipRegisteredValueChanged
-        .attach(() => console.log(`evtIsSipRegisteredValueChanged ${webphone.getIsSipRegistered()}`));
+    webphone.obsIsSipRegistered.evtChange.attach(
+        isSipRegistered => console.log(`evtIsSipRegisteredValueChanged ${isSipRegistered}`)
+    );
 
     webphone.evtUserSimUpdated.attach(evtData=> console.log("evtUserSimUpdated", evtData));
 

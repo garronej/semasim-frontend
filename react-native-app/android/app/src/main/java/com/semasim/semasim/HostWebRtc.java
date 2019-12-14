@@ -97,7 +97,7 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
 
     }
 
-    private static final Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+    private int ongoingCallCount= 0;
 
     @ReactMethod
     public void createRTCPeerConnection(
@@ -106,12 +106,20 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
     ){
 
         {
-            Log.i("Starting EndlessPhonyTask");
 
-            //NOTE: Keep the app alive while call ongoing ( so the timers callback are run )
-            reactContext.startService(new Intent(reactContext, EndlessPhonyTaskService.class));
+            ongoingCallCount++;
 
-            //HeadlessJsTaskService.acquireWakeLockNow(reactContext);
+            if( ongoingCallCount == 1 ) {
+
+                Log.i("Starting EndlessPhonyTask");
+
+                //NOTE: Keep the app alive while call ongoing ( so the timers callback are run )
+                reactContext.startService(new Intent(reactContext, EndlessPhonyTaskService.class));
+
+                //HeadlessJsTaskService.acquireWakeLockNow(reactContext);
+
+            }
+
         }
 
         webRTCApiExposedByHost.createRTCPeerConnection(
@@ -151,9 +159,17 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
     void closeRTCPeerConnection(int rtcPeerConnectionRef){
 
         {
-            Log.i("End EndlessPhonyTask");
 
-            reactContext.stopService(new Intent(reactContext, EndlessPhonyTaskService.class));
+            ongoingCallCount--;
+
+            if( ongoingCallCount == 0 ) {
+
+                Log.i("End EndlessPhonyTask");
+
+                reactContext.stopService(new Intent(reactContext, EndlessPhonyTaskService.class));
+
+            }
+
         }
 
         webRTCApiExposedByHost.closeRTCPeerConnection(

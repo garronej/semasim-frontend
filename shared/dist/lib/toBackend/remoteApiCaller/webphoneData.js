@@ -79,6 +79,8 @@ var wd = require("../../types/webphoneData/logic");
 var md5 = require("md5");
 var cryptoLib = require("../../crypto/cryptoLibProxy");
 var ts_events_extended_1 = require("ts-events-extended");
+var createObjectWithGivenRef_1 = require("../../../tools/createObjectWithGivenRef");
+var id_1 = require("../../../tools/id");
 var hash = md5;
 //NOTE: time and direction are plain in db, ref does not need to be secure.
 var buildWdMessageRef = function (time, direction) { return hash("" + time + direction); };
@@ -858,7 +860,7 @@ evtRequestProcessedByBackend) {
                                             if (wdMessage === undefined) {
                                                 return [2 /*return*/];
                                             }
-                                            createObjectWithGivenRef(wdMessage, {
+                                            createObjectWithGivenRef_1.createObjectWithGivenRef(wdMessage, {
                                                 "ref": params_5.messageRef,
                                                 "time": wdMessage.time,
                                                 "direction": "OUTGOING",
@@ -886,12 +888,12 @@ evtRequestProcessedByBackend) {
                                         if (wdMessage_beforeUpdate_1 === undefined) {
                                             return [2 /*return*/];
                                         }
-                                        _d = createObjectWithGivenRef;
+                                        _d = createObjectWithGivenRef_1.createObjectWithGivenRef;
                                         _e = [wdMessage_beforeUpdate_1];
                                         return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                                                var part, sentBy, out_3, out_4, _a, _b, _c, _d, _e;
-                                                return __generator(this, function (_f) {
-                                                    switch (_f.label) {
+                                                var part, sentBy, _a, _b, _c, _d, _e, _f, _g;
+                                                return __generator(this, function (_h) {
+                                                    switch (_h.label) {
                                                         case 0:
                                                             part = {
                                                                 "ref": params_6.messageRef,
@@ -903,21 +905,23 @@ evtRequestProcessedByBackend) {
                                                             };
                                                             sentBy = params_6.sentBy;
                                                             if (!(sentBy.who === "USER")) return [3 /*break*/, 1];
-                                                            out_3 = __assign(__assign({}, part), { sentBy: sentBy });
-                                                            return [2 /*return*/, out_3];
+                                                            _a = id_1.id(__assign(__assign({}, part), { sentBy: sentBy }));
+                                                            return [3 /*break*/, 3];
                                                         case 1:
-                                                            _a = [__assign({}, part)];
-                                                            _b = {};
-                                                            _c = "sentBy";
-                                                            _d = {
+                                                            _b = id_1.id;
+                                                            _c = [__assign({}, part)];
+                                                            _d = {};
+                                                            _e = "sentBy";
+                                                            _f = {
                                                                 "who": "OTHER"
                                                             };
-                                                            _e = "email";
+                                                            _g = "email";
                                                             return [4 /*yield*/, decryptThenParse(sentBy.email.encrypted_string)];
                                                         case 2:
-                                                            out_4 = __assign.apply(void 0, _a.concat([(_b[_c] = (_d[_e] = _f.sent(),
-                                                                    _d), _b)]));
-                                                            return [2 /*return*/, out_4];
+                                                            _a = _b.apply(void 0, [__assign.apply(void 0, _c.concat([(_d[_e] = (_f[_g] = _h.sent(),
+                                                                        _f), _d)]))]);
+                                                            _h.label = 3;
+                                                        case 3: return [2 /*return*/, _a];
                                                     }
                                                 });
                                             }); })()];
@@ -941,10 +945,4 @@ evtRequestProcessedByBackend) {
             return out;
         };
     };
-}
-/** changeRef(ref, o) === ref */
-function createObjectWithGivenRef(ref, o) {
-    Object.keys(ref).forEach(function (key) { delete ref[key]; });
-    Object.assign(ref, o);
-    return ref;
 }

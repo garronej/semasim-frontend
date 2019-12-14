@@ -64,21 +64,9 @@ class RootComponent extends React.Component<{}, State> {
 
     }
 
-    public componentDidMount = () => {
+    public componentDidMount = () => appLifeCycleEvents.evtComponentDidMount.post(this);
 
-        log("componentDidMount");
-
-        appLifeCycleEvents.evtComponentDidMount.post(this);
-
-    };
-
-    public componentWillUnmount = () => {
-
-        log("componentWillUnmount");
-
-        appLifeCycleEvents.evtComponentWillUnmount.post(this);
-
-    };
+    public componentWillUnmount = () => appLifeCycleEvents.evtComponentWillUnmount.post(this) ;
 
     public render = () => (
         <rn.View
@@ -92,9 +80,6 @@ class RootComponent extends React.Component<{}, State> {
     );
 
 }
-
-
-            //{/*this.state.isDoneImporting && <SplashScreenComponent />*/}
 
 export const componentProvider: rn.ComponentProvider = () => () => <RootComponent />;
 

@@ -3,7 +3,9 @@ import { UiWebphoneController } from "./UiWebphoneController";
 import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import * as observer from "frontend-shared/dist/tools/observer";
-import { appLauncher, Params as AppLauncherParams } from "frontend-shared/dist/lib/appLauncher";
+import { appLauncher } from "frontend-shared/dist/lib/appLauncher";
+import { phoneCallUiCreateFactory } from "./phoneCallUiCreateFactory";
+import { id } from "frontend-shared/dist/tools/id";
 
 
 import * as overrideWebRTCImplementation from "frontend-shared/dist/tools/overrideWebRTCImplementation";
@@ -18,15 +20,10 @@ $(document).ready(async () => {
 
 	dialogApi.loading("Decrypting your chat history 🔐", 0);
 
-	const webphones = await appLauncher((() => {
-
-		const out: AppLauncherParams.Browser = {
-			"assertJsRuntimeEnv": "browser"
-		}
-
-		return out;
-
-	})()).then(({ prWebphones })=> prWebphones);
+	const webphones = await appLauncher(id<appLauncher.Params.Browser>({
+		"assertJsRuntimeEnv": "browser",
+		phoneCallUiCreateFactory
+	})).then(({ prWebphones }) => prWebphones);
 
 	dialogApi.dismissLoading();
 

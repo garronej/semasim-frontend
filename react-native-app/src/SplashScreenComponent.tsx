@@ -1,14 +1,14 @@
 import * as React from "react";
-import * as rn from "react-native";
 import { Dialog, api as dialogBaseApi } from "./globalComponents/Dialog";
 import { LoginRouter } from "./loginScreens/LoginRouter";
 import { MainComponent } from "./MainComponent";
 import { NoBackendConnectionBanner, notConnectedUserFeedback } from "./globalComponents/NoBackendConnectionBanner";
 import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotification";
-import { appLauncher, Params as AppLauncherParams } from "frontend-shared/dist/lib/appLauncher";
-import { firebase } from '@react-native-firebase/messaging';
+import { appLauncher } from "frontend-shared/dist/lib/appLauncher";
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
+import { id } from "frontend-shared/dist/tools/id";
+import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
 
 type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
 
@@ -25,18 +25,12 @@ evtBackgroundPushNotification.attach(notYetDefined => {
 
 log("imported");
 
-const prAppLaunch = appLauncher((() => {
-
-    const out: AppLauncherParams.ReactNative = {
-        "assertJsRuntimeEnv": "react-native",
-        "prPushNotificationToken": firebase.messaging().getToken(),
-        notConnectedUserFeedback,
-        dialogBaseApi
-    };
-
-    return out;
-
-})());
+const prAppLaunch = appLauncher(id<appLauncher.Params.ReactNative>({
+    "assertJsRuntimeEnv": "react-native",
+    notConnectedUserFeedback,
+    dialogBaseApi,
+    phoneCallUiCreateFactory
+}));
 
 export type State =
     {
@@ -61,9 +55,6 @@ export class SplashScreenComponent extends React.Component<{}, State> {
 
     }
 
-
-
-
     public readonly state: Readonly<State> = { "type": "SPLASH SCREEN" };
 
     constructor(props: any) {
@@ -79,7 +70,6 @@ export class SplashScreenComponent extends React.Component<{}, State> {
                 )
             )
         );
-
 
     }
 

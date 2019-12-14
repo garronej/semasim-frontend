@@ -37,143 +37,103 @@ JsSIP.debug.disable("JsSIP:*");
 
 export type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 
-export class Ua {
+export function sipUserAgentCreateFactory(
+    params: {
+        email: string,
+        uaInstanceId: string,
+        cryptoRelatedParams: ParamsNeededToInstantiateUa;
+        pushNotificationToken: string;
+        connection: ConnectionApi;
+        appEvts: import("./toBackend/appEvts").SubsetOfAppEvts<
+        "evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer"
+        >
+    }
+) {
 
-    public static instantiate(
-        params: {
-            email: string,
-            uaInstanceId: string,
-            cryptoRelatedParams: ParamsNeededToInstantiateUa;
-            pushNotificationToken: string;
-            connection: ConnectionApi;
-            fromBackendEvents: import("./toBackend/appEvts").SubsetOfAppEvts<
-            "evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer"
-            >
-        }
-    ): Ua {
+    const uaDescriptor: gwTypes.Ua = {
+        "instance": params.uaInstanceId,
+        "pushToken": params.pushNotificationToken,
+        "towardUserEncryptKeyStr": params.cryptoRelatedParams.towardUserEncryptKeyStr,
+        "userEmail": params.email,
+        "platform": (() => {
+            switch (env.jsRuntimeEnv) {
+                case "browser": return "web";
+                case "react-native": return env.hostOs;
+            }
+        })()
 
-        const {
-            uaInstanceId,
-            email,
-            cryptoRelatedParams: {
-                towardUserDecryptor,
-                towardUserEncryptKeyStr,
-                getTowardSimEncryptor
-            },
-            pushNotificationToken,
-            connection,
-            fromBackendEvents
-        } = params;
+    };
 
-        return new Ua(
-            {
-                "instance": uaInstanceId,
-                "pushToken": pushNotificationToken,
-                towardUserEncryptKeyStr,
-                "userEmail": email
-            },
-            towardUserDecryptor,
-            (() => {
+    const evtUaSimUnregisteredByGateway = (() => {
 
-                const evtUnregisteredByGateway = new SyncEvent<{ imsi: string; }>();
+        const out = new SyncEvent<{ imsi: string; }>();
 
-                const onEvt = ({ sim: { imsi } }: UsableUserSim) => evtUnregisteredByGateway.post({ imsi })
+        const onEvt = ({ sim: { imsi } }: UsableUserSim) => out.post({ imsi })
 
-                fromBackendEvents.evtSimPasswordChanged.attach(onEvt);
+        params.appEvts.evtSimPasswordChanged.attach(onEvt);
 
-                fromBackendEvents.evtSimPermissionLost.attach(onEvt);
+        params.appEvts.evtSimPermissionLost.attach(onEvt);
 
-                fromBackendEvents.evtSimReachabilityStatusChange.attach(
-                    ({ reachableSimState }) => reachableSimState === undefined,
-                    onEvt
-                );
-
-                return evtUnregisteredByGateway;
-
-            })(),
-            getTowardSimEncryptor,
-            imsi => new JsSipSocket(imsi, connection),
-            () => fromBackendEvents.rtcIceEServer.getCurrent()
+        params.appEvts.evtSimReachabilityStatusChange.attach(
+            ({ reachableSimState }) => reachableSimState === undefined,
+            onEvt
         );
 
+        return out;
 
-    }
+    })();
 
-    public descriptor: gwTypes.Ua;
+    const getJsSipSocket = (imsi: string) => new JsSipSocket(imsi, params.connection);
 
-    /** evtUnregisteredByGateway should post when a sim that was previously
-     * reachable goes unreachable, when this happen SIP packets can no longer be
-     * routed to the gateway and the gateway unregister all the SIP contact
-     * It happen also when an user lose access to sim or need to refresh sim password.
-     * */
-    private constructor(
-        uaDescriptorWithoutPlatform: Omit<gwTypes.Ua, "platform">,
-        private towardUserDecryptor: Decryptor,
-        private evtUnregisteredByGateway: SyncEvent<{ imsi: string; }>,
-        private getTowardSimEncryptor: (usableUserSim: { towardSimEncryptKeyStr: string; }) => { towardSimEncryptor: Encryptor; },
-        private getJsSipSocket: (imsi: string) => JsSipSocket,
-        private getRtcIceServer: () => Promise<RTCIceServer>,
-    ) {
-
-        this.descriptor = {
-            ...uaDescriptorWithoutPlatform,
-            "platform": (() => {
-                switch (env.jsRuntimeEnv) {
-                    case "browser": return "web";
-                    case "react-native": return env.hostOs;
-                }
-            })()
-        };
-
-    }
+    const getRtcIceServer: () => Promise<RTCIceServer> = () => params.appEvts.rtcIceEServer.getCurrent();
 
 
-    public newUaSim(
+
+    return function sipUserAgentCreate(
         usableUserSim: { sim: { imsi: string; }; password: string; towardSimEncryptKeyStr: string; }
-    ): UaSim {
+    ) {
 
         const { sim } = usableUserSim;
 
-        return new UaSim(
-            this.descriptor,
-            this.towardUserDecryptor,
-            this.getRtcIceServer,
-            (() => {
+        const evtUnregisteredByGateway = (() => {
 
-                const out = new VoidSyncEvent();
+            const out = new VoidSyncEvent();
 
-                this.evtUnregisteredByGateway.attach(
-                    ({ imsi }) => imsi === sim.imsi,
-                    () => out.post()
-                );
+            evtUaSimUnregisteredByGateway.attach(
+                ({ imsi }) => imsi === sim.imsi,
+                () => out.post()
+            );
 
-                return out;
+            return out;
 
 
-            })(),
-            this.getJsSipSocket(sim.imsi),
+        })();
+
+        return new SipUserAgent(
+            uaDescriptor,
+            params.cryptoRelatedParams.towardUserDecryptor,
+            getRtcIceServer,
+            evtUnregisteredByGateway,
+            getJsSipSocket(sim.imsi),
             sim.imsi,
             usableUserSim.password,
-            this.getTowardSimEncryptor(usableUserSim).towardSimEncryptor
+            params.cryptoRelatedParams.getTowardSimEncryptor(usableUserSim).towardSimEncryptor
         );
-    }
 
+    }
 
 }
 
 
-export class UaSim {
+class SipUserAgent {
 
 
     /** post isRegistered */
-    public readonly evtRegistrationStateChanged = new SyncEvent<boolean>();
+    public readonly evtRegistrationStateChange = new SyncEvent<boolean>();
 
     private readonly jsSipUa: any;
     private evtRingback = new SyncEvent<string>();
 
-
-
-    /** Use UA.prototype.newUaSim to instantiate an UaSim */
     constructor(
         uaDescriptor: gwTypes.Ua,
         private readonly towardUserDecryptor: Decryptor,
@@ -236,29 +196,29 @@ export class UaSim {
         event 'registered' is posted only when register change 
         so we use this instead.
         */
-        this.jsSipSocket.evtSipRegistrationSuccess.attach(()=>{
+        this.jsSipSocket.evtSipRegistrationSuccess.attach(() => {
 
-                lastRegisterTime = Date.now();
+            lastRegisterTime = Date.now();
 
-                if( this.isRegistered ){
-                    return;
-                }
+            if (this.isRegistered) {
+                return;
+            }
 
-                this.isRegistered = true;
+            this.isRegistered = true;
 
-                this.evtRegistrationStateChanged.post(this.isRegistered);
+            this.evtRegistrationStateChange.post(this.isRegistered);
 
         });
 
         this.jsSipUa.on("unregistered", () => {
 
-            if( !this.isRegistered ){
+            if (!this.isRegistered) {
                 return;
             }
 
             this.isRegistered = false;
 
-            this.evtRegistrationStateChanged.post(this.isRegistered);
+            this.evtRegistrationStateChange.post(this.isRegistered);
 
         });
 
@@ -316,6 +276,7 @@ export class UaSim {
     }
 
 
+    /*
     public unregister() {
 
         if (!this.isRegistered) {
@@ -325,6 +286,7 @@ export class UaSim {
         this.jsSipUa.unregister();
 
     }
+    */
 
 
 
@@ -372,7 +334,7 @@ export class UaSim {
     }
 
     private postEvtIncomingMessage = runExclusive.buildMethod(
-        (evtData: Pick<SyncEvent.Type<typeof UaSim.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
+        (evtData: Pick<SyncEvent.Type<typeof SipUserAgent.prototype.evtIncomingMessage>, "fromNumber" | "bundledData">) => {
 
             let handlerCb!: () => void;
 
@@ -650,7 +612,7 @@ interface Hacks {
 
 class JsSipSocket implements IjsSipSocket, Hacks {
 
-    public readonly evtSipRegistrationSuccess= new VoidSyncEvent();
+    public readonly evtSipRegistrationSuccess = new VoidSyncEvent();
     public readonly evtUnderlyingSocketClose = new VoidSyncEvent();
 
     public readonly via_transport: sip.TransportProtocol = "WSS";

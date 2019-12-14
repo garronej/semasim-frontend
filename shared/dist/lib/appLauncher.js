@@ -61,7 +61,7 @@ var remoteApiCaller = require("./toBackend/remoteApiCaller");
 var AuthenticatedSessionDescriptorSharedData_1 = require("./localStorage/AuthenticatedSessionDescriptorSharedData");
 var declaredPushNotificationToken = require("./localStorage/declaredPushNotificationToken");
 var TowardUserKeys_1 = require("./localStorage/TowardUserKeys");
-var Ua_1 = require("./Ua");
+var sipUserAgent_1 = require("./sipUserAgent");
 var appEvts_1 = require("./toBackend/appEvts");
 var Webphone_1 = require("./Webphone");
 var connection = require("./toBackend/connection");
@@ -71,6 +71,8 @@ var env_1 = require("./env");
 var dialog_1 = require("../tools/modal/dialog");
 var webApiCaller = require("./webApiCaller");
 var interactiveAppEvtHandlers_1 = require("./interactiveAppEvtHandlers");
+var getPushToken_1 = require("./getPushToken");
+var id_1 = require("../tools/id");
 var log = true ?
     (function () {
         var args = [];
@@ -129,7 +131,7 @@ function appLauncher(params) {
 exports.appLauncher = appLauncher;
 function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedData) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, getApiCallerForSpecificSim, pushNotificationToken, ua, createWebphone, _e, _f;
+        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, prCreateWebphone, _e, _f;
         var _this = this;
         return __generator(this, function (_g) {
             switch (_g.label) {
@@ -144,14 +146,10 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                             _c)])];
                 case 2:
                     _a = _g.sent(), paramsNeededToEncryptDecryptWebphoneData = _a.paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa = _a.paramsNeededToInstantiateUa;
-                    getApiCallerForSpecificSim = (function () {
-                        var encryptorDecryptor = paramsNeededToEncryptDecryptWebphoneData.encryptorDecryptor;
-                        return remoteApiCaller.getWdApiCallerForSpecificSimFactory(encryptorDecryptor, email);
-                    })();
                     return [4 /*yield*/, (function () {
                             switch (params.assertJsRuntimeEnv) {
                                 case "browser": return undefined;
-                                case "react-native": return params.prPushNotificationToken;
+                                case "react-native": return getPushToken_1.getPushToken();
                             }
                         })()];
                 case 3:
@@ -196,43 +194,46 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     //To fix this backend might return user.id_ so we can detect when it is not
                     //the same user account. ( change need to be made in webApiCaller.loginUser )
                     _g.sent();
-                    ua = Ua_1.Ua.instantiate({
-                        email: email,
-                        uaInstanceId: uaInstanceId,
-                        "cryptoRelatedParams": paramsNeededToInstantiateUa,
-                        "pushNotificationToken": (pushNotificationToken !== null && pushNotificationToken !== void 0 ? pushNotificationToken : ""),
-                        connection: connection,
-                        fromBackendEvents: appEvts_1.appEvts
-                    });
                     connection.connect((function () {
                         var requestTurnCred = true;
                         switch (params.assertJsRuntimeEnv) {
                             case "browser": {
-                                var out = {
+                                return id_1.id({
                                     "assertJsRuntimeEnv": "browser",
                                     requestTurnCred: requestTurnCred
-                                };
-                                return out;
+                                });
                             }
                             case "react-native": {
-                                var out = {
+                                return id_1.id({
                                     "assertJsRuntimeEnv": "react-native",
                                     requestTurnCred: requestTurnCred,
                                     "notConnectedUserFeedback": params.notConnectedUserFeedback
-                                };
-                                return out;
+                                });
                             }
                         }
                     })());
-                    createWebphone = Webphone_1.Webphone.createFactory(ua, appEvts_1.appEvts, getApiCallerForSpecificSim, remoteApiCaller.core);
                     appEvts_1.appEvts.evtUsableSim.attachOnce(function () { return restartApp_1.restartApp("New usable sim"); });
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
                     appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
                     interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
+                    prCreateWebphone = Webphone_1.Webphone.createFactory({
+                        "sipUserAgentCreate": sipUserAgent_1.sipUserAgentCreateFactory({
+                            email: email,
+                            uaInstanceId: uaInstanceId,
+                            "cryptoRelatedParams": paramsNeededToInstantiateUa,
+                            "pushNotificationToken": (pushNotificationToken !== null && pushNotificationToken !== void 0 ? pushNotificationToken : ""),
+                            connection: connection,
+                            appEvts: appEvts_1.appEvts
+                        }),
+                        appEvts: appEvts_1.appEvts,
+                        "getWdApiCallerForSpecificSim": remoteApiCaller.getWdApiCallerForSpecificSimFactory(paramsNeededToEncryptDecryptWebphoneData.encryptorDecryptor, email),
+                        "coreApiCaller": remoteApiCaller.core,
+                        "phoneCallUiCreateFactory": params.phoneCallUiCreateFactory
+                    });
                     _f = (_e = Promise).all;
                     return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
                 case 5: return [4 /*yield*/, _f.apply(_e, [(_g.sent())
-                            .map(function (userSim) { return createWebphone(userSim); })])];
+                            .map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); })])];
                 case 6: return [2 /*return*/, (_g.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
             }
         });

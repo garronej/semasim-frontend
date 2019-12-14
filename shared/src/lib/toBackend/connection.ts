@@ -244,8 +244,8 @@ async function connectRecursive(
         "connection": true,
         "error": true,
         "close": true,
-        "incomingTraffic": true,
-        "outgoingTraffic": true,
+        "incomingTraffic": false,
+        "outgoingTraffic": false,
         "ignoreApiTraffic": true
     }, log);
 

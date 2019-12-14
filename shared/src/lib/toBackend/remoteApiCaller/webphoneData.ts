@@ -6,6 +6,8 @@ import * as wd from "../../types/webphoneData/logic"
 import * as md5 from "md5";
 import * as cryptoLib from "../../crypto/cryptoLibProxy";
 import { SyncEvent } from "ts-events-extended";
+import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
+import { id } from "../../../tools/id";
 
 export type WdEvts = {
     evtNewUpdatedOrDeletedWdChat: SyncEvent<{ wdChat: wd.Chat<"PLAIN">; eventType: "NEW" | "UPDATED" | "DELETED" }>,
@@ -978,29 +980,21 @@ function getGetGetWdEvts(
 
                                     const { sentBy } = params;
 
-
-                                    if (sentBy.who === "USER") {
-
-                                        const out: wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN"> = {
+                                    return sentBy.who === "USER" ?
+                                        id<wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN">>({
                                             ...part,
                                             sentBy
-                                        };
-
-                                        return out;
-
-                                    } else {
-
-                                        const out: wd.Message.Outgoing.StatusReportReceived.SentByOther<"PLAIN"> = {
+                                        })
+                                        :
+                                        id<wd.Message.Outgoing.StatusReportReceived.SentByOther<"PLAIN">>({
                                             ...part,
                                             "sentBy": {
                                                 "who": "OTHER",
                                                 "email": await decryptThenParse<string>(sentBy.email.encrypted_string)
                                             }
-                                        };
+                                        })
+                                        ;
 
-                                        return out;
-
-                                    }
 
                                 })()
                             );
@@ -1028,13 +1022,3 @@ function getGetGetWdEvts(
     };
 }
 
-/** changeRef(ref, o) === ref */
-function createObjectWithGivenRef<TargetType>(ref: Object, o: TargetType): TargetType {
-
-    Object.keys(ref).forEach(key => { delete ref[key]; });
-
-    Object.assign(ref, o);
-
-    return ref as TargetType;
-
-}
