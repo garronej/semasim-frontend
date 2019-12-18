@@ -12,30 +12,38 @@ log("Eval");
 
 firebase.messaging().setBackgroundMessageHandler(async message => {
 
-  log("Firebase Cloud Message received while app was in the background");
+    log("Firebase Cloud Message received while app was in the background");
 
-  if( evtBackgroundPushNotification.getHandlers().length === 0 ){
+    if (evtBackgroundPushNotification.getHandlers().length === 0) {
 
-    log("Waiting for an handler to be attached to evt");
+        log("Waiting for an handler to be attached to evt");
 
-    await evtBackgroundPushNotification.evtAttach.waitFor();
+        await evtBackgroundPushNotification.evtAttach.waitFor();
 
-  }
+    }
 
-  evtBackgroundPushNotification.post(message);
+    evtBackgroundPushNotification.post(message);
 
 });
 
 
 AppRegistry.registerHeadlessTask("RNCallKeepBackgroundMessage", () => ({ name, callUUID, handle }) => {
-  // Make your call here
+    // Make your call here
 
-  log("User wanted to make a call with semasim", { name, callUUID, handle });
+    log("User wanted to make a call with semasim", { name, callUUID, handle });
 
-  return Promise.resolve();
+    return Promise.resolve();
 
 });
 
 
-AppRegistry.registerHeadlessTask("EndlessPhonyTask", () => () => new Promise<never>(() => { }));
+//AppRegistry.registerHeadlessTask("EndlessPhonyTask", () => () => new Promise<never>(() => { }));
+
+AppRegistry.registerHeadlessTask("EndlessPhonyTask", () => () => {
+
+    log("========> start keeping app alive");
+
+    return new Promise<never>(() => { })
+
+});
 

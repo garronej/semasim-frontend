@@ -9,9 +9,9 @@ export async function run() {
 
         const apiExposedByHost = {};
 
-        const { HostCryptoLib, HostWebRtc, HostKfd } = rn.NativeModules;
+        const { HostCryptoLib, HostWebRtc, HostKfd, HostKeepAlive, HostAudioManager } = rn.NativeModules;
 
-        [HostCryptoLib, HostWebRtc, HostKfd].forEach(hostApi => Object.assign(apiExposedByHost, hostApi));
+        [HostCryptoLib, HostWebRtc, HostKfd, HostKeepAlive, HostAudioManager].forEach(hostApi => Object.assign(apiExposedByHost, hostApi));
 
         Object.assign(window, { apiExposedByHost });
 
@@ -21,6 +21,8 @@ export async function run() {
         import("frontend-shared/dist/lib/nativeModules/hostCryptoLib"),
         import("frontend-shared/dist/lib/nativeModules/hostWebRtc"),
         import("frontend-shared/dist/lib/nativeModules/hostKfd"),
+        import("frontend-shared/dist/lib/nativeModules/hostKeepAlive"),
+        import("frontend-shared/dist/lib/nativeModules/hostAudioManager"),
     ]).then(
         arr => arr
             .map(({ apiExposedToHost }) => apiExposedToHost)

@@ -7,7 +7,10 @@ import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions"
 import * as imageAssets from "../lib/imageAssets";
 import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
-const log: typeof console.log = false ? console.log.bind(console) : () => { };
+
+const log: typeof console.log = true ?
+    ((...args: any[]) => console.log.apply(console, ["[globalComponent/Dialog]", ...args])) :
+    (() => { });
 
 
 const evtRef = new SyncEvent<Dialog | undefined>();
@@ -33,8 +36,6 @@ export const api: types.Api = {
 
 
 function createModal<T extends types.Type>(dialogType: T, options: types.Options<T>): types.Modal {
-
-    log("==================> create modal");
 
     if (options.show !== false) {
         throw new Error("options.show other than false not implemented");
@@ -137,16 +138,8 @@ export class Dialog extends React.Component<Props, State> {
     public readonly state: Readonly<State> = { ...savedState };
 
 
-    constructor(props: any) {
-        super(props);
-
-        log("[Dialog] constructor");
-
-    }
 
     public componentDidMount = () => {
-
-        log("[Dialog] componentDidMount");
 
         evtRef.post(this);
 
@@ -155,8 +148,6 @@ export class Dialog extends React.Component<Props, State> {
     };
 
     public componentWillUnmount = () => {
-
-        log("[Dialog] componentWillUnmount");
 
         evtRef.post(undefined);
 

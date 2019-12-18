@@ -40,14 +40,14 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
-      @SuppressWarnings("UnnecessaryLocalVariable")
+
       List<ReactPackage> packages = new PackageList(this).getPackages();
-      // Packages that cannot be autolinked yet can be added manually here, for example:
+      // Packages that cannot be autolinked yet can be added manually here
       packages.add(new HostCryptoLibPackage());
       packages.add(new HostWebRtcPackage());
       packages.add(new HostKfdPackage());
-
-
+      packages.add(new HostKeepAlivePackage());
+      packages.add(new HostAudioManagerPackage());
 
       return packages;
     }

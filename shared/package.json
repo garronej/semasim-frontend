@@ -1,5 +1,6 @@
 {
   "name": "frontend-shared",
+  "version": "1.0.0",
   "scripts": {
     "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json"
   },

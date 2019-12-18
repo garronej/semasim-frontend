@@ -1,7 +1,9 @@
 
 package com.semasim.semasim;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -97,30 +99,11 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
 
     }
 
-    private int ongoingCallCount= 0;
-
     @ReactMethod
     public void createRTCPeerConnection(
             int rtcPeerConnectionRef,
             String rtcConfigurationJson
     ){
-
-        {
-
-            ongoingCallCount++;
-
-            if( ongoingCallCount == 1 ) {
-
-                Log.i("Starting EndlessPhonyTask");
-
-                //NOTE: Keep the app alive while call ongoing ( so the timers callback are run )
-                reactContext.startService(new Intent(reactContext, EndlessPhonyTaskService.class));
-
-                //HeadlessJsTaskService.acquireWakeLockNow(reactContext);
-
-            }
-
-        }
 
         webRTCApiExposedByHost.createRTCPeerConnection(
                 rtcPeerConnectionRef,
@@ -157,20 +140,6 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
 
     @ReactMethod
     void closeRTCPeerConnection(int rtcPeerConnectionRef){
-
-        {
-
-            ongoingCallCount--;
-
-            if( ongoingCallCount == 0 ) {
-
-                Log.i("End EndlessPhonyTask");
-
-                reactContext.stopService(new Intent(reactContext, EndlessPhonyTaskService.class));
-
-            }
-
-        }
 
         webRTCApiExposedByHost.closeRTCPeerConnection(
                 rtcPeerConnectionRef

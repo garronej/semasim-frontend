@@ -27,12 +27,16 @@ type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
 
 log("imported");
 
+declare const alert: Function;
+
 async function makeTestCall(webphone: Webphone){
 
     log("Making test call");
 
 
     const wdChat = webphone.wdChats.find(o => o.contactNumber === "+33636786385")!;
+    //const wdChat = webphone.wdChats.find(o => o.contactNumber === "666")!;
+    //const wdChat= await webphone.getAndOrCreateAndOrUpdateWdChat("+33146094949");
 
     webphone.placeOutgoingCall(wdChat);
 

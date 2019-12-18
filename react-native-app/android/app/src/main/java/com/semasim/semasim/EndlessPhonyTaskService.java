@@ -1,7 +1,6 @@
 package com.semasim.semasim;
 
 import android.content.Intent;
-import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 

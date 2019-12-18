@@ -505,6 +505,14 @@
         "version": "09ef617b5f2d66ae1fca23974ef5d63ec5ea2b3894a06033c197fed3c3ee0e7a",
         "signature": "fdb7aca60a016a6cfb31782d151485b93bc00070e8f2a122e9746021acf00099"
       },
+      "../src/lib/nativemodules/hostaudiomanager.ts": {
+        "version": "68b679a1321bb65a9b394b29b83dc30bcc2e234c7d52a258b78b3bf0746e8414",
+        "signature": "2635d06fb18f75cbad89d9237d9b86e9fa4adf4a63185910c699739add1fda79"
+      },
+      "../src/lib/nativemodules/hostkeepalive.ts": {
+        "version": "b724ba74008721e94ea75db84f3b6b58d92c24d1e30b7ee72cd7462389f738a4",
+        "signature": "fd190e13fe2527c389bcc3876adedb8ebfd053c712117a37e1cad8c01ca4a658"
+      },
       "../src/tools/overridewebrtcimplementation.ts": {
         "version": "9aa82d412f24e13b820a20368710ba4ebe985dad4ca3fc7b38aca32a593ae2d4",
         "signature": "9595f96193fd768c374ff57c93edda073e54c5fa8c5bcb41a3163e1602a7889b"
@@ -1522,9 +1530,11 @@
       "../src/lib/tobackend/connection.ts",
       "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
+      "../src/lib/webphone.ts",
       "../src/lib/interactiveappevthandlers.ts",
       "../src/lib/getpushtoken/impl.ts",
       "../src/lib/getpushtoken/index.ts",
+      "../src/lib/applauncher.ts",
       "../src/lib/availablepages.ts",
       "../src/lib/loaduiclasshtml.ts",
       "../src/lib/shipping.ts",
@@ -1533,6 +1543,7 @@
       "../src/lib/getpushtoken/impl.native.ts",
       "../src/lib/localstorage/justregistered.ts",
       "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts",
+      "../src/lib/nativemodules/hostaudiomanager.ts",
       "../src/tools/overridewebrtcimplementation.ts",
       "../src/lib/nativemodules/hostwebrtc.ts",
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
@@ -1551,8 +1562,7 @@
       "../src/tools/polyfills/object.assign.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/webphone.ts",
-      "../src/lib/applauncher.ts"
+      "../src/lib/nativemodules/hostkeepalive.ts"
     ]
   },
   "version": "3.7.3"

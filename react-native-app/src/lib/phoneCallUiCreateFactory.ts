@@ -1,12 +1,17 @@
 
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import * as uuid from "uuid";
 import RNCallKeep from "react-native-callkeep";
 import * as types from "frontend-shared/dist/lib/types/userSimAndPhoneCallUi";
-import { Observable } from "frontend-shared/dist/tools/Observable";
+import { Observable, ObservableImpl } from "frontend-shared/dist/tools/Observable";
 import * as helperTypes from "frontend-shared/dist/tools/helperTypes";
 import { askUserForPermissions } from "./askUserForPermissions";
+import * as rn from "react-native";
+import * as hostKeepAlive from "frontend-shared/dist/lib/nativeModules/hostKeepAlive";
+import * as hostAudioManager from "frontend-shared/dist/lib/nativeModules/hostAudioManager";
+
+declare const alert: Function;
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log.apply(console, ["[lib/phoneCallUiCreateFactory]", ...args])) :
@@ -29,6 +34,42 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
     const evts = await initialization(params.obsIsAtLeastOneSipRegistration);
 
+
+
+    evts.didReceiveStartCallAction.attach(async evtData=> {
+
+        log("TODO: evtDidReceiveStartCallAction", { evtData });
+
+        /*
+        log("Back to foreground");
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        log("should go back to foreground...");
+
+        RNCallKeep.backToForeground();
+
+        rn.Alert.alert(
+            "my title",
+            "my content",
+            [
+              {
+                text: "my cancel button",
+                onPress: ()=> console.log("cancel pressed"),
+                style: 'cancel',
+              },
+              { text: "ok",
+                onPress: () => console.log("ok pressed")
+              },
+            ],
+            { cancelable: false },
+          );
+        
+        alert("So so so so");
+        */
+
+    });
+
     const onEstablished= getOnEstablished(evts);
 
     return userSim => ({
@@ -41,15 +82,29 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
             RNCallKeep.startCall(
                 callRef.uuid,
-                phoneNumber.prettyPrint(
-                    wdChat.contactNumber,
-                    userSim.sim.country?.iso
-                ),
-                `${wdChat.contactName} with ${userSim.friendlyName}`
+                wdChat.contactNumber,
+                wdChat.contactName
             );
+
+            log("====================> wesh c labu");
+
+
+            //const obsEndCall= new ObservableImpl<boolean>(false);
+
+
+
+            //TODO: Remove, hasardous test
+            //RNCallKeep.updateDisplay(callRef.uuid, "foo bar", wdChat.contactNumber);
+
+            hostKeepAlive.start();
 
             return {
                 "onTerminated": message => {
+                    
+
+                    log(`onTerminated: ${message}`);
+
+                    hostKeepAlive.stop();
 
                     evts.endCall.detach(callRef);
                     evts.didPerformDTMFAction.detach(callRef);
@@ -58,6 +113,7 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
                     //TODO: modify api to match end call reason.
 
                     RNCallKeep.reportEndCallWithUUID(callRef.uuid, 2);
+
 
                 },
                 "onRingback": () => {
@@ -69,10 +125,13 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
                     return {
                         "onEstablished": () => {
 
+                            log("====================> on established !!!!");
+
                             evts.endCall.detach(callRef);
 
                             //NOTE: For android
                             (RNCallKeep.setCurrentCallActive as any)(callRef.uuid);
+
 
                             //NOTE: For ios
                             RNCallKeep.reportConnectedOutgoingCallWithUUID(callRef.uuid);
@@ -133,28 +192,42 @@ async function initialization(obsIsAtLeastOneSipRegistration: Observable<boolean
         "didPerformDTMFAction": new SyncEvent<{
             digits: string; callUUID: string;
         }>(),
-        "didActivateAudioSession": new SyncEvent<{}>()
+        "didActivateAudioSession": new SyncEvent<null>(),
+        "checkReachability": new SyncEvent<null>()
     };
 
     for (const type of [
         "didReceiveStartCallAction",
         "answerCall",
         "endCall",
+        "didActivateAudioSession",
+        "didDeactivateAudioSession",
         "didDisplayIncomingCall",
         "didPerformSetMutedCallAction",
         "didToggleHoldCallAction",
         "didPerformDTMFAction",
-        "didActivateAudioSession"
+        "didResetProvider",
+        "checkReachability"
     ] as const) {
 
-        RNCallKeep.addEventListener(type, data => evts[type].post(data));
+        RNCallKeep.addEventListener(type, data => {
+
+            log(`====================> event: ${type}`, data);
+
+            if( !(type in evts)){
+                log(`==========> WARNING: no handler for ${type}`);
+                return;
+            }
+
+            const evt: SyncEvent<any> = evts[type as keyof typeof evts];
+
+            evt.post(data);
+
+        });
 
     }
 
-    RNCallKeep.addEventListener(
-        "checkReachability",
-        () => RNCallKeep.setReachable()
-    );
+    evts.checkReachability.attach(() => RNCallKeep.setReachable());
 
     await askUserForPermissions();
 
@@ -188,11 +261,17 @@ async function initialization(obsIsAtLeastOneSipRegistration: Observable<boolean
 
     }
 
-    log("RNCallKeep setup sucess");
+    log("RNCallKeep setup success");
 
     {
 
-        const setAvailability = () => RNCallKeep.setAvailable(obsIsAtLeastOneSipRegistration.value);
+        const setAvailability = () => { 
+
+            log(`setAvailability: ${obsIsAtLeastOneSipRegistration.value}`);
+
+            RNCallKeep.setAvailable(obsIsAtLeastOneSipRegistration.value);
+
+        };
 
         obsIsAtLeastOneSipRegistration.evtChange.attach(() => setAvailability());
 
@@ -204,6 +283,77 @@ async function initialization(obsIsAtLeastOneSipRegistration: Observable<boolean
 
 
 }
+
+function getCallEvts( 
+    callUUID: string,
+    evts: Pick<helperTypes.UnpackPromise<ReturnType<typeof initialization>>, "didPerformDTMFAction" | "didPerformSetMutedCallAction" | "endCall">,
+) {
+
+
+    const evts_ = {
+        "didPerformSetMutedCallAction": new SyncEvent<{ muted: boolean; }>(),
+        "didPerformDTMFAction": new SyncEvent<{ digits: string; }>()
+    };
+
+
+    const matcher= (evtData: { callUUID: string })=> evtData.callUUID === callUUID;
+
+    const detach= ()=>{
+
+        evts.endCall.getHandlers().filter(handler => handler.matcher === matcher).forEach(handler => handler.detach());
+
+    };
+
+    const evtEndCall = (() => {
+
+        const out = new VoidSyncEvent();
+
+        evts.endCall.attachOnce(
+            matcher,
+            () => {
+
+                detach();
+
+                out.post();
+
+            }
+
+        );
+
+        return out;
+
+    })();
+
+
+
+
+
+
+    return {
+        evts,
+        "onLogicEndCall": () => {
+            detach();
+        },
+        "setOnceUniqEndCallHandler": (() => {
+
+            const boundTo: never[] = [];
+
+            return (handler: () => void) => {
+
+                evtEndCall.detach(boundTo);
+
+                evtEndCall.attachOnce(boundTo, handler);
+
+            };
+
+        })()
+
+    };
+
+
+
+}
+
 
 function getOnEstablished(
     evts: Pick<helperTypes.UnpackPromise<ReturnType<typeof initialization>>, "didPerformDTMFAction" | "didPerformSetMutedCallAction" | "endCall">,
@@ -220,15 +370,6 @@ function getOnEstablished(
                 "duration": 250
             }
             )
-        );
-
-        evts.didPerformSetMutedCallAction.attach(
-            callRef,
-            ({ muted }) => {
-
-                log({ muted }, "TODO ?");
-
-            }
         );
 
         evts.endCall.attachOnce(
