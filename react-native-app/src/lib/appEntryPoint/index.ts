@@ -1,8 +1,8 @@
 
 const { name: appName } = require("../../../app.json");
-import { AppRegistry } from "react-native";
+import * as rn from "react-native";
 import { componentProvider } from "../../RootComponent";
 
 import "./impl";
 
-AppRegistry.registerComponent(appName, componentProvider);
+rn.AppRegistry.registerComponent(appName, componentProvider);

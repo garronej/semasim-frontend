@@ -17,7 +17,14 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = params 
         throw new Error("wrong assertion");
     }
 
-    return Promise.resolve(userSim => new PhoneCallUiImpl(userSim));
+    return Promise.resolve(params => {
+
+        if (params.assertJsRuntimeEnv !== "browser") {
+            throw new Error("wrong assertion");
+        }
+        return new PhoneCallUiImpl(params.userSim);
+
+    });
 
 };
 
@@ -234,7 +241,7 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
     }
 
-    public readonly onIncoming: types.PhoneCallUi["onIncoming"] =
+    public readonly openUiForIncomingCall: types.PhoneCallUi["openUiForIncomingCall"] =
         wdChat => {
 
             this.setContact(wdChat);
@@ -269,7 +276,9 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
         };
 
-    public readonly onOutgoing: types.PhoneCallUi["onOutgoing"] =
+    public readonly evtUiOpenedForOutgoingCall: types.PhoneCallUi["evtUiOpenedForOutgoingCall"] = new SyncEvent();
+
+    public readonly openUiForOutgoingCall: types.PhoneCallUi["openUiForOutgoingCall"] =
         wdChat => {
 
             this.setContact(wdChat);
@@ -278,7 +287,8 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
             this.setState("LOADING", "Loading...");
 
-            return {
+            this.evtUiOpenedForOutgoingCall.post({
+                "phoneNumber": wdChat.contactNumber,
                 "onTerminated": message => this.setState("TERMINATED", message),
                 "onRingback": () => {
 
@@ -307,7 +317,9 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
                     })
                 )
-            };
+
+            });
+
 
         };
 

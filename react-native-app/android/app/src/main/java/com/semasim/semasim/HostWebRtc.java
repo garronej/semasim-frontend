@@ -1,20 +1,12 @@
 
 package com.semasim.semasim;
 
-import android.content.Context;
-import android.content.Intent;
-import android.media.AudioManager;
-import android.os.Handler;
-import android.os.Looper;
 
-import com.facebook.react.bridge.Arguments;
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.WritableArray;
-//import com.semasim.semasim.tools.Log;
-//import com.semasim.semasim.tools.WebViewManager;
-import com.semasim.semasim.tools.Log;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedByHost;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedByHostImpl;
 import com.semasim.semasim.tools.webrtc.WebRTCApiExposedToHost;
@@ -23,35 +15,16 @@ import java.lang.reflect.Proxy;
 
 public class HostWebRtc extends ReactContextBaseJavaModule {
 
+    @NonNull
     @Override
     public String getName() {
         return "HostWebRtc";
     }
 
-    private ReactApplicationContext reactContext;
     private WebRTCApiExposedByHost webRTCApiExposedByHost;
 
     HostWebRtc(ReactApplicationContext reactContext) {
         super(reactContext);
-
-        this.reactContext= reactContext;
-
-
-        /*
-        Log.i("(not)ReactNativeJS hack mode in call <===================================================");
-
-        final AudioManager audioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
-
-        final Runnable updateAudioManager = () -> {
-
-            audioManager.setMode(AudioManager.MODE_IN_CALL);
-            audioManager.setSpeakerphoneOn(true);
-            audioManager.setMicrophoneMute(false);
-
-        };
-
-        updateAudioManager.run();
-        */
 
         webRTCApiExposedByHost= new WebRTCApiExposedByHostImpl(
                 (WebRTCApiExposedToHost) Proxy.newProxyInstance(
@@ -59,35 +32,35 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
                         new Class[]{WebRTCApiExposedToHost.class},
                         (proxy, method, args) -> {
 
-                            WritableArray params= Arguments.createArray();
-
-                            for( Object arg: args){
-
-                                if( arg == null ){
-
-                                    params.pushNull();
-
-                                }else if( arg instanceof Integer ){
-
-
-                                    params.pushInt((Integer)arg);
-
-                                }else if( arg instanceof String ){
-
-                                    params.pushString((String)arg);
-
-                                }else{
-
-                                    throw new RuntimeException("never");
-
-                                }
-
-                            }
-
-                            ApiExposedToHostCaller.invokeFunction(
+                            ApiExposedToHostCallerService.invokeFunction(
                                     reactContext,
                                     method.getName(),
-                                    params
+                                    params -> {
+
+                                        for( Object arg: args){
+
+                                            if( arg == null ){
+
+                                                params.pushNull();
+
+                                            }else if( arg instanceof Integer ){
+
+
+                                                params.pushInt((Integer)arg);
+
+                                            }else if( arg instanceof String ){
+
+                                                params.pushString((String)arg);
+
+                                            }else{
+
+                                                throw new RuntimeException("never");
+
+                                            }
+
+                                        }
+
+                                    }
                             );
 
                             return null;
@@ -99,6 +72,7 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
 
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
     public void createRTCPeerConnection(
             int rtcPeerConnectionRef,
@@ -111,6 +85,7 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
     public void getUserMedia(int mediaStreamRef, String mediaStreamConstraintsJson, int callRef){
 
@@ -121,8 +96,9 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void addStreamToRTCPeerConnection(int rtcPeerConnectionRef, int mediaStreamRef) {
+    public void addStreamToRTCPeerConnection(int rtcPeerConnectionRef, int mediaStreamRef) {
 
         webRTCApiExposedByHost.addStreamToRTCPeerConnection(
                 rtcPeerConnectionRef,
@@ -130,16 +106,18 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void stopMediaStreamTrack(int mediaStreamRef){
+    public void stopMediaStreamTrack(int mediaStreamRef){
 
         webRTCApiExposedByHost.stopMediaStreamTrack(
                 mediaStreamRef
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void closeRTCPeerConnection(int rtcPeerConnectionRef){
+    public void closeRTCPeerConnection(int rtcPeerConnectionRef){
 
         webRTCApiExposedByHost.closeRTCPeerConnection(
                 rtcPeerConnectionRef
@@ -148,8 +126,9 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
     }
 
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void setLocalDescriptionOfRTCPeerConnection(
+    public void setLocalDescriptionOfRTCPeerConnection(
             int rtcPeerConnectionRef,
             String rtcSessionDescriptionInitJson,
             int callRef
@@ -162,8 +141,9 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void setRemoteDescriptionOfRTCPeerConnection(
+    public void setRemoteDescriptionOfRTCPeerConnection(
             int rtcPeerConnectionRef,
             String rtcSessionDescriptionInitJson,
             int callRef
@@ -176,8 +156,9 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void createOfferForRTCPeerConnection(
+    public void createOfferForRTCPeerConnection(
             int rtcPeerConnectionRef,
             int callRef
     ){
@@ -188,8 +169,9 @@ public class HostWebRtc extends ReactContextBaseJavaModule {
         );
     }
 
+    @SuppressWarnings("unused")
     @ReactMethod
-    void createAnswerForRTCPeerConnection(
+    public void createAnswerForRTCPeerConnection(
             int rtcPeerConnectionRef,
             int callRef
     ){

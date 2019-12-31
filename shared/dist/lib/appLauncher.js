@@ -131,21 +131,21 @@ function appLauncher(params) {
 exports.appLauncher = appLauncher;
 function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedData) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, prCreateWebphone, _e, _f;
+        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, userSims, prCreateWebphone, _e, _f, _g, _h;
         var _this = this;
-        return __generator(this, function (_g) {
-            switch (_g.label) {
+        return __generator(this, function (_j) {
+            switch (_j.label) {
                 case 0:
                     encryptedSymmetricKey = authenticatedSessionDescriptorSharedData.encryptedSymmetricKey, email = authenticatedSessionDescriptorSharedData.email, uaInstanceId = authenticatedSessionDescriptorSharedData.uaInstanceId;
                     _b = appCryptoSetupHelper_1.appCryptoSetupHelper;
                     _c = {};
                     _d = "towardUserKeys";
                     return [4 /*yield*/, TowardUserKeys_1.TowardUserKeys.retrieve()];
-                case 1: return [4 /*yield*/, _b.apply(void 0, [(_c[_d] = _g.sent(),
+                case 1: return [4 /*yield*/, _b.apply(void 0, [(_c[_d] = _j.sent(),
                             _c.encryptedSymmetricKey = encryptedSymmetricKey,
                             _c)])];
                 case 2:
-                    _a = _g.sent(), paramsNeededToEncryptDecryptWebphoneData = _a.paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa = _a.paramsNeededToInstantiateUa;
+                    _a = _j.sent(), paramsNeededToEncryptDecryptWebphoneData = _a.paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa = _a.paramsNeededToInstantiateUa;
                     return [4 /*yield*/, (function () {
                             switch (params.assertJsRuntimeEnv) {
                                 case "browser": return undefined;
@@ -153,7 +153,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                             }
                         })()];
                 case 3:
-                    pushNotificationToken = _g.sent();
+                    pushNotificationToken = _j.sent();
                     //TODO: If user delete and re create an account with same email and password
                     //and to not re-open the app while the account was deleted the it will result
                     //into the UA not being declared.
@@ -193,7 +193,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     //into the UA not being declared.
                     //To fix this backend might return user.id_ so we can detect when it is not
                     //the same user account. ( change need to be made in webApiCaller.loginUser )
-                    _g.sent();
+                    _j.sent();
                     connection.connect((function () {
                         var requestTurnCred = true;
                         switch (params.assertJsRuntimeEnv) {
@@ -216,7 +216,11 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
                     appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
                     interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
-                    prCreateWebphone = Webphone_1.Webphone.createFactory({
+                    return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
+                case 5:
+                    userSims = _j.sent();
+                    _f = (_e = Webphone_1.Webphone).createFactory;
+                    _g = {
                         "sipUserAgentCreate": sipUserAgent_1.sipUserAgentCreateFactory({
                             email: email,
                             uaInstanceId: uaInstanceId,
@@ -227,14 +231,29 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                         }),
                         appEvts: appEvts_1.appEvts,
                         "getWdApiCallerForSpecificSim": remoteApiCaller.getWdApiCallerForSpecificSimFactory(paramsNeededToEncryptDecryptWebphoneData.encryptorDecryptor, email),
-                        "coreApiCaller": remoteApiCaller.core,
-                        "phoneCallUiCreateFactory": params.phoneCallUiCreateFactory
-                    });
-                    _f = (_e = Promise).all;
-                    return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
-                case 5: return [4 /*yield*/, _f.apply(_e, [(_g.sent())
-                            .map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); })])];
-                case 6: return [2 /*return*/, (_g.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
+                        "coreApiCaller": remoteApiCaller.core
+                    };
+                    _h = "phoneCallUiCreate";
+                    return [4 /*yield*/, params.phoneCallUiCreateFactory((function () {
+                            switch (env_1.env.jsRuntimeEnv) {
+                                case "browser": {
+                                    return id_1.id({
+                                        "assertJsRuntimeEnv": "browser"
+                                    });
+                                }
+                                case "react-native": {
+                                    return id_1.id({
+                                        "assertJsRuntimeEnv": "react-native",
+                                        userSims: userSims,
+                                    });
+                                }
+                            }
+                        })())];
+                case 6:
+                    prCreateWebphone = _f.apply(_e, [(_g[_h] = _j.sent(),
+                            _g)]);
+                    return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); }))];
+                case 7: return [2 /*return*/, (_j.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
             }
         });
     });

@@ -27,7 +27,7 @@
     "crypto": "file:./polyfills_modules/crypto-browserify",
     "vm": "file:./polyfills_modules/vm-browserify",
     "path": "file:./polyfills_modules/path",
-    "react-native-callkeep": "file:../unpublished_modules/react-native-callkeep",
+    "react-native-callkeep": "file:../local_modules/react-native-callkeep",
     "uuid": "^3.3.3",
     "react-native-device-info": "^4.0.1",
     "react-native-restart": "^0.0.13",

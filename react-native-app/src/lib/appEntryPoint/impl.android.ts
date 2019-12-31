@@ -1,8 +1,10 @@
 
-import { AppRegistry } from "react-native";
+import * as rn from "react-native";
 
 import { firebase } from '@react-native-firebase/messaging';
 import { evtBackgroundPushNotification } from "../evtBackgroundPushNotification";
+import * as hostKeepAlive from "../nativeModules/hostKeepAlive";
+import * as exposeNativeModules  from "../exposeNativeModules";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log.apply(console, ["[appEntryPoint.android]", ...args])) :
@@ -26,7 +28,13 @@ firebase.messaging().setBackgroundMessageHandler(async message => {
 
 });
 
+[exposeNativeModules, hostKeepAlive].forEach(
+    ({ doHeadlessTaskRegistering }) => doHeadlessTaskRegistering(
+        (...args) => rn.AppRegistry.registerHeadlessTask(...args)
+    )
+);
 
+/*
 AppRegistry.registerHeadlessTask("RNCallKeepBackgroundMessage", () => ({ name, callUUID, handle }) => {
     // Make your call here
 
@@ -46,4 +54,8 @@ AppRegistry.registerHeadlessTask("EndlessPhonyTask", () => () => {
     return new Promise<never>(() => { })
 
 });
+*/
+
+
+
 

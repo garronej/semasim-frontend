@@ -21,7 +21,7 @@ import * as types from "./types/userSimAndPhoneCallUi";
 
 
 const log: typeof console.log = true ?
-	((...args) => console.log.apply(console, ["[appLauncher]", ...args])) :
+	((...args) => console.log(...["[appLauncher]", ...args])) :
 	(() => { });
 
 export async function appLauncher(params: appLauncher.Params): Promise<{
@@ -186,6 +186,8 @@ async function appLauncher_onceLoggedIn(
 		restartApp
 	);
 
+	const userSims = await remoteApiCaller.core.getUsableUserSims();
+
 	const prCreateWebphone = Webphone.createFactory({
 		"sipUserAgentCreate": sipUserAgentCreateFactory({
 			email,
@@ -201,13 +203,31 @@ async function appLauncher_onceLoggedIn(
 			email
 		),
 		"coreApiCaller": remoteApiCaller.core,
-		"phoneCallUiCreateFactory": params.phoneCallUiCreateFactory
+		"phoneCallUiCreate": await params.phoneCallUiCreateFactory(
+			((): types.PhoneCallUi.CreateFactory.Params => {
+				switch (env.jsRuntimeEnv) {
+					case "browser": {
+						return id<types.PhoneCallUi.CreateFactory.Params.Browser>({
+							"assertJsRuntimeEnv": "browser"
+						});
+					}
+					case "react-native": {
+						return id<types.PhoneCallUi.CreateFactory.Params.ReactNative>({
+							"assertJsRuntimeEnv": "react-native",
+							userSims,
+						});
+					}
+				}
+			})()
+		)
 	});
 
-
 	return (await Promise.all(
-		(await remoteApiCaller.core.getUsableUserSims())
-			.map(userSim => prCreateWebphone.then(createWebphone => createWebphone(userSim)))
+		userSims.map(
+			userSim => prCreateWebphone.then(
+				createWebphone => createWebphone(userSim)
+			)
+		)
 	)).sort(Webphone.sortPutingFirstTheOnesWithMoreRecentActivity);
 
 }

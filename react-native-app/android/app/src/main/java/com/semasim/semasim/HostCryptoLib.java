@@ -1,11 +1,15 @@
 package com.semasim.semasim;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.semasim.semasim.tools.JsCaller;
+import com.semasim.semasim.tools.Log;
+import com.semasim.semasim.tools.MethodNameGetter;
 
 import org.jdeferred2.Deferred;
 import org.jdeferred2.DoneCallback;
@@ -19,13 +23,12 @@ import java.util.concurrent.Executors;
 
 public class HostCryptoLib extends ReactContextBaseJavaModule {
 
-    private ReactApplicationContext reactContext;
 
     HostCryptoLib(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.reactContext = reactContext;
     }
 
+    @NonNull
     @Override
     public String getName() {
         return "HostCryptoLib";
@@ -39,22 +42,18 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
             int callRef
     ){
 
-        HostCryptoLib.aesEncryptOrDecrypt(action, keyB64, inputDataB64)
-                .done((DoneCallback<String>) outputDataB64 -> {
 
-                    WritableArray params = Arguments.createArray();
+        String methodName = MethodNameGetter.get();
 
-                    params.pushInt(callRef);
-                    params.pushString(outputDataB64);
+        aesEncryptOrDecrypt(action, keyB64, inputDataB64).done(
+                (DoneCallback<String>) outputDataB64 -> ApiExposedToHostCallerService.invokeOnResultFunction(
+                        getReactApplicationContext(),
+                        methodName,
+                        callRef,
+                        params -> params.pushString(outputDataB64)
+                )
+        );
 
-                    ApiExposedToHostCaller.invokeFunction(
-                            reactContext,
-                            "onAesEncryptOrDecryptResult",
-                            params
-                    );
-
-
-                });
 
     }
 
@@ -68,21 +67,17 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
             int callRef
     ){
 
-        HostCryptoLib.rsaEncryptOrDecrypt(action, keyStr, inputDataB64)
-                .done((DoneCallback<String>) outputDataB64 -> {
+        String methodName = MethodNameGetter.get();
 
-                    WritableArray params = Arguments.createArray();
+        rsaEncryptOrDecrypt(action, keyStr, inputDataB64).done(
+                (DoneCallback<String>) outputDataB64 -> ApiExposedToHostCallerService.invokeOnResultFunction(
+                        getReactApplicationContext(),
+                        methodName,
+                        callRef,
+                        params -> params.pushString(outputDataB64)
+                )
+        );
 
-                    params.pushInt(callRef);
-                    params.pushString(outputDataB64);
-
-                    ApiExposedToHostCaller.invokeFunction(
-                            reactContext,
-                            "onRsaEncryptOrDecryptResult",
-                            params
-                    );
-
-                });
 
 
     }
@@ -94,22 +89,21 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
             int callRef
     ){
 
-        HostCryptoLib.rsaGenerateKeys(seedB64, keysLengthBytes)
-                .done((DoneCallback<String[]>) result -> {
+        String methodName = MethodNameGetter.get();
 
-                    WritableArray params = Arguments.createArray();
+        rsaGenerateKeys(seedB64, keysLengthBytes).done(
+                (DoneCallback<String[]>) result -> ApiExposedToHostCallerService.invokeOnResultFunction(
+                        getReactApplicationContext(),
+                        methodName,
+                        callRef,
+                        params -> {
 
-                    params.pushInt(callRef);
-                    params.pushString(result[0]);
-                    params.pushString(result[1]);
+                            params.pushString(result[0]);
+                            params.pushString(result[1]);
 
-                    ApiExposedToHostCaller.invokeFunction(
-                            reactContext,
-                            "onRsaGenerateKeysResult",
-                            params
-                    );
-
-                });
+                        }
+                )
+        );
 
 
     }
@@ -128,12 +122,14 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
 
     ) {
 
+        String methodName= MethodNameGetter.get();
+
         Deferred<String, ?, ?> d= new AndroidDeferredObject<>();
 
         executor.execute(()-> d.resolve(
                 JsCaller.callJsFunction(
                         scriptPath,
-                        "aesEncryptOrDecrypt",
+                        methodName,
                         (args, jsContext) -> {
 
                             for( String arg: new String[]{ action, keyB64, inputDataB64 }){
@@ -163,12 +159,15 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
 
     ) {
 
+        String methodName= MethodNameGetter.get();
+
+
         Deferred<String, ?, ?> d= new AndroidDeferredObject<>();
 
         executor.execute(()-> d.resolve(
                 JsCaller.callJsFunction(
                         scriptPath,
-                        "rsaEncryptOrDecrypt",
+                        methodName,
                         (args, jsContext) -> {
 
                             for( String arg: new String[]{ action, keyStr, inputDataB64 }){
@@ -192,10 +191,14 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
     }
 
 
-    public static Promise<String[], ?, ?> rsaGenerateKeys(
+    private static Promise<String[], ?, ?> rsaGenerateKeys(
             String seedB64,
             int keysLengthBytes
     ){
+
+        String methodName= MethodNameGetter.get();
+
+        Log.i("methodName: " + methodName);
 
         Deferred<String[], ?, ?> d= new AndroidDeferredObject<>();
 
@@ -203,7 +206,7 @@ public class HostCryptoLib extends ReactContextBaseJavaModule {
 
             JSBaseArray<JSValue> result= JsCaller.callJsFunction(
                     scriptPath,
-                    "rsaGenerateKeys",
+                    methodName,
                     (args, jsContext) -> {
 
                         for( Object arg: new Object[]{ seedB64, keysLengthBytes }){

@@ -12,6 +12,8 @@ import android.os.Looper;
 import android.util.SparseArray;
 import android.webkit.JavascriptInterface;
 
+import com.semasim.semasim.tools.Log;
+
 import org.webrtc.DataChannel;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;

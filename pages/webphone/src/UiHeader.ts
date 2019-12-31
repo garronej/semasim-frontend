@@ -75,8 +75,6 @@ export class UiHeader {
 
             });
 
-        console.log(JSON.stringify(this.userSim, null, 2));
-
         (() => {
 
             const divConf = this.structure.find(".id_conf");

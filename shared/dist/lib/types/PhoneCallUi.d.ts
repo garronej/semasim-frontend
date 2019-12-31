@@ -3,7 +3,18 @@ import * as wd from "../types/webphoneData/types";
 declare type SyncEvent<T> = import("ts-events-extended").SyncEvent<T>;
 declare type Observable<T> = import("../../tools/Observable").Observable<T>;
 export declare type PhoneCallUi = {
-    onOutgoing(wdChat: wd.Chat<"PLAIN">): {
+    openUiForOutgoingCall(wdChat: wd.Chat<"PLAIN">): void;
+    openUiForIncomingCall(wdChat: wd.Chat<"PLAIN">): {
+        onTerminated(message: string): void;
+        prUserInput: Promise<{
+            userAction: "ANSWER";
+            onEstablished: PhoneCallUi.OnEstablished;
+        } | {
+            userAction: "REJECT";
+        }>;
+    };
+    evtUiOpenedForOutgoingCall: SyncEvent<{
+        phoneNumber: string;
         onTerminated(message: string): void;
         onRingback(): {
             onEstablished: PhoneCallUi.OnEstablished;
@@ -14,16 +25,7 @@ export declare type PhoneCallUi = {
         prUserInput: Promise<{
             userAction: "CANCEL";
         }>;
-    };
-    onIncoming(wdChat: wd.Chat<"PLAIN">): {
-        onTerminated(message: string): void;
-        prUserInput: Promise<{
-            userAction: "ANSWER";
-            onEstablished: PhoneCallUi.OnEstablished;
-        } | {
-            userAction: "REJECT";
-        }>;
-    };
+    }>;
 };
 export declare namespace PhoneCallUi {
     type DtmFSignal = import("../sipUserAgent").DtmFSignal;
@@ -41,7 +43,7 @@ export declare namespace PhoneCallUi {
     type OnEstablished = () => {
         evtUserInput: SyncEvent<PhoneCallUi.InCallUserAction>;
     };
-    type CreateFactory = (params: CreateFactory.Params) => Promise<(userSim: types.UserSim.Usable) => PhoneCallUi>;
+    type CreateFactory = (params: CreateFactory.Params) => Promise<Create>;
     namespace CreateFactory {
         type Params = Params.Browser | Params.ReactNative;
         namespace Params {
@@ -50,7 +52,23 @@ export declare namespace PhoneCallUi {
             };
             type ReactNative = {
                 assertJsRuntimeEnv: "react-native";
-                obsIsAtLeastOneSipRegistration: Observable<boolean>;
+                userSims: types.UserSim.Usable[];
+            };
+        }
+    }
+    type Create = (params: Create.Params) => PhoneCallUi;
+    namespace Create {
+        type Params = Params.Browser | Params.ReactNative;
+        namespace Params {
+            type _Common = {
+                userSim: types.UserSim.Usable;
+            };
+            type Browser = _Common & {
+                assertJsRuntimeEnv: "browser";
+            };
+            type ReactNative = _Common & {
+                assertJsRuntimeEnv: "react-native";
+                obsIsSipRegistered: Observable<boolean>;
             };
         }
     }

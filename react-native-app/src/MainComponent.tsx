@@ -27,8 +27,6 @@ type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
 
 log("imported");
 
-declare const alert: Function;
-
 async function makeTestCall(webphone: Webphone){
 
     log("Making test call");
@@ -50,21 +48,21 @@ function attachWebphoneListeners(webphone: Webphone){
         return;
     }
 
-    console.log("attachWebphoneListeners");
+    log("attachWebphoneListeners");
 
     attachWebphoneListeners.alreadyDone.push(webphone);
 
-    console.log(JSON.stringify({ "wdChats": webphone.wdChats }, null, 2));
+    log(JSON.stringify({ "wdChats": webphone.wdChats }, null, 2));
 
     webphone.obsIsSipRegistered.evtChange.attach(
-        isSipRegistered => console.log(`evtIsSipRegisteredValueChanged ${isSipRegistered}`)
+        isSipRegistered => log(`evtIsSipRegisteredValueChanged ${isSipRegistered}`)
     );
 
-    webphone.evtUserSimUpdated.attach(evtData=> console.log("evtUserSimUpdated", evtData));
+    webphone.evtUserSimUpdated.attach(evtData=> log("evtUserSimUpdated", evtData));
 
-    webphone.wdEvts.evtNewOrUpdatedWdMessage.attach(evtData=> console.log("wdEvts.evtNewOrUpdatedWdMessage", evtData));
+    webphone.wdEvts.evtNewOrUpdatedWdMessage.attach(evtData=> log("wdEvts.evtNewOrUpdatedWdMessage", evtData));
 
-    webphone.wdEvts.evtNewUpdatedOrDeletedWdChat.attach(evtData=> console.log("wdEvts.evtNewUpdatedOrDeletedWdChat", evtData));
+    webphone.wdEvts.evtNewUpdatedOrDeletedWdChat.attach(evtData=> log("wdEvts.evtNewUpdatedOrDeletedWdChat", evtData));
 
 }
 
@@ -75,28 +73,12 @@ export type Props = { webphones: Webphone[] };
 
 export class MainComponent extends React.Component<Props, {}> {
 
-    public componentDidMount = () => {
-
-        log("componentDidMount");
-
-    };
-
-    public componentWillUnmount = () => {
-
-        log("componentWillUnmount");
-
-    };
-
     constructor(props: any) {
         super(props);
-
-        log("constructor");
 
         attachWebphoneListeners(this.props.webphones[0]);
 
     }
-
-
 
     public render = () => (
         <rn.View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -118,10 +100,6 @@ export class MainComponent extends React.Component<Props, {}> {
             </rn.TouchableOpacity>
         </rn.View>
     );
-
-
-
-
 
 }
 

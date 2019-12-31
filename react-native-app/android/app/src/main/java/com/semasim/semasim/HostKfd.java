@@ -5,12 +5,12 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import com.facebook.react.bridge.Arguments;
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.UiThreadUtil;
-import com.facebook.react.bridge.WritableArray;
 import com.semasim.semasim.tools.HexStringBinaryRepresentation;
 import com.semasim.semasim.tools.Log;
 import com.semasim.semasim.tools.PBKDF2WithHmacSHA1;
@@ -23,16 +23,14 @@ import org.jdeferred2.android.AndroidDeferredObject;
 
 public class HostKfd extends ReactContextBaseJavaModule {
 
+    @NonNull
     @Override
     public String getName() {
         return "HostKfd";
     }
 
-    private ReactApplicationContext reactContext;
-
     HostKfd(final ReactApplicationContext reactContext) {
         super(reactContext);
-        this.reactContext = reactContext;
     }
 
     @SuppressWarnings("unused")
@@ -150,7 +148,7 @@ public class HostKfd extends ReactContextBaseJavaModule {
 
             }
 
-            WebView webView= new WebView(MainApplication.getContext());
+            WebView webView= new WebView(SemasimApplication.getContext());
 
             webView.resumeTimers();
 
@@ -205,15 +203,11 @@ public class HostKfd extends ReactContextBaseJavaModule {
 
     private void sendResult(int callRef, String resultHex){
 
-        WritableArray params = Arguments.createArray();
-
-        params.pushInt(callRef);
-        params.pushString(resultHex);
-
-        ApiExposedToHostCaller.invokeFunction(
-                reactContext,
-                "onKfdResult",
-                params
+        ApiExposedToHostCallerService.invokeOnResultFunction(
+                getReactApplicationContext(),
+                "kfd",
+                callRef,
+                params -> params.pushString(resultHex)
         );
 
     }

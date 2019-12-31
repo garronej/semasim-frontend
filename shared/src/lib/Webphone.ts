@@ -66,7 +66,7 @@ export namespace Webphone {
             appEvts: AppEvts;
             getWdApiCallerForSpecificSim: GetWdApiCallerForSpecificSim;
             coreApiCaller: CoreApiCaller;
-            phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
+            phoneCallUiCreate: types.PhoneCallUi.Create;
         }
     ) {
 
@@ -75,45 +75,12 @@ export namespace Webphone {
             appEvts,
             getWdApiCallerForSpecificSim,
             coreApiCaller,
-            phoneCallUiCreateFactory
+            phoneCallUiCreate
         } = params;
-
-        const obsSipRegistrationCount = new ObservableImpl<number>(0);
-
-        const phoneCallUiCreate = await phoneCallUiCreateFactory(
-            ((): types.PhoneCallUi.CreateFactory.Params => {
-                switch (env.jsRuntimeEnv) {
-                    case "browser": {
-                        return id<types.PhoneCallUi.CreateFactory.Params.Browser>({
-                            "assertJsRuntimeEnv": "browser"
-                        });
-                    }
-                    case "react-native": {
-                        return id<types.PhoneCallUi.CreateFactory.Params.ReactNative>({
-                            "assertJsRuntimeEnv": "react-native",
-                            "obsIsAtLeastOneSipRegistration": (() => {
-
-                                const getIsAtLeastOneSipRegistration = () => obsSipRegistrationCount.value !== 0;
-
-                                const out = new ObservableImpl<boolean>(getIsAtLeastOneSipRegistration());
-
-                                obsSipRegistrationCount.evtChange.attach(
-                                    () => out.onPotentialChange(getIsAtLeastOneSipRegistration())
-                                );
-
-                                return out;
-
-                            })()
-                        });
-                    }
-                }
-            })()
-        );
-
 
         return async function create(userSim: types.UserSim.Usable): Promise<Webphone> {
 
-            const phoneCallUi =  phoneCallUiCreate(userSim);
+            const obsIsSipRegistered = new ObservableImpl(false);
 
             const sipUserAgent = sipUserAgentCreate(userSim);
 
@@ -121,19 +88,32 @@ export namespace Webphone {
 
             const { wdChats, wdEvts } = await wdApiCallerForSpecificSim.getUserSimChats(20);
 
+
             await synchronizeUserSimAndWdInstance(
                 userSim,
                 wdChats,
                 wdApiCallerForSpecificSim
             );
 
-
-            const obsIsSipRegistered = new ObservableImpl(sipUserAgent.isRegistered);
-
-            obsIsSipRegistered.evtChange.attach(isRegistered =>
-                obsSipRegistrationCount.onPotentialChange(
-                    obsSipRegistrationCount.value + (isRegistered ? 1 : -1)
-                )
+            //NOTE: phoneCallUi listeners must be set in current tick so it must be placed after the async statements.
+            const phoneCallUi = phoneCallUiCreate(
+                ((): types.PhoneCallUi.Create.Params => {
+                    switch (env.jsRuntimeEnv) {
+                        case "browser": {
+                            return id<types.PhoneCallUi.Create.Params.Browser>({
+                                "assertJsRuntimeEnv": "browser",
+                                userSim
+                            });
+                        }
+                        case "react-native": {
+                            return id<types.PhoneCallUi.Create.Params.ReactNative>({
+                                "assertJsRuntimeEnv": "react-native",
+                                userSim,
+                                obsIsSipRegistered
+                            });
+                        }
+                    }
+                })()
             );
 
             const webphone: Webphone = {
@@ -177,51 +157,8 @@ export namespace Webphone {
                 },
                 "placeOutgoingCall": async wdChat => {
 
-                    //TODO: Ask for permissions.
+                    phoneCallUi.openUiForOutgoingCall(wdChat);
 
-                    const {
-                        prNextState: logic_prNextState,
-                        prTerminated: logic_prTerminated,
-                        terminate: logic_terminate
-                    } = await sipUserAgent.placeOutgoingCall(wdChat.contactNumber);
-
-                    const {
-                        onTerminated: ui_onTerminated,
-                        prUserInput: ui_prUserInput,
-                        onRingback: ui_onRingback
-                    } = phoneCallUi.onOutgoing(wdChat);
-
-                    logic_prTerminated.then(() => ui_onTerminated("Call terminated"));
-
-                    ui_prUserInput.then(() => logic_terminate());
-
-                    logic_prNextState.then(({ prNextState: logic_prNextState }) => {
-
-                        const {
-                            onEstablished: ui_onEstablished,
-                            prUserInput: ui_prUserInput
-                        } = ui_onRingback();
-
-                        ui_prUserInput.then(() => logic_terminate());
-
-                        logic_prNextState.then(({ sendDtmf: logic_sendDtmf }) => {
-
-                            const { evtUserInput: ui_evtUserInput } = ui_onEstablished();
-
-                            ui_evtUserInput.attach(
-                                (eventData): eventData is types.PhoneCallUi.InCallUserAction.Dtmf =>
-                                    eventData.userAction === "DTMF",
-                                ({ signal, duration }) => logic_sendDtmf(signal, duration)
-                            );
-
-                            ui_evtUserInput.attachOnce(
-                                ({ userAction }) => userAction === "HANGUP",
-                                () => logic_terminate()
-                            );
-
-                        });
-
-                    });
 
 
 
@@ -359,7 +296,7 @@ export namespace Webphone {
                 const {
                     onTerminated: ui_onTerminated,
                     prUserInput: ui_prUserInput
-                } = phoneCallUi.onIncoming(
+                } = phoneCallUi.openUiForIncomingCall(
                     await webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)
                 );
 
@@ -391,6 +328,56 @@ export namespace Webphone {
 
                     });
 
+
+                });
+
+            });
+
+            phoneCallUi.evtUiOpenedForOutgoingCall.attach(async evtData => {
+
+                const {
+                    phoneNumber,
+                    onTerminated: ui_onTerminated,
+                    prUserInput: ui_prUserInput,
+                    onRingback: ui_onRingback
+                } = evtData;
+
+                const {
+                    prNextState: logic_prNextState,
+                    prTerminated: logic_prTerminated,
+                    terminate: logic_terminate
+                } = await sipUserAgent.placeOutgoingCall(phoneNumber);
+
+
+                logic_prTerminated.then(() => ui_onTerminated("Call terminated"));
+
+                ui_prUserInput.then(() => logic_terminate());
+
+                logic_prNextState.then(({ prNextState: logic_prNextState }) => {
+
+                    const {
+                        onEstablished: ui_onEstablished,
+                        prUserInput: ui_prUserInput
+                    } = ui_onRingback();
+
+                    ui_prUserInput.then(() => logic_terminate());
+
+                    logic_prNextState.then(({ sendDtmf: logic_sendDtmf }) => {
+
+                        const { evtUserInput: ui_evtUserInput } = ui_onEstablished();
+
+                        ui_evtUserInput.attach(
+                            (eventData): eventData is types.PhoneCallUi.InCallUserAction.Dtmf =>
+                                eventData.userAction === "DTMF",
+                            ({ signal, duration }) => logic_sendDtmf(signal, duration)
+                        );
+
+                        ui_evtUserInput.attachOnce(
+                            ({ userAction }) => userAction === "HANGUP",
+                            () => logic_terminate()
+                        );
+
+                    });
 
                 });
 

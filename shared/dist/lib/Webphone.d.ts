@@ -38,7 +38,7 @@ export declare namespace Webphone {
         appEvts: AppEvts;
         getWdApiCallerForSpecificSim: GetWdApiCallerForSpecificSim;
         coreApiCaller: CoreApiCaller;
-        phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
+        phoneCallUiCreate: types.PhoneCallUi.Create;
     }): Promise<(userSim: types.UserSim._Base<types.SimOwnership.Owned | types.SimOwnership.Shared.Confirmed>) => Promise<Webphone>>;
     function sortPutingFirstTheOnesWithMoreRecentActivity(webphone1: Webphone, webphone2: Webphone): -1 | 0 | 1;
 }
