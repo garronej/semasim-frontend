@@ -1,3 +1,4 @@
+import { VoidSyncEvent } from "ts-events-extended";
 export declare type Default = (reason: string) => Promise<never>;
-import restartApp from "./impl";
-export { restartApp };
+export declare const evtAppAboutToRestart: VoidSyncEvent;
+export declare const restartApp: Default;

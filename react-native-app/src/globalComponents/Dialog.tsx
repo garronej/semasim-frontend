@@ -5,6 +5,8 @@ import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
+import { assert } from "frontend-shared/dist/tools/assert";
+//NOTE: Type only import.
 import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
 
@@ -13,8 +15,9 @@ const log: typeof console.log = true ?
     (() => { });
 
 
+
 const evtRef = new SyncEvent<Dialog | undefined>();
-const evtNewAppState= new SyncEvent<rn.AppStateStatus>();
+const evtNewAppState = new SyncEvent<rn.AppStateStatus>();
 
 let ref: Dialog | undefined = undefined;
 
@@ -34,6 +37,16 @@ export const api: types.Api = {
     )
 };
 
+export const setComponentIsVisibleStateToFalse = (): void => {
+
+    if (ref === undefined) {
+        return;
+    }
+
+    ref.setState({ "isVisible": false });
+
+};
+
 
 function createModal<T extends types.Type>(dialogType: T, options: types.Options<T>): types.Modal {
 
@@ -50,7 +63,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
             currentModal = modal;
 
             Promise.all<unknown>([
-                ref || evtRef.waitFor(),
+                ref ?? evtRef.waitFor(),
                 rn.AppState.currentState === "active" ||
                 evtNewAppState.attachOnce(newAppState => newAppState === "active", modal, () => { })
             ]).then(() => ref!.setState({
@@ -207,7 +220,8 @@ export class Dialog extends React.Component<Props, State> {
 
     };
 
-    private inputText = "";
+    private changedInputText: string | undefined = undefined;
+
 
     public render = () => {
 
@@ -247,11 +261,17 @@ export class Dialog extends React.Component<Props, State> {
                         <Body
                             dialogType={this.state.dialogType}
                             options={this.state.options}
-                            onChangeText={text => this.inputText = text} />
+                            onChangeText={text => this.changedInputText = text} />
                         <Buttons
                             dialogType={this.state.dialogType}
                             options={this.state.options}
-                            getInput={() => this.inputText}
+                            getInput={() => {
+
+                                assert(this.state.dialogType === "prompt");
+
+                                return this.changedInputText ?? this.state.options.value ?? "";
+
+                            }}
                             onPress={() => currentModal.hide()} />
                     </rn.View>
                 </rn.View>
@@ -325,50 +345,51 @@ const Body: React.FunctionComponent<Omit<State, "isVisible"> & { onChangeText: (
 
     const props = props_ as State & { onChangeText: (text: string) => void };
 
-    if (props.dialogType !== "prompt") {
+    switch (props.dialogType) {
+        case "alert":
+        case "confirm":
+        case "dialog":
+            return props.options.message === "" ? null : (
+                <rn.View style={{ marginVertical: h(2), paddingHorizontal: w(1.5), width: "100%", alignItems: "center" }}>
+                    <rn.Text>{props.options.message.replace(/<br>/g, "\n")}</rn.Text>
+                </rn.View>
+            );
+        case "prompt":
+            return (
+                <rn.View style={{ marginVertical: h(2), width: "100%" }}>
+                    <InputField
+                        placeholder={props.options.placeholder || ""}
+                        onChangeText={props.onChangeText}
+                        keyboardType={(() => {
+                            switch (props.options.inputType) {
+                                case undefined: return "default";
+                                case "email": return "email-address";
+                                case "number": return "number-pad";
+                                case "password":
+                                case "text": return "default";
+                                default: throw new Error(`input type ${props.options.inputType} not implemented yet`);
+                            }
+                        })()}
+                        ref={ref => {
 
-        if (props.options.message === undefined) {
-            return null;
-        }
+                            if (ref === null) {
+                                return;
+                            }
 
-        return (
-            <rn.View style={{ marginVertical: h(2), paddingHorizontal: w(1.5), width: "100%", alignItems: "center" }}>
-                <rn.Text>{props.options.message.replace(/<br>/g, "\n")}</rn.Text>
-            </rn.View>
-        );
+                            const { value } = props.options;
 
+                            if (value === undefined) {
+                                return;
+                            }
 
+                            ref.setInputValue(value);
+
+                        }}
+                        secureTextEntry={props.options.inputType === "password"}
+                    />
+                </rn.View>
+            );
     }
-
-    return (
-        <rn.View style={{ marginVertical: h(2), width: "100%" }}>
-            <InputField
-                placeholder={props.options.placeholder || ""}
-                onChangeText={props.onChangeText}
-                keyboardType={(() => {
-                    switch (props.options.inputType) {
-                        case "email": return "email-address";
-                        case "number": return "number-pad";
-                        case "password":
-                        case "text": return "default";
-                        default: throw new Error("not implemented yet");
-                    }
-                })()}
-                ref={ref => {
-
-                    const { value } = props.options;
-
-                    if (value === undefined || ref === null) {
-                        return;
-                    }
-
-                    ref.setInputValue(value);
-
-                }}
-                secureTextEntry={props.options.inputType === "password"}
-            />
-        </rn.View>
-    );
 
 };
 
@@ -378,7 +399,6 @@ const buttonStyle = rn.StyleSheet.create({
     },
     "btn-default": {
     }
-
 });
 
 const Buttons: React.FunctionComponent<Omit<State, "isVisible"> & { getInput: () => string; onPress: () => void; }> =
@@ -396,7 +416,7 @@ const Buttons: React.FunctionComponent<Omit<State, "isVisible"> & { getInput: ()
                 case "alert": return [{
                     "label": "OK",
                     "className": "btn-default" as const,
-                    "callback": props.options.callback || (() => { })
+                    "callback": props.options.callback ?? (() => { })
                 }];
                 case "confirm": return [
                     {

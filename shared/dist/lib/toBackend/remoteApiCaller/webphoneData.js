@@ -81,6 +81,7 @@ var cryptoLib = require("../../crypto/cryptoLibProxy");
 var ts_events_extended_1 = require("ts-events-extended");
 var createObjectWithGivenRef_1 = require("../../../tools/createObjectWithGivenRef");
 var id_1 = require("../../../tools/id");
+var assert_1 = require("../../../tools/assert");
 var hash = md5;
 //NOTE: time and direction are plain in db, ref does not need to be secure.
 var buildWdMessageRef = function (time, direction) { return hash("" + time + direction); };
@@ -108,9 +109,7 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                         var matcher = _a.matcher;
                         return matcher(evtData);
                     }).length;
-                    if (handlerCount === 0) {
-                        throw new Error("wrong assertion");
-                    }
+                    assert_1.assert(handlerCount !== 0);
                     evtRequestProcessedByBackend.post(evtData);
                 })];
         });

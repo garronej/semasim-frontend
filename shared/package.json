@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "chan-dongle-extended-client": "github:garronej/chan-dongle-extended-client",
-    "semasim-gateway": "file:../../gateway",
-    "md5": "^2.2.1"
+    "md5": "^2.2.1",
+    "semasim-gateway": "file:../../gateway"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",

@@ -8,6 +8,8 @@ import * as runExclusive from "run-exclusive";
 export { types as baseTypes, provideCustomImplementationOfApi as provideCustomImplementationOfBaseApi };
 
 
+
+
 export type DialogOptions<T extends types.Type> = types.Options<T> & {
     animate?: boolean //Default false
     show?: true //Default true 

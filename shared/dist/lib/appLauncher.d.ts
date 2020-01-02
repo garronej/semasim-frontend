@@ -18,6 +18,7 @@ export declare namespace appLauncher {
         export type ReactNative = Base_ & {
             assertJsRuntimeEnv: "react-native";
             notConnectedUserFeedback: connection.ConnectParams.ReactNative["notConnectedUserFeedback"];
+            notifyAppAboutToRestart: () => void;
             dialogBaseApi: dialogBaseTypes.Api;
         };
         export {};

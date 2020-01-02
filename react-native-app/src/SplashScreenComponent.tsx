@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, api as dialogBaseApi } from "./globalComponents/Dialog";
+import { Dialog, api as dialogBaseApi, setComponentIsVisibleStateToFalse } from "./globalComponents/Dialog";
 import { LoginRouter } from "./loginScreens/LoginRouter";
 import { MainComponent } from "./MainComponent";
 import { NoBackendConnectionBanner, notConnectedUserFeedback } from "./globalComponents/NoBackendConnectionBanner";
@@ -29,7 +29,8 @@ const prAppLaunch = appLauncher(id<appLauncher.Params.ReactNative>({
     "assertJsRuntimeEnv": "react-native",
     notConnectedUserFeedback,
     dialogBaseApi,
-    phoneCallUiCreateFactory
+    phoneCallUiCreateFactory,
+    "notifyAppAboutToRestart": ()=> setComponentIsVisibleStateToFalse()
 }));
 
 export type State =

@@ -1,13 +1,11 @@
 
-
 import * as React from "react";
 import * as rn from "react-native";
-
-import RNRestart from "react-native-restart";
-
+import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import { restartApp } from "frontend-shared/dist/lib/restartApp";
 
 const log: typeof console.log = true ?
-    ((...args: any[]) => console.log.apply(console, ["[MainComponent]", ...args])) :
+    ((...args: any[]) => console.log(...["[MainComponent]", ...args])) :
     (() => { });
 
 type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
@@ -27,10 +25,27 @@ type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
 
 log("imported");
 
-async function makeTestCall(webphone: Webphone){
+async function makeTestCall(webphone: Webphone | undefined){
+
+    if( webphone === undefined ){
+
+        dialogApi.create("alert", { "message": "No sim registered" });
+
+        return;
+    }
+
+    if( !webphone.obsIsSipRegistered.value ){
+
+        dialogApi.create(
+            "alert", 
+            { "message": `SIP not registered, reachableSimState: ${JSON.stringify(webphone.userSim.reachableSimState)}` }
+        );
+
+        return;
+
+    }
 
     log("Making test call");
-
 
     const wdChat = webphone.wdChats.find(o => o.contactNumber === "+33636786385")!;
     //const wdChat = webphone.wdChats.find(o => o.contactNumber === "666")!;
@@ -42,7 +57,11 @@ async function makeTestCall(webphone: Webphone){
 
 
 
-function attachWebphoneListeners(webphone: Webphone){
+function attachWebphoneListeners(webphone: Webphone | undefined){
+
+    if( webphone === undefined ){
+        return;
+    }
 
     if (attachWebphoneListeners.alreadyDone.indexOf(webphone) >= 0) {
         return;
@@ -91,15 +110,29 @@ export class MainComponent extends React.Component<Props, {}> {
                 style={{ backgroundColor: "grey", marginTop: 30 }}
                 onPress={() => {
 
-                    log("Restarting app now");
-
-                    RNRestart.Restart();
+                    restartApp("User required to restart");
 
                 }}>
                 <rn.Text>Restart app</rn.Text>
+            </rn.TouchableOpacity>
+            <rn.TouchableOpacity
+                style={{ backgroundColor: "red", marginTop: 30 }}
+                onPress={() => {
+
+                    dialogApi.create("alert", { "message": "Hello word" });
+
+                    setTimeout(()=> {
+
+                        restartApp("Testing restart after dialog");
+
+                    }, 5000);
+
+                }}>
+                <rn.Text>Show dialog then restart</rn.Text>
             </rn.TouchableOpacity>
         </rn.View>
     );
 
 }
+
 

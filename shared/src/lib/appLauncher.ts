@@ -10,7 +10,7 @@ import { appEvts } from "./toBackend/appEvts";
 import { Webphone } from "./Webphone";
 import * as connection from "./toBackend/connection";
 import { tryLoginFromStoredCredentials } from "./tryLoginFromStoredCredentials";
-import { restartApp } from "./restartApp";
+import { restartApp, evtAppAboutToRestart } from "./restartApp";
 import { env } from "./env";
 import { baseTypes as dialogBaseTypes, provideCustomImplementationOfBaseApi, dialogApi, startMultiDialogProcess } from "../tools/modal/dialog";
 import * as webApiCaller from "./webApiCaller";
@@ -35,7 +35,10 @@ export async function appLauncher(params: appLauncher.Params): Promise<{
 
 	if (params.assertJsRuntimeEnv === "react-native") {
 
+		evtAppAboutToRestart.attachOnce(()=> params.notifyAppAboutToRestart());
+
 		provideCustomImplementationOfBaseApi(params.dialogBaseApi);
+
 
 	}
 
@@ -88,6 +91,7 @@ export namespace appLauncher {
 		export type ReactNative = Base_ & {
 			assertJsRuntimeEnv: "react-native";
 			notConnectedUserFeedback: connection.ConnectParams.ReactNative["notConnectedUserFeedback"];
+			notifyAppAboutToRestart: ()=> void;
 			dialogBaseApi: dialogBaseTypes.Api;
 		};
 

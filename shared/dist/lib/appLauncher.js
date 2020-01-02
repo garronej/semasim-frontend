@@ -93,6 +93,7 @@ function appLauncher(params) {
                         throw new Error("Wrong params for js runtime environnement");
                     }
                     if (params.assertJsRuntimeEnv === "react-native") {
+                        restartApp_1.evtAppAboutToRestart.attachOnce(function () { return params.notifyAppAboutToRestart(); });
                         dialog_1.provideCustomImplementationOfBaseApi(params.dialogBaseApi);
                     }
                     _a = "NO VALID CREDENTIALS";

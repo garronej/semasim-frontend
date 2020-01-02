@@ -8,6 +8,7 @@ import * as cryptoLib from "../../crypto/cryptoLibProxy";
 import { SyncEvent } from "ts-events-extended";
 import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
 import { id } from "../../../tools/id";
+import { assert } from "../../../tools/assert";
 
 export type WdEvts = {
     evtNewUpdatedOrDeletedWdChat: SyncEvent<{ wdChat: wd.Chat<"PLAIN">; eventType: "NEW" | "UPDATED" | "DELETED" }>,
@@ -74,9 +75,7 @@ export function getApiCallerForSpecificSimFactory(
 
             const handlerCount = evtRequestProcessedByBackend.getHandlers().filter(({ matcher }) => matcher(evtData)).length;
 
-            if( handlerCount === 0 ){
-                throw new Error("wrong assertion");
-            }
+            assert( handlerCount !== 0 );
 
             evtRequestProcessedByBackend.post(evtData);
 
