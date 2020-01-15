@@ -216,7 +216,6 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     })());
                     appEvts_1.appEvts.evtUsableSim.attachOnce(function () { return restartApp_1.restartApp("New usable sim"); });
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
-                    appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
                     interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(new Promise(function (resolve) { return resolvePrReadyToInteract = resolve; }), appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
                     return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
                 case 5:

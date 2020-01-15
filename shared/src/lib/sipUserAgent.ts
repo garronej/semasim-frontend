@@ -66,11 +66,13 @@ export function sipUserAgentCreateFactory(
 
     const evtUaSimUnregisteredByGateway = (() => {
 
-        const out = new SyncEvent<{ imsi: string; }>();
+        const out = new SyncEvent<{ imsi: string; shouldReRegister: boolean; }>();
 
-        const onEvt = ({ sim: { imsi } }: UsableUserSim) => out.post({ imsi })
+        const onEvtFactory = (shouldReRegister: boolean)=> ({ sim: { imsi } }: UsableUserSim) => out.post({ imsi, shouldReRegister });
 
-        params.appEvts.evtSimPasswordChanged.attach(onEvt);
+        params.appEvts.evtSimPasswordChanged.attach(onEvtFactory(true));
+
+        const onEvt= onEvtFactory(false);
 
         params.appEvts.evtSimPermissionLost.attach(onEvt);
 
@@ -97,11 +99,11 @@ export function sipUserAgentCreateFactory(
 
         const evtUnregisteredByGateway = (() => {
 
-            const out = new VoidSyncEvent();
+            const out = new SyncEvent<{ shouldReRegister: boolean; }>();
 
             evtUaSimUnregisteredByGateway.attach(
                 ({ imsi }) => imsi === sim.imsi,
-                () => out.post()
+                ({shouldReRegister}) => out.post({shouldReRegister})
             );
 
             return out;
@@ -138,7 +140,7 @@ class SipUserAgent {
         uaDescriptor: gwTypes.Ua,
         private readonly towardUserDecryptor: Decryptor,
         private getRtcIceServer: () => Promise<RTCIceServer>,
-        evtUnregisteredByGateway: VoidSyncEvent,
+        evtUnregisteredByGateway: SyncEvent<{ shouldReRegister: boolean; }>,
         private readonly jsSipSocket: JsSipSocket,
         imsi: string,
         sipPassword: string,
@@ -188,9 +190,18 @@ class SipUserAgent {
 
         });
 
-        evtUnregisteredByGateway.attach(
-            () => this.jsSipUa.emit("unregistered")
-        );
+
+        evtUnregisteredByGateway.attach(({ shouldReRegister })=> {
+
+            this.jsSipUa.emit("unregistered");
+
+            if( !shouldReRegister ){
+                return;
+            }
+
+            this.jsSipUa.register();
+
+        });
 
         /* 
         event 'registered' is posted only when register change 

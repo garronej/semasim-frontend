@@ -370,8 +370,8 @@
         "signature": "b5c96aee91f901b8e6a52e9093824191433c36cf222f7b5851d06ca93de34b19"
       },
       "../src/lib/sipuseragent.ts": {
-        "version": "727bbe3227bc4afe24dc523c093b318fabf4c4bc5e3bd8380de28358929dd6fc",
-        "signature": "b5c20d2b8628a16fecc650f97fea50be8d0d0b216c3794ac8c4faa2e1a4edb31"
+        "version": "648786236c1365b2f715a7523b26d8f81de66341039e30233579ab337dfb9d47",
+        "signature": "6879fe1deffa926ecb96b481fa6f2f99e7b81d8097a61d749e84a47bb353aebe"
       },
       "../src/lib/types/phonecallui.ts": {
         "version": "c0ab10a6c90b55300d6cd7c9e0913e5ce6aa910ce1cecdb0e082ceb439bb0dec",
@@ -502,7 +502,7 @@
         "signature": "a3d081938268a7b9f7484ae6c43ebd6e72c065d44b659c376a8b883101ef05a7"
       },
       "../src/lib/applauncher.ts": {
-        "version": "9745044a6f53ac2fc008a2895848b27a29fd3b9c54657396d675fd6336eb7356",
+        "version": "78b1fe070d09851d206a75efec68d8ef63a073c1dfeb07992618c585d257b367",
         "signature": "29a629d7c0bbc788c97aa5ccf26419c9e6c0bdd1fbedeabff6f6d95d5789c4e6"
       },
       "../src/lib/availablepages.ts": {
@@ -1564,11 +1564,10 @@
       "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
+      "../src/lib/types/webphonedata/types.ts",
       "../src/sip_api_declarations/backendtoua.ts",
       "../src/sip_api_declarations/uatobackend.ts",
       "../src/lib/tobackend/appevts.ts",
-      "../src/lib/sipuseragent.ts",
-      "../src/lib/types/usersimandphonecallui.ts",
       "../src/tools/isascendingalphabeticalorder.ts",
       "../src/lib/types/webphonedata/logic.ts",
       "../src/tools/id.ts",
@@ -1598,7 +1597,6 @@
       "../src/lib/interactiveappevthandlers.ts",
       "../src/lib/getpushtoken/impl.ts",
       "../src/lib/getpushtoken/index.ts",
-      "../src/lib/applauncher.ts",
       "../src/lib/availablepages.ts",
       "../src/lib/loaduiclasshtml.ts",
       "../src/lib/shipping.ts",
@@ -1625,9 +1623,11 @@
       "../src/tools/polyfills/object.assign.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/types/webphonedata/types.ts",
+      "../src/lib/sipuseragent.ts",
+      "../src/lib/applauncher.ts",
+      "../src/lib/webphone.ts",
       "../src/lib/types/phonecallui.ts",
-      "../src/lib/webphone.ts"
+      "../src/lib/types/usersimandphonecallui.ts"
     ]
   },
   "version": "3.7.4"

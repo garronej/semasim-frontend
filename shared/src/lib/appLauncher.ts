@@ -184,9 +184,6 @@ async function appLauncher_onceLoggedIn(
 		() => restartApp("Permission lost for a Sim")
 	);
 
-	appEvts.evtSimPasswordChanged.attach(
-		() => restartApp("One sim password have changed")
-	);
 
 	//NOTE: Must be resolved after user enabled sim permissions.
 	let resolvePrReadyToInteract!: ()=> void;

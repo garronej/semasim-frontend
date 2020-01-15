@@ -35,7 +35,9 @@ declare class SipUserAgent {
     readonly evtRegistrationStateChange: SyncEvent<boolean>;
     private readonly jsSipUa;
     private evtRingback;
-    constructor(uaDescriptor: gwTypes.Ua, towardUserDecryptor: Decryptor, getRtcIceServer: () => Promise<RTCIceServer>, evtUnregisteredByGateway: VoidSyncEvent, jsSipSocket: JsSipSocket, imsi: string, sipPassword: string, towardSimEncryptor: Encryptor);
+    constructor(uaDescriptor: gwTypes.Ua, towardUserDecryptor: Decryptor, getRtcIceServer: () => Promise<RTCIceServer>, evtUnregisteredByGateway: SyncEvent<{
+        shouldReRegister: boolean;
+    }>, jsSipSocket: JsSipSocket, imsi: string, sipPassword: string, towardSimEncryptor: Encryptor);
     isRegistered: boolean;
     register(): void;
     readonly evtIncomingMessage: SyncEvent<{

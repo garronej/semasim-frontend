@@ -92,11 +92,12 @@ function sipUserAgentCreateFactory(params) {
     };
     var evtUaSimUnregisteredByGateway = (function () {
         var out = new ts_events_extended_1.SyncEvent();
-        var onEvt = function (_a) {
+        var onEvtFactory = function (shouldReRegister) { return function (_a) {
             var imsi = _a.sim.imsi;
-            return out.post({ imsi: imsi });
-        };
-        params.appEvts.evtSimPasswordChanged.attach(onEvt);
+            return out.post({ imsi: imsi, shouldReRegister: shouldReRegister });
+        }; };
+        params.appEvts.evtSimPasswordChanged.attach(onEvtFactory(true));
+        var onEvt = onEvtFactory(false);
         params.appEvts.evtSimPermissionLost.attach(onEvt);
         params.appEvts.evtSimReachabilityStatusChange.attach(function (_a) {
             var reachableSimState = _a.reachableSimState;
@@ -109,11 +110,14 @@ function sipUserAgentCreateFactory(params) {
     return function sipUserAgentCreate(usableUserSim) {
         var sim = usableUserSim.sim;
         var evtUnregisteredByGateway = (function () {
-            var out = new ts_events_extended_1.VoidSyncEvent();
+            var out = new ts_events_extended_1.SyncEvent();
             evtUaSimUnregisteredByGateway.attach(function (_a) {
                 var imsi = _a.imsi;
                 return imsi === sim.imsi;
-            }, function () { return out.post(); });
+            }, function (_a) {
+                var shouldReRegister = _a.shouldReRegister;
+                return out.post({ shouldReRegister: shouldReRegister });
+            });
             return out;
         })();
         return new SipUserAgent(uaDescriptor, params.cryptoRelatedParams.towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, getJsSipSocket(sim.imsi), sim.imsi, usableUserSim.password, params.cryptoRelatedParams.getTowardSimEncryptor(usableUserSim).towardSimEncryptor);
@@ -183,7 +187,14 @@ var SipUserAgent = /** @class */ (function () {
                 return [2 /*return*/];
             });
         }); });
-        evtUnregisteredByGateway.attach(function () { return _this.jsSipUa.emit("unregistered"); });
+        evtUnregisteredByGateway.attach(function (_a) {
+            var shouldReRegister = _a.shouldReRegister;
+            _this.jsSipUa.emit("unregistered");
+            if (!shouldReRegister) {
+                return;
+            }
+            _this.jsSipUa.register();
+        });
         /*
         event 'registered' is posted only when register change
         so we use this instead.
