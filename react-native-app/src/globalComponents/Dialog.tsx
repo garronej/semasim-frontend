@@ -5,16 +5,13 @@ import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
-import { assert } from "frontend-shared/dist/tools/assert";
+import { assert } from "frontend-shared/dist/tools/assert";
 //NOTE: Type only import.
 import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
-
 const log: typeof console.log = true ?
-    ((...args: any[]) => console.log.apply(console, ["[globalComponent/Dialog]", ...args])) :
+    ((...args: any[]) => console.log(...["[globalComponent/Dialog]", ...args])) :
     (() => { });
-
-
 
 const evtRef = new SyncEvent<Dialog | undefined>();
 const evtNewAppState = new SyncEvent<rn.AppStateStatus>();
@@ -37,13 +34,22 @@ export const api: types.Api = {
     )
 };
 
-export const setComponentIsVisibleStateToFalse = (): void => {
+let isSettingIsVisibleToTrueForbidden = false;
+
+export const setComponentIsVisibleStateToImutableFalse = async (): Promise<void> => {
+
+    isSettingIsVisibleToTrueForbidden = true;
 
     if (ref === undefined) {
         return;
     }
 
-    ref.setState({ "isVisible": false });
+    await new Promise<void>(
+        resolve => ref!.setState(
+            { "isVisible": false },
+            () => resolve()
+        )
+    );
 
 };
 
@@ -71,6 +77,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
                 dialogType,
                 options
             }, () => modal.evtShown.post()));
+
 
         },
         "hide": () => {
@@ -141,6 +148,10 @@ export class Dialog extends React.Component<Props, State> {
         state: Pick<State, K>,
         callback?: () => void
     ): void {
+
+        if (isSettingIsVisibleToTrueForbidden && (state as Partial<State>).isVisible) {
+            return;
+        }
 
         Object.assign(savedState, state);
 

@@ -1,10 +1,10 @@
 
 import { types as gwTypes } from "../gateway/types";
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, Observable, ObservableImpl } from "ts-events-extended";
+
 import * as types from "./types/userSimAndPhoneCallUi";
 import * as wd from "./types/webphoneData/logic";
 import { phoneNumber } from "phone-number/dist/lib";
-import { Observable, ObservableImpl } from "../tools/Observable";
 import { env } from "./env";
 import { id } from "../tools/id";
 
@@ -98,18 +98,51 @@ export namespace Webphone {
             //NOTE: phoneCallUi listeners must be set in current tick so it must be placed after the async statements.
             const phoneCallUi = phoneCallUiCreate(
                 ((): types.PhoneCallUi.Create.Params => {
+
+                    const _common = (() => {
+
+                        const buildPhoneNumber = (phoneNumberRaw: string) => phoneNumber.build(
+                            phoneNumberRaw,
+                            userSim.sim.country?.iso
+                        );
+
+                        return id<types.PhoneCallUi.Create.Params._Common>({
+                           "imsi": userSim.sim.imsi,
+                            "getContactName": phoneNumberRaw => userSim.phonebook.find(
+                                (() => {
+
+                                    const validPhoneNumber = buildPhoneNumber(phoneNumberRaw);
+
+                                    return ({ number_raw }) => phoneNumber.areSame(
+                                        validPhoneNumber,
+                                        number_raw
+                                    );
+
+                                })()
+                            )?.name,
+                            "getPhoneNumberPrettyPrint": phoneNumberRaw =>
+                                phoneNumber.prettyPrint(
+                                    buildPhoneNumber(phoneNumberRaw),
+                                    userSim.sim.country?.iso
+                                )
+                        });
+
+
+                    })();
+
+
                     switch (env.jsRuntimeEnv) {
                         case "browser": {
                             return id<types.PhoneCallUi.Create.Params.Browser>({
                                 "assertJsRuntimeEnv": "browser",
-                                userSim
+                                ..._common
                             });
                         }
                         case "react-native": {
                             return id<types.PhoneCallUi.Create.Params.ReactNative>({
                                 "assertJsRuntimeEnv": "react-native",
-                                userSim,
-                                obsIsSipRegistered
+                                obsIsSipRegistered,
+                                ..._common
                             });
                         }
                     }
@@ -155,14 +188,7 @@ export namespace Webphone {
                     }
 
                 },
-                "placeOutgoingCall": async wdChat => {
-
-                    phoneCallUi.openUiForOutgoingCall(wdChat);
-
-
-
-
-                },
+                "placeOutgoingCall": wdChat => phoneCallUi.openUiForOutgoingCall(wdChat.contactNumber),
                 "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
                 "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
                 "getAndOrCreateAndOrUpdateWdChat": async (number, contactName, contactIndexInSim) => {
@@ -296,9 +322,7 @@ export namespace Webphone {
                 const {
                     onTerminated: ui_onTerminated,
                     prUserInput: ui_prUserInput
-                } = phoneCallUi.openUiForIncomingCall(
-                    await webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)
-                );
+                } = phoneCallUi.openUiForIncomingCall(fromNumber);
 
                 logic_prTerminated.then(() => ui_onTerminated("Call ended"));
 
@@ -336,7 +360,7 @@ export namespace Webphone {
             phoneCallUi.evtUiOpenedForOutgoingCall.attach(async evtData => {
 
                 const {
-                    phoneNumber,
+                    phoneNumberRaw,
                     onTerminated: ui_onTerminated,
                     prUserInput: ui_prUserInput,
                     onRingback: ui_onRingback
@@ -346,7 +370,12 @@ export namespace Webphone {
                     prNextState: logic_prNextState,
                     prTerminated: logic_prTerminated,
                     terminate: logic_terminate
-                } = await sipUserAgent.placeOutgoingCall(phoneNumber);
+                } = await sipUserAgent.placeOutgoingCall(
+                    phoneNumber.build(
+                        phoneNumberRaw,
+                        userSim.sim.country?.iso
+                    )
+                );
 
 
                 logic_prTerminated.then(() => ui_onTerminated("Call terminated"));
@@ -553,5 +582,10 @@ async function synchronizeUserSimAndWdInstance(
     }
 
 }
+
+
+
+
+
 
 

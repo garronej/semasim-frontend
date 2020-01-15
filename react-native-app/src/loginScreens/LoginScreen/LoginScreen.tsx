@@ -24,7 +24,7 @@ export type State = {
   isEmailInputHighlightedInRed: boolean;
   isPasswordInputHighlightedInRed: boolean;
   isAwaitingLoginResponse: boolean;
-}
+};
 
 log("[LoginScreen] imported");
 

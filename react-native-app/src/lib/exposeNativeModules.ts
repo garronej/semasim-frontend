@@ -2,7 +2,6 @@
 
 import * as rn from "react-native";
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import { postOnceMatched } from "../tools/postOnceMatched";
 declare const window: any;
 
 const log: typeof console.log = true ?
@@ -21,7 +20,7 @@ const evtApiExposeToHostInvocation = new SyncEvent<{
 rn.DeviceEventEmitter.addListener(
     apiExposedToHostInvocationEventName,
     (eventData: SyncEvent.Type<typeof evtApiExposeToHostInvocation>) =>
-        postOnceMatched(evtApiExposeToHostInvocation, eventData)
+        evtApiExposeToHostInvocation.postOnceMatched(eventData)
 );
 
 export async function run() {
@@ -93,7 +92,7 @@ export function doHeadlessTaskRegistering(
 
             log(`==========> ${eventData.functionName} called from HeadlessJS`);
 
-            postOnceMatched(evtApiExposeToHostInvocation, eventData);
+            evtApiExposeToHostInvocation.postOnceMatched(eventData);
 
         }
     );

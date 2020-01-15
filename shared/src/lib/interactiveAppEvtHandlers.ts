@@ -25,6 +25,7 @@ export type AppEvts = import("./toBackend/appEvts").SubsetOfAppEvts<
 
 
 export function registerInteractiveAppEvtHandlers(
+    prReadyToInteract: Promise<void>,
     appEvts: AppEvts,
     remoteCoreApiCaller: RemoteCoreApiCaller,
     dialogApi: DialogApi,
@@ -32,11 +33,10 @@ export function registerInteractiveAppEvtHandlers(
     restartApp: (typeof import("./restartApp"))["restartApp"]
 ) {
 
-
     const interactiveProcedures = getInteractiveProcedures(remoteCoreApiCaller);
 
     appEvts.evtDongleOnLan.attach(
-        async data => {
+        data => prReadyToInteract.then(async () => {
 
             const { dialogApi, endMultiDialogProcess } = startMultiDialogProcess();
 
@@ -52,42 +52,47 @@ export function registerInteractiveAppEvtHandlers(
 
             endMultiDialogProcess();
 
-        }
+        })
     );
 
     appEvts.evtSimSharingRequest.attach(
-        async userSim => {
+        userSim => prReadyToInteract.then(async () => {
 
             const { endMultiDialogProcess, dialogApi } = startMultiDialogProcess();
 
             await interactiveProcedures.onSimSharingRequest(userSim, dialogApi)
 
             endMultiDialogProcess();
-
-        }
+        })
     );
 
     appEvts.evtSharingRequestResponse.attach(
-        ({ userSim, email, isAccepted }) => dialogApi.create(
-            "alert",
-            { "message": `${email} ${isAccepted ? "accepted" : "rejected"} sharing request for ${userSim.friendlyName}` }
+        ({ userSim, email, isAccepted }) => prReadyToInteract.then(
+            () => dialogApi.create(
+                "alert",
+                { "message": `${email} ${isAccepted ? "accepted" : "rejected"} sharing request for ${userSim.friendlyName}` }
+            )
         )
     );
 
     appEvts.evtOtherSimUserUnregisteredSim.attach(
-        ({ userSim, email }) => dialogApi.create(
-            "alert",
-            { "message": `${email} no longer share ${userSim.friendlyName}` }
+        ({ userSim, email }) => prReadyToInteract.then(
+            () => dialogApi.create(
+                "alert",
+                { "message": `${email} no longer share ${userSim.friendlyName}` }
+            )
         )
     );
 
     appEvts.evtOpenElsewhere.attach(
-        () => dialogApi.create(
-            "alert",
-            {
-                "message": "You are connected somewhere else",
-                "callback": () => restartApp("Connected somewhere else with uaInstanceId")
-            }
+        () => prReadyToInteract.then(() =>
+            dialogApi.create(
+                "alert",
+                {
+                    "message": "You are connected somewhere else",
+                    "callback": () => restartApp("Connected somewhere else with uaInstanceId")
+                }
+            )
         )
     );
 

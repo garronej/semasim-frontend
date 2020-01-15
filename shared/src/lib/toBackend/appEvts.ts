@@ -57,7 +57,27 @@ export namespace appEvts {
     export const evtOpenElsewhere = new VoidSyncEvent();
 
 
-    export namespace rtcIceEServer {
+
+
+    //NOTE: We do not directly use RTCIceServer so we don't have to import lib.dom for integrations test on backend.
+    export type DOM_RTCIceServer_subset = {
+        credential?: string;
+        credentialType?: "password";
+        urls: string[];
+        username?: string;
+    };
+
+    export const evt = new SyncEvent<
+        {
+            rtcIceServer: DOM_RTCIceServer_subset;
+            socket: sipLibrary.Socket
+        }
+    >();
+
+
+
+
+    export namespace rtcIceServer {
 
         //NOTE: We do not directly use RTCIceServer so we don't have to import lib.dom for integrations test on backend.
         export type DOM_RTCIceServer_subset = {
@@ -69,7 +89,7 @@ export namespace appEvts {
 
         export const evt = new SyncEvent<{
             rtcIceServer: DOM_RTCIceServer_subset;
-            socket: sipLibrary.Socket
+            attachOnNoLongerValid: (onNoLongerValid: ()=> void)=> void;
         }>();
 
         export const getCurrent = (() => {
@@ -78,9 +98,9 @@ export namespace appEvts {
 
             const evtUpdated = new VoidSyncEvent();
 
-            evt.attach(({ rtcIceServer, socket }) => {
+            evt.attach(({ rtcIceServer, attachOnNoLongerValid }) => {
 
-                socket.evtClose.attachOnce(() => current = undefined);
+                attachOnNoLongerValid(()=> current = undefined);
 
                 current = rtcIceServer;
 
@@ -114,6 +134,7 @@ export namespace appEvts {
 export type AppEvts = typeof appEvts;
 
 export type SubsetOfAppEvts<K extends keyof AppEvts> = Pick<AppEvts, K>;
+
 
 
 /*

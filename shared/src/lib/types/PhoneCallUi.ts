@@ -1,14 +1,10 @@
 
-
-
-import * as types from "../types/userSim";
-import * as wd from "../types/webphoneData/types";
 type SyncEvent<T> = import("ts-events-extended").SyncEvent<T>;
-type Observable<T> = import("../../tools/Observable").Observable<T>;
+type Observable<T> = import("ts-events-extended").Observable<T>;
 
 export type PhoneCallUi = {
-    openUiForOutgoingCall(wdChat: wd.Chat<"PLAIN">): void;
-    openUiForIncomingCall(wdChat: wd.Chat<"PLAIN">): {
+    openUiForOutgoingCall(phoneNumberRaw: string): void;
+    openUiForIncomingCall(phoneNumberRaw: string): {
         onTerminated(message: string): void;
         prUserInput: Promise<{
             userAction: "ANSWER";
@@ -18,7 +14,7 @@ export type PhoneCallUi = {
         }>;
     };
     evtUiOpenedForOutgoingCall: SyncEvent<{
-        phoneNumber: string;
+        phoneNumberRaw: string;
         onTerminated(message: string): void;
         onRingback(): {
             onEstablished: PhoneCallUi.OnEstablished;
@@ -60,21 +56,14 @@ export namespace PhoneCallUi {
 
     export namespace CreateFactory {
 
-        export type Params = Params.Browser | Params.ReactNative;
-
-        export namespace Params {
-
-            export type Browser = {
-                assertJsRuntimeEnv: "browser";
-            };
-
-            export type ReactNative = {
-                assertJsRuntimeEnv: "react-native";
-                userSims: types.UserSim.Usable[];
-            };
-
-        }
-
+        export type Params = {
+                sims: {
+                    imsi: string;
+                    friendlyName: string;
+                    phoneNumber: string | undefined; //NOTE: formated
+                    serviceProvider: string | undefined;
+                }[]
+        };
 
     }
 
@@ -87,7 +76,9 @@ export namespace PhoneCallUi {
         export namespace Params {
 
             export type _Common = {
-                userSim: types.UserSim.Usable;
+                imsi: string;
+                getContactName: (phoneNumberRaw: string) => string | undefined;
+                getPhoneNumberPrettyPrint: (phoneNumberRaw: string) => string;
             };
 
             export type Browser = _Common & {

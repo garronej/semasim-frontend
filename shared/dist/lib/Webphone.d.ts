@@ -1,8 +1,7 @@
-import { SyncEvent } from "ts-events-extended";
+import { SyncEvent, Observable } from "ts-events-extended";
 import * as types from "./types/userSimAndPhoneCallUi";
 import * as wd from "./types/webphoneData/logic";
 import { phoneNumber } from "phone-number/dist/lib";
-import { Observable } from "../tools/Observable";
 declare type SipUserAgentCreate = ReturnType<(typeof import("./sipUserAgent"))["sipUserAgentCreateFactory"]>;
 declare type WdEvts = import("./toBackend/remoteApiCaller/webphoneData").WdEvts;
 export declare type GetWdApiCallerForSpecificSim = ReturnType<(typeof import("./toBackend/remoteApiCaller"))["getWdApiCallerForSpecificSimFactory"]>;

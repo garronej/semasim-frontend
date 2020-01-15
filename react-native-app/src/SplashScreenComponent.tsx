@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, api as dialogBaseApi, setComponentIsVisibleStateToFalse } from "./globalComponents/Dialog";
+import { Dialog, api as dialogBaseApi, setComponentIsVisibleStateToImutableFalse } from "./globalComponents/Dialog";
 import { LoginRouter } from "./loginScreens/LoginRouter";
 import { MainComponent } from "./MainComponent";
 import { NoBackendConnectionBanner, notConnectedUserFeedback } from "./globalComponents/NoBackendConnectionBanner";
@@ -30,7 +30,7 @@ const prAppLaunch = appLauncher(id<appLauncher.Params.ReactNative>({
     notConnectedUserFeedback,
     dialogBaseApi,
     phoneCallUiCreateFactory,
-    "notifyAppAboutToRestart": ()=> setComponentIsVisibleStateToFalse()
+    "actionToPerformBeforeAppRestart": ()=> setComponentIsVisibleStateToImutableFalse()
 }));
 
 export type State =

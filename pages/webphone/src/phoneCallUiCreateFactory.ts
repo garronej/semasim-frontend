@@ -3,26 +3,27 @@
 
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import * as types from "frontend-shared/dist/lib/types/userSimAndPhoneCallUi";
-import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import * as modalApi from "frontend-shared/dist/tools/modal";
+import { assert } from "frontend-shared/dist/tools/assert";
 
 declare const ion: any;
 declare const require: any;
 
 export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = params => {
 
-    if (params.assertJsRuntimeEnv !== "browser") {
-        throw new Error("wrong assertion");
-    }
+    const { sims } = params;
 
     return Promise.resolve(params => {
 
-        if (params.assertJsRuntimeEnv !== "browser") {
-            throw new Error("wrong assertion");
-        }
-        return new PhoneCallUiImpl(params.userSim);
+        assert(params.assertJsRuntimeEnv === "browser")
+
+        return new PhoneCallUiImpl({
+            "sim": sims.find(({imsi})=>imsi===params.imsi)!,
+            "getContactName": params.getContactName,
+            "getPhoneNumberPrettyPrint": params.getPhoneNumberPrettyPrint
+
+        });
 
     });
 
@@ -37,7 +38,6 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
     private readonly structure = html.structure.clone();
 
-    private readonly countryIso: string | undefined;
 
     private readonly btnGreen = this.structure.find(".id_btn-green");
     private readonly btnRed = this.structure.find(".id_btn-red");
@@ -50,10 +50,10 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
     private readonly showModal: () => Promise<void>;
 
     constructor(
-        private readonly userSim: types.UserSim.Usable
+        private readonly params: Pick<
+            types.PhoneCallUi.Create.Params.Browser, "getContactName" | "getPhoneNumberPrettyPrint"
+        > & { sim: types.PhoneCallUi.CreateFactory.Params["sims"][number]; }
     ) {
-
-        this.countryIso = userSim.sim.country?.iso;
 
         {
 
@@ -71,19 +71,15 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
         }
 
-        this.structure.find("span.id_me").html(userSim.friendlyName);
+        this.structure.find("span.id_me").html(params.sim.friendlyName);
+
 
         this.structure.find("span.id_me_under").html(
-            !!this.userSim.sim.storage.number ?
-
-                phoneNumber.prettyPrint(
-                    phoneNumber.build(
-                        this.userSim.sim.storage.number,
-                        this.countryIso
-                    ),
-                    this.countryIso
-                ) : ""
+            params.getPhoneNumberPrettyPrint(
+                params.sim.phoneNumber ?? ""
+            )
         );
+
 
         this.btnGreen.on("click", () => this.evtBtnClick.post("GREEN"));
         this.btnRed.on("click", () => this.evtBtnClick.post("RED"));
@@ -116,18 +112,13 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
 
     }
 
-    private setContact(wdChat: wd.Chat<"PLAIN">): void {
+    private setContact(phoneNumberRaw: string): void {
 
         this.structure.find("span.id_contact")
-            .html(wdChat.contactName ? wdChat.contactName : "");
+            .html(this.params.getContactName(phoneNumberRaw) ?? "");
 
         this.structure.find("span.id_contact_under")
-            .html(
-                phoneNumber.prettyPrint(
-                    wdChat.contactNumber,
-                    this.countryIso
-                )
-            );
+            .html(this.params.getPhoneNumberPrettyPrint(phoneNumberRaw));
 
 
     }
@@ -242,9 +233,9 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
     }
 
     public readonly openUiForIncomingCall: types.PhoneCallUi["openUiForIncomingCall"] =
-        wdChat => {
+        phoneNumberRaw => {
 
-            this.setContact(wdChat);
+            this.setContact(phoneNumberRaw);
 
             this.setArrows("INCOMING");
 
@@ -279,16 +270,16 @@ class PhoneCallUiImpl implements types.PhoneCallUi {
     public readonly evtUiOpenedForOutgoingCall: types.PhoneCallUi["evtUiOpenedForOutgoingCall"] = new SyncEvent();
 
     public readonly openUiForOutgoingCall: types.PhoneCallUi["openUiForOutgoingCall"] =
-        wdChat => {
+        phoneNumberRaw => {
 
-            this.setContact(wdChat);
+            this.setContact(phoneNumberRaw);
 
             this.setArrows("OUTGOING");
 
             this.setState("LOADING", "Loading...");
 
             this.evtUiOpenedForOutgoingCall.post({
-                "phoneNumber": wdChat.contactNumber,
+                phoneNumberRaw,
                 "onTerminated": message => this.setState("TERMINATED", message),
                 "onRingback": () => {
 

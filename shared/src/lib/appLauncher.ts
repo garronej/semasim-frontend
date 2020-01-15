@@ -10,13 +10,17 @@ import { appEvts } from "./toBackend/appEvts";
 import { Webphone } from "./Webphone";
 import * as connection from "./toBackend/connection";
 import { tryLoginFromStoredCredentials } from "./tryLoginFromStoredCredentials";
-import { restartApp, evtAppAboutToRestart } from "./restartApp";
+import { restartApp, registerActionToPerformBeforeAppRestart } from "./restartApp";
 import { env } from "./env";
-import { baseTypes as dialogBaseTypes, provideCustomImplementationOfBaseApi, dialogApi, startMultiDialogProcess } from "../tools/modal/dialog";
+import { 
+	baseTypes as dialogBaseTypes, 
+	provideCustomImplementationOfBaseApi as provideCustomImplementationOfDialogBaseApi, 
+	dialogApi, startMultiDialogProcess } from "../tools/modal/dialog";
 import * as webApiCaller from "./webApiCaller";
 import { registerInteractiveAppEvtHandlers } from "./interactiveAppEvtHandlers";
 import { getPushToken } from "./getPushToken";
 import { id } from "../tools/id";
+import { phoneNumber } from "phone-number/dist/lib";
 import * as types from "./types/userSimAndPhoneCallUi";
 
 
@@ -35,9 +39,11 @@ export async function appLauncher(params: appLauncher.Params): Promise<{
 
 	if (params.assertJsRuntimeEnv === "react-native") {
 
-		evtAppAboutToRestart.attachOnce(()=> params.notifyAppAboutToRestart());
+		registerActionToPerformBeforeAppRestart(
+			()=>params.actionToPerformBeforeAppRestart()
+		);
 
-		provideCustomImplementationOfBaseApi(params.dialogBaseApi);
+		provideCustomImplementationOfDialogBaseApi(params.dialogBaseApi);
 
 
 	}
@@ -91,7 +97,7 @@ export namespace appLauncher {
 		export type ReactNative = Base_ & {
 			assertJsRuntimeEnv: "react-native";
 			notConnectedUserFeedback: connection.ConnectParams.ReactNative["notConnectedUserFeedback"];
-			notifyAppAboutToRestart: ()=> void;
+			actionToPerformBeforeAppRestart: ()=> Promise<void>;
 			dialogBaseApi: dialogBaseTypes.Api;
 		};
 
@@ -182,7 +188,11 @@ async function appLauncher_onceLoggedIn(
 		() => restartApp("One sim password have changed")
 	);
 
+	//NOTE: Must be resolved after user enabled sim permissions.
+	let resolvePrReadyToInteract!: ()=> void;
+
 	registerInteractiveAppEvtHandlers(
+		new Promise(resolve=> resolvePrReadyToInteract = resolve),
 		appEvts,
 		remoteApiCaller.core,
 		dialogApi,
@@ -207,24 +217,32 @@ async function appLauncher_onceLoggedIn(
 			email
 		),
 		"coreApiCaller": remoteApiCaller.core,
-		"phoneCallUiCreate": await params.phoneCallUiCreateFactory(
-			((): types.PhoneCallUi.CreateFactory.Params => {
-				switch (env.jsRuntimeEnv) {
-					case "browser": {
-						return id<types.PhoneCallUi.CreateFactory.Params.Browser>({
-							"assertJsRuntimeEnv": "browser"
-						});
-					}
-					case "react-native": {
-						return id<types.PhoneCallUi.CreateFactory.Params.ReactNative>({
-							"assertJsRuntimeEnv": "react-native",
-							userSims,
-						});
-					}
-				}
-			})()
-		)
+		"phoneCallUiCreate": await params.phoneCallUiCreateFactory({
+			"sims": userSims.map(userSim => ({
+				"imsi": userSim.sim.imsi,
+				"friendlyName": userSim.friendlyName,
+				"phoneNumber": (() => {
+
+					const { number } = userSim.sim.storage;
+
+					return number !== undefined ? phoneNumber.build(
+						number,
+						userSim.sim.country?.iso
+					) : undefined;
+
+				})(),
+				"serviceProvider": (() => {
+
+					const { fromImsi, fromNetwork } = userSim.sim.serviceProvider;
+
+					return fromImsi ?? fromNetwork ?? "";
+
+				})()
+			}))
+		})
 	});
+
+	resolvePrReadyToInteract();
 
 	return (await Promise.all(
 		userSims.map(

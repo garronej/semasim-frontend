@@ -105,7 +105,7 @@ function sipUserAgentCreateFactory(params) {
         return out;
     })();
     var getJsSipSocket = function (imsi) { return new JsSipSocket(imsi, params.connection); };
-    var getRtcIceServer = function () { return params.appEvts.rtcIceEServer.getCurrent(); };
+    var getRtcIceServer = function () { return params.appEvts.rtcIceServer.getCurrent(); };
     return function sipUserAgentCreate(usableUserSim) {
         var sim = usableUserSim.sim;
         var evtUnregisteredByGateway = (function () {

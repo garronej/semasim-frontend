@@ -1,6 +1,5 @@
 
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import { postOnceMatched } from "../../tools/postOnceMatched";
+import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/nativeModules/hostPhoneCallUi]", ...args])) :
@@ -14,9 +13,11 @@ type ApiExposedByHost = {
     getIsSimPhoneAccountEnabled(imsi: string, callRef: number): void;
     unregisterOtherPhoneAccounts(imsisJson: string, callRef: number): void;
 
-    placeCall(phoneCallRef: number, imsi: string, phoneNumber: string, contactName: string): void;
+    placeCall(phoneCallRef: number, imsi: string, phoneNumber: string): void;
     setCallActive(phoneCallRef: number): void;
     reportCallTerminated(phoneCallRef: number): void;
+
+    onGetContactNameResponse(phoneCallRef: number, contactName: string | null): void;
 
 };
 
@@ -31,10 +32,7 @@ type ApiExposedToHost = {
     notifyCallAnswered(phoneCallRef: number): void;
     notifyDtmf(phoneCallRef: number, dtmf: string): void;
     notifyEndCall(phoneCallRef: number): void;
-    notifyUiOpenForOutgoingCall(phoneCallRef: number, imsi: string, phoneNumber: string): void;
-
-
-
+    notifyUiOpenForOutgoingCallAndGetContactName(phoneCallRef: number, imsi: string, phoneNumberRaw: string): void;
 
 };
 
@@ -50,12 +48,16 @@ const evtUnregisterOtherPhoneAccountsResult = new SyncEvent<{ callRef: number; }
 export const evtUiOpenForOutgoingCall = new SyncEvent<{
     phoneCallRef: number;
     imsi: string;
-    phoneNumber: string;
+    phoneNumberRaw: string;
+    setContactName: (contactName: string | undefined)=> void;
+    evtDtmf: SyncEvent<{dtmf: string; }>;
+    evtEndCall: VoidSyncEvent;
 }>();
 
-export const evtCallAnswered = new SyncEvent<{ phoneCallRef: number; }>();
-export const evtDtmf = new SyncEvent<{ phoneCallRef: number; dtmf: string; }>();
-export const evtEndCall = new SyncEvent<{ phoneCallRef: number; }>();
+const evtCallAnswered = new SyncEvent<{ phoneCallRef: number; }>();
+const evtDtmf = new SyncEvent<{ phoneCallRef: number; dtmf: string; }>();
+const evtEndCall = new SyncEvent<{ phoneCallRef: number; }>();
+
 
 
 export const apiExposedToHost: ApiExposedToHost = {
@@ -76,8 +78,38 @@ export const apiExposedToHost: ApiExposedToHost = {
         evtDtmf.post({ phoneCallRef, dtmf }),
     "notifyEndCall": phoneCallRef =>
         evtEndCall.post({ phoneCallRef }),
-    "notifyUiOpenForOutgoingCall": (phoneCallRef, imsi, phoneNumber) =>
-        postOnceMatched(evtUiOpenForOutgoingCall, { phoneCallRef, imsi, phoneNumber })
+    "notifyUiOpenForOutgoingCallAndGetContactName": (phoneCallRef, imsi, phoneNumberRaw) =>
+        evtUiOpenForOutgoingCall.postOnceMatched({
+            phoneCallRef,
+            imsi,
+            phoneNumberRaw,
+            "setContactName": contactName =>
+                apiExposedByHost.onGetContactNameResponse(phoneCallRef, contactName ?? null),
+            "evtDtmf": (() => {
+
+                const out = new SyncEvent<{ dtmf: string; }>();
+
+                evtDtmf.attach(
+                    ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+                    ({ dtmf }) => out.postOnceMatched({ dtmf })
+                );
+
+                return out;
+
+            })(),
+            "evtEndCall": (() => {
+
+                const out = new VoidSyncEvent();
+
+                evtEndCall.attach(
+                    ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+                    () => out.postOnceMatched()
+                );
+
+                return out;
+
+            })(),
+        })
 
 };
 
@@ -153,7 +185,7 @@ export async function unregisterOtherPhoneAccounts(imsis: string[]): Promise<voi
     const callRef = getCounter();
 
     apiExposedByHost.unregisterOtherPhoneAccounts(
-        JSON.stringify(imsis), 
+        JSON.stringify(imsis),
         callRef
     );
 
@@ -163,8 +195,8 @@ export async function unregisterOtherPhoneAccounts(imsis: string[]): Promise<voi
 
 }
 
-export function placeCall(phoneCallRef: number, imsi: string, phoneNumber: string, contactName: string): void {
-    apiExposedByHost.placeCall(phoneCallRef, imsi, phoneNumber, contactName);
+export function placeCall(phoneCallRef: number, imsi: string, phoneNumber: string): void {
+    apiExposedByHost.placeCall(phoneCallRef, imsi, phoneNumber);
 }
 
 export function setCallActive(phoneCallRef: number): void {

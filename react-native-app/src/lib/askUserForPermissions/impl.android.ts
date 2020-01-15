@@ -35,14 +35,11 @@ const askForAndroidPermissions = async ()=> {
     for (const permission of [
         PERMISSIONS.RECORD_AUDIO,
         PERMISSIONS.READ_CONTACTS,
-        PERMISSIONS.READ_PHONE_STATE
+        PERMISSIONS.READ_PHONE_STATE,
+        PERMISSIONS.CALL_PHONE
     ]) {
 
-        log("================>", { permission });
-
         if (!permission) {
-
-            log("=============> continue");
 
             continue;
 
@@ -63,9 +60,9 @@ const askForAndroidPermissions = async ()=> {
 
         } catch (error) {
 
-            log("Throw error");
+            log(`Throw error for ${permission}`);
 
-            throw error;
+            continue;
 
         }
 

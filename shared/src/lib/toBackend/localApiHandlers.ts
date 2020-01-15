@@ -670,7 +670,7 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
     const handler: sipLibrary.api.Server.Handler<Params, Response> = {
         "handler": (params, fromSocket) => {
 
-            appEvts.rtcIceEServer.evt.post({
+            appEvts.rtcIceServer.evt.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
                         "urls": [
@@ -680,7 +680,10 @@ const evtUsableDongle = new SyncEvent<{ imei: string; }>();
                             "stun:stun4.l.google.com:19302"
                         ]
                     }),
-                "socket": fromSocket
+                    "attachOnNoLongerValid": onNoLongerValid => fromSocket.evtClose.attachOnce(
+                        ()=> onNoLongerValid()
+                    )
+
             });
 
             return Promise.resolve(undefined);

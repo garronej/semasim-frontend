@@ -1,10 +1,8 @@
-import * as types from "../types/userSim";
-import * as wd from "../types/webphoneData/types";
 declare type SyncEvent<T> = import("ts-events-extended").SyncEvent<T>;
-declare type Observable<T> = import("../../tools/Observable").Observable<T>;
+declare type Observable<T> = import("ts-events-extended").Observable<T>;
 export declare type PhoneCallUi = {
-    openUiForOutgoingCall(wdChat: wd.Chat<"PLAIN">): void;
-    openUiForIncomingCall(wdChat: wd.Chat<"PLAIN">): {
+    openUiForOutgoingCall(phoneNumberRaw: string): void;
+    openUiForIncomingCall(phoneNumberRaw: string): {
         onTerminated(message: string): void;
         prUserInput: Promise<{
             userAction: "ANSWER";
@@ -14,7 +12,7 @@ export declare type PhoneCallUi = {
         }>;
     };
     evtUiOpenedForOutgoingCall: SyncEvent<{
-        phoneNumber: string;
+        phoneNumberRaw: string;
         onTerminated(message: string): void;
         onRingback(): {
             onEstablished: PhoneCallUi.OnEstablished;
@@ -45,23 +43,23 @@ export declare namespace PhoneCallUi {
     };
     type CreateFactory = (params: CreateFactory.Params) => Promise<Create>;
     namespace CreateFactory {
-        type Params = Params.Browser | Params.ReactNative;
-        namespace Params {
-            type Browser = {
-                assertJsRuntimeEnv: "browser";
-            };
-            type ReactNative = {
-                assertJsRuntimeEnv: "react-native";
-                userSims: types.UserSim.Usable[];
-            };
-        }
+        type Params = {
+            sims: {
+                imsi: string;
+                friendlyName: string;
+                phoneNumber: string | undefined;
+                serviceProvider: string | undefined;
+            }[];
+        };
     }
     type Create = (params: Create.Params) => PhoneCallUi;
     namespace Create {
         type Params = Params.Browser | Params.ReactNative;
         namespace Params {
             type _Common = {
-                userSim: types.UserSim.Usable;
+                imsi: string;
+                getContactName: (phoneNumberRaw: string) => string | undefined;
+                getPhoneNumberPrettyPrint: (phoneNumberRaw: string) => string;
             };
             type Browser = _Common & {
                 assertJsRuntimeEnv: "browser";

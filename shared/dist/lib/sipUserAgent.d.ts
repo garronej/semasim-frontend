@@ -18,7 +18,7 @@ export declare function sipUserAgentCreateFactory(params: {
     cryptoRelatedParams: ParamsNeededToInstantiateUa;
     pushNotificationToken: string;
     connection: ConnectionApi;
-    appEvts: import("./toBackend/appEvts").SubsetOfAppEvts<"evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer">;
+    appEvts: import("./toBackend/appEvts").SubsetOfAppEvts<"evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceServer">;
 }): (usableUserSim: {
     sim: {
         imsi: string;

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
@@ -20,8 +21,10 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 
+import org.jdeferred2.Deferred;
 import org.jdeferred2.DoneCallback;
 import org.jdeferred2.Promise;
+import org.jdeferred2.android.AndroidDeferredObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -29,7 +32,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.semasim.semasim.tools.Log;
 import com.semasim.semasim.tools.MethodNameGetter;
@@ -82,6 +87,33 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
 
     }
 
+    private static void notify(String functionName, Integer phoneCallRef, ApiExposedToHostCallerService.ParamsEditor paramsEditor) {
+
+
+        ApiExposedToHostCallerService.invokeFunction(
+                HostPhoneCallUi.instance != null ? instance.getReactApplicationContext() : null,
+                functionName,
+                params -> {
+
+                    if (phoneCallRef != null) {
+
+                        params.pushInt(phoneCallRef);
+
+                    }
+
+                    if (paramsEditor != null) {
+
+                        paramsEditor.editParams(params);
+
+                    }
+
+
+                }
+        );
+
+
+    }
+
 
     static void notifyCallAnswered(int phoneCallRef) {
         notify(
@@ -108,45 +140,41 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
     }
 
 
-    static void notifyUiOpenForOutgoingCall(int phoneCallRef, String imsi, String phoneNumber) {
+
+    private static final SparseArray<Deferred<String, ?, ?>> dContactNameByPhoneCallRef = new SparseArray<>();
+
+    static Promise<String,?,?> notifyUiOpenForOutgoingCallAndGetContactName(int phoneCallRef, String imsi, String phoneNumberRaw) {
 
         notify(
                 MethodNameGetter.get(),
                 phoneCallRef,
                 params -> {
                     params.pushString(imsi);
-                    params.pushString(phoneNumber);
+                    params.pushString(phoneNumberRaw);
                 }
         );
 
+        Deferred<String, ?, ?> dContactName = new AndroidDeferredObject<>();
+
+        dContactNameByPhoneCallRef.put( phoneCallRef, dContactName );
+
+        return dContactName.promise();
 
     }
 
+    @SuppressWarnings("unused")
+    @ReactMethod
+    public void onGetContactNameResponse(int phoneCallRef, String contactName) {
 
-    private static void notify(String functionName, Integer phoneCallRef, ApiExposedToHostCallerService.ParamsEditor paramsEditor) {
+        Deferred<String, ?, ?> dContactName = dContactNameByPhoneCallRef.get(phoneCallRef);
 
+        if( dContactName == null ){
+            throw new RuntimeException("never");
+        }
 
-        ApiExposedToHostCallerService.invokeFunction(
-                HostPhoneCallUi.instance != null ? instance.getReactApplicationContext() : null,
-                functionName,
-                params -> {
+        dContactName.resolve(contactName);
 
-                    if (phoneCallRef != null) {
-
-                        params.pushInt(phoneCallRef);
-
-                    }
-
-                    if (paramsEditor != null) {
-
-                        paramsEditor.editParams(params);
-
-                    }
-
-
-                }
-        );
-
+        dContactNameByPhoneCallRef.delete(phoneCallRef);
 
     }
 
@@ -520,8 +548,7 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
     public void placeCall(
             int phoneCallRef,
             String imsi,
-            String phoneNumber,
-            String contactName
+            String phoneNumber
     ){
 
         Bundle placeCallExtras;
@@ -536,8 +563,7 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
 
             includeSemasimOutgoingCallExtrasInConnectionRequestExtras(
                     placeCallExtras,
-                    phoneCallRef,
-                    contactName
+                    phoneCallRef
             );
 
         }
@@ -548,6 +574,7 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
                 null
         );
 
+
         try {
 
             telecomManager.placeCall(
@@ -556,7 +583,7 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
             );
 
         }catch(SecurityException e){
-            //NOTE: Assert we have already all the premissions to make the call
+            //NOTE: Assert we have already all the permissions to make the call
             throw new RuntimeException(e.getMessage());
         }
 
@@ -580,15 +607,13 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
 
     interface SemasimOutgoingCallExtras {
         int getPhoneCallRef();
-        String getContactName();
     }
 
     private static final String SEMASIM_OUTGOING_CALL_EXTRAS_SINGLE_KEY= "KEY";
 
     private static void includeSemasimOutgoingCallExtrasInConnectionRequestExtras(
             Bundle placeCallExtras,
-            int phoneCallRef,
-            String contactName
+            int phoneCallRef
     ){
 
         Bundle outgoingConnectionRequestExtras = new Bundle();
@@ -596,17 +621,7 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
         outgoingConnectionRequestExtras.putString(
                 HostPhoneCallUi.SEMASIM_OUTGOING_CALL_EXTRAS_SINGLE_KEY,
                 Serializer.stringifyObject(
-                        new SemasimOutgoingCallExtras() {
-                            @Override
-                            public int getPhoneCallRef() {
-                                return phoneCallRef;
-                            }
-
-                            @Override
-                            public String getContactName() {
-                                return contactName;
-                            }
-                        }
+                        (SemasimOutgoingCallExtras) () -> phoneCallRef
                 )
         );
 
@@ -624,8 +639,6 @@ public class HostPhoneCallUi extends ReactContextBaseJavaModule {
         String semasimOutgoingCallExtrasJson = outgoingConnectionRequestExtras.getString(
                 HostPhoneCallUi.SEMASIM_OUTGOING_CALL_EXTRAS_SINGLE_KEY
         );
-
-
 
         if( semasimOutgoingCallExtrasJson == null ){
             return null;

@@ -1,4 +1,3 @@
-import { VoidSyncEvent } from "ts-events-extended";
 export declare type Default = (reason: string) => Promise<never>;
-export declare const evtAppAboutToRestart: VoidSyncEvent;
+export declare function registerActionToPerformBeforeAppRestart(action: () => void | Promise<void>): void;
 export declare const restartApp: Default;

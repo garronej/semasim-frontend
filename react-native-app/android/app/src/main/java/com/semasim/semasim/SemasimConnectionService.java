@@ -11,6 +11,8 @@ import android.telecom.PhoneAccountHandle;
 
 import com.semasim.semasim.tools.Log;
 
+import org.jdeferred2.Promise;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -92,48 +94,38 @@ public class SemasimConnectionService extends ConnectionService {
     ) {
 
 
-        Bundle connectionRequestExtras = connectionRequest.getExtras();
+        int phoneCallRef;
+        {
 
-        //TODO: is null if call started from outside of the app.
-        HostPhoneCallUi.SemasimOutgoingCallExtras semasimOutgoingCallExtras=
-                HostPhoneCallUi.extractSemasimOutgoingCallExtrasFromConnectionRequestExtras(
-                        connectionRequestExtras
-                );
+            Bundle connectionRequestExtras = connectionRequest.getExtras();
+
+            //TODO: is null if call started from outside of the app.
+            HostPhoneCallUi.SemasimOutgoingCallExtras semasimOutgoingCallExtras =
+                    HostPhoneCallUi.extractSemasimOutgoingCallExtrasFromConnectionRequestExtras(
+                            connectionRequestExtras
+                    );
 
 
+            phoneCallRef = semasimOutgoingCallExtras != null ?
+                    semasimOutgoingCallExtras.getPhoneCallRef() :
+                    -ThreadLocalRandom.current().nextInt(
+                            1, Integer.MAX_VALUE
+                    );
 
-        String contactName = semasimOutgoingCallExtras != null ?
-                semasimOutgoingCallExtras.getContactName() :
-                connectionRequest.getAddress().getUserInfo() //TODO: Test, educated guess, if right contact name should be put in uri
-                ;
-
-        Log.i("=================> contactName educated guess: " + contactName);
-
-        int phoneCallRef= semasimOutgoingCallExtras!=null ?
-                semasimOutgoingCallExtras.getPhoneCallRef() :
-                -ThreadLocalRandom.current().nextInt(
-                        1, Integer.MAX_VALUE
-                )
-                ;
+        }
 
 
         String phoneNumber = connectionRequest.getAddress().getSchemeSpecificPart();
 
-        {
-
-            String imsi = phoneAccountHandle.getId();
-
-            HostPhoneCallUi.notifyUiOpenForOutgoingCall(
-                    phoneCallRef,
-                    imsi,
-                    phoneNumber
-            );
-
-        }
+        Promise<String, ?, ?> prContactName = HostPhoneCallUi.notifyUiOpenForOutgoingCallAndGetContactName(
+                phoneCallRef,
+                "" + phoneAccountHandle.getId(),
+                phoneNumber
+        );
 
         SemasimConnection semasimConnection = new SemasimConnection(
                 phoneNumber,
-                contactName,
+                prContactName,
                 new SemasimConnection.Listeners() {
                     @Override
                     public void onAnswer() {

@@ -498,7 +498,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     var methodName = apiDeclaration.notifyIceServer.methodName;
     var handler = {
         "handler": function (params, fromSocket) {
-            appEvts_1.appEvts.rtcIceEServer.evt.post({
+            appEvts_1.appEvts.rtcIceServer.evt.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
                         "urls": [
@@ -508,7 +508,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                             "stun:stun4.l.google.com:19302"
                         ]
                     }),
-                "socket": fromSocket
+                "attachOnNoLongerValid": function (onNoLongerValid) { return fromSocket.evtClose.attachOnce(function () { return onNoLongerValid(); }); }
             });
             return Promise.resolve(undefined);
         }

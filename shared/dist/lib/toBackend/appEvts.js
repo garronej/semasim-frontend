@@ -58,15 +58,16 @@ var appEvts;
     appEvts.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     appEvts.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
     appEvts.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
-    var rtcIceEServer;
-    (function (rtcIceEServer) {
-        rtcIceEServer.evt = new ts_events_extended_1.SyncEvent();
-        rtcIceEServer.getCurrent = (function () {
+    appEvts.evt = new ts_events_extended_1.SyncEvent();
+    var rtcIceServer;
+    (function (rtcIceServer_1) {
+        rtcIceServer_1.evt = new ts_events_extended_1.SyncEvent();
+        rtcIceServer_1.getCurrent = (function () {
             var current = undefined;
             var evtUpdated = new ts_events_extended_1.VoidSyncEvent();
-            rtcIceEServer.evt.attach(function (_a) {
-                var rtcIceServer = _a.rtcIceServer, socket = _a.socket;
-                socket.evtClose.attachOnce(function () { return current = undefined; });
+            rtcIceServer_1.evt.attach(function (_a) {
+                var rtcIceServer = _a.rtcIceServer, attachOnNoLongerValid = _a.attachOnNoLongerValid;
+                attachOnNoLongerValid(function () { return current = undefined; });
                 current = rtcIceServer;
                 evtUpdated.post();
             });
@@ -87,7 +88,7 @@ var appEvts;
                 });
             };
         })();
-    })(rtcIceEServer = appEvts.rtcIceEServer || (appEvts.rtcIceEServer = {}));
+    })(rtcIceServer = appEvts.rtcIceServer || (appEvts.rtcIceServer = {}));
     appEvts.evtWdActionFromOtherUa = new ts_events_extended_1.SyncEvent();
 })(appEvts = exports.appEvts || (exports.appEvts = {}));
 /*

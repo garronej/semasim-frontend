@@ -52,6 +52,7 @@ async function onLoggedIn(): Promise<UiController> {
     })());
 
     registerInteractiveAppEvtHandlers(
+        Promise.resolve(),
         appEvts,
         remoteCoreApiCaller,
         dialogApi,

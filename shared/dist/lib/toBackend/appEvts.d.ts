@@ -42,7 +42,17 @@ export declare namespace appEvts {
         email: string;
     }>;
     const evtOpenElsewhere: VoidSyncEvent;
-    namespace rtcIceEServer {
+    type DOM_RTCIceServer_subset = {
+        credential?: string;
+        credentialType?: "password";
+        urls: string[];
+        username?: string;
+    };
+    const evt: SyncEvent<{
+        rtcIceServer: DOM_RTCIceServer_subset;
+        socket: sipLibrary.Socket;
+    }>;
+    namespace rtcIceServer {
         type DOM_RTCIceServer_subset = {
             credential?: string;
             credentialType?: "password";
@@ -51,7 +61,7 @@ export declare namespace appEvts {
         };
         const evt: SyncEvent<{
             rtcIceServer: DOM_RTCIceServer_subset;
-            socket: sipLibrary.Socket;
+            attachOnNoLongerValid: (onNoLongerValid: () => void) => void;
         }>;
         const getCurrent: () => Promise<DOM_RTCIceServer_subset>;
     }

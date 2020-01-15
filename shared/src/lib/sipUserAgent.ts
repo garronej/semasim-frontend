@@ -45,7 +45,7 @@ export function sipUserAgentCreateFactory(
         pushNotificationToken: string;
         connection: ConnectionApi;
         appEvts: import("./toBackend/appEvts").SubsetOfAppEvts<
-        "evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceEServer"
+        "evtSimPasswordChanged" | "evtSimPermissionLost" | "evtSimReachabilityStatusChange" | "rtcIceServer"
         >
     }
 ) {
@@ -85,7 +85,7 @@ export function sipUserAgentCreateFactory(
 
     const getJsSipSocket = (imsi: string) => new JsSipSocket(imsi, params.connection);
 
-    const getRtcIceServer: () => Promise<RTCIceServer> = () => params.appEvts.rtcIceEServer.getCurrent();
+    const getRtcIceServer: () => Promise<RTCIceServer> = () => params.appEvts.rtcIceServer.getCurrent();
 
 
 

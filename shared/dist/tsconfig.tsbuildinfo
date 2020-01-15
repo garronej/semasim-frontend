@@ -177,9 +177,33 @@
         "version": "9e8270a0f6b69c6607df8f5ef11796a90ea441ecfb28b97a7180b0bd881b8655",
         "signature": "dc10587c937decba249305480cc9408aea82cbe5ef953f4d5bef378a7ddf09e6"
       },
-      "../node_modules/ts-events-extended/dist/lib/index.d.ts": {
-        "version": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45",
-        "signature": "bc2aa2a3e1a5a6bb6366f9a9427632197796d75658ce9ef545ec829738850e45"
+      "../../local_modules/ts-events-extended/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts": {
+        "version": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/defs.d.ts": {
+        "version": "b59784276dce6cc61be48b01eebd9ade2808271d5a6ec357fa087e45d8919d80",
+        "signature": "b59784276dce6cc61be48b01eebd9ade2808271d5a6ec357fa087e45d8919d80"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": {
+        "version": "4d570c966a7e965e40148ffdf18f58460ae7795df946cd22d6ae9434fa66b5e6",
+        "signature": "4d570c966a7e965e40148ffdf18f58460ae7795df946cd22d6ae9434fa66b5e6"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts": {
+        "version": "9f764e87e1ed4647647712656a2c47997172a084bddce704b191146463b5f76c",
+        "signature": "9f764e87e1ed4647647712656a2c47997172a084bddce704b191146463b5f76c"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts": {
+        "version": "4f8a568a80fe2fcfc90600a7bbf81998bb70292e9e9d8f4151aa42dc02a906ac",
+        "signature": "4f8a568a80fe2fcfc90600a7bbf81998bb70292e9e9d8f4151aa42dc02a906ac"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/observable.d.ts": {
+        "version": "6aca33da96db6f8b7821f695b451b39d58cbebe12c3a50238e64be981df2cdd3",
+        "signature": "6aca33da96db6f8b7821f695b451b39d58cbebe12c3a50238e64be981df2cdd3"
+      },
+      "../../local_modules/ts-events-extended/dist/lib/index.d.ts": {
+        "version": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a",
+        "signature": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a"
       },
       "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts": {
         "version": "b986c5f17166f5c3a270f95c72dcc057548a769a80c564223591cd14bfcae2a0",
@@ -188,14 +212,6 @@
       "../src/lib/types/usersim.ts": {
         "version": "997f1dd4eb7dcbd6e374d8e7b791f26186f07b984b195ea3a5e152a7558d42f3",
         "signature": "0201fd670f0cfa3f5ece632fda88e95b1c2813bc2d27a257023fb5b98883b2ba"
-      },
-      "../src/lib/types/webphonedata/types.ts": {
-        "version": "d9f6da36f5ccecc7d8ef6411751b176ad6b5d83b1032552a7e455d113979c140",
-        "signature": "78e78e64ad055ed40970eadf6249385145af3111232b926f55f798531a1f2ce3"
-      },
-      "../src/tools/observable.ts": {
-        "version": "4ed965b5c96a9a8a451e631e63c02d387ff86fd989c7211cc39b230313f5bfc0",
-        "signature": "96a66f2a9525a94c8e58014ecb17575c656142c3dfa8fd46060017aecfe6efc2"
       },
       "../../local_modules/ts-sip/dist/lib/index.d.ts": {
         "version": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
@@ -309,6 +325,10 @@
         "version": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958",
         "signature": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958"
       },
+      "../node_modules/trackable-map/node_modules/ts-events-extended/dist/lib/index.d.ts": {
+        "version": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a",
+        "signature": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a"
+      },
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": {
         "version": "9025a5b37f7f32b1f4d491d70af60a7e3224e1dfe276fd7b69930fb05b70fe85",
         "signature": "9025a5b37f7f32b1f4d491d70af60a7e3224e1dfe276fd7b69930fb05b70fe85"
@@ -316,6 +336,10 @@
       "../node_modules/trackable-map/dist/lib/index.d.ts": {
         "version": "a962616fff067ab6bfe0a271ea7a30e8dc9c2b4b3acb4c67240cec15ae4e4d10",
         "signature": "a962616fff067ab6bfe0a271ea7a30e8dc9c2b4b3acb4c67240cec15ae4e4d10"
+      },
+      "../node_modules/chan-dongle-extended-client/node_modules/ts-events-extended/dist/lib/index.d.ts": {
+        "version": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a",
+        "signature": "01883bfb9717231946f008253c6db86d59c7b091ebefa0297d5cca753bc9224a"
       },
       "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": {
         "version": "827beea819609471a0a48e237adff3e4a07a59db303f53c150360ed7c8c5add1",
@@ -329,6 +353,10 @@
         "version": "6d6ca69eb06f3b6a9ab9c47a8eb0bb2d1dd86f45619c60e861d41a1861806a2c",
         "signature": "6d6ca69eb06f3b6a9ab9c47a8eb0bb2d1dd86f45619c60e861d41a1861806a2c"
       },
+      "../src/lib/types/webphonedata/types.ts": {
+        "version": "07e5535193d497ab5a3fe482dfb24eeb5ed55947358016fba865eb79e54648fe",
+        "signature": "78e78e64ad055ed40970eadf6249385145af3111232b926f55f798531a1f2ce3"
+      },
       "../src/sip_api_declarations/backendtoua.ts": {
         "version": "fc4fa6cdecf6146334cacf9d87998ed3878fc16c04a3240f00e0681a46203614",
         "signature": "9537753439f78e8f4a9717c03560b32a1b70a838c0b78c2822e595809b05a02f"
@@ -338,16 +366,16 @@
         "signature": "ff1f9cb18c9bd4f49b36105127c6a06d7cad745f1ee8db3538a19b94b269402d"
       },
       "../src/lib/tobackend/appevts.ts": {
-        "version": "4cedbe9ea18b13eead35b7b643249610f8da45b5229879a8ca2ab5aae005b283",
-        "signature": "e2440386246ded068f40b0815effc83bd0dd1a56089f1a4639d5ae70fe7127ca"
+        "version": "39a9735c63b53adc61cb9600a9e92440e5336fc873990ca6cddaa325a52fd463",
+        "signature": "b5c96aee91f901b8e6a52e9093824191433c36cf222f7b5851d06ca93de34b19"
       },
       "../src/lib/sipuseragent.ts": {
-        "version": "ee141f8ea42883be59181c2b05109df4d4f445a26b8df4045f96f16702206a67",
-        "signature": "91a49137528faccdf95b733fbde4e84c5552122c50d8946beb221cf115e5d45a"
+        "version": "727bbe3227bc4afe24dc523c093b318fabf4c4bc5e3bd8380de28358929dd6fc",
+        "signature": "b5c20d2b8628a16fecc650f97fea50be8d0d0b216c3794ac8c4faa2e1a4edb31"
       },
       "../src/lib/types/phonecallui.ts": {
-        "version": "0b986001199999fbfa438275c631eefa20c76f3fec2d37c668bc999ede31bdfe",
-        "signature": "4c2f170c0408305142ba235c89f2e3a275ff423c86ac8934bca3525637731776"
+        "version": "c0ab10a6c90b55300d6cd7c9e0913e5ce6aa910ce1cecdb0e082ceb439bb0dec",
+        "signature": "cb066342f467c2ecb7452746570073e0d38fd08b26bb83a78cb876ad16392f17"
       },
       "../src/lib/types/usersimandphonecallui.ts": {
         "version": "51baca8c37f38787088406a9fb73278ccebc01e3ec6f388237a08692807e1bbf",
@@ -378,8 +406,8 @@
         "signature": "30dd92fd197702e13b2c8ccddb26805ffbb65ff0b4ec136f97ecdb3b8373aad3"
       },
       "../src/lib/restartapp/index.ts": {
-        "version": "a860a92f537bd9842b92cb31b3a563a51ebc213c38bf00c2a74899d2133792b9",
-        "signature": "d08f4112dc76183dcf47431690a45cac7fc68562e9f722d3e2a75e47e2bcf41f"
+        "version": "51fc40be4d9dc636b078a98779fbdb37e028d638b290f29d83a3eac2f7a611b1",
+        "signature": "7b0c542198e8d06c6a3d564f6c198cf97c5700d2f6d1793e094899b2f1284ebc"
       },
       "../src/lib/tobackend/remoteapicaller/core.ts": {
         "version": "43412908b6c0b8b6763a8c8c75fa0fa576e00eb3e18a440a4b7959b090c0ce97",
@@ -390,7 +418,7 @@
         "signature": "725a87b83787ef479457bb6fe16a3d0f01638d3ed0bcb2b5aee0c48b2ce0385f"
       },
       "../src/lib/tobackend/localapihandlers.ts": {
-        "version": "85ef7d1b903a2592f1e805c96f300356a454b65d13a3c3b8f74acc5cda9ec10d",
+        "version": "a473a218c6ab737e45c622c99b58575229313c9be4d1770f66ee611e4bcdeec3",
         "signature": "1e2ecf4ec2b30af899faa5c8cc207aba31c4da3ddefe8af948467533fa37f66c"
       },
       "../src/lib/types/websocketconnectionparams.ts": {
@@ -458,12 +486,12 @@
         "signature": "8efe3798dc3ea5bea8198fe7871cbeffce0949ff64ed22655f28d4fc264f3079"
       },
       "../src/lib/webphone.ts": {
-        "version": "3dce6ca4ed39ef1e768849d3fc0daa770282f71c6badcdd3ec588ff93a343dd1",
-        "signature": "32a90967eedde453faf1b41325bd505dd18c1a0e3e1630eb0c0dd71d590a7d78"
+        "version": "43f4b596432bd45ca2185cc680d6cbefa3791fae85f2e4362263cb6929f1c362",
+        "signature": "914dd982fb661d3aba10cd388b13c03108e672135c562454eb6912a3985fd4fd"
       },
       "../src/lib/interactiveappevthandlers.ts": {
-        "version": "f6a0ef7ea912e0c7f372c74e92942fafb502fbcd42db3cce730c4c20853d554d",
-        "signature": "777e69fc418bd741e377be298c4d1dfa46ed9bf1930f779252d54d31ab7c8576"
+        "version": "ace3fedaf3a42ad016747add67fb063d2cdaf70ccfb8c95d65e2a796b0ea2e5a",
+        "signature": "e965346f2bb478e6c914d44d45323412733c4430822d5fcdcc6830a397c4ff15"
       },
       "../src/lib/getpushtoken/impl.ts": {
         "version": "59b4389eb32ec449706aafc4790c9921c52a0971eeae7d9ab4f44ae1e7c43e15",
@@ -474,8 +502,8 @@
         "signature": "a3d081938268a7b9f7484ae6c43ebd6e72c065d44b659c376a8b883101ef05a7"
       },
       "../src/lib/applauncher.ts": {
-        "version": "aa3ae4d2bf2129edbf30f91930f35d2be50c32e4703e2eb8a4984dd769967708",
-        "signature": "d0702372d686512060d252806a39bed96b3f39c0b0ca7ead9dba4a9f906cab12"
+        "version": "9745044a6f53ac2fc008a2895848b27a29fd3b9c54657396d675fd6336eb7356",
+        "signature": "29a629d7c0bbc788c97aa5ccf26419c9e6c0bdd1fbedeabff6f6d95d5789c4e6"
       },
       "../src/lib/availablepages.ts": {
         "version": "482ebffb661fb851a532d239bb622f9b366139fde75757567c547a0413b5b578",
@@ -692,15 +720,27 @@
       "../src/gateway/webapipath.ts": [
         "../../../gateway/dist/web_api_declaration.d.ts"
       ],
-      "../node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/observable.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
       ],
       "../src/lib/types/usersim.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../src/tools/observable.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../../local_modules/ts-sip/dist/lib/index.d.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
@@ -724,7 +764,7 @@
         "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
       ],
       "../src/lib/nativemodules/hostcryptolib.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/crypto/cryptolibproxy.ts": [
         "../../local_modules/crypto-lib/dist/async/index.d.ts",
@@ -732,7 +772,7 @@
         "../src/lib/env/index.ts"
       ],
       "../src/tools/modal/types.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/tools/modal/types.structure.ts"
       ],
       "../src/tools/modal/stack.ts": [
@@ -743,7 +783,7 @@
       ],
       "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": [
         "../src/tools/modal/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/tools/modal/dialog/getapi.ts": [
         "../src/tools/modal/dialog/types.ts",
@@ -756,7 +796,7 @@
         "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts"
       ],
       "../src/lib/nativemodules/hostkfd.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/crypto/kfd.ts": [
         "../src/lib/env/index.ts",
@@ -782,13 +822,23 @@
         "../src/lib/crypto/keysgeneration.ts",
         "../src/lib/localstorage/towarduserkeys.ts"
       ],
+      "../node_modules/trackable-map/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
+      ],
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/index.d.ts": [
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
         "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
+      ],
+      "../node_modules/chan-dongle-extended-client/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
@@ -796,7 +846,7 @@
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
         "../node_modules/trackable-map/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
@@ -815,13 +865,13 @@
       ],
       "../src/lib/tobackend/appevts.ts": [
         "../src/lib/types/usersim.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
         "../src/sip_api_declarations/uatobackend.ts"
       ],
       "../src/lib/sipuseragent.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/gateway/bundleddata.ts",
         "../src/gateway/readimsi.ts",
@@ -836,10 +886,7 @@
         "../src/lib/tobackend/appevts.ts"
       ],
       "../src/lib/types/phonecallui.ts": [
-        "../src/lib/types/usersim.ts",
-        "../src/lib/types/webphonedata/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "../src/tools/observable.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/sipuseragent.ts"
       ],
       "../src/lib/types/usersimandphonecallui.ts": [
@@ -857,7 +904,6 @@
         "../src/lib/restartapp/index.ts"
       ],
       "../src/lib/restartapp/index.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/restartapp/impl.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/core.ts": [
@@ -880,7 +926,7 @@
       "../src/lib/tobackend/localapihandlers.ts": [
         "../src/sip_api_declarations/uatobackend.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/types/usersim.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
         "../src/lib/tobackend/appevts.ts",
@@ -888,7 +934,7 @@
         "../src/lib/tobackend/remoteapicaller/index.ts"
       ],
       "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/localstorage/localstorageapi/index.ts"
       ],
       "../src/lib/webapicaller/sendrequest.ts": [
@@ -905,11 +951,11 @@
         "../src/lib/localstorage/localstorageapi/index.ts"
       ],
       "../src/lib/networkstatemonitoring/types.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/networkstatemonitoring/impl.ts": [
         "../src/lib/networkstatemonitoring/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/networkstatemonitoring/index.ts": [
         "../src/lib/networkstatemonitoring/types.ts",
@@ -921,7 +967,7 @@
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
         "../src/lib/localstorage/credentials.ts",
         "../src/lib/env/index.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/restartapp/index.ts",
         "../src/lib/localstorage/declaredpushnotificationtoken.ts",
         "../src/lib/networkstatemonitoring/index.ts",
@@ -934,7 +980,7 @@
       ],
       "../src/lib/tobackend/connection.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/tobackend/localapihandlers.ts",
         "../src/lib/types/websocketconnectionparams.ts",
         "../src/tools/modal/dialog/index.ts",
@@ -957,7 +1003,7 @@
         "../../local_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/types/webphonedata/logic.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/tools/createobjectwithgivenref.ts",
         "../src/tools/id.ts",
         "../src/tools/assert.ts",
@@ -966,11 +1012,10 @@
       ],
       "../src/lib/webphone.ts": [
         "../src/gateway/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/types/usersimandphonecallui.ts",
         "../src/lib/types/webphonedata/logic.ts",
         "../../local_modules/phone-number/dist/lib/index.d.ts",
-        "../src/tools/observable.ts",
         "../src/lib/env/index.ts",
         "../src/tools/id.ts",
         "../src/lib/sipuseragent.ts",
@@ -1011,6 +1056,7 @@
         "../src/lib/interactiveappevthandlers.ts",
         "../src/lib/getpushtoken/index.ts",
         "../src/tools/id.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/types/usersimandphonecallui.ts"
       ],
       "../src/lib/shopproducts.ts": [
@@ -1030,7 +1076,7 @@
         "../res/@types/@react-native-community/async-storage/index.d.ts"
       ],
       "../src/tools/overridewebrtcimplementation.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/nativemodules/hostwebrtc.ts": [
         "../src/tools/overridewebrtcimplementation.ts"
@@ -1041,7 +1087,7 @@
       ],
       "../src/lib/networkstatemonitoring/impl.native.ts": [
         "../src/lib/networkstatemonitoring/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts"
       ],
       "../src/lib/pagelogic/loginpagelogic.ts": [
@@ -1158,15 +1204,27 @@
       "../src/gateway/webapipath.ts": [
         "../../../gateway/dist/web_api_declaration.d.ts"
       ],
-      "../node_modules/ts-events-extended/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/syncevent.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/defs.d.ts"
+      "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/observable.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts"
+      ],
+      "../../local_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
       ],
       "../src/lib/types/usersim.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../src/tools/observable.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../../local_modules/ts-sip/dist/lib/index.d.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
@@ -1193,7 +1251,7 @@
         "../../local_modules/crypto-lib/dist/async/index.d.ts"
       ],
       "../src/tools/modal/types.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/tools/modal/types.structure.ts"
       ],
       "../src/tools/modal/stack.ts": [
@@ -1223,13 +1281,23 @@
         "../src/lib/localstorage/towarduserkeys.ts",
         "../src/lib/crypto/cryptolibproxy.ts"
       ],
+      "../node_modules/trackable-map/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
+      ],
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/index.d.ts": [
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
         "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
+      ],
+      "../node_modules/chan-dongle-extended-client/node_modules/ts-events-extended/dist/lib/index.d.ts": [
+        "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/observable.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
@@ -1237,7 +1305,7 @@
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
         "../node_modules/trackable-map/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
@@ -1256,7 +1324,7 @@
       ],
       "../src/lib/tobackend/appevts.ts": [
         "../src/lib/types/usersim.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
         "../src/sip_api_declarations/uatobackend.ts"
@@ -1264,7 +1332,7 @@
       "../src/lib/sipuseragent.ts": [
         "../src/lib/tobackend/appevts.ts",
         "../src/lib/crypto/appcryptosetuphelper.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
         "../../local_modules/phone-number/dist/lib/index.d.ts",
@@ -1272,10 +1340,7 @@
       ],
       "../src/lib/types/phonecallui.ts": [
         "../src/lib/sipuseragent.ts",
-        "../src/lib/types/webphonedata/types.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
-        "../src/lib/types/usersim.ts",
-        "../src/tools/observable.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/types/usersimandphonecallui.ts": [
         "../src/lib/types/usersim.ts",
@@ -1287,9 +1352,6 @@
       ],
       "../src/lib/restartapp/impl.ts": [
         "../src/lib/restartapp/index.ts"
-      ],
-      "../src/lib/restartapp/index.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/core.ts": [
         "../src/lib/types/usersim.ts",
@@ -1306,13 +1368,13 @@
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts"
       ],
       "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/localstorage/credentials.ts": [
         "../src/web_api_declaration.ts"
       ],
       "../src/lib/networkstatemonitoring/types.ts": [
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/networkstatemonitoring/impl.ts": [
         "../src/lib/networkstatemonitoring/types.ts"
@@ -1329,11 +1391,11 @@
       ],
       "../src/lib/tobackend/connection.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts"
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
         "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/types/webphonedata/logic.ts",
         "../src/lib/tobackend/appevts.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
@@ -1343,10 +1405,9 @@
         "../src/lib/tobackend/remoteapicaller/index.ts",
         "../src/lib/tobackend/appevts.ts",
         "../src/lib/types/usersimandphonecallui.ts",
-        "../../../gateway/node_modules/ts-events-extended/dist/lib/index.d.ts",
+        "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
         "../src/lib/types/webphonedata/logic.ts",
         "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
-        "../src/tools/observable.ts",
         "../../local_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/sipuseragent.ts"
       ],
@@ -1459,11 +1520,15 @@
       "../src/gateway/types.ts",
       "../../../gateway/dist/web_api_declaration.d.ts",
       "../src/gateway/webapipath.ts",
-      "../node_modules/ts-events-extended/dist/lib/index.d.ts",
+      "../../local_modules/ts-events-extended/node_modules/minimal-polyfills/dist/lib/array.prototype.find.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/defs.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/synceventbaseprotected.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/synceventbase.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/syncevent.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/observable.d.ts",
+      "../../local_modules/ts-events-extended/dist/lib/index.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
       "../src/lib/types/usersim.ts",
-      "../src/lib/types/webphonedata/types.ts",
-      "../src/tools/observable.ts",
       "../../local_modules/ts-sip/dist/lib/index.d.ts",
       "../node_modules/run-exclusive/dist/lib/runexclusive.d.ts",
       "../src/lib/env/impl.ts",
@@ -1492,8 +1557,10 @@
       "../src/lib/crypto/keysgeneration.ts",
       "../src/lib/crypto/appcryptosetuphelper.ts",
       "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
+      "../node_modules/trackable-map/node_modules/ts-events-extended/dist/lib/index.d.ts",
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts",
       "../node_modules/trackable-map/dist/lib/index.d.ts",
+      "../node_modules/chan-dongle-extended-client/node_modules/ts-events-extended/dist/lib/index.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
@@ -1501,7 +1568,6 @@
       "../src/sip_api_declarations/uatobackend.ts",
       "../src/lib/tobackend/appevts.ts",
       "../src/lib/sipuseragent.ts",
-      "../src/lib/types/phonecallui.ts",
       "../src/lib/types/usersimandphonecallui.ts",
       "../src/tools/isascendingalphabeticalorder.ts",
       "../src/lib/types/webphonedata/logic.ts",
@@ -1529,7 +1595,7 @@
       "../src/lib/tobackend/connection.ts",
       "../src/lib/tobackend/remoteapicaller/sendrequest.ts",
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
-      "../src/lib/webphone.ts",
+      "../src/lib/interactiveappevthandlers.ts",
       "../src/lib/getpushtoken/impl.ts",
       "../src/lib/getpushtoken/index.ts",
       "../src/lib/applauncher.ts",
@@ -1559,7 +1625,9 @@
       "../src/tools/polyfills/object.assign.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/interactiveappevthandlers.ts"
+      "../src/lib/types/webphonedata/types.ts",
+      "../src/lib/types/phonecallui.ts",
+      "../src/lib/webphone.ts"
     ]
   },
   "version": "3.7.4"

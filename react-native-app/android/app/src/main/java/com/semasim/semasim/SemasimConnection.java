@@ -4,11 +4,20 @@ package com.semasim.semasim;
 import android.annotation.TargetApi;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.telecom.Connection;
 import android.telecom.DisconnectCause;
+import android.telecom.PhoneAccount;
+import android.telecom.StatusHints;
 import android.telecom.TelecomManager;
 
+import androidx.annotation.NonNull;
+
 import com.semasim.semasim.tools.Log;
+
+import org.jdeferred2.DoneCallback;
+import org.jdeferred2.Promise;
 
 @TargetApi(Build.VERSION_CODES.M)
 public class SemasimConnection extends Connection {
@@ -25,34 +34,14 @@ public class SemasimConnection extends Connection {
 
     private final Listeners listeners;
 
-    private void debug(String txt) {
-
-        Log.i("=============================================> " + txt);
-
-        if( this.getAddress() != null ) {
-
-            Log.i("=======================> Connection this.getAddress()[uri].toString(): " + this.getAddress().toString());
-
-        }
-
-        Log.i("=======================> Connection callerDisplayName before it is set: " + this.getCallerDisplayName());
-
-        for (String key: this.getExtras().keySet()) {
-            Log.i("======================> Connection getExtra()[bundle]: " + key + " is a key in the bundle");
-        }
-
-        Log.i("=======================> Connection statusHists.toString(): " + this.getStatusHints().toString());
-
-    }
 
     SemasimConnection(
-            String phoneNumber,
-            String contactName,
-            Listeners listeners
+            @NonNull String phoneNumber,
+            @NonNull Promise<String, ?, ?> prContactName,
+            @NonNull Listeners listeners
     ) {
         super();
 
-        //debug("just after super");
 
         this.listeners= listeners;
 
@@ -65,29 +54,49 @@ public class SemasimConnection extends Connection {
         setDialing();
 
         setAddress(
-                Uri.parse(phoneNumber),
+                Uri.fromParts(
+                        PhoneAccount.SCHEME_TEL,
+                        phoneNumber,
+                        null
+                ),
                 TelecomManager.PRESENTATION_ALLOWED
         );
 
-        //debug("just after setAddress");
+        prContactName.done((DoneCallback<String>) contactName -> {
 
-        if (contactName != null ) {
+            Log.i("=====================> PromiseResolve: " + contactName);
 
+            if (contactName == null ) {
+                return;
+            }
+
+            /*
+             * NOTE: Will take effect only if there isn't a contact with this phone number
+             * in the contacts of the phone. Even tho the name will appear while in call
+             * the call history will only show the phone number.
+             */
             setCallerDisplayName(
                     contactName,
                     TelecomManager.PRESENTATION_ALLOWED
             );
 
-            //debug("just after setCallerDisplayName: " + contactName);
 
-        }
+        });
 
-        // ‍️Weirdly on some Samsung phones (A50, S9...) using `setInitialized` will not display the native UI ...
+        /*
+        setCallerDisplayName(
+                "Loading........................",
+                TelecomManager.PRESENTATION_ALLOWED
+        );
+         */
+
+
+        // ‍Weirdly on some Samsung phones (A50, S9...) using `setInitialized` will not display the native UI ...
         // when making a call from the native Phone application. The call will still be displayed correctly without it.
+        //TODO: See if should put after prContactNameResolve
         if (!Build.MANUFACTURER.equalsIgnoreCase("Samsung")) {
             setInitialized();
         }
-
 
     }
 

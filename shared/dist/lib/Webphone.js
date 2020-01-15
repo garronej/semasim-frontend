@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -66,7 +77,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var wd = require("./types/webphoneData/logic");
 var lib_1 = require("phone-number/dist/lib");
-var Observable_1 = require("../tools/Observable");
 var env_1 = require("./env");
 var id_1 = require("../tools/id");
 var Webphone;
@@ -83,7 +93,7 @@ var Webphone;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
                                     case 0:
-                                        obsIsSipRegistered = new Observable_1.ObservableImpl(false);
+                                        obsIsSipRegistered = new ts_events_extended_1.ObservableImpl(false);
                                         sipUserAgent = sipUserAgentCreate(userSim);
                                         wdApiCallerForSpecificSim = getWdApiCallerForSpecificSim(userSim.sim.imsi);
                                         return [4 /*yield*/, wdApiCallerForSpecificSim.getUserSimChats(20)];
@@ -93,19 +103,32 @@ var Webphone;
                                     case 2:
                                         _b.sent();
                                         phoneCallUi = phoneCallUiCreate((function () {
+                                            var _common = (function () {
+                                                var buildPhoneNumber = function (phoneNumberRaw) {
+                                                    var _a;
+                                                    return lib_1.phoneNumber.build(phoneNumberRaw, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso);
+                                                };
+                                                return id_1.id({
+                                                    "imsi": userSim.sim.imsi,
+                                                    "getContactName": function (phoneNumberRaw) { var _a; return (_a = userSim.phonebook.find((function () {
+                                                        var validPhoneNumber = buildPhoneNumber(phoneNumberRaw);
+                                                        return function (_a) {
+                                                            var number_raw = _a.number_raw;
+                                                            return lib_1.phoneNumber.areSame(validPhoneNumber, number_raw);
+                                                        };
+                                                    })())) === null || _a === void 0 ? void 0 : _a.name; },
+                                                    "getPhoneNumberPrettyPrint": function (phoneNumberRaw) {
+                                                        var _a;
+                                                        return lib_1.phoneNumber.prettyPrint(buildPhoneNumber(phoneNumberRaw), (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso);
+                                                    }
+                                                });
+                                            })();
                                             switch (env_1.env.jsRuntimeEnv) {
                                                 case "browser": {
-                                                    return id_1.id({
-                                                        "assertJsRuntimeEnv": "browser",
-                                                        userSim: userSim
-                                                    });
+                                                    return id_1.id(__assign({ "assertJsRuntimeEnv": "browser" }, _common));
                                                 }
                                                 case "react-native": {
-                                                    return id_1.id({
-                                                        "assertJsRuntimeEnv": "react-native",
-                                                        userSim: userSim,
-                                                        obsIsSipRegistered: obsIsSipRegistered
-                                                    });
+                                                    return id_1.id(__assign({ "assertJsRuntimeEnv": "react-native", obsIsSipRegistered: obsIsSipRegistered }, _common));
                                                 }
                                             }
                                         })());
@@ -154,12 +177,7 @@ var Webphone;
                                                     }
                                                 });
                                             }); },
-                                            "placeOutgoingCall": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
-                                                return __generator(this, function (_a) {
-                                                    phoneCallUi.openUiForOutgoingCall(wdChat);
-                                                    return [2 /*return*/];
-                                                });
-                                            }); },
+                                            "placeOutgoingCall": function (wdChat) { return phoneCallUi.openUiForOutgoingCall(wdChat.contactNumber); },
                                             "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
                                             "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
                                             "getAndOrCreateAndOrUpdateWdChat": function (number, contactName, contactIndexInSim) { return __awaiter(_this, void 0, void 0, function () {
@@ -263,50 +281,45 @@ var Webphone;
                                             });
                                         });
                                         sipUserAgent.evtIncomingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
-                                            var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput, _b, _c;
-                                            return __generator(this, function (_d) {
-                                                switch (_d.label) {
-                                                    case 0:
-                                                        fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
-                                                        _c = (_b = phoneCallUi).openUiForIncomingCall;
-                                                        return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
-                                                    case 1:
-                                                        _a = _c.apply(_b, [_d.sent()]), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
-                                                        logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
-                                                        ui_prUserInput.then(function (ui_userInput) {
-                                                            if (ui_userInput.userAction === "REJECT") {
-                                                                logic_terminate();
-                                                                return;
-                                                            }
-                                                            var ui_onEstablished = ui_userInput.onEstablished;
-                                                            logic_onAccepted().then(function (_a) {
-                                                                var logic_sendDtmf = _a.sendDtmf;
-                                                                var ui_evtUserInput = ui_onEstablished().evtUserInput;
-                                                                ui_evtUserInput.attach(function (eventData) {
-                                                                    return eventData.userAction === "DTMF";
-                                                                }, function (_a) {
-                                                                    var signal = _a.signal, duration = _a.duration;
-                                                                    return logic_sendDtmf(signal, duration);
-                                                                });
-                                                                ui_evtUserInput.attachOnce(function (_a) {
-                                                                    var userAction = _a.userAction;
-                                                                    return userAction === "HANGUP";
-                                                                }, function () { return logic_terminate(); });
-                                                            });
+                                            var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput;
+                                            return __generator(this, function (_b) {
+                                                fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
+                                                _a = phoneCallUi.openUiForIncomingCall(fromNumber), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
+                                                logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
+                                                ui_prUserInput.then(function (ui_userInput) {
+                                                    if (ui_userInput.userAction === "REJECT") {
+                                                        logic_terminate();
+                                                        return;
+                                                    }
+                                                    var ui_onEstablished = ui_userInput.onEstablished;
+                                                    logic_onAccepted().then(function (_a) {
+                                                        var logic_sendDtmf = _a.sendDtmf;
+                                                        var ui_evtUserInput = ui_onEstablished().evtUserInput;
+                                                        ui_evtUserInput.attach(function (eventData) {
+                                                            return eventData.userAction === "DTMF";
+                                                        }, function (_a) {
+                                                            var signal = _a.signal, duration = _a.duration;
+                                                            return logic_sendDtmf(signal, duration);
                                                         });
-                                                        return [2 /*return*/];
-                                                }
+                                                        ui_evtUserInput.attachOnce(function (_a) {
+                                                            var userAction = _a.userAction;
+                                                            return userAction === "HANGUP";
+                                                        }, function () { return logic_terminate(); });
+                                                    });
+                                                });
+                                                return [2 /*return*/];
                                             });
                                         }); });
                                         phoneCallUi.evtUiOpenedForOutgoingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
-                                            var phoneNumber, ui_onTerminated, ui_prUserInput, ui_onRingback, _a, logic_prNextState, logic_prTerminated, logic_terminate;
-                                            return __generator(this, function (_b) {
-                                                switch (_b.label) {
+                                            var phoneNumberRaw, ui_onTerminated, ui_prUserInput, ui_onRingback, _a, logic_prNextState, logic_prTerminated, logic_terminate;
+                                            var _b;
+                                            return __generator(this, function (_c) {
+                                                switch (_c.label) {
                                                     case 0:
-                                                        phoneNumber = evtData.phoneNumber, ui_onTerminated = evtData.onTerminated, ui_prUserInput = evtData.prUserInput, ui_onRingback = evtData.onRingback;
-                                                        return [4 /*yield*/, sipUserAgent.placeOutgoingCall(phoneNumber)];
+                                                        phoneNumberRaw = evtData.phoneNumberRaw, ui_onTerminated = evtData.onTerminated, ui_prUserInput = evtData.prUserInput, ui_onRingback = evtData.onRingback;
+                                                        return [4 /*yield*/, sipUserAgent.placeOutgoingCall(lib_1.phoneNumber.build(phoneNumberRaw, (_b = userSim.sim.country) === null || _b === void 0 ? void 0 : _b.iso))];
                                                     case 1:
-                                                        _a = _b.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
+                                                        _a = _c.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
                                                         logic_prTerminated.then(function () { return ui_onTerminated("Call terminated"); });
                                                         ui_prUserInput.then(function () { return logic_terminate(); });
                                                         logic_prNextState.then(function (_a) {

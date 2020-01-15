@@ -16,7 +16,7 @@ export type Chat<E extends EncryptionState> = {
     ref: string;
     contactNumber: Encryptable["string"][E]; /* type phoneNumber */
     contactName: Encryptable["string"][E];
-    contactIndexInSim: Encryptable["number | null"][E]; //TODO: Should be encrypted somehow
+    contactIndexInSim: Encryptable["number | null"][E];
     messages: Message<E>[];
     refOfLastMessageSeen: string | null; 
 };

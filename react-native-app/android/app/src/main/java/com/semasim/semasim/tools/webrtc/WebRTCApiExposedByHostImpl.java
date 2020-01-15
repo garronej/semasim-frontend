@@ -80,6 +80,7 @@ public class WebRTCApiExposedByHostImpl implements WebRTCApiExposedByHost {
         @Override
         public void onIceCandidate(IceCandidate iceCandidate) {
 
+
             //NOTE: Because of get description
             executor.execute(() -> {
 
@@ -131,9 +132,22 @@ public class WebRTCApiExposedByHostImpl implements WebRTCApiExposedByHost {
                 String localDescriptionRTCSessionDescriptionInitOrNullJson;
                 {
 
-                    SessionDescription localDescription = webRTCApiExposedByHost.peerConnectionByRef
-                            .get(rtcPeerConnectionRef)
-                            .getLocalDescription();
+
+                    SessionDescription localDescription;
+                    {
+
+                        PeerConnection rtcPeerConnection = webRTCApiExposedByHost.peerConnectionByRef
+                                .get(rtcPeerConnectionRef)
+                                ;
+
+                        if( rtcPeerConnection == null ){
+                            return;
+                        }
+
+                        localDescription=rtcPeerConnection.getLocalDescription();
+
+                    }
+
 
                     if (localDescription == null) {
                         localDescriptionRTCSessionDescriptionInitOrNullJson = null;
@@ -418,10 +432,20 @@ public class WebRTCApiExposedByHostImpl implements WebRTCApiExposedByHost {
     public void addStreamToRTCPeerConnection(int rtcPeerConnectionRef, int mediaStreamRef) {
 
         executor.execute(
-                () -> peerConnectionByRef.get(rtcPeerConnectionRef).addTrack(
-                        audioTrackByRef.get(mediaStreamRef),
-                        Collections.singletonList(AUDIO_TRACK_ID)
-                )
+                () -> {
+
+                    PeerConnection rtcPeerConnection = peerConnectionByRef.get(rtcPeerConnectionRef);
+
+                    if( rtcPeerConnection == null){
+                        return;
+                    }
+
+                    rtcPeerConnection.addTrack(
+                            audioTrackByRef.get(mediaStreamRef),
+                            Collections.singletonList(AUDIO_TRACK_ID)
+                    );
+
+                }
         );
 
 
@@ -520,9 +544,14 @@ public class WebRTCApiExposedByHostImpl implements WebRTCApiExposedByHost {
 
         };
 
-        PeerConnection peerConnection = peerConnectionByRef.get(rtcPeerConnectionRef);
 
         executor.execute(() -> {
+
+            PeerConnection peerConnection = peerConnectionByRef.get(rtcPeerConnectionRef);
+
+            if( peerConnection == null ){
+                return;
+            }
 
 
             if (toLocal) {
@@ -624,6 +653,10 @@ public class WebRTCApiExposedByHostImpl implements WebRTCApiExposedByHost {
                 () -> {
 
                     PeerConnection peerConnection = peerConnectionByRef.get(rtcPeerConnectionRef);
+
+                    if( peerConnection == null ){
+                        return;
+                    }
 
                     if( isOffer ){
 

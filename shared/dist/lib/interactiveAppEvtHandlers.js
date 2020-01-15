@@ -37,10 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("./env");
-function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
+function registerInteractiveAppEvtHandlers(prReadyToInteract, appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
     var _this = this;
     var interactiveProcedures = getInteractiveProcedures(remoteCoreApiCaller);
-    appEvts.evtDongleOnLan.attach(function (data) { return __awaiter(_this, void 0, void 0, function () {
+    appEvts.evtDongleOnLan.attach(function (data) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, dialogApi, endMultiDialogProcess;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -54,8 +54,8 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
-    appEvts.evtSimSharingRequest.attach(function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    }); }); });
+    appEvts.evtSimSharingRequest.attach(function (userSim) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, endMultiDialogProcess, dialogApi;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -68,18 +68,20 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
+    }); }); });
     appEvts.evtSharingRequestResponse.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email, isAccepted = _a.isAccepted;
-        return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName }); });
     });
     appEvts.evtOtherSimUserUnregisteredSim.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email;
-        return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName }); });
     });
-    appEvts.evtOpenElsewhere.attach(function () { return dialogApi.create("alert", {
-        "message": "You are connected somewhere else",
-        "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+    appEvts.evtOpenElsewhere.attach(function () { return prReadyToInteract.then(function () {
+        return dialogApi.create("alert", {
+            "message": "You are connected somewhere else",
+            "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+        });
     }); });
 }
 exports.registerInteractiveAppEvtHandlers = registerInteractiveAppEvtHandlers;

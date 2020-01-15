@@ -73,6 +73,7 @@ var webApiCaller = require("./webApiCaller");
 var interactiveAppEvtHandlers_1 = require("./interactiveAppEvtHandlers");
 var getPushToken_1 = require("./getPushToken");
 var id_1 = require("../tools/id");
+var lib_1 = require("phone-number/dist/lib");
 var log = true ?
     (function () {
         var args = [];
@@ -93,7 +94,7 @@ function appLauncher(params) {
                         throw new Error("Wrong params for js runtime environnement");
                     }
                     if (params.assertJsRuntimeEnv === "react-native") {
-                        restartApp_1.evtAppAboutToRestart.attachOnce(function () { return params.notifyAppAboutToRestart(); });
+                        restartApp_1.registerActionToPerformBeforeAppRestart(function () { return params.actionToPerformBeforeAppRestart(); });
                         dialog_1.provideCustomImplementationOfBaseApi(params.dialogBaseApi);
                     }
                     _a = "NO VALID CREDENTIALS";
@@ -132,7 +133,7 @@ function appLauncher(params) {
 exports.appLauncher = appLauncher;
 function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedData) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, userSims, prCreateWebphone, _e, _f, _g, _h;
+        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, resolvePrReadyToInteract, userSims, prCreateWebphone, _e, _f, _g, _h;
         var _this = this;
         return __generator(this, function (_j) {
             switch (_j.label) {
@@ -216,7 +217,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     appEvts_1.appEvts.evtUsableSim.attachOnce(function () { return restartApp_1.restartApp("New usable sim"); });
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
                     appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
-                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
+                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(new Promise(function (resolve) { return resolvePrReadyToInteract = resolve; }), appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
                     return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
                 case 5:
                     userSims = _j.sent();
@@ -235,24 +236,26 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                         "coreApiCaller": remoteApiCaller.core
                     };
                     _h = "phoneCallUiCreate";
-                    return [4 /*yield*/, params.phoneCallUiCreateFactory((function () {
-                            switch (env_1.env.jsRuntimeEnv) {
-                                case "browser": {
-                                    return id_1.id({
-                                        "assertJsRuntimeEnv": "browser"
-                                    });
-                                }
-                                case "react-native": {
-                                    return id_1.id({
-                                        "assertJsRuntimeEnv": "react-native",
-                                        userSims: userSims,
-                                    });
-                                }
-                            }
-                        })())];
+                    return [4 /*yield*/, params.phoneCallUiCreateFactory({
+                            "sims": userSims.map(function (userSim) { return ({
+                                "imsi": userSim.sim.imsi,
+                                "friendlyName": userSim.friendlyName,
+                                "phoneNumber": (function () {
+                                    var _a;
+                                    var number = userSim.sim.storage.number;
+                                    return number !== undefined ? lib_1.phoneNumber.build(number, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso) : undefined;
+                                })(),
+                                "serviceProvider": (function () {
+                                    var _a;
+                                    var _b = userSim.sim.serviceProvider, fromImsi = _b.fromImsi, fromNetwork = _b.fromNetwork;
+                                    return _a = (fromImsi !== null && fromImsi !== void 0 ? fromImsi : fromNetwork), (_a !== null && _a !== void 0 ? _a : "");
+                                })()
+                            }); })
+                        })];
                 case 6:
                     prCreateWebphone = _f.apply(_e, [(_g[_h] = _j.sent(),
                             _g)]);
+                    resolvePrReadyToInteract();
                     return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); }))];
                 case 7: return [2 /*return*/, (_j.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
             }

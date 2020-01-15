@@ -5,6 +5,7 @@ import * as hostPhoneCallUi from "../nativeModules/hostPhoneCallUi";
 import * as hostKeepAlive from "../nativeModules/hostKeepAlive";
 import * as types from "frontend-shared/dist/lib/types/PhoneCallUi";
 import { askUserForPermissions } from "../askUserForPermissions";
+import { assert } from "frontend-shared/dist/tools/assert";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/phoneCallUiCreateFactory/index.android]", ...args])) :
@@ -21,11 +22,7 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
     hasBeenCalled = true;
 
-    if (params.assertJsRuntimeEnv !== "react-native") {
-        throw new Error("Wrong assertion");
-    }
-
-    log("factory");
+    const { sims } = params;
 
     try {
 
@@ -37,27 +34,23 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
     }
 
+    /*
     hostPhoneCallUi.unregisterOtherPhoneAccounts(
         params.userSims.map(({ sim })=> sim.imsi)
     );
+    */
+
+    hostPhoneCallUi.unregisterOtherPhoneAccounts(
+        sims.map(({ imsi })=> imsi)
+    );
 
     await Promise.all(
-        params.userSims.map(
-            userSim => hostPhoneCallUi.registerOrUpdatePhoneAccount(
-                userSim.sim.imsi,
-                userSim.friendlyName,
-                (() => {
-
-                    const { fromImsi, fromNetwork } = userSim.sim.serviceProvider;
-
-                    return fromImsi ?? fromNetwork ?? "";
-
-                })(),
-                userSim.sim.storage.number !== undefined ?
-                    phoneNumber.build(
-                        userSim.sim.storage.number,
-                        userSim.sim.country?.iso
-                    ) : null
+        sims.map(
+            sim => hostPhoneCallUi.registerOrUpdatePhoneAccount(
+                sim.imsi,
+                sim.friendlyName,
+                sim.serviceProvider ?? "",
+                sim.phoneNumber ?? null
             )
         )
     );
@@ -65,7 +58,7 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
     while (true) {
 
         const areAllPhoneAccountEnabled = await Promise.all(
-            params.userSims.map(({ sim: { imsi } }) =>
+            sims.map(({ imsi }) =>
                 hostPhoneCallUi.getIsSimPhoneAccountEnabled(imsi)
             )
         ).then(arr => arr.every(isSimPhoneAccountEnabled => isSimPhoneAccountEnabled));
@@ -81,23 +74,21 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
     }
 
-    //TODO: Incorporate to hotPhoneCallUi implementation.
-    hostPhoneCallUi.evtEndCall.attach(() => hostKeepAlive.stop());
 
     //TODO: We need an event to watch when friendlyName change and restart app.
 
-    log("factory return");
-
     return function phoneCallUiCreate(params) {
 
-        if (params.assertJsRuntimeEnv !== "react-native") {
-            throw new Error("Wrong assertion");
-        }
+        assert(params.assertJsRuntimeEnv === "react-native");
 
-        log("create", params.userSim.friendlyName);
+        const sim = sims.find(({ imsi })=> imsi === params.imsi)!;
 
-        const { userSim, obsIsSipRegistered } = params;
+        log("create", sim.friendlyName);
 
+
+        /*
+
+        const { obsIsSipRegistered } = params;
         hostPhoneCallUi.setIsPhoneAccountSipRegistered(
             userSim.sim.imsi, obsIsSipRegistered.value
         );
@@ -107,13 +98,14 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
                 userSim.sim.imsi, isSipRegistered
             )
         );
+        */
+
 
         const phoneCallUi: types.PhoneCallUi = {
-            "openUiForOutgoingCall": wdChat => hostPhoneCallUi.placeCall(
+            "openUiForOutgoingCall": (phoneNumberRaw) => hostPhoneCallUi.placeCall(
                 ~~(Math.random() * 100000),
-                userSim.sim.imsi,
-                wdChat.contactNumber,
-                wdChat.contactName
+                sim.imsi,
+                phoneNumberRaw
             ),
             "openUiForIncomingCall": wdChat => {
                 throw new Error("TODO");
@@ -122,13 +114,20 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
         };
 
         hostPhoneCallUi.evtUiOpenForOutgoingCall.attach(
-            ({ imsi }) => imsi === userSim.sim.imsi,
-            ({ phoneNumber, phoneCallRef }) => {
+            ({ imsi }) => imsi === sim.imsi,
+            ({ phoneNumberRaw, phoneCallRef, setContactName, evtDtmf, evtEndCall }) => {
+
+                setContactName(
+                    params.getContactName(phoneNumberRaw)
+                );
 
                 hostKeepAlive.start();
 
+                //TODO: Incorporate to hotPhoneCallUi implementation.
+                evtEndCall.attach(() => hostKeepAlive.stop());
+
                 phoneCallUi.evtUiOpenedForOutgoingCall.post({
-                    phoneNumber,
+                    phoneNumberRaw,
                     "onTerminated": message => {
 
                         hostKeepAlive.stop();
@@ -143,20 +142,17 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
                             hostPhoneCallUi.setCallActive(phoneCallRef);
 
-                            return getOnEstablishedReturnedApi(phoneCallRef);
+                            return getOnEstablishedReturnedApi({evtDtmf, evtEndCall});
 
                         },
                         "prUserInput": new Promise(
-                            resolve => hostPhoneCallUi.evtEndCall.attachOnce(
-                                ({ phoneCallRef: phoneCallRef_ }) =>
-                                    phoneCallRef_ === phoneCallRef,
+                            resolve => evtEndCall.attachOnce(
                                 () => resolve({ "userAction": "HANGUP" })
                             )
                         )
                     }),
                     "prUserInput": new Promise(
-                        resolve => hostPhoneCallUi.evtEndCall.attachOnce(
-                            ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+                        resolve => evtEndCall.attachOnce(
                             () => resolve({ "userAction": "CANCEL" })
                         )
                     )
@@ -172,12 +168,14 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
 }
 
-function getOnEstablishedReturnedApi(phoneCallRef: number): ReturnType<types.PhoneCallUi.OnEstablished> {
+//function getOnEstablishedReturnedApi(phoneCallRef: number): ReturnType<types.PhoneCallUi.OnEstablished> {
+function getOnEstablishedReturnedApi(
+    {evtDtmf, evtEndCall}: Pick<SyncEvent.Type<typeof hostPhoneCallUi.evtUiOpenForOutgoingCall>, "evtDtmf" | "evtEndCall">
+): ReturnType<types.PhoneCallUi.OnEstablished> {
 
     const evtUserInput = new SyncEvent<types.PhoneCallUi.InCallUserAction>();
 
-    hostPhoneCallUi.evtDtmf.attach(
-        ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+    evtDtmf.attach(
         ({ dtmf }) => evtUserInput.post({
             "userAction": "DTMF",
             "signal": dtmf as types.PhoneCallUi.DtmFSignal,
@@ -185,8 +183,7 @@ function getOnEstablishedReturnedApi(phoneCallRef: number): ReturnType<types.Pho
         })
     );
 
-    hostPhoneCallUi.evtEndCall.attachOnce(
-        ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+    evtEndCall.attachOnce(
         () => evtUserInput.post({ "userAction": "HANGUP" })
     );
 
