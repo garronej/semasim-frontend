@@ -1,6 +1,6 @@
 
-type SyncEvent<T> = import("ts-events-extended").SyncEvent<T>;
-type Observable<T> = import("ts-events-extended").Observable<T>;
+type Evt<T> = import("evt").Evt<T>;
+type IObservable<T> = import("evt/dist/lib/Observable").IObservable<T>;
 
 export type PhoneCallUi = {
     openUiForOutgoingCall(phoneNumberRaw: string): void;
@@ -13,7 +13,7 @@ export type PhoneCallUi = {
             userAction: "REJECT";
         }>;
     };
-    evtUiOpenedForOutgoingCall: SyncEvent<{
+    evtUiOpenedForOutgoingCall: Evt<{
         phoneNumberRaw: string;
         onTerminated(message: string): void;
         onRingback(): {
@@ -27,7 +27,7 @@ export type PhoneCallUi = {
 
 export namespace PhoneCallUi {
 
-    export type DtmFSignal = import("../sipUserAgent").DtmFSignal;
+    export type DtmFSignal = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#";
 
     export type InCallUserAction =
         InCallUserAction.Dtmf |
@@ -47,7 +47,7 @@ export namespace PhoneCallUi {
 
     }
 
-    export type OnEstablished = () => { evtUserInput: SyncEvent<PhoneCallUi.InCallUserAction> };
+    export type OnEstablished = () => { evtUserInput: Evt<PhoneCallUi.InCallUserAction> };
 
 
     export type CreateFactory = (params: CreateFactory.Params) =>
@@ -87,7 +87,7 @@ export namespace PhoneCallUi {
 
             export type ReactNative = _Common & {
                 assertJsRuntimeEnv: "react-native";
-                obsIsSipRegistered: Observable<boolean>;
+                obsIsSipRegistered: IObservable<boolean>;
             };
 
         }

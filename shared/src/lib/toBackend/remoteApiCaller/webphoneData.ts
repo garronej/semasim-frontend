@@ -2,31 +2,28 @@
 import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
 import { types as gwTypes } from "../../../gateway/types";
 import { phoneNumber } from "phone-number/dist/lib";
-import * as wd from "../../types/webphoneData/logic"
 import * as md5 from "md5";
 import * as cryptoLib from "../../crypto/cryptoLibProxy";
-import { SyncEvent } from "ts-events-extended";
+import { Evt, UnpackEvt } from "evt";
 import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
-import { id } from "../../../tools/id";
-import { assert } from "../../../tools/assert";
+import { id } from "../../../tools/typeSafety/id";
+import { assert } from "../../../tools/typeSafety";
+import { decryptThenParseFactory } from "crypto-lib/dist/async/serializer";
+import { NonPostableEvts } from "../../../tools/NonPostableEvts";
+import * as types from "../../types";
 
-export type WdEvts = {
-    evtNewUpdatedOrDeletedWdChat: SyncEvent<{ wdChat: wd.Chat<"PLAIN">; eventType: "NEW" | "UPDATED" | "DELETED" }>,
-    evtNewOrUpdatedWdMessage: SyncEvent<{ wdChat: wd.Chat<"PLAIN">; wdMessage: wd.Message<"PLAIN">; }>
-};
+const hash: (str: string) => string = md5;
 
 
-type RequestProcessedByBackend = SyncEvent.Type<import("../appEvts").AppEvts["evtWdActionFromOtherUa"]>;
+type RequestProcessedByBackend = UnpackEvt<types.RemoteNotifyEvts["evtWdActionFromOtherUa"]>;
 
-export type AppEvts = {
-    evtWdActionFromOtherUa: SyncEvent<
+//NOTE: Understand Pick<import("../../types/AppEvts").AppEvts, "evtWdActionFromOtherUa">, modified for tests.
+export type RemoteNotifyEvts = {
+    evtWdActionFromOtherUa: Evt<
         RequestProcessedByBackend &
         { handlerCb?: (error?: Error) => void }
     >;
 };
-
-
-const hash: (str: string) => string = md5;
 
 //NOTE: time and direction are plain in db, ref does not need to be secure.
 const buildWdMessageRef = (
@@ -36,24 +33,31 @@ const buildWdMessageRef = (
 
 
 /** Inject send request only when testing */
-export function getApiCallerForSpecificSimFactory(
-    sendRequest: typeof import("./sendRequest").sendRequest,
-    appEvts: AppEvts,
-    encryptorDecryptor: cryptoLib.EncryptorDecryptor,
-    userEmail: string
+export function getWdApiFactory(
+    params: {
+        sendRequest: ReturnType<typeof import("./getSendRequest").getSendRequest>,
+        remoteNotifyEvts: RemoteNotifyEvts,
+        encryptorDecryptor: cryptoLib.EncryptorDecryptor,
+        userEmail: string;
+    }
 ) {
+
+    const { sendRequest, remoteNotifyEvts, encryptorDecryptor, userEmail } = params;
+
+    const decryptChat = types.wd.Chat.decryptFactory({ decryptThenParseFactory });
+    const decryptMessage = types.wd.Message.decryptFactory({ decryptThenParseFactory });
 
     const stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
 
-    const evtRequestProcessedByBackend: AppEvts["evtWdActionFromOtherUa"] = new SyncEvent();
+    const evtRequestProcessedByBackend: RemoteNotifyEvts["evtWdActionFromOtherUa"] = new Evt();
 
-    const onRequestProcessedByBackend = async (arg: RequestProcessedByBackend) => 
+    const onRequestProcessedByBackend = async (requestProcessedByBackend: RequestProcessedByBackend) =>
         new Promise<void>((resolve, reject) => {
 
-            let count= 0;
+            let count = 0;
 
-            const evtData: SyncEvent.Type<typeof evtRequestProcessedByBackend> = { 
-                ...arg, 
+            const evtData: UnpackEvt<typeof evtRequestProcessedByBackend> = {
+                ...requestProcessedByBackend,
                 "handlerCb": error => {
 
                     if (!!error) {
@@ -73,34 +77,45 @@ export function getApiCallerForSpecificSimFactory(
                 }
             };
 
-            const handlerCount = evtRequestProcessedByBackend.getHandlers().filter(({ matcher }) => matcher(evtData)).length;
+            const handlerCount = evtRequestProcessedByBackend
+                .getHandlers()
+                .filter(
+                    ({ op }) => !!evtRequestProcessedByBackend
+                        .getStatelessOp(op)(evtData)
+                )
+                .length
+                ;
 
-            assert( handlerCount !== 0 );
+            assert(handlerCount !== 0);
 
             evtRequestProcessedByBackend.post(evtData);
 
         });
 
-    appEvts.evtWdActionFromOtherUa.attach(
+    remoteNotifyEvts.evtWdActionFromOtherUa.attach(
         evtData => evtRequestProcessedByBackend.post(evtData)
     );
 
-    const getGetWdEvts = getGetGetWdEvts(encryptorDecryptor, evtRequestProcessedByBackend);
+    const getGetWdEvts = getGetGetWdEvts({
+        encryptorDecryptor,
+        evtRequestProcessedByBackend,
+        decryptMessage
+    });
 
-    return function getApiCallerForSpecificSim(imsi: string) {
+    return function getWdApi({ imsi }: { imsi: string; }) {
 
         const getWdEvts = getGetWdEvts(imsi);
 
-        const apiCallerForSpecificSim = {
+        const wdApi = {
             "getUserSimChats": (() => {
 
                 const { methodName } = apiDeclaration.wd_getUserSimChats;
                 type Params = apiDeclaration.wd_getUserSimChats.Params;
                 type Response = apiDeclaration.wd_getUserSimChats.Response;
 
-                return async function (maxMessageCountByChat: number): Promise<{
-                    wdChats: wd.Chat<"PLAIN">[];
-                    wdEvts: WdEvts
+                return async function ({ maxMessageCountByChat }: { maxMessageCountByChat: number; }): Promise<{
+                    wdChats: types.wd.Chat[];
+                    wdEvts: NonPostableEvts<types.wd.Evts>
                 }> {
 
                     const wdEncryptedChats = await sendRequest<Params, Response>(
@@ -110,22 +125,20 @@ export function getApiCallerForSpecificSimFactory(
 
                     const wdChats = await Promise.all(
                         wdEncryptedChats.map(
-                            chat => wd.decryptChat(
-                                encryptorDecryptor,
+                            chat => decryptChat({
+                                "decryptor": encryptorDecryptor,
                                 chat
-                            )
+                            })
                         )
                     );
 
                     for (const wdChat of wdChats) {
 
-                        wdChat.messages.sort(wd.compareMessage);
+                        wdChat.messages.sort(types.wd.Message.compare);
 
                     }
 
-                    const wdEvts = getWdEvts(wdChats);
-
-                    return { wdChats, wdEvts };
+                    return { wdChats, "wdEvts": getWdEvts(wdChats) };
 
                 };
 
@@ -137,12 +150,12 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_newChat.Params;
                 type Response = apiDeclaration.wd_newChat.Response;
 
-                return async function (
-                    wdChats: wd.Chat<"PLAIN">[],
-                    contactNumber: phoneNumber,
-                    contactName: string,
-                    contactIndexInSim: number | null
-                ): Promise<void> {
+                return async function ({ wdChats, contactNumber, contactName, contactIndexInSim }: {
+                    wdChats: types.wd.Chat[];
+                    contactNumber: phoneNumber;
+                    contactName: string;
+                    contactIndexInSim: number | null;
+                }): Promise<void> {
 
                     //TODO: Use a stronger hash, md5 can easily be brute-forced, leak contactNumber.
                     const chatRef = hash(`${imsi}${contactNumber}`);
@@ -189,10 +202,10 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_fetchOlderMessages.Params;
                 type Response = apiDeclaration.wd_fetchOlderMessages.Response;
 
-                return async function (
-                    wdChat: wd.Chat<"PLAIN">,
-                    maxMessageCount: number
-                ): Promise<wd.Message<"PLAIN">[]> {
+                return async function ({ wdChat, maxMessageCount }: {
+                    wdChat: types.wd.Chat;
+                    maxMessageCount: number;
+                }): Promise<types.wd.Message[]> {
 
                     const wdMessages = wdChat.messages;
 
@@ -212,10 +225,10 @@ export function getApiCallerForSpecificSimFactory(
                                 maxMessageCount
                             }
                         )).map(encryptedOlderMessage =>
-                            wd.decryptMessage(
-                                encryptorDecryptor,
-                                encryptedOlderMessage
-                            )
+                            decryptMessage({
+                                "decryptor": encryptorDecryptor,
+                                "encryptedMessage": encryptedOlderMessage
+                            })
                         )
                     );
 
@@ -233,7 +246,7 @@ export function getApiCallerForSpecificSimFactory(
 
                     }
 
-                    wdMessages.sort(wd.compareMessage);
+                    wdMessages.sort(types.wd.Message.compare);
 
                     olderWdMessages = [];
 
@@ -273,7 +286,7 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_updateChatLastMessageSeen.Params;
                 type Response = apiDeclaration.wd_updateChatLastMessageSeen.Response;
 
-                return async function (wdChat: wd.Chat<"PLAIN">): Promise<void> {
+                return async function (wdChat: types.wd.Chat): Promise<void> {
 
                     const messageRef: string | undefined = (() => {
 
@@ -327,8 +340,6 @@ export function getApiCallerForSpecificSimFactory(
              * 
              * If same as before the request won't be sent 
              * 
-             * return true if request was sent
-             * 
              * */
             "updateChatContactInfos": (() => {
 
@@ -336,13 +347,13 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_updateChatContactInfos.Params;
                 type Response = apiDeclaration.wd_updateChatContactInfos.Response;
 
-                return async function (
-                    wdChat: wd.Chat<"PLAIN">,
-                    contactName: string,
-                    contactIndexInSim: number | null
-                ): Promise<void> {
+                return async function ({ wdChat, contactName, contactIndexInSim }: {
+                    wdChat: types.wd.Chat;
+                    contactName: string;
+                    contactIndexInSim: number | null;
+                }): Promise<void> {
 
-                    const fields: Partial<Pick<wd.Chat<"PLAIN">, "contactName" | "contactIndexInSim">> = {
+                    const fields: Partial<Pick<types.wd.Chat, "contactName" | "contactIndexInSim">> = {
                         contactName,
                         contactIndexInSim
                     };
@@ -399,10 +410,10 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_destroyChat.Params;
                 type Response = apiDeclaration.wd_destroyChat.Response;
 
-                return async function (
-                    wdChats: wd.Chat<"PLAIN">[],
-                    refOfTheChatToDelete: string
-                ): Promise<void> {
+                return async function ({ wdChats, refOfTheChatToDelete }: {
+                    wdChats: types.wd.Chat[];
+                    refOfTheChatToDelete: string;
+                }): Promise<void> {
 
                     const wdChat = wdChats.find(({ ref }) => ref == refOfTheChatToDelete);
 
@@ -432,8 +443,11 @@ export function getApiCallerForSpecificSimFactory(
                 type Params = apiDeclaration.wd_newMessage.Params;
                 type Response = apiDeclaration.wd_newMessage.Response;
 
+                type Args_Common = {
+                    wdChat: types.wd.Chat,
+                };
 
-                type Arg1_IncomingMessage = {
+                type Args_IncomingMessage = Args_Common & {
                     type: "SERVER TO CLIENT";
                     bundledData:
                     gwTypes.BundledData.ServerToClient.Message |
@@ -443,7 +457,7 @@ export function getApiCallerForSpecificSimFactory(
                     gwTypes.BundledData.ServerToClient.MissedCall
                 };
 
-                type Arg1_OutgoingMessage = {
+                type Args_OutgoingMessage = Args_Common & {
                     type: "CLIENT TO SERVER";
                     bundledData: {
                         exactSendDateTime: number;
@@ -451,88 +465,78 @@ export function getApiCallerForSpecificSimFactory(
                     }
                 };
 
-                type Arg1 = Arg1_IncomingMessage | Arg1_OutgoingMessage;
+                type Args = Args_IncomingMessage | Args_OutgoingMessage;
 
-                async function out(
-                    wdChat: wd.Chat<"PLAIN">,
-                    arg1: Arg1_IncomingMessage
-                ): Promise<void>;
-                async function out(
-                    wdChat: wd.Chat<"PLAIN">,
-                    arg1: Arg1_OutgoingMessage
-                ): Promise<{ onUaFailedToSendMessage: () => Promise<void>; }>;
-                async function out(
-                    wdChat: wd.Chat<"PLAIN">,
-                    arg1: Arg1
-                ): Promise<any> {
+                async function out(args: Args_IncomingMessage): Promise<void>;
+                async function out(args: Args_OutgoingMessage): Promise<{ onUaFailedToSendMessage: () => Promise<void>; }>;
+                async function out(args: Args): Promise<any> {
+
+                    const { wdChat } = args;
 
                     const [wdMessage, onUaFailedToSendMessage] = (() => {
 
-                        switch (arg1.type) {
+                        switch (args.type) {
                             case "SERVER TO CLIENT": {
 
-                                const { bundledData } = arg1;
+                                const { bundledData } = args;
 
                                 const direction = "INCOMING";
 
-                                let out: wd.Message.Incoming.Text<"PLAIN"> | wd.Message.Incoming.Notification<"PLAIN">;
+                                return [
+                                    bundledData.type === "MESSAGE" ?
+                                        (() => {
 
-                                if (bundledData.type === "MESSAGE") {
+                                            const time = bundledData.pduDateTime;
 
-                                    const time = bundledData.pduDateTime;
+                                            return id<types.wd.Message.Incoming.Text>({
+                                                "ref": buildWdMessageRef(time, direction),
+                                                time,
+                                                direction,
+                                                "text": bundledData.text,
+                                                "isNotification": false
+                                            });
 
-                                    const out_: wd.Message.Incoming.Text<"PLAIN"> = {
-                                        "ref": buildWdMessageRef(time, direction),
-                                        time,
-                                        direction,
-                                        "text": bundledData.text,
-                                        "isNotification": false
-                                    };
+                                        })()
+                                        :
+                                        (() => {
 
-                                    out = out_;
+                                            const time = (() => {
 
+                                                switch (bundledData.type) {
+                                                    case "CALL ANSWERED BY":
+                                                    case "MISSED CALL":
+                                                        return bundledData.dateTime;
+                                                    case "MMS NOTIFICATION":
+                                                        return bundledData.pduDateTime;
+                                                    case "FROM SIP CALL SUMMARY":
+                                                        return bundledData.callPlacedAtDateTime;
+                                                }
 
-                                } else {
+                                            })();
 
-                                    const time = (() => {
-
-                                        switch (bundledData.type) {
-                                            case "CALL ANSWERED BY":
-                                            case "MISSED CALL":
-                                                return bundledData.dateTime;
-                                            case "MMS NOTIFICATION":
-                                                return bundledData.pduDateTime;
-                                            case "FROM SIP CALL SUMMARY":
-                                                return bundledData.callPlacedAtDateTime;
-                                        }
-
-                                    })();
-
-                                    const out_: wd.Message.Incoming.Notification<"PLAIN"> = {
-                                        "ref": buildWdMessageRef(time, direction),
-                                        time,
-                                        direction,
-                                        "text": bundledData.text,
-                                        "isNotification": true,
-                                    };
-
-                                    out = out_;
+                                            return id<types.wd.Message.Incoming.Notification>({
+                                                "ref": buildWdMessageRef(time, direction),
+                                                time,
+                                                direction,
+                                                "text": bundledData.text,
+                                                "isNotification": true,
+                                            });
 
 
-                                }
-
-                                return [out, undefined] as const;
+                                        })(),
+                                    undefined
+                                ] as const;
 
                             };
                             case "CLIENT TO SERVER": {
 
-                                const { bundledData } = arg1;
+                                const { bundledData } = args;
 
                                 const time = bundledData.exactSendDateTime;
 
                                 const direction = "OUTGOING";
 
-                                const out: wd.Message.Outgoing.Pending<"PLAIN"> = {
+                                const wdMessage: types.wd.Message.Outgoing.Pending = {
                                     "ref": buildWdMessageRef(time, direction),
                                     time,
                                     direction,
@@ -541,18 +545,18 @@ export function getApiCallerForSpecificSimFactory(
                                 };
 
                                 return [
-                                    out,
+                                    wdMessage,
                                     //NOTE: Hack
-                                    () => apiCallerForSpecificSim.notifySendReportReceived(
+                                    () => wdApi.notifySendReportReceived({
                                         wdChat,
-                                        {
+                                        "bundledData": {
                                             "sendDateTime": null,
                                             "messageTowardGsm": {
-                                                "dateTime": out.time,
-                                                "text": out.text
+                                                "dateTime": wdMessage.time,
+                                                "text": wdMessage.text
                                             }
                                         }
-                                    )
+                                    })
                                 ] as const;
 
                             };
@@ -599,13 +603,15 @@ export function getApiCallerForSpecificSimFactory(
                 type Response = apiDeclaration.wd_notifySendReportReceived.Response;
 
                 return async function callee(
-                    wdChat: wd.Chat<"PLAIN">,
-                    bundledData: {
-                        messageTowardGsm: {
-                            dateTime: number;
-                            text: string;
-                        };
-                        sendDateTime: number | null;
+                    { wdChat, bundledData }: {
+                        wdChat: types.wd.Chat,
+                        bundledData: {
+                            messageTowardGsm: {
+                                dateTime: number;
+                                text: string;
+                            };
+                            sendDateTime: number | null;
+                        }
                     }
                 ) {
 
@@ -615,7 +621,7 @@ export function getApiCallerForSpecificSimFactory(
                     const wdMessageRef = buildWdMessageRef(time, direction);
 
                     const wdMessage = wdChat.messages
-                        .find(({ ref }) => ref === wdMessageRef) as wd.Message.Outgoing<"PLAIN"> | undefined;
+                        .find(({ ref }) => ref === wdMessageRef) as types.wd.Message.Outgoing | undefined;
 
                     if (wdMessage !== undefined && wdMessage.status !== "PENDING") {
                         return;
@@ -623,18 +629,16 @@ export function getApiCallerForSpecificSimFactory(
 
                     if (wdMessage === undefined) {
 
-                        await apiCallerForSpecificSim.newMessage(
+                        await wdApi.newMessage({
                             wdChat,
-                            {
-                                "type": "CLIENT TO SERVER",
-                                "bundledData": {
-                                    "exactSendDateTime": time,
-                                    "text": bundledData.messageTowardGsm.text
-                                }
+                            "type": "CLIENT TO SERVER",
+                            "bundledData": {
+                                "exactSendDateTime": time,
+                                "text": bundledData.messageTowardGsm.text
                             }
-                        );
+                        });
 
-                        await callee(wdChat, bundledData);
+                        await callee({ wdChat, bundledData });
 
                         return;
 
@@ -665,8 +669,10 @@ export function getApiCallerForSpecificSimFactory(
                 type Response = apiDeclaration.wd_notifyStatusReportReceived.Response;
 
                 return async function callee(
-                    wdChat: wd.Chat<"PLAIN">,
-                    bundledData: gwTypes.BundledData.ServerToClient.StatusReport
+                    { wdChat, bundledData }: {
+                        wdChat: types.wd.Chat,
+                        bundledData: gwTypes.BundledData.ServerToClient.StatusReport
+                    }
                 ) {
 
 
@@ -676,7 +682,7 @@ export function getApiCallerForSpecificSimFactory(
                     const wdMessageRef = buildWdMessageRef(time, direction);
 
                     const wdMessage = wdChat.messages
-                        .find(({ ref }) => ref === wdMessageRef) as wd.Message.Outgoing<"PLAIN"> | undefined;
+                        .find(({ ref }) => ref === wdMessageRef) as types.wd.Message.Outgoing | undefined;
 
                     if (wdMessage !== undefined && wdMessage.status === "STATUS REPORT RECEIVED") {
                         return;
@@ -684,15 +690,15 @@ export function getApiCallerForSpecificSimFactory(
 
                     if (wdMessage === undefined || wdMessage.status === "PENDING") {
 
-                        await apiCallerForSpecificSim.notifySendReportReceived(
+                        await wdApi.notifySendReportReceived({
                             wdChat,
-                            {
+                            "bundledData": {
                                 "sendDateTime": bundledData.statusReport.sendDateTime,
                                 "messageTowardGsm": bundledData.messageTowardGsm
                             }
-                        );
+                        });
 
-                        await callee(wdChat, bundledData);
+                        await callee({ wdChat, bundledData });
 
                         return;
 
@@ -702,7 +708,7 @@ export function getApiCallerForSpecificSimFactory(
                         bundledData.statusReport.dischargeDateTime : null
                         ;
 
-                    const sentBy: wd.Message.Outgoing.StatusReportReceived<"PLAIN">["sentBy"] =
+                    const sentBy: types.wd.Message.Outgoing.StatusReportReceived["sentBy"] =
                         bundledData.messageTowardGsm.uaSim.ua.userEmail === userEmail! ?
                             ({ "who": "USER" }) :
                             ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail });
@@ -733,45 +739,52 @@ export function getApiCallerForSpecificSimFactory(
             })(),
             /** Hack so we don't have to handle special case when UA can't send message */
             "notifyUaFailedToSendMessage": async (
-                wdChat: wd.Chat<"PLAIN">,
-                wdMessage: wd.Message.Outgoing.Pending<"PLAIN">
+                wdChat: types.wd.Chat,
+                wdMessage: types.wd.Message.Outgoing.Pending
             ): Promise<void> => {
 
-                await apiCallerForSpecificSim.notifySendReportReceived(
+                await wdApi.notifySendReportReceived({
                     wdChat,
-                    {
+                    "bundledData": {
                         "sendDateTime": null,
                         "messageTowardGsm": {
                             "dateTime": wdMessage.time,
                             "text": wdMessage.text
                         }
                     }
-                );
+                });
 
             }
         };
 
-        return apiCallerForSpecificSim;
+        return wdApi;
 
     };
 
 }
 
+
+export type WdApi = ReturnType<ReturnType<typeof getWdApiFactory>>;
+
 function getGetGetWdEvts(
-    encryptorDecryptor: cryptoLib.EncryptorDecryptor,
-    //evtRequestProcessedByBackend: { attach: EvtRequestProcessedByBackend["attach"] },
-    evtRequestProcessedByBackend: { attach: AppEvts["evtWdActionFromOtherUa"]["attach"] }
+    params: {
+        encryptorDecryptor: cryptoLib.EncryptorDecryptor,
+        evtRequestProcessedByBackend: { attach: RemoteNotifyEvts["evtWdActionFromOtherUa"]["attach"] }
+        decryptMessage: ReturnType<typeof types.wd.Message.decryptFactory>;
+    }
 ) {
+
+    const { encryptorDecryptor, evtRequestProcessedByBackend, decryptMessage } = params;
 
     const decryptThenParse = cryptoLib.decryptThenParseFactory(encryptorDecryptor);
 
     return function getGetWdEvts(imsi: string) {
 
-        return function getWdEvts(wdChats: wd.Chat<"PLAIN">[]): WdEvts {
+        return function getWdEvts(wdChats: types.wd.Chat[]): NonPostableEvts<types.wd.Evts> {
 
-            const out: WdEvts = {
-                "evtNewUpdatedOrDeletedWdChat": new SyncEvent(),
-                "evtNewOrUpdatedWdMessage": new SyncEvent()
+            const out: types.wd.Evts = {
+                "evtWdChat": new Evt(),
+                "evtWdMessage": new Evt()
             };
 
             evtRequestProcessedByBackend.attach(
@@ -801,7 +814,7 @@ function getGetGetWdEvts(
                                 ] as const
                             );
 
-                            const wdChat: wd.Chat<"PLAIN"> = {
+                            const wdChat: types.wd.Chat = {
                                 "ref": chatRef,
                                 contactNumber,
                                 contactName,
@@ -812,7 +825,9 @@ function getGetGetWdEvts(
 
                             wdChats.push(wdChat);
 
-                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "NEW" });
+                            wdChats.sort(types.wd.Chat.compare);
+
+                            out.evtWdChat.post({ wdChat, "eventType": "NEW" });
 
                         } break;
                         case "wd_updateChatLastMessageSeen": {
@@ -827,18 +842,30 @@ function getGetGetWdEvts(
 
                             wdChat.refOfLastMessageSeen = params.refOfLastMessageSeen;
 
-                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "UPDATED" });
+                            out.evtWdChat.post({
+                                wdChat,
+                                "eventType": "UPDATED",
+                                "changes": {
+                                    "unreadMessageCount": true,
+                                    "contactInfos": false,
+                                    "ordering": false
+                                }
+                            });
 
                         } break;
                         case "wd_updateChatContactInfos": {
 
                             const { params } = evtData;
 
-                            const wdChat = wdChats.find(({ ref }) => ref === params.chatRef);
+                            const indexBefore = wdChats
+                                .findIndex(({ ref }) => ref === params.chatRef)
+                                ;
 
-                            if (!wdChat) {
+                            if (indexBefore < 0) {
                                 return;
                             }
+
+                            const wdChat = wdChats[indexBefore];
 
                             const [contactName, contactIndexInSim] = await Promise.all([
                                 params.contactName !== undefined ?
@@ -855,7 +882,17 @@ function getGetGetWdEvts(
                                 wdChat.contactIndexInSim = contactIndexInSim;
                             }
 
-                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "UPDATED" });
+                            wdChats.sort(types.wd.Chat.compare);
+
+                            out.evtWdChat.post({
+                                wdChat,
+                                "eventType": "UPDATED",
+                                "changes": {
+                                    "ordering": wdChats.indexOf(wdChat) !== indexBefore,
+                                    "contactInfos": true,
+                                    "unreadMessageCount": false
+                                }
+                            });
 
                         } break;
                         case "wd_destroyChat": {
@@ -873,7 +910,7 @@ function getGetGetWdEvts(
                                 1
                             );
 
-                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "DELETED" });
+                            out.evtWdChat.post({ wdChat, "eventType": "DELETED" });
 
 
                         } break;
@@ -881,13 +918,18 @@ function getGetGetWdEvts(
 
                             const { params } = evtData;
 
-                            const wdChat = wdChats.find(({ ref }) => ref === params.chatRef);
+                            const indexBefore = wdChats.findIndex(({ ref }) => ref === params.chatRef);
 
-                            if (!wdChat) {
+                            if (indexBefore < 0) {
                                 return;
                             }
 
-                            const wdMessage = await wd.decryptMessage(encryptorDecryptor, params.message);
+                            const wdChat = wdChats[indexBefore];
+
+                            const wdMessage = await decryptMessage({
+                                "decryptor": encryptorDecryptor,
+                                "encryptedMessage": params.message
+                            });
 
                             if (!!wdChat.messages.find(({ ref }) => ref === wdMessage.ref)) {
                                 return;
@@ -895,28 +937,41 @@ function getGetGetWdEvts(
 
                             wdChat.messages.push(wdMessage);
 
-                            wdChat.messages.sort(wd.compareMessage);
+                            wdChat.messages.sort(types.wd.Message.compare);
 
-                            if (wdMessage.direction === "INCOMING") {
-                                //NOTE: Metadata unreadMessageCount will have changed
-                                out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "UPDATED" });
-                            }
+                            wdChats.sort(types.wd.Chat.compare);
 
-                            out.evtNewOrUpdatedWdMessage.post({ wdChat, wdMessage });
+                            out.evtWdChat.post({
+                                wdChat,
+                                "eventType": "UPDATED",
+                                "changes": {
+                                    "ordering": wdChats.indexOf(wdChat) !== indexBefore,
+                                    "unreadMessageCount": wdMessage.direction === "INCOMING",
+                                    "contactInfos": false
+                                }
+                            });
+
+                            out.evtWdMessage.post({
+                                wdChat,
+                                wdMessage,
+                                "eventType": "NEW"
+                            });
 
                         } break;
                         case "wd_notifySendReportReceived": {
 
                             const { params } = evtData;
 
-                            const wdChat = wdChats.find(({ ref }) => ref === params.chatRef);
+                            const wdChatIndexBefore = wdChats.findIndex(({ ref }) => ref === params.chatRef);
 
-                            if (!wdChat) {
+                            if (wdChatIndexBefore < 0) {
                                 return;
                             }
 
+                            const wdChat = wdChats[wdChatIndexBefore];
+
                             const wdMessage = wdChat.messages
-                                .find((wdMessage): wdMessage is wd.Message.Outgoing.Pending<"PLAIN"> => (
+                                .find((wdMessage): wdMessage is types.wd.Message.Outgoing.Pending => (
                                     wdMessage.ref === params.messageRef &&
                                     wdMessage.direction === "OUTGOING" &&
                                     wdMessage.status === "PENDING"
@@ -926,7 +981,7 @@ function getGetGetWdEvts(
                                 return;
                             }
 
-                            createObjectWithGivenRef<wd.Message.Outgoing.SendReportReceived<"PLAIN">>(
+                            createObjectWithGivenRef<types.wd.Message.Outgoing.SendReportReceived>(
                                 wdMessage,
                                 {
                                     "ref": params.messageRef,
@@ -938,23 +993,46 @@ function getGetGetWdEvts(
                                 }
                             );
 
-                            wdChat.messages.sort(wd.compareMessage);
+                            const wdMessageIndexBefore = wdChat.messages.indexOf(wdMessage);
 
-                            out.evtNewOrUpdatedWdMessage.post({ wdChat, wdMessage });
+                            wdChat.messages.sort(types.wd.Message.compare);
+
+                            wdChats.sort(types.wd.Chat.compare);
+
+                            out.evtWdChat.post({
+                                wdChat,
+                                "eventType": "UPDATED",
+                                "changes": {
+                                    "ordering": wdChats.indexOf(wdChat) !== wdChatIndexBefore,
+                                    "unreadMessageCount": false,
+                                    "contactInfos": false
+                                }
+                            });
+
+                            out.evtWdMessage.post({
+                                wdChat,
+                                wdMessage,
+                                "eventType": "UPDATED",
+                                "orderingChange": wdChat.messages.indexOf(wdMessage) !== wdMessageIndexBefore
+                            });
+
 
                         } break;
                         case "wd_notifyStatusReportReceived": {
 
                             const { params } = evtData;
 
-                            const wdChat = wdChats.find(({ ref }) => ref === params.chatRef);
 
-                            if (!wdChat) {
+                            const wdChatIndexBefore = wdChats.findIndex(({ ref }) => ref === params.chatRef);
+
+                            if (wdChatIndexBefore < 0) {
                                 return;
                             }
 
+                            const wdChat = wdChats[wdChatIndexBefore];
+
                             const wdMessage_beforeUpdate = wdChat.messages
-                                .find((wdMessage): wdMessage is wd.Message.Outgoing.SendReportReceived<"PLAIN"> => (
+                                .find((wdMessage): wdMessage is types.wd.Message.Outgoing.SendReportReceived => (
                                     wdMessage.ref === params.messageRef &&
                                     wdMessage.direction === "OUTGOING" &&
                                     wdMessage.status === "SEND REPORT RECEIVED"
@@ -964,7 +1042,7 @@ function getGetGetWdEvts(
                                 return;
                             }
 
-                            const wdMessage = createObjectWithGivenRef<wd.Message.Outgoing.StatusReportReceived<"PLAIN">>(
+                            const wdMessage = createObjectWithGivenRef<types.wd.Message.Outgoing.StatusReportReceived>(
                                 wdMessage_beforeUpdate,
                                 await (async () => {
 
@@ -980,12 +1058,12 @@ function getGetGetWdEvts(
                                     const { sentBy } = params;
 
                                     return sentBy.who === "USER" ?
-                                        id<wd.Message.Outgoing.StatusReportReceived.SentByUser<"PLAIN">>({
+                                        id<types.wd.Message.Outgoing.StatusReportReceived.SentByUser>({
                                             ...part,
                                             sentBy
                                         })
                                         :
-                                        id<wd.Message.Outgoing.StatusReportReceived.SentByOther<"PLAIN">>({
+                                        id<types.wd.Message.Outgoing.StatusReportReceived.SentByOther>({
                                             ...part,
                                             "sentBy": {
                                                 "who": "OTHER",
@@ -998,14 +1076,30 @@ function getGetGetWdEvts(
                                 })()
                             );
 
-                            wdChat.messages.sort(wd.compareMessage);
+                            const wdMessageIndexBefore = wdChat.messages.indexOf(wdMessage);
 
-                            if (wdMessage.sentBy.who === "OTHER") {
-                                //NOTE: unreadMessageCount will have changed.
-                                out.evtNewUpdatedOrDeletedWdChat.post({ wdChat, "eventType": "UPDATED" });
-                            }
+                            wdChat.messages.sort(types.wd.Message.compare);
 
-                            out.evtNewOrUpdatedWdMessage.post({ wdChat, wdMessage });
+                            wdChats.sort(types.wd.Chat.compare);
+
+                            out.evtWdChat.post({
+                                wdChat,
+                                "eventType": "UPDATED",
+                                "changes": {
+                                    "ordering": wdChats.indexOf(wdChat) !== wdChatIndexBefore,
+                                    "unreadMessageCount": wdMessage.sentBy.who === "OTHER",
+                                    "contactInfos": false
+                                }
+                            });
+
+                            out.evtWdMessage.post({
+                                wdChat,
+                                wdMessage,
+                                "eventType": "UPDATED",
+                                "orderingChange": wdChat.messages.indexOf(wdMessage) !== wdMessageIndexBefore
+                            });
+
+
 
                         } break;
                     }

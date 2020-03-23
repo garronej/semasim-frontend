@@ -20,7 +20,7 @@ export async function appCryptoSetupHelper(
     paramsNeededToInstantiateUa: {
         towardUserEncryptKeyStr: string;
         towardUserDecryptor: cryptoLib.Decryptor;
-        getTowardSimEncryptor: (usableUserSim: { towardSimEncryptKeyStr: string; }) => { towardSimEncryptor: cryptoLib.Encryptor; }
+        getTowardSimEncryptor: (userSim: { towardSimEncryptKeyStr: string; }) => { towardSimEncryptor: cryptoLib.Encryptor; }
     };
     paramsNeededToEncryptDecryptWebphoneData: {
         encryptorDecryptor: cryptoLib.EncryptorDecryptor;

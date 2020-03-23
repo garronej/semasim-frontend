@@ -2,58 +2,40 @@
 import * as React from "react";
 import * as rn from "react-native";
 import { h } from "../lib/dimensions";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { ObservableImpl } from "frontend-shared/node_modules/ts-events-extended";
+import { id } from "frontend-shared/dist/tools/id";
 
-//import { notConnectedUserFeedback } from "frontend-shared/dist/lib/toBackend/connection";
+const log: typeof console.log = true ?
+    ((...args) => console.log(...["[globalComponents/NoBackendConnectionBanner]", ...args])) :
+    (() => { });
 
 
-const log: typeof console.log = false ? console.log.bind(console) : () => { };
+const obsRef = new ObservableImpl<NoBackendConnectionBanner | undefined>(undefined);
 
-const evtRef = new SyncEvent<NoBackendConnectionBanner | undefined>();
 
-let ref: NoBackendConnectionBanner | undefined = undefined;
-
-evtRef.attach(newRef => ref = newRef);
-
-/*
-notConnectedUserFeedback.provideCustomImplementation(state =>
-    Promise.resolve(
-        ref ||
-        evtRef.waitFor((ref): ref is NoBackendConnectionBanner => !!ref)
-    ).then(ref =>
-        ref.setState({
-            "isVisible": state.isVisible,
-            ...(state.isVisible ? ({ "message": state.message }) : ({}))
-        })
-    )
-);
-*/
-
-type NotConnectedUserFeedback = import("frontend-shared/dist/lib/toBackend/connection")
-    .ConnectParams
+type NotConnectedUserFeedback = import("frontend-shared/dist/lib/appLauncher/appLaunch")
+    .appLaunch
+    .Params
     .ReactNative["notConnectedUserFeedback"]
     ;
 
-export const notConnectedUserFeedback: NotConnectedUserFeedback = (()=>{
+export const notConnectedUserFeedback = (() => {
 
-    let timer: NodeJS.Timer | undefined = undefined;
+    let timer: number | undefined = undefined;
 
-    return (state: Parameters<NotConnectedUserFeedback>[0])=>{
+    return id<NotConnectedUserFeedback>(state => {
 
         if (timer !== undefined) {
             clearTimeout(timer);
         }
 
         const setState = () => Promise.resolve(
-            ref ||
-            evtRef.waitFor((ref): ref is NonNullable<typeof ref> => !!ref)
-        ).then(ref =>
-            ref.setState({
-                "isVisible": state.isVisible,
-                ...(state.isVisible ? ({ "message": state.message }) : ({}))
-            })
-        );
-
+            obsRef.value ??
+            obsRef.evtChange.waitFor((ref): ref is NonNullable<typeof ref> => !!ref)
+        ).then(ref => ref.setState({
+            "isVisible": state.isVisible,
+            ...(state.isVisible ? ({ "message": state.message }) : ({}))
+        }));
 
         if (state.isVisible) {
 
@@ -65,10 +47,12 @@ export const notConnectedUserFeedback: NotConnectedUserFeedback = (()=>{
 
         }
 
-    };
+    });
+
 
 
 })();
+
 
 
 export type Props = {};
@@ -84,32 +68,11 @@ log("[NoBackendConnectionBanner] imported");
 
 export class NoBackendConnectionBanner extends React.Component<Props, State> {
 
-
     public readonly state: Readonly<State> = { "isVisible": false, "message": "" };
 
-    constructor(props: any) {
-        super(props);
+    public componentDidMount = () => obsRef.onPotentialChange(this);
 
-        log("[NoBackendConnectionBanner] constructor");
-
-    }
-
-    public componentDidMount = () => {
-
-        log("[NoBackendConnectionBanner] componentDidMount");
-
-        evtRef.post(this);
-
-    };
-
-    public componentWillUnmount = () => {
-
-        log("[NoBackendConnectionBanner] componentWillUnmount");
-
-        evtRef.post(undefined);
-
-
-    };
+    public componentWillUnmount = () => obsRef.onPotentialChange(undefined);
 
     public render = () => this.state.isVisible ? (
         <rn.View style={{

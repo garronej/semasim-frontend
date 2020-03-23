@@ -57,17 +57,12 @@ var __spread = (this && this.__spread) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sip = require("ts-sip");
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var localApiHandlers = require("./localApiHandlers");
-var dialog_1 = require("../../tools/modal/dialog");
 var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
-var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var tryLoginFromStoredCredentials_1 = require("../tryLoginFromStoredCredentials");
-var appEvts_1 = require("./appEvts");
-var restartApp_1 = require("../restartApp");
-var networkStateMonitoring = require("../networkStateMonitoring");
-exports.url = "wss://web." + env_1.env.baseDomain;
+var assert_1 = require("../../tools/typeSafety/assert");
+var id_1 = require("../../tools/typeSafety/id");
 var idString = "toBackend";
 env_1.env.isDevEnv;
 /*
@@ -84,153 +79,157 @@ var log = true ?
         return console.log.apply(console, __spread(["[toBackend/connection]"], args));
     }) :
     (function () { });
-var notConnectedUserFeedback;
-(function (notConnectedUserFeedback) {
-    var setVisibilityWithMessage;
-    function setVisibility(isVisible) {
-        var state = isVisible ?
-            ({ isVisible: isVisible, "message": "Connecting..." }) :
-            ({ isVisible: isVisible });
-        setVisibilityWithMessage(state);
-    }
-    notConnectedUserFeedback.setVisibility = setVisibility;
-    function provideCustomImplementation(setVisibilityWithMessageImpl) {
-        setVisibilityWithMessage = setVisibilityWithMessageImpl;
-    }
-    notConnectedUserFeedback.provideCustomImplementation = provideCustomImplementation;
-})(notConnectedUserFeedback || (notConnectedUserFeedback = {}));
-var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
-    idString: idString,
-    log: log,
-    "hideKeepAlive": true
-}));
 /** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
  * else error will be thrown.
  */
-exports.connect = (function () {
-    var hasBeenInvoked = false;
-    return function connect(params) {
-        if (hasBeenInvoked) {
-            throw new Error("Should be invoked only once");
-        }
-        hasBeenInvoked = true;
-        if (params.assertJsRuntimeEnv !== env_1.env.jsRuntimeEnv) {
-            throw new Error("Wrong params for js runtime environnement");
-        }
-        notConnectedUserFeedback.provideCustomImplementation(params.assertJsRuntimeEnv === "react-native" ?
-            params.notConnectedUserFeedback :
-            (function (state) {
-                if (state.isVisible) {
-                    dialog_1.dialogApi.loading(state.message, 1200);
-                }
-                else {
-                    dialog_1.dialogApi.dismissLoading();
-                }
-            }));
-        //TODO: See if of any use
-        networkStateMonitoring.getApi().then(function (api) {
-            return api.evtStateChange.attach(function () { return !api.getIsOnline(); }, function () {
-                var socket = get();
-                if (socket instanceof Promise) {
-                    return;
-                }
-                socket.destroy("Internet connection lost");
+function connectAndGetApi(params) {
+    assert_1.assert(!connectAndGetApi.hasBeenInvoked, "Should be invoked only once");
+    connectAndGetApi.hasBeenInvoked = true;
+    var url = "wss://web." + env_1.env.baseDomain;
+    var _a = (function () {
+        var socketCurrent = undefined;
+        var evtConnect = new evt_1.Evt();
+        return {
+            evtConnect: evtConnect,
+            "setSocketCurrent": function (socket) {
+                socketCurrent = socket;
+                socket.evtConnect.attachOnce(function () { return evtConnect.post(socket); });
+            },
+            "getSocket": function () { return (!socketCurrent ||
+                socketCurrent.evtClose.postCount !== 0 ||
+                !socketCurrent.evtConnect.postCount) ? evtConnect.waitFor() : socketCurrent; }
+        };
+    })(), evtConnect = _a.evtConnect, getSocket = _a.getSocket, setSocketCurrent = _a.setSocketCurrent;
+    var AuthenticatedSessionDescriptorSharedData = params.AuthenticatedSessionDescriptorSharedData;
+    var _b = localApiHandlers.getHandlers(), remoteNotifyEvts = _b.remoteNotifyEvts, handlers = _b.handlers;
+    {
+        var setNotConnectUserFeedbackVisibility_1 = function (isVisible) { return params.notConnectedUserFeedback(isVisible ?
+            ({ isVisible: isVisible, "message": "Connecting..." }) :
+            ({ isVisible: isVisible })); };
+        var requestTurnCred_1 = params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED";
+        var getShouldReconnect_1 = function () { return remoteNotifyEvts.evtOpenElsewhere.postCount === 0; };
+        var apiServer_1 = new sip.api.Server(handlers, sip.api.Server.getDefaultLogger({
+            idString: idString,
+            log: log,
+            "hideKeepAlive": true
+        }));
+        var restartApp_1 = params.restartApp, tryLoginWithStoredCredentialIfNotAlreadyLogedIn_1 = params.tryLoginWithStoredCredentialIfNotAlreadyLogedIn;
+        (function connectRecursive() {
+            return __awaiter(this, void 0, void 0, function () {
+                var loginAttemptResult, connect_sid, webSocket, socket;
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            setNotConnectUserFeedbackVisibility_1(true);
+                            return [4 /*yield*/, tryLoginWithStoredCredentialIfNotAlreadyLogedIn_1()];
+                        case 1:
+                            loginAttemptResult = _a.sent();
+                            if (loginAttemptResult !== "LOGGED IN") {
+                                restartApp_1("User is no longer logged in");
+                                return [2 /*return*/];
+                            }
+                            return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.get()];
+                        case 2:
+                            connect_sid = (_a.sent()).connect_sid;
+                            try {
+                                webSocket = new WebSocket(urlGetParameters.buildUrl(url, {
+                                    connect_sid: connect_sid,
+                                    requestTurnCred: requestTurnCred_1
+                                }), "SIP");
+                            }
+                            catch (error) {
+                                log("WebSocket construction error: " + error.message);
+                                connectRecursive();
+                                return [2 /*return*/];
+                            }
+                            socket = new sip.Socket(webSocket, true, {
+                                "remoteAddress": "web." + env_1.env.baseDomain,
+                                "remotePort": 443
+                            }, 20000);
+                            apiServer_1.startListening(socket);
+                            sip.api.client.enableKeepAlive(socket, 25 * 1000);
+                            sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
+                                idString: idString,
+                                log: log
+                            }));
+                            socket.enableLogger({
+                                "socketId": idString,
+                                "remoteEndId": "BACKEND",
+                                "localEndId": "FRONTEND",
+                                "connection": true,
+                                "error": true,
+                                "close": true,
+                                "incomingTraffic": false,
+                                "outgoingTraffic": false,
+                                "ignoreApiTraffic": true
+                            }, log);
+                            setSocketCurrent(socket);
+                            socket.evtConnect.attachOnce(function () {
+                                log("Socket (re-)connected");
+                                setNotConnectUserFeedbackVisibility_1(false);
+                            });
+                            socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    if (!getShouldReconnect_1()) {
+                                        return [2 /*return*/];
+                                    }
+                                    connectRecursive();
+                                    return [2 /*return*/];
+                                });
+                            }); });
+                            return [2 /*return*/];
+                    }
+                });
             });
-        });
-        AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.evtChange.attach(function (authenticatedSessionDescriptorSharedData) { return !authenticatedSessionDescriptorSharedData; }, function () {
-            var socket = get();
+        })();
+    }
+    {
+        var api_1 = params.networkStateMonitoringApi;
+        //TODO: See if of any use
+        api_1.evtStateChange.attach(function () { return !api_1.getIsOnline(); }, function () {
+            var socket = getSocket();
             if (socket instanceof Promise) {
                 return;
             }
-            socket.destroy("User no longer authenticated");
+            socket.destroy("Internet connection lost");
         });
-        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED");
-    };
-})();
-exports.evtConnect = new ts_events_extended_1.SyncEvent();
-var socketCurrent = undefined;
-/** Assert user logged in, will restart app as soon as user is detected as no longer logged in */
-function connectRecursive(requestTurnCred) {
-    return __awaiter(this, void 0, void 0, function () {
-        var loginAttemptResult, connect_sid, webSocket, socket;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    notConnectedUserFeedback.setVisibility(true);
-                    return [4 /*yield*/, tryLoginFromStoredCredentials_1.tryLoginFromStoredCredentials()];
-                case 1:
-                    loginAttemptResult = _a.sent();
-                    if (loginAttemptResult !== "LOGGED IN") {
-                        restartApp_1.restartApp("User is no longer logged in");
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
-                case 2:
-                    connect_sid = (_a.sent()).connect_sid;
-                    try {
-                        webSocket = new WebSocket(urlGetParameters.buildUrl(exports.url, {
-                            connect_sid: connect_sid,
-                            requestTurnCred: requestTurnCred
-                        }), "SIP");
-                    }
-                    catch (error) {
-                        log("WebSocket construction error: " + error.message);
-                        connectRecursive(requestTurnCred);
-                        return [2 /*return*/];
-                    }
-                    socket = new sip.Socket(webSocket, true, {
-                        "remoteAddress": "web." + env_1.env.baseDomain,
-                        "remotePort": 443
-                    }, 20000);
-                    apiServer.startListening(socket);
-                    sip.api.client.enableKeepAlive(socket, 25 * 1000);
-                    sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
-                        idString: idString,
-                        log: log
-                    }));
-                    socket.enableLogger({
-                        "socketId": idString,
-                        "remoteEndId": "BACKEND",
-                        "localEndId": "FRONTEND",
-                        "connection": true,
-                        "error": true,
-                        "close": true,
-                        "incomingTraffic": false,
-                        "outgoingTraffic": false,
-                        "ignoreApiTraffic": true
-                    }, log);
-                    socketCurrent = socket;
-                    socket.evtConnect.attachOnce(function () {
-                        log("Socket (re-)connected");
-                        notConnectedUserFeedback.setVisibility(false);
-                        exports.evtConnect.post(socket);
-                    });
-                    socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            if (appEvts_1.appEvts.evtOpenElsewhere.postCount !== 0) {
-                                return [2 /*return*/];
-                            }
-                            connectRecursive(requestTurnCred);
-                            return [2 /*return*/];
-                        });
-                    }); });
-                    return [2 /*return*/];
-            }
-        });
+    }
+    AuthenticatedSessionDescriptorSharedData.evtChange.attach(function (authenticatedSessionDescriptorSharedData) { return !authenticatedSessionDescriptorSharedData; }, function () {
+        var socket = getSocket();
+        if (socket instanceof Promise) {
+            return;
+        }
+        socket.destroy("User no longer authenticated");
+    });
+    return id_1.id({
+        url: url,
+        remoteNotifyEvts: remoteNotifyEvts,
+        evtConnect: evtConnect,
+        getSocket: getSocket
     });
 }
-function get() {
-    if (!socketCurrent ||
-        socketCurrent.evtClose.postCount !== 0 ||
-        !socketCurrent.evtConnect.postCount) {
-        return new Promise(function (resolve) { return exports.evtConnect.attachOnce(function () { return resolve(socketCurrent); }); });
-    }
-    else {
-        return socketCurrent;
-    }
-}
-exports.get = get;
+exports.connectAndGetApi = connectAndGetApi;
+connectAndGetApi.hasBeenInvoked = false;
+/*
+notConnectedUserFeedback.provideCustomImplementation(
+    params.assertJsRuntimeEnv === "react-native" ?
+        params.notConnectedUserFeedback :
+        (state => {
+
+            if (state.isVisible) {
+
+                dialogApi.loading(state.message, 1200);
+
+            } else {
+
+                dialogApi.dismissLoading();
+
+            }
+
+        })
+);
+*/

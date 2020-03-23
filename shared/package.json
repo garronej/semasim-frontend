@@ -2,7 +2,7 @@
   "name": "frontend-shared",
   "version": "1.0.0",
   "scripts": {
-    "tsc": "npx tsc -p ./tsconfig.json"
+    "tsc": "npx tsc"
   },
   "dependencies": {
     "chan-dongle-extended-client": "github:garronej/chan-dongle-extended-client",
@@ -14,10 +14,11 @@
     "@types/jquery": "2.0.48",
     "crypto-lib": "file:../local_modules/crypto-lib",
     "phone-number": "file:../local_modules/phone-number",
-    "run-exclusive": "github:garronej/run-exclusive",
+    "run-exclusive": "^2.1.6",
     "transfer-tools": "garronej/transfer-tools",
-    "ts-events-extended": "file:../local_modules/ts-events-extended",
+    "evt": "~1.0.0",
     "ts-sip": "file:../local_modules/ts-sip",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.1",
+    "uuid": "^3.3.3"
   }
 }

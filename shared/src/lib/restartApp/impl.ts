@@ -1,7 +1,7 @@
 
 import { env } from "../env";
 
-const default_: import("./index").Default = reason=> { 
+const default_: import("./index").RestartApp = reason=> { 
 
     if( env.isDevEnv ){
         alert(`About to restart app, reason: ${reason}`);

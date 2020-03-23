@@ -1,14 +1,10 @@
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
 import "frontend-shared/dist/tools/polyfills/Object.assign";
-import { JustRegistered } from "frontend-shared/dist/lib/localStorage/JustRegistered";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
-import * as loginPageLogic from "frontend-shared/dist/lib/pageLogic/loginPageLogic";
-import { TowardUserKeys } from "frontend-shared/dist/lib/localStorage/TowardUserKeys";
-import * as cryptoLib from "frontend-shared/node_modules/crypto-lib";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
-
-let justRegistered: JustRegistered | undefined;
+import { loginPageLaunch } from "frontend-shared/dist/lib/appLauncher/loginPageLaunch";
+import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 
 declare const apiExposedByHost: (
 	hostKfd.ApiExposedByHost &
@@ -31,7 +27,84 @@ const apiExposedToHost: (
 
 Object.assign(window, { apiExposedToHost });
 
-function setHandlers() {
+$(document).ready(async () => {
+
+	const prApi = loginPageLaunch({
+		"assertJsRuntimeEnv": "browser",
+		"intent": (() => {
+
+			const {
+				email,
+				email_confirmation_code,
+				renew_password_token
+			} = urlGetParameters.parseUrl<availablePages.urlParams.Login>()
+
+			if (typeof email_confirmation_code === "string") {
+
+				assert(typeof email === "string");
+
+				return {
+					"action": "VALIDATE EMAIL" as const,
+					email,
+					"code": email_confirmation_code
+				};
+
+			}
+
+			if (typeof renew_password_token === "string") {
+
+				assert(typeof email === "string");
+
+				return {
+					"action": "RENEW PASSWORD" as const,
+					email,
+					"token": renew_password_token
+				};
+
+			}
+
+			return {
+				"action": "LOGIN" as const,
+				email
+			};
+
+		})(),
+		"uiApi": {
+			"emailInput": {
+				"getValue": $("#email").val(),
+				"setValue": email => $("#email").val(email)
+			},
+			"passwordInput": {
+				"getValue": $("#password").val(),
+				"setValue": password => $("#password").val(password)
+			},
+			"triggerClickButtonLogin": () => $("#login-btn").trigger("click"),
+			"redirectToRegister": () => window.location.href = `/${availablePages.PageName.register}`,
+			"onLoginSuccess": async ({
+				email,
+				secret,
+				towardUserEncryptKeyStr,
+				towardUserDecryptKeyStr
+			}) => {
+
+				if (typeof apiExposedByHost !== "undefined") {
+
+					apiExposedByHost.onDone(
+						email,
+						secret,
+						towardUserEncryptKeyStr,
+						towardUserDecryptKeyStr
+					);
+
+					return;
+
+				}
+
+				window.location.href = `/${availablePages.PageName.manager}`;
+
+			}
+		}
+	});
 
 	/* Start import from theme */
 	$("#login-form").validate({
@@ -79,76 +152,25 @@ function setHandlers() {
 
 		if (!$(this).valid()) return;
 
-		const [email, password] = (() => {
+		const { login } = await prApi;
 
-			const [email, password] = ["#email", "#password"]
-				.map(sel => $(sel).val() as string)
-				;
-
-			return [email, password];
-
-		})();
-
-		loginPageLogic.login(
-			email,
-			password,
-			undefined,
-			justRegistered,
-			{
-				"resetPassword": () => $("#password").val(""),
-				"loginSuccess": async secret => {
-
-					if (typeof apiExposedByHost !== "undefined") {
-
-						const towardUserKeys = (await TowardUserKeys.retrieve())!;
-
-						apiExposedByHost.onDone(
-							email,
-							secret,
-							cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
-							cryptoLib.RsaKey.stringify(towardUserKeys.decryptKey)
-						);
-
-						return;
-
-					}
-
-					window.location.href = `/${availablePages.PageName.manager}`;
-
-				}
-			}
-		);
+		login({ "assertJsRuntimeEnv": "browser" });
 
 	});
 
 
-	$("#forgot-password").click(event => {
+	$("#forgot-password").click(async event => {
 
 		event.preventDefault();
 
-		loginPageLogic.requestRenewPassword({
-			"redirectToRegister": () => window.location.href = `/${availablePages.PageName.register}`,
-			"getEmail": () => $("#email").val(),
-			"setEmail": email => $("#email").val(email)
-		});
+		const { requestRenewPassword } = await prApi;
 
+		requestRenewPassword();
 
 	});
 
-}
-
-$(document).ready(async () => {
-
-	setHandlers();
-
-	loginPageLogic.init(
-		urlGetParameters.parseUrl<availablePages.urlParams.Login>(),
-		{
-			"setEmail": email => $("#email").val(email),
-			"setJustRegistered": justRegistered_ => justRegistered = justRegistered_,
-			"setPassword": password => $("#password").val(password),
-			"triggerClickLogin": () => $("#login-btn").trigger("click")
-		}
-	);
 
 });
+
+
+

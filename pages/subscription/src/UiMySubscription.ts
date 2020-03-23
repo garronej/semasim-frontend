@@ -1,6 +1,6 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/subscription";
 import * as moment from "moment";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
@@ -17,8 +17,8 @@ require("../templates/UiMySubscription.less");
 export class UiMySubscription {
 
     public readonly structure = html.structure.clone();
-    public readonly evtScheduleCancel = new VoidSyncEvent();
-    public readonly evtReactivate = new VoidSyncEvent();
+    public readonly evtScheduleCancel = new VoidEvt();
+    public readonly evtReactivate = new VoidEvt();
 
     constructor(s: types.SubscriptionInfos.Subscription, amount: number) {
 

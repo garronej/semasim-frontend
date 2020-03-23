@@ -1,15 +1,15 @@
 
-import * as types  from "../lib/types/userSim"
-import * as wd from "../lib/types/webphoneData/types";
 import { types as dcTypes } from "chan-dongle-extended-client";
+import * as types from "../lib/types";
 
-export namespace getUsableUserSims {
 
-    export const methodName = "getUsableUserSims";
+export namespace getUserSims {
+
+    export const methodName = "getUserSims";
 
     export type Params = { includeContacts: boolean; };
 
-    export type Response = types.UserSim.Usable[];
+    export type Response = types.UserSim[];
 
 }
 
@@ -36,7 +36,7 @@ export namespace registerSim {
         friendlyName: string;
     };
 
-    export type Response = types.UserSim.Owned;
+    export type Response = undefined;
 
 }
 
@@ -114,7 +114,7 @@ export namespace acceptSharingRequest {
         friendlyName: string;
     };
 
-    export type Response = { password: string; };
+    export type Response = undefined;
 
 }
 
@@ -135,19 +135,14 @@ export namespace createContact {
 
     export const methodName = "createContact";
 
-    /** number expect a formated phone number */
+    //NOTE: Here the phone number are not checked
     export type Params = {
         imsi: string;
         name: string;
-        number: string;
+        number_raw: string;
     };
 
-    //TODO: changed, update on server
-    export type Response = {
-        mem_index: number;
-        name_as_stored_in_sim: string;
-        new_digest: string;
-    } | undefined;
+    export type Response = undefined;
 
 
 }
@@ -158,7 +153,7 @@ export namespace updateContactName {
 
     export type Params = contactInSim.Params | contactNotInSim.Params;
 
-    export type Response = contactInSim.Response | contactNotInSim.Response;
+    export type Response = undefined;
 
     export namespace contactInSim {
 
@@ -168,11 +163,6 @@ export namespace updateContactName {
             newName: string;
         };
 
-        //TODO: updated, change on server
-        export type Response = {
-            name_as_stored_in_sim: string;
-            new_digest: string;
-        };
 
     }
 
@@ -184,7 +174,6 @@ export namespace updateContactName {
             newName: string;
         };
 
-        export type Response = undefined;
 
     }
 
@@ -199,8 +188,7 @@ export namespace deleteContact {
         contactRef: { mem_index: number; } | { number: string; }
     };
 
-    //TODO: Change on server
-    export type Response = { new_digest?: string; };
+    export type Response = undefined;
 
 }
 
@@ -224,7 +212,7 @@ export namespace wd_getUserSimChats {
     /** If maxMessageCountByChat is undefined all message history will be pulled */
     export type Params = { imsi: string; maxMessageCountByChat: number; };
 
-    export type Response = wd.Chat<"ENCRYPTED">[];
+    export type Response = types.wd.Chat<"ENCRYPTED">[];
 
 }
 
@@ -235,9 +223,9 @@ export namespace wd_newChat {
     export type Params = {
         imsi: string;
         chatRef: string;
-        contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
-        contactName: wd.Chat<"ENCRYPTED">["contactName"];
-        contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactNumber: types.wd.Chat<"ENCRYPTED">["contactNumber"];
+        contactName: types.wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim: types.wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
 
     export type Response = undefined;
@@ -256,7 +244,7 @@ export namespace wd_fetchOlderMessages {
     };
 
     //Message are sorted from the older to the newest ( but just by message time )
-    export type Response = wd.Message<"ENCRYPTED">[];
+    export type Response = types.wd.Message<"ENCRYPTED">[];
 
 }
 
@@ -281,8 +269,8 @@ export namespace wd_updateChatContactInfos {
     export type Params = {
         imsi: string;
         chatRef: string;
-        contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
-        contactName?: wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim?: types.wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactName?: types.wd.Chat<"ENCRYPTED">["contactName"];
     };
 
     export type Response = undefined;
@@ -308,8 +296,8 @@ export namespace wd_newMessage {
         imsi: string;
         chatRef: string;
         message: 
-            wd.Message.Incoming<"ENCRYPTED"> |
-            wd.Message.Outgoing.Pending<"ENCRYPTED">
+            types.wd.Message.Incoming<"ENCRYPTED"> |
+            types.wd.Message.Outgoing.Pending<"ENCRYPTED">
         ;
     };
 
@@ -341,7 +329,7 @@ export namespace wd_notifyStatusReportReceived {
         chatRef: string;
         messageRef: string;
         deliveredTime: number | null;
-        sentBy: wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
+        sentBy: types.wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
     };
 
     export type Response = undefined;

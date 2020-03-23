@@ -1,21 +1,19 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import { restartApp } from "frontend-shared/dist/lib/restartApp";
+import * as types from "frontend-shared/dist/lib/types";
+import { id } from "frontend-shared/dist/tools/id";
+import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[MainComponent]", ...args])) :
     (() => { });
 
-type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
+(async () => {
 
+    while (true) {
 
-(async ()=>{
-
-    while(true){
-
-        await new Promise(resolve=> setTimeout(resolve,5000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         log("tick");
 
@@ -25,20 +23,38 @@ type Webphone = import("frontend-shared/dist/lib/Webphone").Webphone;
 
 log("imported");
 
-async function makeTestCall(webphone: Webphone | undefined){
+async function makeTestCall(
+    params: {
+        webphone: types.Webphone | undefined;
+        dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
+    }
+) {
 
-    if( webphone === undefined ){
+    const { webphone, dialogApi } = params;
+
+    if (webphone === undefined) {
 
         dialogApi.create("alert", { "message": "No sim registered" });
 
         return;
     }
 
-    if( !webphone.obsIsSipRegistered.value ){
+    if (!webphone.obsIsSipRegistered.value) {
+
+
+    }
+
+    const { userSim } = webphone;
+
+    if (!(
+        webphone.obsIsSipRegistered.value &&
+        userSim.reachableSimState?.isGsmConnectivityOk &&
+        userSim.reachableSimState.ongoingCall === undefined
+    )) {
 
         dialogApi.create(
-            "alert", 
-            { "message": `SIP not registered, reachableSimState: ${JSON.stringify(webphone.userSim.reachableSimState)}` }
+            "alert",
+            { "message": `Can't call now: ${JSON.stringify(webphone.userSim.reachableSimState)}` }
         );
 
         return;
@@ -57,9 +73,15 @@ async function makeTestCall(webphone: Webphone | undefined){
 
 
 
-function attachWebphoneListeners(webphone: Webphone | undefined){
+function attachWebphoneListeners(
+    params: {
+        webphone: types.Webphone | undefined;
+    }
+) {
 
-    if( webphone === undefined ){
+    const { webphone } = params;
+
+    if (webphone === undefined) {
         return;
     }
 
@@ -67,9 +89,9 @@ function attachWebphoneListeners(webphone: Webphone | undefined){
         return;
     }
 
-    log("attachWebphoneListeners");
-
     attachWebphoneListeners.alreadyDone.push(webphone);
+
+    log("attachWebphoneListeners");
 
     log(JSON.stringify({ "wdChats": webphone.wdChats }, null, 2));
 
@@ -77,25 +99,35 @@ function attachWebphoneListeners(webphone: Webphone | undefined){
         isSipRegistered => log(`evtIsSipRegisteredValueChanged ${isSipRegistered}`)
     );
 
-    webphone.evtUserSimUpdated.attach(evtData=> log("evtUserSimUpdated", evtData));
+    (Object.keys(webphone.userSimEvts) as (keyof typeof webphone.userSimEvts)[]).forEach(evtName =>
+        id<SyncEvent<any>>(webphone.userSimEvts[evtName])
+            .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
+    );
 
-    webphone.wdEvts.evtNewOrUpdatedWdMessage.attach(evtData=> log("wdEvts.evtNewOrUpdatedWdMessage", evtData));
+    (Object.keys(webphone.wdEvts) as (keyof typeof webphone.wdEvts)[]).forEach(evtName =>
+        id<SyncEvent<any>>(webphone.wdEvts[evtName])
+            .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
+    );
 
-    webphone.wdEvts.evtNewUpdatedOrDeletedWdChat.attach(evtData=> log("wdEvts.evtNewUpdatedOrDeletedWdChat", evtData));
 
 }
 
-attachWebphoneListeners.alreadyDone = [] as Webphone[];
+attachWebphoneListeners.alreadyDone = id<types.Webphone[]>([]);
 
 
-export type Props = { webphones: Webphone[] };
+export type Props = {
+    dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
+    restartApp: import("frontend-shared/dist/lib/restartApp").RestartApp;
+    webphones: types.Webphone[];
+    accountManagementApi: types.AccountManagementApi;
+};
 
 export class MainComponent extends React.Component<Props, {}> {
 
     constructor(props: any) {
         super(props);
 
-        attachWebphoneListeners(this.props.webphones[0]);
+        attachWebphoneListeners({ "webphone": this.props.webphones[0] });
 
     }
 
@@ -103,35 +135,34 @@ export class MainComponent extends React.Component<Props, {}> {
         <rn.View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <rn.TouchableOpacity
                 style={{ backgroundColor: "blue" }}
-                onPress={() => makeTestCall(this.props.webphones[0])}>
+                onPress={() => makeTestCall({
+                    "webphone": this.props.webphones[0],
+                    "dialogApi": this.props.dialogApi
+                })}>
                 <rn.Text>Start call</rn.Text>
             </rn.TouchableOpacity>
             <rn.TouchableOpacity
                 style={{ backgroundColor: "grey", marginTop: 30 }}
-                onPress={() => {
-
-                    restartApp("User required to restart");
-
-                }}>
+                onPress={() => this.props.restartApp("User required to restart")}>
                 <rn.Text>Restart app</rn.Text>
             </rn.TouchableOpacity>
             <rn.TouchableOpacity
                 style={{ backgroundColor: "red", marginTop: 30 }}
                 onPress={() => {
 
-                    dialogApi.create("alert", { "message": "Hello word" });
+                    this.props.dialogApi.create("alert", { "message": "Hello word" });
 
-                    setTimeout(()=> {
-
-                        restartApp("Testing restart after dialog");
-
-                    }, 5000);
+                    setTimeout(
+                        () => this.props.restartApp("Testing restart after dialog"),
+                        5000
+                    );
 
                 }}>
                 <rn.Text>Show dialog then restart</rn.Text>
             </rn.TouchableOpacity>
         </rn.View>
     );
+
 
 }
 

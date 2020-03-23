@@ -1,6 +1,6 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/subscription";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -14,7 +14,7 @@ require("../templates/UiPaymentMethod.less");
 export class UiPaymentMethod {
 
     public readonly structure = html.structure.clone();
-    public readonly evtRequestUpdate = new VoidSyncEvent();
+    public readonly evtRequestUpdate = new VoidEvt();
 
     constructor(s: types.SubscriptionInfos.Source) {
 

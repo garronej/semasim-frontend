@@ -10,7 +10,7 @@ export declare function appCryptoSetupHelper(params: {
     paramsNeededToInstantiateUa: {
         towardUserEncryptKeyStr: string;
         towardUserDecryptor: cryptoLib.Decryptor;
-        getTowardSimEncryptor: (usableUserSim: {
+        getTowardSimEncryptor: (userSim: {
             towardSimEncryptKeyStr: string;
         }) => {
             towardSimEncryptor: cryptoLib.Encryptor;

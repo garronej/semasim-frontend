@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import { convertFromEuro } from "frontend-shared/dist/tools/currency";
 
@@ -25,7 +25,7 @@ export class UiProduct {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUserClickAddToCart = new VoidSyncEvent();
+    public readonly evtUserClickAddToCart = new VoidEvt();
 
     private currency!: string;
 

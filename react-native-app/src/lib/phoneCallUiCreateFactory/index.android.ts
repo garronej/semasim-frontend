@@ -1,6 +1,5 @@
 
 import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import * as hostPhoneCallUi from "../nativeModules/hostPhoneCallUi";
 import * as hostKeepAlive from "../nativeModules/hostKeepAlive";
 import * as types from "frontend-shared/dist/lib/types/PhoneCallUi";

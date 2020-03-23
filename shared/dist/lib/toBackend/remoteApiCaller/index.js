@@ -1,11 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = require("./core");
-exports.core = core;
 var webphoneData = require("./webphoneData");
-var sendRequest_1 = require("./sendRequest");
-var appEvts_1 = require("../appEvts");
-var getWdApiCallerForSpecificSimFactory = function (encryptorDecryptor, userEmail) {
-    return webphoneData.getApiCallerForSpecificSimFactory(sendRequest_1.sendRequest, appEvts_1.appEvts, encryptorDecryptor, userEmail);
-};
-exports.getWdApiCallerForSpecificSimFactory = getWdApiCallerForSpecificSimFactory;
+var getSendRequest_1 = require("./getSendRequest");
+function factory(params) {
+    var connectionApi = params.connectionApi, restartApp = params.restartApp;
+    var sendRequest = getSendRequest_1.getSendRequest(connectionApi, restartApp);
+    return {
+        "getWdApiFactory": function (_a) {
+            var encryptorDecryptor = _a.encryptorDecryptor, userEmail = _a.userEmail;
+            return webphoneData.getWdApiFactory({
+                sendRequest: sendRequest,
+                "remoteNotifyEvts": connectionApi.remoteNotifyEvts,
+                encryptorDecryptor: encryptorDecryptor,
+                userEmail: userEmail
+            });
+        },
+        "getCoreApi": function (_a) {
+            var userEmail = _a.userEmail;
+            return core.getCoreApi(sendRequest, connectionApi.remoteNotifyEvts, restartApp, userEmail);
+        }
+    };
+}
+exports.factory = factory;

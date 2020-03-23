@@ -1,9 +1,8 @@
+import { Evt } from "frontend-shared/node_modules/evt"
 import * as types from "frontend-shared/dist/lib/types/userSim";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
-import * as modalApi from "frontend-shared/dist/tools/modal";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
 declare const require: any;
 
@@ -14,293 +13,300 @@ const html = loadUiClassHtml(
 
 require("../templates/UiShareSim.less");
 
-export class UiShareSim {
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts>,
+    "evtSharedUserSetChange" |
+    "evtDelete"
+>;
 
-    private readonly structure = html.structure.clone();
+export type UiShareSim = InstanceType<ReturnType<typeof uiShareSimDependencyInjection>["UiShareSim"]>;
 
-    private readonly buttonClose = this.structure.find(".id_close");
-    private readonly buttonStopSharing = this.structure.find(".id_stopSharing");
-    private readonly divListContainer = this.structure.find(".id_list");
-    private readonly inputEmails = this.structure.find(".id_emails");
-    private readonly textareaMessage = this.structure.find(".id_message textarea");
-    private readonly buttonSubmit = this.structure.find(".id_submit");
-    private readonly divsToHideIfNotShared = this.structure.find("._toHideIfNotShared");
-
-    public evtShare = new SyncEvent<{
-        userSim: types.UserSim.Owned;
-        emails: string[];
-        message: string;
-        onSubmitted: () => void;
-    }>();
-
-    public evtStopSharing = new SyncEvent<{
-        userSim: types.UserSim.Owned;
-        emails: string[];
-        onSubmitted: () => void;
-    }>();
-
-    private currentUserSim: types.UserSim.Owned | undefined = undefined;
-
-    private readonly hideModal: ()=> Promise<void>;
-    private readonly showModal: ()=> Promise<void>;
-
-    private getInputEmails(): string[] {
-
-        const raw = this.inputEmails.val();
-
-        return !!raw ? JSON.parse(raw) : [];
-
+export function uiShareSimDependencyInjection(
+    params: {
+        dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
+        createModal: typeof import("frontend-shared/dist/tools/modal").createModal;
     }
+) {
 
-    /** 
-     * 
-     * TODO: Refactor: use a method why using an event ??
-     * 
-     * The evt argument should post be posted whenever.
-     * -An user accept a sharing request.
-     * -An user reject a sharing request.
-     * -An user unregistered a shared sim.
-     */
-    constructor(
-        private readonly evt: SyncEvent<{
-            userSim: types.UserSim.Owned;
-            email: string;
-        }>
-    ) {
+    const { dialogApi, createModal } = params;
 
-        {
+    class UiShareSim {
 
-            const { hide, show }= modalApi.createModal(
-                this.structure,
-                {
-                    "keyboard": false,
-                    "backdrop": true
-                }
-            );
+        private readonly structure = html.structure.clone();
 
-            this.hideModal = hide;
-            this.showModal = show;
+        private readonly buttonClose = this.structure.find(".id_close");
+        private readonly buttonStopSharing = this.structure.find(".id_stopSharing");
+        private readonly divListContainer = this.structure.find(".id_list");
+        private readonly inputEmails = this.structure.find(".id_emails");
+        private readonly textareaMessage = this.structure.find(".id_message textarea");
+        private readonly buttonSubmit = this.structure.find(".id_submit");
+        private readonly divsToHideIfNotShared = this.structure.find("._toHideIfNotShared");
+
+
+        private currentUserSim: types.UserSim.Owned | undefined = undefined;
+
+        private readonly hideModal: () => Promise<void>;
+        private readonly showModal: () => Promise<void>;
+
+        private getInputEmails(): string[] {
+
+            const raw = this.inputEmails.val();
+
+            return !!raw ? JSON.parse(raw) : [];
 
         }
 
-        this.buttonClose.on("click", () => this.hideModal());
 
-        (this.inputEmails as any).multiple_emails({
-            "placeholder": "Enter email addresses",
-            "checkDupEmail": true
-        });
+        private readonly userSimEvts: Pick<UserSimEvts, "evtSharedUserSetChange">;
 
-        this.buttonStopSharing.on("click", async () => {
+        constructor(
+            params: {
+                userSimEvts: UserSimEvts;
+                shareSim(params: { userSim: types.UserSim.Owned; emails: string[]; message: string; }): Promise<void>;
+                stopSharingSim(params: { userSim: types.UserSim.Owned; emails: string[]; }): Promise<void>;
+            }
+        ) {
 
-            const emails: string[] = [];
+            this.userSimEvts = params.userSimEvts;
 
-            this.divListContainer.find(".id_row.selected").each((_, element) => {
+            {
 
-                emails.push($(element).find(".id_email").html());
+                const { hide, show } = createModal(
+                    this.structure,
+                    {
+                        "keyboard": false,
+                        "backdrop": true
+                    }
+                );
 
-            });
+                this.hideModal = hide;
+                this.showModal = show;
 
-            await this.hideModal();
+            }
 
-            dialogApi.loading("Revoking some user's SIM access");
-
-            await new Promise(resolve =>
-                this.evtStopSharing.post({
-                    "userSim": this.currentUserSim!,
-                    emails,
-                    "onSubmitted": () => resolve()
-                })
+            params.userSimEvts.evtDelete.attach(
+                ({ userSim }) => userSim === this.currentUserSim,
+                () => this.hideModal()
             );
 
-            dialogApi.dismissLoading();
+            this.buttonClose.on("click", () => this.hideModal());
 
-            this.open(this.currentUserSim!);
+            (this.inputEmails as any).multiple_emails({
+                "placeholder": "Enter email addresses",
+                "checkDupEmail": true
+            });
 
-        });
 
-        this.buttonSubmit.on("click", async () => {
+            this.buttonStopSharing.on("click", async () => {
 
-            if (this.getInputEmails().length === 0) {
+                const emails: string[] = [];
 
-                this.structure.find(".id_emails")
-                    .trigger(jQuery.Event("keypress", { "keycode": 13 }));
+                this.divListContainer.find(".id_row.selected").each((_, element) => {
 
-            } else {
+                    emails.push($(element).find(".id_email").html());
 
-                const emails = this.getInputEmails();
+                });
+
 
                 await this.hideModal();
 
-                dialogApi.loading("Granting sim access to some users");
+                dialogApi.loading("Revoking some user's SIM access");
 
-                await new Promise(resolve =>
-                    this.evtShare.post({
-                        "userSim": this.currentUserSim!,
-                        emails,
-                        "message": this.textareaMessage.html(),
-                        "onSubmitted": () => resolve()
-                    })
-                );
+                await params.stopSharingSim({
+                    "userSim": this.currentUserSim!,
+                    emails
+                });
 
                 dialogApi.dismissLoading();
 
                 this.open(this.currentUserSim!);
 
-            }
+            });
 
-        });
+            this.buttonSubmit.on("click", async () => {
 
-        this.inputEmails.change(() => {
+                if (this.getInputEmails().length === 0) {
 
-            if (this.getInputEmails().length === 0) {
-
-                this.buttonSubmit.text("Validate email");
-
-                this.textareaMessage.parent().hide();
-
-            } else {
-
-                this.buttonSubmit.text("Share");
-
-                this.textareaMessage.parent().show({
-                    "done": () => this.textareaMessage.focus()
-                });
-
-            }
-
-        });
-
-    }
-
-
-    public open(userSim: types.UserSim.Owned): void {
-
-        this.evt.detach(this);
-
-        this.currentUserSim = userSim;
-
-        this.textareaMessage.html([
-            `I would like to share the SIM card`,
-            userSim.friendlyName,
-            userSim.sim.storage.number || "",
-            `with you.`
-        ].join(" "));
-
-        this.inputEmails.parent().find("li").detach();
-
-        this.inputEmails.val("");
-
-        this.inputEmails.trigger("change");
-
-        if (
-            userSim.ownership.sharedWith.confirmed.length === 0 &&
-            userSim.ownership.sharedWith.notConfirmed.length === 0
-        ) {
-
-            this.divsToHideIfNotShared.hide();
-
-        } else {
-
-            this.divListContainer.find(".id_row").detach();
-
-            this.divsToHideIfNotShared.show();
-
-            const onRowClick = (divRow?: JQuery) => {
-
-                if (!!divRow) {
-
-                    divRow.toggleClass("selected");
-
-                }
-
-                const selectedCount: number =
-                    this.divListContainer.find(".id_row.selected").length;
-
-                if (selectedCount === 0) {
-
-                    this.buttonStopSharing.hide();
+                    this.structure.find(".id_emails")
+                        .trigger(jQuery.Event("keypress", { "keycode": 13 }));
 
                 } else {
 
-                    this.buttonStopSharing.show();
+                    const emails = this.getInputEmails();
 
-                    this.buttonStopSharing.find("span").html(`Revoke access (${selectedCount})`);
+                    await this.hideModal();
+
+                    dialogApi.loading("Granting sim access to users");
+
+
+                    await params.shareSim({
+                        "userSim": this.currentUserSim!,
+                        emails,
+                        "message": this.textareaMessage.html()
+                    });
+
+                    dialogApi.dismissLoading();
+
+                    this.open(this.currentUserSim!);
 
                 }
 
-            };
+            });
 
-            const appendRow = (email: string, isConfirmed: boolean) => {
+            this.inputEmails.change(() => {
 
-                const divRow = html.templates.find(".id_row").clone();
+                if (this.getInputEmails().length === 0) {
 
-                divRow.find(".id_email").text(email);
+                    this.buttonSubmit.text("Validate email");
 
-                divRow.find(".id_isConfirmed")
-                    .text(isConfirmed ? "confirmed" : "Not yet confirmed")
-                    .addClass(isConfirmed ? "color-green" : "color-yellow")
-                    ;
+                    this.textareaMessage.parent().hide();
 
-                divRow.on("click", () => onRowClick(divRow));
+                } else {
 
-                this.evt.attach(
-                    ({ userSim, email: email_ }) => (
-                        userSim === this.currentUserSim &&
-                        email_ === email
-                    ),
-                    this,
-                    () => {
+                    this.buttonSubmit.text("Share");
 
-                        if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0) {
+                    this.textareaMessage.parent().show({
+                        "done": () => this.textareaMessage.focus()
+                    });
 
-                            divRow.find(".id_isConfirmed")
-                                .removeClass("color-yellow")
-                                .text("confirmed")
-                                .addClass("color-green")
-                                ;
+                }
 
-                        } else {
+            });
 
-                            divRow.remove();
+        }
 
-                            if (
-                                userSim.ownership.sharedWith.confirmed.length === 0 &&
-                                userSim.ownership.sharedWith.notConfirmed.length === 0
-                            ) {
 
-                                this.divsToHideIfNotShared.hide();
+        public open(userSim: types.UserSim.Owned): void {
+
+            this.userSimEvts.evtSharedUserSetChange.detach(Evt.getCtx(this));
+
+
+            this.currentUserSim = userSim;
+
+            this.textareaMessage.html([
+                `I would like to share the SIM card`,
+                userSim.friendlyName,
+                userSim.sim.storage.number || "",
+                `with you.`
+            ].join(" "));
+
+            this.inputEmails.parent().find("li").detach();
+
+            this.inputEmails.val("");
+
+            this.inputEmails.trigger("change");
+
+            if (
+                userSim.ownership.sharedWith.confirmed.length === 0 &&
+                userSim.ownership.sharedWith.notConfirmed.length === 0
+            ) {
+
+                this.divsToHideIfNotShared.hide();
+
+            } else {
+
+                this.divListContainer.find(".id_row").detach();
+
+                this.divsToHideIfNotShared.show();
+
+                const onRowClick = (divRow?: JQuery) => {
+
+                    if (!!divRow) {
+
+                        divRow.toggleClass("selected");
+
+                    }
+
+                    const selectedCount: number =
+                        this.divListContainer.find(".id_row.selected").length;
+
+                    if (selectedCount === 0) {
+
+                        this.buttonStopSharing.hide();
+
+                    } else {
+
+                        this.buttonStopSharing.show();
+
+                        this.buttonStopSharing.find("span").html(`Revoke access (${selectedCount})`);
+
+                    }
+
+                };
+
+                const appendRow = (email: string, isConfirmed: boolean) => {
+
+                    const divRow = html.templates.find(".id_row").clone();
+
+                    divRow.find(".id_email").text(email);
+
+                    divRow.find(".id_isConfirmed")
+                        .text(isConfirmed ? "confirmed" : "Not yet confirmed")
+                        .addClass(isConfirmed ? "color-green" : "color-yellow")
+                        ;
+
+                    divRow.on("click", () => onRowClick(divRow));
+
+                    this.userSimEvts.evtSharedUserSetChange.attach(
+                        ({ userSim, email: email_ }) => (
+                            userSim === this.currentUserSim &&
+                            email_ === email
+                        ),
+                        Evt.getCtx(this),
+                        () => {
+
+                            if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0) {
+
+                                divRow.find(".id_isConfirmed")
+                                    .removeClass("color-yellow")
+                                    .text("confirmed")
+                                    .addClass("color-green")
+                                    ;
+
+                            } else {
+
+                                divRow.remove();
+
+                                if (
+                                    userSim.ownership.sharedWith.confirmed.length === 0 &&
+                                    userSim.ownership.sharedWith.notConfirmed.length === 0
+                                ) {
+
+                                    this.divsToHideIfNotShared.hide();
+
+                                }
 
                             }
 
                         }
+                    );
 
-                    }
-                );
+                    this.divListContainer.append(divRow);
 
-                this.divListContainer.append(divRow);
+                };
 
-            };
+                for (const email of userSim.ownership.sharedWith.confirmed) {
 
-            for (const email of userSim.ownership.sharedWith.confirmed) {
+                    appendRow(email, true);
 
-                appendRow(email, true);
+                }
+
+                for (const email of userSim.ownership.sharedWith.notConfirmed) {
+
+                    appendRow(email, false);
+
+                }
+
+                onRowClick();
 
             }
 
-            for (const email of userSim.ownership.sharedWith.notConfirmed) {
-
-                appendRow(email, false);
-
-            }
-
-            onRowClick();
+            this.showModal();
 
         }
 
-        this.showModal();
-
     }
 
+    return { UiShareSim };
+
 }
-
-

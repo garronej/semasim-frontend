@@ -36,10 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var evtAesEncryptOrDecryptResult = new ts_events_extended_1.SyncEvent();
-var evtRsaEncryptOrDecryptResult = new ts_events_extended_1.SyncEvent();
-var evtRsaGenerateKeysResult = new ts_events_extended_1.SyncEvent();
+var evt_1 = require("evt");
+var evtAesEncryptOrDecryptResult = new evt_1.Evt();
+var evtRsaEncryptOrDecryptResult = new evt_1.Evt();
+var evtRsaGenerateKeysResult = new evt_1.Evt();
 exports.apiExposedToHost = {
     "onAesEncryptOrDecryptResult": function (callRef, outputDataB64) {
         return evtAesEncryptOrDecryptResult.post({ callRef: callRef, outputDataB64: outputDataB64 });

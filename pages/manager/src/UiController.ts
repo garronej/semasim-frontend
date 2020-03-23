@@ -1,590 +1,539 @@
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import * as types from "frontend-shared/dist/lib/types/userSim";
-import { appEvts } from "frontend-shared/dist/lib/toBackend/appEvts";
-import * as remoteCoreApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/core";
+import { Observable, IObservable } from "frontend-shared/node_modules/evt";
+import * as types from "frontend-shared/dist/lib/types/UserSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiButtonBar } from "./UiButtonBar";
-import { UiPhonebook } from "./UiPhonebook";
+import { uiPhonebookDependencyInjection } from "./UiPhonebook";
 import { UiSimRow } from "./UiSimRow";
-import { UiShareSim } from "./UiShareSim";
+import { uiShareSimDependencyInjection } from "./UiShareSim";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
-
+import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 declare const require: (path: string) => any;
 
-const html = loadUiClassHtml(
-    require("../templates/UiController.html"),
-    "UiController"
-);
+type UiPhonebook = import("./UiPhonebook").UiPhonebook;
+type UiShareSim = import("./UiShareSim").UiShareSim;
 
+type CoreApi = Pick<
+    import("frontend-shared/dist/lib/toBackend/remoteApiCaller").CoreApi,
+    "createContact" |
+    "updateContactName" |
+    "deleteContact" |
+    "unregisterSim" |
+    "changeSimFriendlyName" |
+    "rebootDongle" |
+    "shareSim" |
+    "stopSharingSim"
+>;
 
-export class UiController {
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts>,
+    "evtNew" |
+    "evtDelete" |
+    "evtReachabilityStatusChange" |
+    "evtCellularConnectivityChange" |
+    "evtCellularSignalStrengthChange" |
+    "evtNewUpdatedOrDeletedContact" |
+    "evtSharedUserSetChange" |
+    "evtFriendlyNameChange"
 
-    public readonly structure = html.structure.clone();
+>;
 
-    private readonly uiButtonBar = new UiButtonBar();
+export type UiController = InstanceType<ReturnType<typeof uiControllerDependencyInjection>["UiController"]>;
 
-    private readonly uiShareSim = new UiShareSim(
-        (() => {
+export function uiControllerDependencyInjection(
+    params: {
+        dialogApi: typeof import("frontend-shared/dist/tools/modal/dialog").dialogApi;
+        startMultiDialogProcess: typeof import("frontend-shared/dist/tools/modal/dialog").startMultiDialogProcess;
+        createModal: typeof import("frontend-shared/dist/tools/modal").createModal;
+    }
+) {
 
-            const evt = new SyncEvent<{
-                userSim: types.UserSim.Owned;
-                email: string;
-            }>();
+    const { dialogApi, startMultiDialogProcess, createModal } = params;
 
-            appEvts.evtSharingRequestResponse.attach(
-                ({ userSim, email }) => evt.post({ userSim, email })
-            );
+    const { UiPhonebook } = uiPhonebookDependencyInjection({ startMultiDialogProcess, createModal });
+    const { UiShareSim } = uiShareSimDependencyInjection({ createModal, dialogApi });
 
-            appEvts.evtOtherSimUserUnregisteredSim.attach(
-                ({ userSim, email }) => evt.post({ userSim, email })
-            );
-
-
-            return evt;
-
-        })()
+    const html = loadUiClassHtml(
+        require("../templates/UiController.html"),
+        "UiController"
     );
 
-    private readonly uiSimRows: UiSimRow[] = [];
+    class UiController {
 
-    private readonly uiPhonebooks: UiPhonebook[] = [];
+        public readonly structure = html.structure.clone();
 
-    private setState(placeholder: "MAIN" | "NO SIM") {
-
-        switch (placeholder) {
-            case "MAIN": {
-
-                $("#loader-line-mask").removeClass("loader-line-mask");
-
-                this.structure.show();
-
-            }; break;
-            case "NO SIM": {
-
-                $("#loader-line-mask").addClass("loader-line-mask");
-
-                this.structure.hide();
-
-            }; break;
-        }
-
-    }
-
-    private addUserSim(userSim: types.UserSim.Usable) {
-
-        this.setState("MAIN");
-
-        const uiSimRow = new UiSimRow(userSim);
-
-        this.uiSimRows.push(uiSimRow);
-
-        this.structure.append(uiSimRow.structure);
-
-        uiSimRow.evtSelected.attach(() => {
-
-            if (this.uiButtonBar.state.isSimRowSelected) {
-
-                this.getSelectedUiSimRow(uiSimRow).unselect();
-
+        constructor(
+            private readonly params: {
+                userSims: types.UserSim.Usable[];
+                userSimEvts: UserSimEvts;
+                coreApi: CoreApi
             }
+        ) {
 
-            this.uiButtonBar.setState({
-                "isSimRowSelected": true,
-                "isSimSharable": types.UserSim.Owned.match(userSim),
-                "isSimReachable": !!userSim.reachableSimState
+            const { userSims, userSimEvts, coreApi } = params;
+
+            const uiShareSim = new UiShareSim({
+                userSimEvts,
+                "shareSim": ({ userSim, emails, message }) => coreApi.shareSim({ userSim, emails, message}),
+                "stopSharingSim": ({ userSim, emails }) => coreApi.stopSharingSim({ userSim, emails })
             });
 
-        });
+            const obsSelectedUserSim = new Observable<types.UserSim.Usable | null>(null);
 
-        appEvts.evtSimReachabilityStatusChange.attach(
-            userSim_ => userSim_ === userSim,
-            () => {
 
-                uiSimRow.populate();
+            const { obsAreDetailsShown } = this.initUiButtonBar({
+                obsSelectedUserSim,
+                uiShareSim
+            });
 
-                if (uiSimRow.isSelected) {
+            const { addUserSim } = this.addUserSimFactory({
+                obsSelectedUserSim,
+                obsAreDetailsShown
+            });
 
-                    this.uiButtonBar.setState({ "isSimReachable": !!userSim.reachableSimState });
+            //NOTE: List first usable SIMs.
+            userSims
+                .sort((a, b) => +!!b.reachableSimState - +!!a.reachableSimState)
+                .forEach(userSim => addUserSim({ userSim }))
+                ;
 
-                }
+            userSimEvts.evtNew.attach(({ userSim }) => addUserSim({ userSim }));
 
-                const uiPhonebook = this.uiPhonebooks.find(ui => ui.userSim === userSim)
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory(userSimEvts);
 
-                if (!!uiPhonebook) {
-                    uiPhonebook.updateButtons();
-                }
-
-            }
-        );
-
-        for (const evt of [
-            appEvts.evtSimGsmConnectivityChange,
-            appEvts.evtSimCellSignalStrengthChange
-        ]) {
-
-            evt.attach(
-                userSim_ => userSim_ === userSim,
-                () => uiSimRow.populate()
-            );
-
-        }
-
-        //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
-        for (const evt of [
-            appEvts.evtContactCreatedOrUpdated,
-            appEvts.evtContactDeleted
-        ]) {
-
-            evt.attach(
-                ({ userSim: _userSim, contact }) => _userSim === userSim && contact.mem_index !== undefined,
+            runNowAndWhenEventOccur(
                 () => {
 
-                    uiSimRow.populate();
+                    const hasSim = userSims.length !== 0
 
-                }
+                    $("#loader-line-mask")[hasSim ? "removeClass" : "addClass"]("loader-line-mask");
+
+                    this.structure[hasSim ? "show" : "hide"]();
+
+                },
+                ["evtNew", "evtDelete"]
             );
 
         }
 
+        private initUiButtonBar(params: {
+            obsSelectedUserSim: Observable<types.UserSim.Usable | null>;
+            uiShareSim: Pick<UiShareSim, "open">;
+        }): { obsAreDetailsShown: IObservable<boolean>; } {
 
-        //If no sim is selected in the list select this one by triggering a click on the row element.
-        if (!this.uiButtonBar.state.isSimRowSelected) {
+            const { obsSelectedUserSim, uiShareSim } = params;
 
-            uiSimRow.structure.click();
+            const uiButtonBar = new UiButtonBar({
+                "obsSelectedUserSim": obsSelectedUserSim,
+                "onButtonClicked": async ({ userSim, button }) => {
+
+                    switch (button) {
+                        case "DELETE": {
+
+                            const shouldProceed = await new Promise<boolean>(
+                                resolve => dialogApi.create("confirm", {
+                                    "title": "Unregister SIM",
+                                    "message": `Do you really want to unregister ${userSim.friendlyName}?`,
+                                    callback: result => resolve(result)
+                                })
+                            );
+
+                            if (!shouldProceed) {
+                                return;
+                            }
+
+                            await this.params.coreApi.unregisterSim(userSim);
+
+                        } break;
+                        case "RENAME": {
+
+                            const friendlyNameSubmitted = await new Promise<string | null>(
+                                resolve => dialogApi.create("prompt", {
+                                    "title": "Friendly name for this sim?",
+                                    "value": userSim.friendlyName,
+                                    "callback": result => resolve(result),
+                                })
+                            );
+
+                            if (!friendlyNameSubmitted) {
+                                return;
+                            }
+
+                            await this.params.coreApi.changeSimFriendlyName({
+                                userSim,
+                                "friendlyName":friendlyNameSubmitted
+                            });
+
+                        } break;
+                        case "CONTACTS": {
+
+                            (await this.getUiPhonebook(userSim)).showModal();
+
+                        } break;
+
+                        case "REBOOT": {
+
+                            const shouldProceed = await new Promise<boolean>(
+                                resolve => dialogApi.create("confirm", {
+                                    "title": "Reboot GSM Dongle",
+                                    "message": `Do you really want to reboot Dongle ${userSim.dongle.manufacturer} ${userSim.dongle.model}?`,
+                                    callback: result => resolve(result)
+                                })
+                            );
+
+                            if (!shouldProceed) {
+                                return;
+                            }
+
+                            dialogApi.loading("Sending reboot command to dongle");
+
+                            /*
+                            NOTE: If the user was able to click on the reboot button
+                            the sim is necessary online.
+                            */
+                            await this.params.coreApi.rebootDongle(userSim);
+
+                            dialogApi.dismissLoading();
+
+                            await new Promise<void>(
+                                resolve => dialogApi.create("alert", {
+                                    "message": "Restart command issued successfully, the SIM should be back online within 30 seconds",
+                                    "callback": () => resolve()
+                                })
+                            );
+
+
+                        } break;
+                        case "SHARE": {
+
+                            /*
+                            NOTE: If the user was able to click on share the 
+                            selected SIM is owned.
+                            */
+                            assert(types.UserSim.Owned.match(userSim));
+
+                            uiShareSim.open(userSim);
+
+
+                        } break;
+                    }
+                }
+            });
+
+            this.structure.append(uiButtonBar.structure);
+
+            return { "obsAreDetailsShown": uiButtonBar.obsAreDetailsShown };
 
         }
 
-    }
+        private addUserSimFactory(
+            params: {
+                obsSelectedUserSim: Observable<types.UserSim.Usable | null>;
+                obsAreDetailsShown: IObservable<boolean>;
+            }
+        ) {
 
-    private async removeUserSim(userSim: types.UserSim.Usable) {
+            const { obsSelectedUserSim, obsAreDetailsShown } = params;
 
-        const uiSimRow = this.uiSimRows.find(uiSimRow => uiSimRow.userSim === userSim)!;
+            const addUserSim = (
+                params: {
+                    userSim: types.UserSim.Usable;
+                }
+            ): void => {
 
-        if (this.uiButtonBar.state.isSimRowSelected) {
+                const { userSim } = params;
 
-            if (uiSimRow === this.getSelectedUiSimRow()) {
+                const obsIsSelected = (() => {
 
-                this.uiButtonBar.setState({
-                    "isSimRowSelected": false,
-                    "isSimSharable": false,
-                    "isSimReachable": false,
-                    "areDetailsShown": false
+                    const getValue = () => obsSelectedUserSim.value === userSim;
+
+                    const out = new Observable<boolean>(getValue());
+
+                    obsSelectedUserSim.evtChange.attach(
+                        () => out.onPotentialChange(getValue())
+                    );
+
+                    return out;
+
+                })();
+
+                obsIsSelected.evtChange.attach(isSelected => {
+
+                    if (isSelected) {
+
+                        obsSelectedUserSim.onPotentialChange(userSim);
+
+                        return;
+
+                    }
+
+                    if (obsSelectedUserSim.value !== userSim) {
+                        return;
+                    }
+
+                    obsSelectedUserSim.onPotentialChange(null);
+
+
                 });
 
-                uiSimRow.unselect();
-
-            }
-
-        }
-
-        uiSimRow.structure.remove();
-
-        if ((await remoteCoreApiCaller.getUsableUserSims()).length === 0) {
-
-            this.setState("NO SIM");
-
-        }
-
-    }
-
-    constructor(private userSims: types.UserSim.Usable[]) {
-
-        this.setState("NO SIM");
-
-        this.initUiButtonBar();
-
-        this.initUiShareSim();
-
-        for (const userSim of userSims.sort((a, b) => +!!b.reachableSimState - +!!a.reachableSimState)) {
-
-            this.addUserSim(userSim);
-
-        }
-
-        appEvts.evtUsableSim.attach(
-            userSim => this.addUserSim(userSim)
-        );
-
-        appEvts.evtSimPermissionLost.attachOnce(
-            userSim => this.removeUserSim(userSim)
-        );
-
-    }
-
-    private getSelectedUiSimRow(notUiSimRow?: UiSimRow): UiSimRow {
-
-        return this.uiSimRows.find(
-            uiSimRow => uiSimRow !== notUiSimRow && uiSimRow.isSelected
-        )!;
-
-    }
-
-    private async initUiPhonebook(userSim: types.UserSim.Usable): Promise<UiPhonebook> {
-
-        if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
-
-            dialogApi.loading("Loading");
-
-            await UiPhonebook.fetchPhoneNumberUtilityScript();
-
-            dialogApi.dismissLoading();
-
-        }
-
-        const uiPhonebook = new UiPhonebook(userSim);
-
-        this.uiPhonebooks.push(uiPhonebook);
-
-        uiPhonebook.evtClickCreateContact.attach(
-            ({ name, number, onSubmitted }) =>
-                remoteCoreApiCaller.createContact(
+                const uiSimRow = new UiSimRow({
                     userSim,
-                    name,
-                    number
-                ).then(contact => onSubmitted(contact))
-        );
-
-        uiPhonebook.evtClickDeleteContacts.attach(
-            ({ contacts, onSubmitted }) => Promise.all(
-                contacts.map(
-                    contact => remoteCoreApiCaller.deleteContact(
+                    "userSimEvts": types.UserSim.Usable.Evts.ForSpecificSim.build(
+                        this.params.userSimEvts,
                         userSim,
-                        contact
-                    )
-                )
-            ).then(() => onSubmitted())
-        );
+                        [
+                            "evtFriendlyNameChange",
+                            "evtReachabilityStatusChange",
+                            "evtCellularConnectivityChange",
+                            "evtCellularSignalStrengthChange",
+                            "evtNewUpdatedOrDeletedContact",
+                            "evtDelete"
+                        ]
+                    ),
+                    obsIsSelected,
+                    "obsAreDetailsVisible": (() => {
 
-        uiPhonebook.evtClickUpdateContactName.attach(
-            ({ contact, newName, onSubmitted }) =>
-                remoteCoreApiCaller.updateContactName(
-                    userSim,
-                    contact,
-                    newName
-                ).then(() => onSubmitted())
-        );
+                        const getValue = () => (
+                            obsIsSelected.value &&
+                            obsAreDetailsShown.value
+                        );
 
-        appEvts.evtSimPermissionLost.attachOnce(
-            userSim_ => userSim_ === userSim,
-            () => uiPhonebook.hideModal().then(() =>
-                uiPhonebook.structure.detach()
-            )
-        );
+                        const out = new Observable<boolean>(getValue());
 
-        appEvts.evtContactCreatedOrUpdated.attach(
-            e => e.userSim === userSim,
-            ({ contact }) => uiPhonebook.notifyContactChanged(contact)
-        );
+                        [obsIsSelected, obsAreDetailsShown].forEach(
+                            obs => obs.evtChange.attach(
+                                () => out.onPotentialChange(getValue())
+                            )
+                        );
 
-        appEvts.evtContactDeleted.attach(
-            e => e.userSim === userSim,
-            ({ contact }) => uiPhonebook.notifyContactChanged(contact)
-        );
+                        return out;
 
-        return uiPhonebook;
+                    })(),
+                    "obsIsVisible": (() => {
 
-    }
+                        const getValue = () => (
+                            obsIsSelected.value ||
+                            obsAreDetailsShown.value
+                        );
+
+                        const out = new Observable<boolean>(getValue());
+
+                        [obsIsSelected, obsAreDetailsShown].forEach(
+                            obs => obs.evtChange.attach(
+                                () => out.onPotentialChange(getValue())
+                            )
+                        );
+
+                        return out;
 
 
-    private initUiButtonBar(): void {
+                    })()
+                });
 
-        this.structure.append(this.uiButtonBar.structure);
+                this.structure.append(uiSimRow.structure);
 
-        this.uiButtonBar.evtToggleDetailVisibility.attach(isShown => {
+                //If no sim is selected in the list select this one by triggering a click on the row element.
+                if (obsSelectedUserSim.value === null) {
+                    obsIsSelected.onPotentialChange(true);
+                }
 
-            for (const uiSimRow of this.uiSimRows) {
+            };
 
-                if (isShown) {
+            return { addUserSim };
 
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("SHOWN");
-                    } else {
-                        uiSimRow.setVisibility("HIDDEN");
-                    }
+        }
 
-                } else {
+        private getUiPhonebook = (() => {
 
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("HIDDEN");
-                    } else {
-                        uiSimRow.setVisibility("SHOWN");
+            const map = new WeakMap<types.UserSim.Usable, UiPhonebook>();
+
+            return async (userSim: types.UserSim.Usable): Promise<UiPhonebook> => {
+
+                {
+                    const out = map.get(userSim);
+
+                    if (out !== undefined) {
+                        return out;
                     }
 
                 }
 
-            }
+                if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
 
+                    dialogApi.loading("Loading");
 
+                    await UiPhonebook.fetchPhoneNumberUtilityScript();
 
-        });
+                    dialogApi.dismissLoading();
 
-        this.uiButtonBar.evtClickContacts.attach(async () => {
+                }
 
-            const { userSim } = this.getSelectedUiSimRow();
-
-            const uiPhonebook = this.uiPhonebooks.find(
-                uiPhonebook => uiPhonebook.userSim === userSim
-            ) || await this.initUiPhonebook(userSim);
-
-
-            uiPhonebook.showModal();
-
-        });
-
-        this.uiButtonBar.evtClickDelete.attach(async () => {
-
-            const { userSim } = this.getSelectedUiSimRow();
-
-            const shouldProceed = await new Promise<boolean>(
-                resolve => dialogApi.create("confirm",{
-                    "title": "Unregister SIM",
-                    "message": `Do you really want to unregister ${userSim.friendlyName}?`,
-                    callback: result => resolve(result)
-                })
-            );
-
-            if (shouldProceed) {
-
-                await remoteCoreApiCaller.unregisterSim(userSim);
-
-                this.removeUserSim(userSim);
-
-            }
-
-
-        });
-
-        this.uiButtonBar.evtClickShare.attach(async () => {
-
-            const { userSim } = this.getSelectedUiSimRow();
-
-            /*
-            NOTE: If the user was able to click on share the 
-            selected SIM is owned.
-            */
-            this.uiShareSim.open(
-                userSim as types.UserSim.Owned
-            );
-
-        });
-
-        this.uiButtonBar.evtClickRename.attach(async () => {
-
-            const uiSimRow = this.getSelectedUiSimRow();
-
-            const friendlyNameSubmitted = await new Promise<string | null>(
-                resolve => dialogApi.create("prompt", {
-                    "title": "Friendly name for this sim?",
-                    "value": uiSimRow.userSim.friendlyName,
-                    "callback": result => resolve(result),
-                })
-            );
-
-            if (!!friendlyNameSubmitted) {
-
-                await remoteCoreApiCaller.changeSimFriendlyName(
-                    uiSimRow.userSim,
-                    friendlyNameSubmitted
+                map.set(
+                    userSim,
+                    new UiPhonebook({
+                        userSim,
+                        "userSimEvts": types.UserSim.Usable.Evts.ForSpecificSim.build(
+                            this.params.userSimEvts,
+                            userSim,
+                            [
+                                "evtReachabilityStatusChange",
+                                "evtNewUpdatedOrDeletedContact",
+                                "evtDelete"
+                            ]
+                        ),
+                        "createContact": ({ name, number }) => this.params.coreApi.createContact({
+                            userSim, name, "number_raw":number
+                        }).then(() => { }),
+                        "deleteContacts": contacts => Promise.all(
+                            contacts.map(contact => this.params.coreApi.deleteContact({
+                                userSim,
+                                contact
+                            }))
+                        ).then(() => { }),
+                        "updateContactName": ({ contact, newName }) => this.params.coreApi.updateContactName({
+                            userSim, contact, newName
+                        }).then(() => { })
+                    })
                 );
 
-                uiSimRow.populate();
+                return this.getUiPhonebook(userSim);
 
             }
 
-        });
+        })();
 
-        this.uiButtonBar.evtClickReboot.attach(async () => {
 
-            const { userSim } = this.getSelectedUiSimRow();
+        public interact_updateContactName(number: phoneNumber) {
+            return this.interact_({ "type": "UPDATE_CONTACT_NAME", number });
+        }
 
-            const shouldProceed = await new Promise<boolean>(
-                resolve => dialogApi.create("confirm", {
-                    "title": "Reboot GSM Dongle",
-                    "message": `Do you really want to reboot Dongle ${userSim.dongle.manufacturer} ${userSim.dongle.model}?`,
-                    callback: result => resolve(result)
-                })
-            );
+        public interact_deleteContact(number: phoneNumber) {
+            return this.interact_({ "type": "DELETE_CONTACT", number });
+        }
 
-            if (!shouldProceed) {
+        public interact_createContact(imsi: string, number: phoneNumber) {
+            return this.interact_({ "type": "CREATE_CONTACT", imsi, number });
+        }
+
+        private async interact_(action: {
+            type: "CREATE_CONTACT";
+            imsi: string;
+            number: phoneNumber;
+        } | {
+            type: "UPDATE_CONTACT_NAME" | "DELETE_CONTACT";
+            number: phoneNumber;
+        }) {
+
+            const userSim = "imsi" in action ?
+                this.params.userSims.find(
+                    ({ sim }) => sim.imsi === action.imsi
+                ) : await interact_getUserSimContainingNumber(
+                    this.params.userSims,
+                    action.number
+                );
+
+            if (!userSim) {
+
+                await new Promise(resolve =>
+                    dialogApi.create("alert", {
+                        "message": "No SIM selected, aborting.",
+                        "callback": () => resolve()
+                    })
+                );
+
                 return;
-            }
-
-            dialogApi.loading("Sending reboot command to dongle");
-
-            /*
-            NOTE: If the user was able to click on the reboot button
-            the sim is necessary online.
-            */
-            await remoteCoreApiCaller.rebootDongle(
-                userSim as types.Online<types.UserSim.Usable>
-            );
-
-            dialogApi.dismissLoading();
-
-            await new Promise<void>(
-                resolve => dialogApi.create("alert", {
-                    "message": "Restart command issued successfully, the SIM should be back online within 30 seconds",
-                    "callback": () => resolve()
-                })
-            );
-
-        });
-
-
-    }
-
-    private initUiShareSim() {
-
-        this.uiShareSim.evtShare.attach(
-            async ({ userSim, emails, message, onSubmitted }) => {
-
-                await remoteCoreApiCaller.shareSim(userSim, emails, message);
-
-                onSubmitted();
 
             }
-        );
 
-        this.uiShareSim.evtStopSharing.attach(
-            async ({ userSim, emails, onSubmitted }) => {
+            if (!userSim.reachableSimState) {
 
-                await remoteCoreApiCaller.stopSharingSim(userSim, emails);
+                await new Promise(resolve =>
+                    dialogApi.create("alert", {
+                        "message": `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
+                        "callback": () => resolve()
+                    })
+                );
 
-                onSubmitted();
+                return;
 
             }
-        );
 
+            const uiPhonebook = await this.getUiPhonebook(userSim);
 
-    }
-
-    public interact_updateContactName(number: phoneNumber) {
-        return this.interact_({ "type": "UPDATE_CONTACT_NAME", number });
-    }
-
-    public interact_deleteContact(number: phoneNumber) {
-        return this.interact_({ "type": "DELETE_CONTACT", number });
-    }
-
-    public interact_createContact(imsi: string, number: phoneNumber) {
-        return this.interact_({ "type": "CREATE_CONTACT", imsi, number });
-    }
-
-    private async interact_(action: {
-        type: "CREATE_CONTACT";
-        imsi: string;
-        number: phoneNumber;
-    } | {
-        type: "UPDATE_CONTACT_NAME" | "DELETE_CONTACT";
-        number: phoneNumber;
-    }) {
-
-        const userSim = "imsi" in action ?
-            this.userSims.find(
-                ({ sim }) => sim.imsi === action.imsi
-            ) : await interact_getUserSimContainingNumber(
-                this.userSims,
-                action.number
-            );
-
-        if (!userSim) {
-
-            await new Promise(resolve =>
-                dialogApi.create("alert", {
-                    "message": "No SIM selected, aborting.",
-                    "callback": () => resolve()
-                })
-            );
-
-            return;
+            switch (action.type) {
+                case "CREATE_CONTACT": await uiPhonebook.interact_createContact(action.number); break;
+                case "DELETE_CONTACT": await uiPhonebook.interact_deleteContacts(action.number); break;
+                case "UPDATE_CONTACT_NAME": await uiPhonebook.interact_updateContact(action.number); break;
+            }
 
         }
 
-        if (!userSim.reachableSimState) {
-
-            await new Promise(resolve =>
-                dialogApi.create("alert", {
-                    "message": `${userSim.friendlyName} is not currently online. Can't edit phonebook`,
-                    "callback": () => resolve()
-                })
-            );
-
-            return;
-
-        }
-
-        const uiPhonebook = this.uiPhonebooks.find(
-            uiPhonebook => uiPhonebook.userSim === userSim
-        ) || await this.initUiPhonebook(userSim);
-
-        switch (action.type) {
-            case "CREATE_CONTACT": await uiPhonebook.interact_createContact(action.number); break;
-            case "DELETE_CONTACT": await uiPhonebook.interact_deleteContacts(action.number); break;
-            case "UPDATE_CONTACT_NAME": await uiPhonebook.interact_updateContact(action.number); break;
-        }
 
     }
 
+    /** Interact only if more than one SIM holds the phone number */
+    async function interact_getUserSimContainingNumber(
+        userSims: types.UserSim.Usable[],
+        number: phoneNumber
+    ): Promise<types.UserSim.Usable | undefined> {
 
-}
+        if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
+            await UiPhonebook.fetchPhoneNumberUtilityScript();
+        }
 
-/** Interact only if more than one SIM holds the phone number */
-async function interact_getUserSimContainingNumber(
-    userSims: types.UserSim.Usable[],
-    number: phoneNumber
-): Promise<types.UserSim.Usable | undefined> {
-
-    if (!UiPhonebook.isPhoneNumberUtilityScriptLoaded) {
-        await UiPhonebook.fetchPhoneNumberUtilityScript();
-    }
-
-    const userSimsContainingNumber = userSims
-        .filter(
-            ({ phonebook }) => !!phonebook.find(
-                ({ number_raw }) => phoneNumber.areSame(number, number_raw)
+        const userSimsContainingNumber = userSims
+            .filter(
+                ({ phonebook }) => !!phonebook.find(
+                    ({ number_raw }) => phoneNumber.areSame(number, number_raw)
+                )
             )
-        )
-        ;
+            ;
 
 
-    if (userSimsContainingNumber.length === 0) {
+        if (userSimsContainingNumber.length === 0) {
 
-        await new Promise(resolve =>
-            dialogApi.create("alert", {
-                "message": [
-                    `${phoneNumber.prettyPrint(number)} is not saved in any of your SIM phonebook.`,
-                    "Use the android contacts native feature to edit contact stored in your phone."
-                ].join("<br>"),
-                "callback": () => resolve()
-            })
+            await new Promise(resolve =>
+                dialogApi.create("alert", {
+                    "message": [
+                        `${phoneNumber.prettyPrint(number)} is not saved in any of your SIM phonebook.`,
+                        "Use the android contacts native feature to edit contact stored in your phone."
+                    ].join("<br>"),
+                    "callback": () => resolve()
+                })
+            );
+
+            return undefined;
+        } else if (userSimsContainingNumber.length === 1) {
+            return userSimsContainingNumber.pop();
+        }
+
+        //TODO: Toss away
+        const index = await new Promise<number | null>(
+            resolve => dialogApi.create("prompt", ({
+                "title": `${phoneNumber.prettyPrint(number)} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
+                "inputType": "select",
+                "inputOptions": userSimsContainingNumber.map(userSim => ({
+                    "text": `${userSim.friendlyName} ${!!userSim.reachableSimState ? "" : "( offline )"}`,
+                    "value": userSimsContainingNumber.indexOf(userSim)
+                })),
+                "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
+            }) as any)
         );
 
-        return undefined;
-    } else if (userSimsContainingNumber.length === 1) {
-        return userSimsContainingNumber.pop();
-    }
-    
-    //TODO: Toss away
-    const index = await new Promise<number | null>(
-        resolve => dialogApi.create("prompt",({
-            "title": `${phoneNumber.prettyPrint(number)} is present in ${userSimsContainingNumber.length}, select phonebook to edit.`,
-            "inputType": "select",
-            "inputOptions": userSimsContainingNumber.map(userSim => ({
-                "text": `${userSim.friendlyName} ${!!userSim.reachableSimState ? "" : "( offline )"}`,
-                "value": userSimsContainingNumber.indexOf(userSim)
-            })),
-            "callback": (indexAsString: string) => resolve(parseInt(indexAsString))
-        }) as any)
-    );
+        if (index === null) {
 
-    if (index === null) {
+            return undefined;
 
-        return undefined;
+        }
+
+        return userSimsContainingNumber[index];
 
     }
 
-    return userSimsContainingNumber[index];
+    return { UiController };
 
 }
+

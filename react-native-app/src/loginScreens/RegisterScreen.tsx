@@ -3,13 +3,19 @@ import * as rn from "react-native";
 import { w, h, percentageOfDiagonalDp } from "../lib/dimensions";
 import { InputField } from "../genericComponents/InputField";
 import * as imageAssets from "../lib/imageAssets";
-import { dialogApi }  from "frontend-shared/dist/tools/modal/dialog";
-import * as registerPageLogic from "frontend-shared/dist/lib/pageLogic/registerPageLogic";
+import { VoidDeferred } from "frontend-shared/dist/tools/Deferred";
 
-const log: typeof console.log = false ? console.log.bind(console) : () => { };
+const log: typeof console.log = true ?
+    ((...args: any[]) => console.log(...["[RegisterScreen]", ...args])) :
+    (() => { });
+
+type Api = import("frontend-shared/dist/lib/pageLogic/register").LaunchRegister.Api;
 
 export type Props = {
-    goToLogin: (email?: string) => void;
+    dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
+    launchRegister: import("frontend-shared/dist/lib/appLauncher/appLaunch")
+    .appLaunch.AuthenticationStep.AuthenticationApi.NeedLogin["launchRegister"];
+    goToLogin(email?: string): void;
 };
 
 export type State = {
@@ -19,34 +25,41 @@ export type State = {
     isAwaitingAccountCreationResponse: boolean;
 };
 
-log("[RegisterScreen]: imported");
+log("imported");
 
 export class RegisterScreen extends React.Component<Props> {
 
-  constructor(props: any) {
 
-    super(props);
+    private readonly prApi: Promise<Api>;
 
-    log("[RegisterScreen] constructor");
+    constructor(props_: any) {
 
-  }
+        super(props_);
 
-  public componentDidMount = () => {
+        log("constructor");
 
-    log("[RegisterScreen] componentDidMount");
+        this.prApi = this.dPrComponentDidMount.pr.then(
+            () => this.props.launchRegister({
+                "email": undefined,
+                "uiApi": {
+                    "emailInput": {
+                        "setValue": ({ value, readonly }) => this.emailInput!.setInputValue(value),
+                        "getValue": () => this.emailInput!.getInputValue()
+                    },
+                    "passwordInput": {
+                        "getValue": () => this.passwordInput!.getInputValue()
+                    },
+                    "redirectToLogin": ({ email }) => this.props.goToLogin(email)
+                }
+            })
+        );
 
-    registerPageLogic.init(
-        {},
-        { "setEmailReadonly": email => this.emailInput!.setInputValue(email) }
-    );
 
-  };
+    }
 
-  public componentWillUnmount = () => {
+    private dPrComponentDidMount = new VoidDeferred();
 
-    log("[RegisterScreen] componentWillUnmount");
-
-  };
+    public componentDidMount = this.dPrComponentDidMount.resolve;
 
     public readonly state: Readonly<State> = {
         "isEmailInputHighlightedInRed": false,
@@ -97,28 +110,23 @@ export class RegisterScreen extends React.Component<Props> {
 
         if (!this.state.isAwaitingAccountCreationResponse) {
 
-            dialogApi.create("alert", { "message": "Not all fields are correctly filled up" });
+            this.props.dialogApi.create(
+                "alert",
+                { "message": "Not all fields are correctly filled up" }
+            );
 
             return;
         }
 
-        registerPageLogic.register(email, password, {
-            "redirectToLogin": () => this.props.goToLogin(email),
-            "resetEmail": () => {
-                this.emailInput!.setInputValue("");
+        (await this.prApi).register();
 
-                this.setState({
-                    "isAwaitingAccountCreationResponse": false
-                });
-            }
-        });
 
-    }
+    };
 
     public render = (() => {
 
         const Continue: React.FunctionComponent<{
-            click: () => void;
+            click(): void;
             isAwaitingAccountCreationResponse: boolean;
         }> = props => {
 

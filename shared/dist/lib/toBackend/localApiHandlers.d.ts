@@ -1,2 +1,6 @@
 import * as sipLibrary from "ts-sip";
-export declare const handlers: sipLibrary.api.Server.Handlers;
+import * as types from "../types/RemoteNotifyEvts";
+export declare function getHandlers(): {
+    handlers: sipLibrary.api.Server.Handlers;
+    remoteNotifyEvts: types.RemoteNotifyEvts;
+};

@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var evtKfdResult = new ts_events_extended_1.SyncEvent();
+var evt_1 = require("evt");
+var evtKfdResult = new evt_1.Evt();
 exports.apiExposedToHost = {
     "onKfdResult": function (callRef, resultHex) { return evtKfdResult.post({ callRef: callRef, resultHex: resultHex }); }
 };

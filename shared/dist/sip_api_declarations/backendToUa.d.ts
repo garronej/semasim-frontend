@@ -1,12 +1,11 @@
-import * as types from "../lib/types/userSim";
-import * as wd from "../lib/types/webphoneData/types";
 import { types as dcTypes } from "chan-dongle-extended-client";
-export declare namespace getUsableUserSims {
-    const methodName = "getUsableUserSims";
+import * as types from "../lib/types";
+export declare namespace getUserSims {
+    const methodName = "getUserSims";
     type Params = {
         includeContacts: boolean;
     };
-    type Response = types.UserSim.Usable[];
+    type Response = types.UserSim[];
 }
 export declare namespace unlockSim {
     const methodName = "unlockSim";
@@ -23,7 +22,7 @@ export declare namespace registerSim {
         imei: string;
         friendlyName: string;
     };
-    type Response = types.UserSim.Owned;
+    type Response = undefined;
 }
 export declare namespace unregisterSim {
     const methodName = "unregisterSim";
@@ -70,9 +69,7 @@ export declare namespace acceptSharingRequest {
         imsi: string;
         friendlyName: string;
     };
-    type Response = {
-        password: string;
-    };
+    type Response = undefined;
 }
 export declare namespace rejectSharingRequest {
     const methodName = "rejectSharingRequest";
@@ -83,22 +80,17 @@ export declare namespace rejectSharingRequest {
 }
 export declare namespace createContact {
     const methodName = "createContact";
-    /** number expect a formated phone number */
     type Params = {
         imsi: string;
         name: string;
-        number: string;
+        number_raw: string;
     };
-    type Response = {
-        mem_index: number;
-        name_as_stored_in_sim: string;
-        new_digest: string;
-    } | undefined;
+    type Response = undefined;
 }
 export declare namespace updateContactName {
     const methodName = "updateContactName";
     type Params = contactInSim.Params | contactNotInSim.Params;
-    type Response = contactInSim.Response | contactNotInSim.Response;
+    type Response = undefined;
     namespace contactInSim {
         type Params = {
             imsi: string;
@@ -106,10 +98,6 @@ export declare namespace updateContactName {
                 mem_index: number;
             };
             newName: string;
-        };
-        type Response = {
-            name_as_stored_in_sim: string;
-            new_digest: string;
         };
     }
     namespace contactNotInSim {
@@ -120,7 +108,6 @@ export declare namespace updateContactName {
             };
             newName: string;
         };
-        type Response = undefined;
     }
 }
 export declare namespace deleteContact {
@@ -133,9 +120,7 @@ export declare namespace deleteContact {
             number: string;
         };
     };
-    type Response = {
-        new_digest?: string;
-    };
+    type Response = undefined;
 }
 export declare namespace shouldAppendPromotionalMessage {
     const methodName = "shouldAppendSenTWithSemasim";
@@ -149,16 +134,16 @@ export declare namespace wd_getUserSimChats {
         imsi: string;
         maxMessageCountByChat: number;
     };
-    type Response = wd.Chat<"ENCRYPTED">[];
+    type Response = types.wd.Chat<"ENCRYPTED">[];
 }
 export declare namespace wd_newChat {
     const methodName = "wd_newChat";
     type Params = {
         imsi: string;
         chatRef: string;
-        contactNumber: wd.Chat<"ENCRYPTED">["contactNumber"];
-        contactName: wd.Chat<"ENCRYPTED">["contactName"];
-        contactIndexInSim: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactNumber: types.wd.Chat<"ENCRYPTED">["contactNumber"];
+        contactName: types.wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim: types.wd.Chat<"ENCRYPTED">["contactIndexInSim"];
     };
     type Response = undefined;
 }
@@ -170,7 +155,7 @@ export declare namespace wd_fetchOlderMessages {
         olderThanTime: number;
         maxMessageCount: number;
     };
-    type Response = wd.Message<"ENCRYPTED">[];
+    type Response = types.wd.Message<"ENCRYPTED">[];
 }
 export declare namespace wd_updateChatLastMessageSeen {
     const methodName = "wd_updateChatLastMessageSeen";
@@ -186,8 +171,8 @@ export declare namespace wd_updateChatContactInfos {
     type Params = {
         imsi: string;
         chatRef: string;
-        contactIndexInSim?: wd.Chat<"ENCRYPTED">["contactIndexInSim"];
-        contactName?: wd.Chat<"ENCRYPTED">["contactName"];
+        contactIndexInSim?: types.wd.Chat<"ENCRYPTED">["contactIndexInSim"];
+        contactName?: types.wd.Chat<"ENCRYPTED">["contactName"];
     };
     type Response = undefined;
 }
@@ -204,7 +189,7 @@ export declare namespace wd_newMessage {
     type Params = {
         imsi: string;
         chatRef: string;
-        message: wd.Message.Incoming<"ENCRYPTED"> | wd.Message.Outgoing.Pending<"ENCRYPTED">;
+        message: types.wd.Message.Incoming<"ENCRYPTED"> | types.wd.Message.Outgoing.Pending<"ENCRYPTED">;
     };
     type Response = undefined;
 }
@@ -225,7 +210,7 @@ export declare namespace wd_notifyStatusReportReceived {
         chatRef: string;
         messageRef: string;
         deliveredTime: number | null;
-        sentBy: wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
+        sentBy: types.wd.Message.Outgoing.StatusReportReceived<"ENCRYPTED">["sentBy"];
     };
     type Response = undefined;
 }

@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,16 +46,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
         }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+    return t;
 };
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -62,420 +73,692 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var sendRequest_1 = require("./sendRequest");
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
-var connection = require("../connection");
-var restartApp_1 = require("../../restartApp");
-var appEvts_1 = require("../appEvts");
-//TODO: Fix, it's called two times!!
-exports.getUsableUserSims = (function () {
-    var methodName = apiDeclaration.getUsableUserSims.methodName;
-    var sendGetUsableUserSimsRequest = function () {
-        return sendRequest_1.sendRequest(methodName, { "includeContacts": true });
-    };
-    var updateUserSims = function (oldUserSims, newUserSims) {
-        var e_1, _a;
-        var _loop_1 = function (newUserSim) {
-            var userSim = oldUserSims
-                .find(function (_a) {
-                var sim = _a.sim;
-                return sim.imsi === newUserSim.sim.imsi;
-            });
-            /*
-            By testing if digests are the same we cover 99% of the case
-            when the sim could have been modified while offline...good enough.
-            */
-            if (!userSim ||
-                userSim.sim.storage.digest !== newUserSim.sim.storage.digest) {
-                restartApp_1.restartApp("Sim internal storage changed (subsequent getUsableSim)");
-                return { value: void 0 };
-            }
-            /*
-            If userSim is online we received a notification before having the
-            response of the request... even possible?
-             */
-            if (!!userSim.reachableSimState) {
-                return "continue";
-            }
-            userSim.reachableSimState = newUserSim.reachableSimState;
-            userSim.password = newUserSim.password;
-            userSim.dongle = newUserSim.dongle;
-            userSim.gatewayLocation = newUserSim.gatewayLocation;
-            if (!!userSim.reachableSimState) {
-                appEvts_1.appEvts.evtSimReachabilityStatusChange.post(userSim);
-            }
-        };
-        try {
-            for (var newUserSims_1 = __values(newUserSims), newUserSims_1_1 = newUserSims_1.next(); !newUserSims_1_1.done; newUserSims_1_1 = newUserSims_1.next()) {
-                var newUserSim = newUserSims_1_1.value;
-                var state_1 = _loop_1(newUserSim);
-                if (typeof state_1 === "object")
-                    return state_1.value;
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (newUserSims_1_1 && !newUserSims_1_1.done && (_a = newUserSims_1.return)) _a.call(newUserSims_1);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-    };
-    var prUserSims = Promise.resolve(connection.get())
-        .then(function () {
-        connection.evtConnect.attach(function (socket) {
-            socket.evtClose.attachOnce(function () { return __awaiter(void 0, void 0, void 0, function () {
-                var _a, _b, userSim, e_2_1;
-                var e_2, _c;
-                return __generator(this, function (_d) {
-                    switch (_d.label) {
-                        case 0:
-                            _d.trys.push([0, 5, 6, 7]);
-                            return [4 /*yield*/, prUserSims];
-                        case 1:
-                            _a = __values.apply(void 0, [_d.sent()]), _b = _a.next();
-                            _d.label = 2;
-                        case 2:
-                            if (!!_b.done) return [3 /*break*/, 4];
-                            userSim = _b.value;
-                            userSim.reachableSimState = undefined;
-                            appEvts_1.appEvts.evtSimReachabilityStatusChange.post(userSim);
-                            _d.label = 3;
-                        case 3:
-                            _b = _a.next();
-                            return [3 /*break*/, 2];
-                        case 4: return [3 /*break*/, 7];
-                        case 5:
-                            e_2_1 = _d.sent();
-                            e_2 = { error: e_2_1 };
-                            return [3 /*break*/, 7];
-                        case 6:
-                            try {
-                                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                            }
-                            finally { if (e_2) throw e_2.error; }
-                            return [7 /*endfinally*/];
-                        case 7: return [2 /*return*/];
-                    }
+var types = require("../../types");
+var evt_1 = require("evt");
+var assert_1 = require("../../../tools/typeSafety/assert");
+var createObjectWithGivenRef_1 = require("../../../tools/createObjectWithGivenRef");
+var id_1 = require("../../../tools/typeSafety/id");
+var phone_number_1 = require("phone-number");
+var _ = require("../../../tools/reducers");
+function getCoreApi(sendRequest, remoteNotifyEvts, restartApp, userEmail) {
+    var getUserSimEvts = getGetUserSimEvts({ remoteNotifyEvts: remoteNotifyEvts, restartApp: restartApp });
+    return {
+        "getUserSims": (function () {
+            //TODO: This was before called as soon as the socket is was connected
+            //make sure it is called early.
+            var methodName = apiDeclaration.getUserSims.methodName;
+            return function (_a) {
+                var includeContacts = _a.includeContacts;
+                return __awaiter(this, void 0, void 0, function () {
+                    var userSims;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0: return [4 /*yield*/, sendRequest(methodName, { includeContacts: includeContacts })];
+                            case 1:
+                                userSims = _b.sent();
+                                return [2 /*return*/, {
+                                        userSims: userSims,
+                                        "userSimEvts": getUserSimEvts(userSims)
+                                    }];
+                        }
+                    });
                 });
-            }); });
-            Promise.all([
-                prUserSims,
-                sendGetUsableUserSimsRequest()
-            ]).then(function (_a) {
-                var _b = __read(_a, 2), oldUserSims = _b[0], newUserSims = _b[1];
-                return updateUserSims(oldUserSims, newUserSims);
-            });
-        });
-        return sendGetUsableUserSimsRequest();
-    });
-    return function () { return prUserSims; };
-})();
-exports.unlockSim = (function () {
-    var methodName = apiDeclaration.unlockSim.methodName;
-    return function (lockedDongle, pin) {
-        return sendRequest_1.sendRequest(methodName, { "imei": lockedDongle.imei, pin: pin });
-    };
-})();
-exports.registerSim = (function () {
-    var methodName = apiDeclaration.registerSim.methodName;
-    return function (dongle, friendlyName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userSim;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, {
-                            "imsi": dongle.sim.imsi,
-                            "imei": dongle.imei,
-                            friendlyName: friendlyName
-                        })];
-                    case 1:
-                        userSim = _a.sent();
-                        return [4 /*yield*/, exports.getUsableUserSims()];
-                    case 2:
-                        (_a.sent()).push(userSim);
-                        appEvts_1.appEvts.evtUsableSim.post(userSim);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.unregisterSim = (function () {
-    var methodName = apiDeclaration.unregisterSim.methodName;
-    return function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var usableUserSims;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi })];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, exports.getUsableUserSims()];
-                    case 2:
-                        usableUserSims = _a.sent();
-                        usableUserSims.splice(usableUserSims.indexOf(userSim), 1);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.rebootDongle = (function () {
-    var methodName = apiDeclaration.rebootDongle.methodName;
-    return function (userSim) {
-        return sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi });
-    };
-})();
-exports.shareSim = (function () {
-    var methodName = apiDeclaration.shareSim.methodName;
-    return function (userSim, emails, message) {
-        return __awaiter(this, void 0, void 0, function () {
-            var emails_1, emails_1_1, email;
-            var e_3, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails, message: message })];
-                    case 1:
-                        _b.sent();
-                        try {
-                            for (emails_1 = __values(emails), emails_1_1 = emails_1.next(); !emails_1_1.done; emails_1_1 = emails_1.next()) {
-                                email = emails_1_1.value;
-                                userSim.ownership.sharedWith.notConfirmed.push(email);
-                            }
+            };
+        })(),
+        "unlockSim": (function () {
+            var methodName = apiDeclaration.unlockSim.methodName;
+            return function (_a) {
+                var lockedDongle = _a.lockedDongle, pin = _a.pin;
+                return sendRequest(methodName, { "imei": lockedDongle.imei, pin: pin });
+            };
+        })(),
+        "registerSim": (function () {
+            var methodName = apiDeclaration.registerSim.methodName;
+            return function (_a) {
+                var dongle = _a.dongle, friendlyName = _a.friendlyName;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                imsi = dongle.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "NEW" &&
+                                            types.UserSim.Owned.match(eventData.userSim) &&
+                                            eventData.userSim.sim.imsi === imsi); }),
+                                        sendRequest(methodName, {
+                                            imsi: imsi,
+                                            "imei": dongle.imei,
+                                            friendlyName: friendlyName
+                                        }),
+                                    ])];
+                            case 1:
+                                _b.sent();
+                                return [2 /*return*/];
                         }
-                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
-                        finally {
-                            try {
-                                if (emails_1_1 && !emails_1_1.done && (_a = emails_1.return)) _a.call(emails_1);
-                            }
-                            finally { if (e_3) throw e_3.error; }
+                    });
+                });
+            };
+        })(),
+        "unregisterSim": (function () {
+            var methodName = apiDeclaration.unregisterSim.methodName;
+            return function (userSim) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "DELETE" &&
+                                            eventData.cause === "USER UNREGISTER SIM" &&
+                                            eventData.imsi === imsi); }),
+                                        sendRequest(methodName, { imsi: imsi })
+                                    ])];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
                         }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.stopSharingSim = (function () {
-    var methodName = apiDeclaration.stopSharingSim.methodName;
-    return function (userSim, emails) {
-        return __awaiter(this, void 0, void 0, function () {
-            var emails_2, emails_2_1, email, _a, notConfirmed, confirmed, arr, index;
-            var e_4, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, emails: emails })];
-                    case 1:
-                        _c.sent();
-                        try {
-                            for (emails_2 = __values(emails), emails_2_1 = emails_2.next(); !emails_2_1.done; emails_2_1 = emails_2.next()) {
-                                email = emails_2_1.value;
-                                _a = userSim.ownership.sharedWith, notConfirmed = _a.notConfirmed, confirmed = _a.confirmed;
-                                arr = void 0;
-                                index = void 0;
-                                index = notConfirmed.indexOf(email);
-                                if (index > 0) {
-                                    arr = notConfirmed;
+                    });
+                });
+            };
+        })(),
+        /** Assert sim is reachable */
+        "rebootDongle": (function () {
+            var methodName = apiDeclaration.rebootDongle.methodName;
+            return function (userSim) {
+                assert_1.assert(!!userSim.reachableSimState);
+                return sendRequest(methodName, { "imsi": userSim.sim.imsi });
+            };
+        })(),
+        "shareSim": (function () {
+            var methodName = apiDeclaration.shareSim.methodName;
+            return function (_a) {
+                var userSim = _a.userSim, emails = _a.emails, message = _a.message;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi, sharedWith;
+                    var _b;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi, sharedWith = userSim.ownership.sharedWith;
+                                emails = (_b = emails
+                                    .map(function (email) { return email.toLowerCase(); })
+                                    .filter(function (email) { return email !== userEmail; })).reduce.apply(_b, __spread(_.removeDuplicates()));
+                                if (emails.length === 0) {
+                                    return [2 /*return*/];
                                 }
-                                else {
-                                    index = confirmed.indexOf(email);
-                                    arr = confirmed;
+                                return [4 /*yield*/, Promise.all(__spread(emails
+                                        .filter(function (email) { return (sharedWith.notConfirmed.indexOf(email) < 0 &&
+                                        sharedWith.confirmed.indexOf(email) < 0); })
+                                        .map(function (email) { return remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "SHARED USER SET CHANGE" &&
+                                        eventData.imsi === imsi &&
+                                        eventData.action === "ADD" &&
+                                        eventData.targetSet === "NOT CONFIRMED USERS" &&
+                                        eventData.email === email); }); }), [
+                                        sendRequest(methodName, { imsi: imsi, emails: emails, message: message })
+                                    ]))];
+                            case 1:
+                                _c.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "stopSharingSim": (function () {
+            var methodName = apiDeclaration.stopSharingSim.methodName;
+            return function (_a) {
+                var userSim = _a.userSim, emails = _a.emails;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi, sharedWith;
+                    var _b;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi, sharedWith = userSim.ownership.sharedWith;
+                                emails = (_b = emails
+                                    .map(function (email) { return email.toLowerCase(); })
+                                    .filter(function (email) { return email !== userEmail; })).reduce.apply(_b, __spread(_.removeDuplicates()));
+                                if (emails.length === 0) {
+                                    return [2 /*return*/];
                                 }
-                                arr.splice(index, 1);
-                            }
+                                return [4 /*yield*/, Promise.all(__spread(emails
+                                        .filter(function (email) { return (sharedWith.notConfirmed.indexOf(email) >= 0 &&
+                                        sharedWith.confirmed.indexOf(email) >= 0); })
+                                        .map(function (email) { return remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "SHARED USER SET CHANGE" &&
+                                        eventData.imsi === imsi &&
+                                        eventData.action === "REMOVE" &&
+                                        eventData.email === email); }); }), [
+                                        sendRequest(methodName, { imsi: imsi, emails: emails })
+                                    ]))];
+                            case 1:
+                                _c.sent();
+                                return [2 /*return*/];
                         }
-                        catch (e_4_1) { e_4 = { error: e_4_1 }; }
-                        finally {
-                            try {
-                                if (emails_2_1 && !emails_2_1.done && (_b = emails_2.return)) _b.call(emails_2);
-                            }
-                            finally { if (e_4) throw e_4.error; }
+                    });
+                });
+            };
+        })(),
+        "changeSimFriendlyName": (function () {
+            var methodName = apiDeclaration.changeSimFriendlyName.methodName;
+            return function (_a) {
+                var userSim = _a.userSim, friendlyName = _a.friendlyName;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "FRIENDLY NAME CHANGE" &&
+                                            eventData.imsi === imsi); }),
+                                        sendRequest(methodName, { imsi: imsi, friendlyName: friendlyName })
+                                    ])];
+                            case 1:
+                                _b.sent();
+                                return [2 /*return*/];
                         }
-                        return [2 /*return*/];
+                    });
+                });
+            };
+        })(),
+        "acceptSharingRequest": (function () {
+            var methodName = apiDeclaration.acceptSharingRequest.methodName;
+            return function (_a) {
+                var notConfirmedUserSim = _a.notConfirmedUserSim, friendlyName = _a.friendlyName;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                imsi = notConfirmedUserSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "IS NOW CONFIRMED" &&
+                                            eventData.imsi === imsi); }),
+                                        sendRequest(methodName, { imsi: imsi, friendlyName: friendlyName })
+                                    ])];
+                            case 1:
+                                _b.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "rejectSharingRequest": (function () {
+            var methodName = apiDeclaration.rejectSharingRequest.methodName;
+            return function (userSim) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "DELETE" &&
+                                            eventData.cause === "REJECT SHARING REQUEST" &&
+                                            eventData.imsi === imsi); }),
+                                        sendRequest(methodName, { imsi: imsi })
+                                    ])];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "createContact": (function () {
+            var methodName = apiDeclaration.createContact.methodName;
+            /** Assert there is not already a contact with this number in the phonebook */
+            return function (_a) {
+                var userSim = _a.userSim, name = _a.name, number_raw = _a.number_raw;
+                return __awaiter(this, void 0, void 0, function () {
+                    var isSameAsInput_1, imsi, contact;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                //NOTE: Test assertion
+                                {
+                                    isSameAsInput_1 = (function () {
+                                        var _a;
+                                        var formatedNumberInput = phone_number_1.phoneNumber.build(number_raw, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso);
+                                        return function (other_number_raw) { return phone_number_1.phoneNumber.areSame(formatedNumberInput, other_number_raw); };
+                                    })();
+                                    if (!!userSim.phonebook.find(function (_a) {
+                                        var number_raw = _a.number_raw;
+                                        return isSameAsInput_1(number_raw);
+                                    })) {
+                                        throw new Error("Already a contact with this number");
+                                    }
+                                }
+                                imsi = userSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "CONTACT CREATED OR UPDATED" &&
+                                            eventData.imsi === imsi &&
+                                            eventData.number_raw === number_raw); }),
+                                        sendRequest(methodName, { imsi: imsi, name: name, number_raw: number_raw })
+                                    ])];
+                            case 1:
+                                _b.sent();
+                                contact = userSim.phonebook
+                                    .find(function (contact) { return contact.number_raw === number_raw; });
+                                assert_1.assert(contact !== undefined);
+                                return [2 /*return*/, contact];
+                        }
+                    });
+                });
+            };
+        })(),
+        "updateContactName": (function () {
+            var methodName = apiDeclaration.updateContactName.methodName;
+            return function (_a) {
+                var userSim = _a.userSim, contact = _a.contact, newName = _a.newName;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi, prDone;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                //NOTE: If formating is needed on newName apply it here.
+                                newName = id_1.id(newName);
+                                if (newName === contact.name) {
+                                    return [2 /*return*/];
+                                }
+                                imsi = userSim.sim.imsi;
+                                prDone = remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "CONTACT CREATED OR UPDATED" &&
+                                    eventData.number_raw === contact.number_raw &&
+                                    eventData.name === newName); });
+                                if (!(contact.mem_index !== undefined)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, sendRequest(methodName, {
+                                        imsi: imsi,
+                                        "contactRef": { "mem_index": contact.mem_index },
+                                        newName: newName
+                                    })];
+                            case 1:
+                                _b.sent();
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, sendRequest(methodName, {
+                                    imsi: imsi,
+                                    "contactRef": { "number": contact.number_raw },
+                                    newName: newName
+                                })];
+                            case 3:
+                                _b.sent();
+                                _b.label = 4;
+                            case 4: return [4 /*yield*/, prDone];
+                            case 5:
+                                _b.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "deleteContact": (function () {
+            var methodName = apiDeclaration.deleteContact.methodName;
+            return function (_a) {
+                var userSim = _a.userSim, contact = _a.contact;
+                return __awaiter(this, void 0, void 0, function () {
+                    var imsi;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                imsi = userSim.sim.imsi;
+                                return [4 /*yield*/, Promise.all([
+                                        remoteNotifyEvts.evtUserSimChange.waitFor(function (eventData) { return (eventData.type === "CONTACT DELETED" &&
+                                            eventData.imsi === imsi &&
+                                            eventData.number_raw === contact.number_raw); }),
+                                        sendRequest(methodName, {
+                                            imsi: imsi,
+                                            "contactRef": contact.mem_index === null ?
+                                                ({ "mem_index": contact.mem_index }) :
+                                                ({ "number": contact.number_raw })
+                                        })
+                                    ])];
+                            case 1:
+                                _b.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "shouldAppendPromotionalMessage": (function () {
+            var methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
+            var cachedResponse = undefined;
+            return function () {
+                if (cachedResponse !== undefined) {
+                    return cachedResponse;
                 }
-            });
-        });
+                return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
+            };
+        })()
     };
-})();
-exports.changeSimFriendlyName = (function () {
-    var methodName = apiDeclaration.changeSimFriendlyName.methodName;
-    return function (userSim, friendlyName) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, friendlyName: friendlyName })];
-                    case 1:
-                        _a.sent();
-                        userSim.friendlyName = friendlyName;
-                        return [2 /*return*/];
-                }
+}
+exports.getCoreApi = getCoreApi;
+function getGetUserSimEvts(params) {
+    var remoteNotifyEvts = params.remoteNotifyEvts, restartApp = params.restartApp;
+    return function getUserSimChangEvts(userSims) {
+        var out = {
+            "evtNew": new evt_1.Evt(),
+            "evtNowConfirmed": new evt_1.Evt(),
+            "evtDelete": new evt_1.Evt(),
+            "evtReachabilityStatusChange": new evt_1.Evt(),
+            "evtSipPasswordRenewed": new evt_1.Evt(),
+            "evtCellularConnectivityChange": new evt_1.Evt(),
+            "evtCellularSignalStrengthChange": new evt_1.Evt(),
+            "evtOngoingCall": new evt_1.Evt(),
+            "evtNewUpdatedOrDeletedContact": new evt_1.Evt(),
+            "evtSharedUserSetChange": new evt_1.Evt(),
+            "evtFriendlyNameChange": new evt_1.Evt()
+        };
+        var findUserSim = function (imsi) {
+            var userSim = userSims.find(function (_a) {
+                var sim = _a.sim;
+                return sim.imsi === imsi;
             });
-        });
-    };
-})();
-exports.acceptSharingRequest = (function () {
-    var methodName = apiDeclaration.acceptSharingRequest.methodName;
-    return function (notConfirmedUserSim, friendlyName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var password, userSim;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": notConfirmedUserSim.sim.imsi, friendlyName: friendlyName })];
-                    case 1:
-                        password = (_a.sent()).password;
-                        userSim = {
-                            "sim": notConfirmedUserSim.sim,
-                            friendlyName: friendlyName,
-                            password: password,
-                            "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
-                            "dongle": notConfirmedUserSim.dongle,
-                            "gatewayLocation": notConfirmedUserSim.gatewayLocation,
-                            "ownership": {
+            assert_1.assert(userSim !== undefined);
+            return userSim;
+        };
+        remoteNotifyEvts.evtUserSimChange.attach(function (eventData) {
+            switch (eventData.type) {
+                case "NEW":
+                    {
+                        var userSim_1 = eventData.userSim;
+                        userSims.push(userSim_1);
+                        out.evtNew.post((function () {
+                            if (types.UserSim.Owned.match(userSim_1)) {
+                                return {
+                                    "cause": "SIM REGISTERED FROM LAN",
+                                    userSim: userSim_1
+                                };
+                            }
+                            if (types.UserSim.Shared.NotConfirmed.match(userSim_1)) {
+                                return {
+                                    "cause": "SHARING REQUEST RECEIVED",
+                                    userSim: userSim_1
+                                };
+                            }
+                            throw new Error("never");
+                        })());
+                    }
+                    return;
+                case "IS NOW CONFIRMED":
+                    {
+                        var notConfirmedUserSim = findUserSim(eventData.imsi);
+                        assert_1.assert(types.UserSim.Shared.NotConfirmed.match(notConfirmedUserSim));
+                        out.evtNowConfirmed.post(createObjectWithGivenRef_1.createObjectWithGivenRef(notConfirmedUserSim, id_1.id(__assign(__assign({}, notConfirmedUserSim), { "friendlyName": eventData.friendlyName, "ownership": {
                                 "status": "SHARED CONFIRMED",
                                 "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
                                 "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
-                            },
-                            "phonebook": notConfirmedUserSim.phonebook,
-                            "reachableSimState": notConfirmedUserSim.reachableSimState
-                        };
-                        return [4 /*yield*/, exports.getUsableUserSims()];
-                    case 2:
-                        (_a.sent()).push(userSim);
-                        appEvts_1.appEvts.evtUsableSim.post(userSim);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.rejectSharingRequest = (function () {
-    var methodName = apiDeclaration.rejectSharingRequest.methodName;
-    return function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi })];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.createContact = (function () {
-    var methodName = apiDeclaration.createContact.methodName;
-    return function (userSim, name, number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var resp, contact;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, { "imsi": userSim.sim.imsi, name: name, number: number })];
-                    case 1:
-                        resp = _a.sent();
-                        contact = {
-                            "mem_index": !!resp ? resp.mem_index : undefined,
-                            name: name,
-                            "number_raw": number
-                        };
-                        userSim.phonebook.push(contact);
-                        if (!!resp) {
-                            userSim.sim.storage.contacts.push({
-                                "index": resp.mem_index,
-                                name: name,
-                                number: number
-                            });
-                            userSim.sim.storage.digest = resp.new_digest;
+                            } }))));
+                    }
+                    return;
+                case "DELETE":
+                    {
+                        var userSim_2 = findUserSim(eventData.imsi);
+                        userSims.splice(userSims.indexOf(userSim_2), 1);
+                        out.evtDelete.post((function () {
+                            var cause = eventData.cause;
+                            switch (cause) {
+                                case "USER UNREGISTER SIM":
+                                    assert_1.assert(types.UserSim.Usable.match(userSim_2));
+                                    return { cause: cause, userSim: userSim_2 };
+                                case "PERMISSION LOSS":
+                                    assert_1.assert(types.UserSim.Shared.match(userSim_2));
+                                    return { cause: cause, userSim: userSim_2 };
+                                case "REJECT SHARING REQUEST":
+                                    assert_1.assert(types.UserSim.Shared.NotConfirmed.match(userSim_2));
+                                    return { cause: cause, userSim: userSim_2 };
+                            }
+                        })());
+                    }
+                    return;
+                case "IS NOW UNREACHABLE":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        var hadOngoingCall = (userSim.reachableSimState !== undefined &&
+                            userSim.reachableSimState.isGsmConnectivityOk &&
+                            userSim.reachableSimState.ongoingCall !== undefined);
+                        userSim.reachableSimState = undefined;
+                        if (hadOngoingCall) {
+                            out.evtOngoingCall.post(userSim);
+                        }
+                        out.evtReachabilityStatusChange.post(userSim);
+                    }
+                    return;
+                case "IS NOW REACHABLE":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        var hasInternalSimStorageChanged = eventData.hasInternalSimStorageChanged, isGsmConnectivityOk = eventData.isGsmConnectivityOk, cellSignalStrength = eventData.cellSignalStrength, password = eventData.password, simDongle = eventData.simDongle, gatewayLocation = eventData.gatewayLocation;
+                        if (hasInternalSimStorageChanged) {
+                            //NOTE: RestartApp should not be used here but we do not refactor 
+                            //as this is a hack to avoid having to write code for very unusual events.
+                            restartApp("Sim internal storage has changed ( notifySimOnline )");
+                            return;
+                        }
+                        //NOTE: True when password changed for example.
+                        var wasAlreadyReachable = userSim.reachableSimState !== undefined;
+                        userSim.reachableSimState = isGsmConnectivityOk ?
+                            ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
+                            ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
+                        var hasPasswordChanged = userSim.password !== password;
+                        userSim.password = password;
+                        userSim.dongle = simDongle;
+                        userSim.gatewayLocation = gatewayLocation;
+                        if (wasAlreadyReachable && hasPasswordChanged) {
+                            out.evtSipPasswordRenewed.post(userSim);
+                            return;
+                        }
+                        if (wasAlreadyReachable) {
+                            return;
+                        }
+                        out.evtReachabilityStatusChange.post(userSim);
+                    }
+                    return;
+                case "CELLULAR CONNECTIVITY CHANGE":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        var reachableSimState = userSim.reachableSimState;
+                        assert_1.assert(reachableSimState !== undefined);
+                        assert_1.assert(eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk);
+                        if (reachableSimState.isGsmConnectivityOk) {
+                            var hadOngoingCall = false;
+                            if (reachableSimState.ongoingCall !== undefined) {
+                                delete reachableSimState.ongoingCall;
+                                hadOngoingCall = true;
+                            }
+                            reachableSimState.isGsmConnectivityOk = false;
+                            if (hadOngoingCall) {
+                                out.evtOngoingCall.post(userSim);
+                            }
+                        }
+                        else {
+                            reachableSimState.isGsmConnectivityOk = true;
+                        }
+                        out.evtCellularConnectivityChange.post(userSim);
+                    }
+                    return;
+                case "CELLULAR SIGNAL STRENGTH CHANGE":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        assert_1.assert(userSim.reachableSimState !== undefined, "sim should be reachable");
+                        userSim.reachableSimState.cellSignalStrength = eventData.cellSignalStrength;
+                        out.evtCellularSignalStrengthChange.post(userSim);
+                    }
+                    return;
+                case "ONGOING CALL":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        if (eventData.isTerminated) {
+                            var ongoingCallId = eventData.ongoingCallId;
+                            var reachableSimState = userSim.reachableSimState;
+                            if (!reachableSimState) {
+                                //NOTE: The event would have been posted in setSimOffline handler.
+                                return;
+                            }
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                //NOTE: If we have had event notifying connectivity lost
+                                //before this event the evtOngoingCall will have been posted
+                                //in notifyGsmConnectivityChange handler function.
+                                return;
+                            }
+                            if (reachableSimState.ongoingCall === undefined ||
+                                reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId) {
+                                return;
+                            }
+                            reachableSimState.ongoingCall = undefined;
+                        }
+                        else {
+                            var ongoingCall = eventData.ongoingCall;
+                            var reachableSimState = userSim.reachableSimState;
+                            assert_1.assert(reachableSimState !== undefined);
+                            assert_1.assert(reachableSimState.isGsmConnectivityOk);
+                            if (reachableSimState.ongoingCall === undefined) {
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else if (reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId) {
+                                reachableSimState.ongoingCall === undefined;
+                                out.evtOngoingCall.post(userSim);
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else {
+                                var ongoingCallId = ongoingCall.ongoingCallId, from = ongoingCall.from, number = ongoingCall.number, isUserInCall = ongoingCall.isUserInCall, otherUserInCallEmails = ongoingCall.otherUserInCallEmails;
+                                var prevOngoingCall_1 = reachableSimState.ongoingCall;
+                                Object.assign(prevOngoingCall_1, { ongoingCallId: ongoingCallId, from: from, number: number, isUserInCall: isUserInCall });
+                                prevOngoingCall_1.otherUserInCallEmails.splice(0, prevOngoingCall_1.otherUserInCallEmails.length);
+                                otherUserInCallEmails.forEach(function (email) { return prevOngoingCall_1.otherUserInCallEmails.push(email); });
+                            }
+                        }
+                        out.evtOngoingCall.post(userSim);
+                    }
+                    return;
+                case "CONTACT CREATED OR UPDATED":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        var storage_1 = eventData.storage, number_raw_1 = eventData.number_raw, name_1 = eventData.name;
+                        var contact = userSim.phonebook.find(function (contact) {
+                            if (storage_1 !== undefined) {
+                                return contact.mem_index === storage_1.mem_index;
+                            }
+                            return contact.number_raw === number_raw_1;
+                        });
+                        var eventType = void 0;
+                        if (!!contact) {
+                            eventType = "UPDATED";
+                            contact.name = name_1;
+                            if (!!storage_1) {
+                                userSim.sim.storage.contacts
+                                    .find(function (_a) {
+                                    var index = _a.index;
+                                    return index === storage_1.mem_index;
+                                }).name =
+                                    storage_1.name_as_stored;
+                            }
+                        }
+                        else {
+                            eventType = "NEW";
+                            contact = { name: name_1, number_raw: number_raw_1 };
+                            userSim.phonebook.push(contact);
+                            if (!!storage_1) {
+                                userSim.sim.storage.infos.storageLeft--;
+                                contact.mem_index = storage_1.mem_index;
+                                userSim.sim.storage.contacts.push({
+                                    "index": contact.mem_index,
+                                    name: name_1,
+                                    "number": number_raw_1
+                                });
+                            }
+                        }
+                        if (!!storage_1) {
+                            userSim.sim.storage.digest = storage_1.new_digest;
+                        }
+                        out.evtNewUpdatedOrDeletedContact.post({ eventType: eventType, contact: contact, userSim: userSim });
+                    }
+                    return;
+                case "CONTACT DELETED":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        var number_raw = eventData.number_raw, storage_2 = eventData.storage;
+                        var contact = undefined;
+                        for (var i = 0; i < userSim.phonebook.length; i++) {
+                            contact = userSim.phonebook[i];
+                            if (!!storage_2 ?
+                                storage_2.mem_index === contact.mem_index :
+                                contact.number_raw === number_raw) {
+                                userSim.phonebook.splice(i, 1);
+                                break;
+                            }
+                        }
+                        assert_1.assert(contact !== undefined);
+                        if (!!storage_2) {
+                            userSim.sim.storage.digest = storage_2.new_digest;
                             userSim.sim.storage.infos.storageLeft--;
-                        }
-                        return [2 /*return*/, contact];
-                }
-            });
-        });
-    };
-})();
-exports.updateContactName = (function () {
-    var methodName = apiDeclaration.updateContactName.methodName;
-    /** Assert contact is the ref of the object stored in userSim */
-    return function (userSim, contact, newName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, name_as_stored_in_sim, new_digest;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (!(contact.mem_index !== undefined)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, sendRequest_1.sendRequest(methodName, {
-                                "imsi": userSim.sim.imsi,
-                                "contactRef": { "mem_index": contact.mem_index },
-                                newName: newName
-                            })];
-                    case 1:
-                        _a = _b.sent(), name_as_stored_in_sim = _a.name_as_stored_in_sim, new_digest = _a.new_digest;
-                        contact.name = newName;
-                        userSim
-                            .sim.storage.contacts.find(function (_a) {
-                            var index = _a.index;
-                            return index === contact.mem_index;
-                        })
-                            .name = name_as_stored_in_sim;
-                        userSim.sim.storage.digest = new_digest;
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, {
-                            "imsi": userSim.sim.imsi,
-                            "contactRef": { "number": contact.number_raw },
-                            newName: newName
-                        })];
-                    case 3:
-                        _b.sent();
-                        contact.name = newName;
-                        _b.label = 4;
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.deleteContact = (function () {
-    var methodName = apiDeclaration.deleteContact.methodName;
-    return function (userSim, contact) {
-        return __awaiter(this, void 0, void 0, function () {
-            var new_digest;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest_1.sendRequest(methodName, {
-                            "imsi": userSim.sim.imsi,
-                            "contactRef": contact.mem_index === null ?
-                                ({ "mem_index": contact.mem_index }) :
-                                ({ "number": contact.number_raw })
-                        })];
-                    case 1:
-                        new_digest = (_a.sent()).new_digest;
-                        if (contact.mem_index !== null) {
-                            userSim.sim.storage.contacts.splice(userSim.sim.storage.contacts.findIndex(function (_a) {
+                            userSim.sim.storage.contacts.splice(userSim.sim.storage.contacts.indexOf(userSim.sim.storage.contacts.find(function (_a) {
                                 var index = _a.index;
-                                return index === contact.mem_index;
-                            }), 1);
+                                return index === storage_2.mem_index;
+                            })), 1);
                         }
-                        userSim.phonebook.splice(userSim.phonebook.indexOf(contact), 1);
-                        if (new_digest !== undefined) {
-                            userSim.sim.storage.digest = new_digest;
+                        out.evtNewUpdatedOrDeletedContact.post({ "eventType": "DELETED", userSim: userSim, contact: contact });
+                    }
+                    return;
+                case "SHARED USER SET CHANGE":
+                    {
+                        var userSim_3 = findUserSim(eventData.imsi);
+                        var doChange = function (action, targetSet) {
+                            var emails = (function (ownership) {
+                                return ownership.status === "OWNED" ? (ownership.sharedWith[(function () {
+                                    switch (targetSet) {
+                                        case "CONFIRMED USERS": return "confirmed";
+                                        case "NOT CONFIRMED USERS": return "notConfirmed";
+                                    }
+                                })()]) : (targetSet === "NOT CONFIRMED USERS" ?
+                                    null :
+                                    ownership.otherUserEmails);
+                            })(userSim_3.ownership);
+                            switch (action) {
+                                case "ADD":
+                                    emails === null || emails === void 0 ? void 0 : emails.push(eventData.email);
+                                    break;
+                                case "REMOVE":
+                                    if (emails === null) {
+                                        break;
+                                    }
+                                    emails.splice(emails.indexOf(eventData.email), 1);
+                                    break;
+                            }
+                        };
+                        if (eventData.action === "MOVE TO CONFIRMED") {
+                            doChange("REMOVE", "NOT CONFIRMED USERS");
+                            doChange("ADD", "CONFIRMED USERS");
                         }
-                        return [2 /*return*/];
-                }
-            });
+                        else {
+                            doChange(eventData.action, eventData.targetSet);
+                        }
+                        out.evtSharedUserSetChange.post(__assign(__assign({}, (function () {
+                            var imsi = eventData.imsi, type = eventData.type, out = __rest(eventData, ["imsi", "type"]);
+                            return out;
+                        })()), { userSim: userSim_3 }));
+                    }
+                    return;
+                case "FRIENDLY NAME CHANGE":
+                    {
+                        var userSim = findUserSim(eventData.imsi);
+                        assert_1.assert(types.UserSim.Usable.match(userSim));
+                        userSim.friendlyName = eventData.friendlyName;
+                        out.evtFriendlyNameChange.post(userSim);
+                    }
+                    return;
+            }
+            throw new Error("never");
         });
+        return out;
     };
-})();
-/** Api only called once */
-exports.shouldAppendPromotionalMessage = (function () {
-    var methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
-    var cachedResponse = undefined;
-    return function () {
-        if (cachedResponse !== undefined) {
-            return cachedResponse;
-        }
-        return sendRequest_1.sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
-    };
-})();
+}

@@ -3,7 +3,7 @@ declare const require: any;
 
 const { default: RNRestart }: typeof import("../../../../react-native-app/node_modules/@types/react-native-restart") = require("react-native-restart");
 
-const default_: import("./index").Default = reason=> { 
+const default_: import("./index").RestartApp = reason=> { 
 
     console.log(`Restarting app, reason: ${reason}`);
 

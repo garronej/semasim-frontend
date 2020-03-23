@@ -1,13 +1,14 @@
 
 import { firebase } from '@react-native-firebase/messaging';
-import { AppLifeCycleListener } from "./appLifeCycle";
 import * as rn from "react-native";
+import { id } from "frontend-shared/dist/tools/id";
 
-import { restartApp } from "frontend-shared/dist/lib/restartApp";
+type AppLifeCycleListener = import("./appLifeCycle").AppLifeCycleListener;
 
-export const testForegroundPushNotification: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount })=> {
 
-    evtComponentDidMount.attach(()=>{
+export const testForegroundPushNotification: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount }) => {
+
+    evtComponentDidMount.attach(() => {
 
         const unsubscribe = firebase.messaging().onMessage(message => {
             // Process your message as required
@@ -16,7 +17,7 @@ export const testForegroundPushNotification: AppLifeCycleListener = ({ evtCompon
 
         });
 
-        evtComponentWillUnmount.attachOnce(()=> unsubscribe());
+        evtComponentWillUnmount.attachOnce(() => unsubscribe());
 
     });
 
@@ -24,34 +25,44 @@ export const testForegroundPushNotification: AppLifeCycleListener = ({ evtCompon
 
 };
 
-export const restartAppIfPushNotificationTokenChange: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount })=>{
-
-    if( rn.Platform.OS === "ios") {
-        return;
+export function restartAppIfPushNotificationTokenChangeFacotry(
+    params: {
+        prRestartApp: Promise<import("frontend-shared/dist/lib/restartApp").RestartApp>
     }
+) {
 
-    const firebaseCloudMessaging = firebase.messaging();
+    const { prRestartApp } = params;
 
-    const prToken = firebaseCloudMessaging.getToken();
+    return id<AppLifeCycleListener>(function restartAppIfPushNotificationTokenChange({ evtComponentDidMount, evtComponentWillUnmount }) {
 
-    evtComponentDidMount.attach(()=>{
+        if (rn.Platform.OS === "ios") {
+            return;
+        }
 
-        const unsubscribe= firebaseCloudMessaging.onTokenRefresh(async ({token}: any) => {
+        const firebaseCloudMessaging = firebase.messaging();
 
-            const previousToken= await prToken;
+        const prToken = firebaseCloudMessaging.getToken();
 
-            if( token === previousToken ){
-                return;
-            }
+        evtComponentDidMount.attach(() => {
 
-            restartApp(`Push notification token changed: new token: ${token}, previous token: ${previousToken}`);
+            const unsubscribe = firebaseCloudMessaging.onTokenRefresh(async ({ token }: any) => {
+
+                const previousToken = await prToken;
+
+                if (token === previousToken) {
+                    return;
+                }
+
+                (await prRestartApp)(
+                    `Push notification token changed: new token: ${token}, previous token: ${previousToken}`
+                );
+
+            });
+
+            evtComponentWillUnmount.attachOnce(() => unsubscribe());
 
         });
 
-        evtComponentWillUnmount.attachOnce(()=> unsubscribe());
-
     });
-
-
-
 }
+

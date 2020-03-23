@@ -1,9 +1,8 @@
 //NOTE: Assert StripeCheckout loaded on the page.
 
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/subscription";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 import { env } from "frontend-shared/dist/lib/env";
@@ -24,13 +23,21 @@ const html = loadUiClassHtml(
     "UiController"
 );
 
+
 require("../templates/UiController.less");
+
+type WebApi = Pick<
+    import("frontend-shared/dist/lib/webApiCaller").WebApi,
+    "createStripeCheckoutSessionForSubscription" |
+    "unsubscribe" |
+    "subscribeOrUpdateSource"
+>;
 
 export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtDone = new VoidSyncEvent();
+    public readonly evtDone = new VoidEvt();
 
     private async interact_checkout(
         currency: string
@@ -43,11 +50,11 @@ export class UiController {
         const {
             stripePublicApiKey,
             checkoutSessionId: sessionId
-        } = await webApiCaller.createStripeCheckoutSessionForSubscription(
+        } = await this.params.webApi.createStripeCheckoutSessionForSubscription({
             currency,
-            `${url}?success=true`, 
-            `${url}?success=false`
-        );
+            "success_url": `${url}?success=true`,
+            "cancel_url": `${url}?success=false`
+        });
 
         const stripe = Stripe(stripePublicApiKey);
 
@@ -62,9 +69,14 @@ export class UiController {
     }
 
     constructor(
-        subscriptionInfos: types.SubscriptionInfos,
-        guessedCountryIso: string | undefined
+        private readonly params: {
+            subscriptionInfos: types.SubscriptionInfos;
+            guessedCountryIso: string | undefined;
+            webApi: WebApi
+        }
     ) {
+
+        const { subscriptionInfos, guessedCountryIso, webApi } = params;
 
         console.log(JSON.stringify(subscriptionInfos));
 
@@ -85,7 +97,7 @@ export class UiController {
 
         const retreaveUserSourceViaStripeCheckout = (() => {
 
-            const evtSourceId = new SyncEvent<
+            const evtSourceId = new Evt<
                 { id: string; currency: string; } |
                 undefined
             >();
@@ -149,7 +161,7 @@ export class UiController {
 
                 dialogApi.loading("Canceling your subscription");
 
-                await webApiCaller.unsubscribe();
+                await webApi.unsubscribe();
 
                 dialogApi.dismissLoading();
 
@@ -169,7 +181,7 @@ export class UiController {
 
                 dialogApi.loading("Re enabling your subscription");
 
-                await webApiCaller.subscribeOrUpdateSource();
+                await webApi.subscribeOrUpdateSource({});
 
                 dialogApi.dismissLoading();
 
@@ -252,7 +264,7 @@ export class UiController {
 
                 //TODO: only display if currency was guessed wrong.
                 const shouldProceed = await new Promise<boolean>(
-                    resolve => dialogApi.create("confirm",{
+                    resolve => dialogApi.create("confirm", {
                         "title": "Enable subscription",
                         "message": [
                             `Confirm subscription for `,
@@ -273,7 +285,7 @@ export class UiController {
 
                 dialogApi.loading("Enabling your subscription");
 
-                await webApiCaller.subscribeOrUpdateSource(newSourceId);
+                await webApi.subscribeOrUpdateSource({ "sourceId": newSourceId });
 
                 dialogApi.dismissLoading();
 
@@ -301,7 +313,7 @@ export class UiController {
 
                 dialogApi.loading("Updating your payment method");
 
-                await webApiCaller.subscribeOrUpdateSource(source.id);
+                await webApi.subscribeOrUpdateSource({ "sourceId": source.id });
 
                 dialogApi.dismissLoading();
 

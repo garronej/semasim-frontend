@@ -1,6 +1,5 @@
 
 import * as rn from "react-native";
-import { AppLifeCycleListener } from "./appLifeCycle";
 
 /*
 const width = 360;
@@ -26,7 +25,7 @@ const ov= {
 
 
 
-export const fixDimensions: AppLifeCycleListener = ({ evtRootViewOnLayout }) => {
+export const fixDimensions: import("./appLifeCycle").AppLifeCycleListener = ({ evtRootViewOnLayout }) => {
 
     if( rn.Platform.OS === "ios" ){
         return;

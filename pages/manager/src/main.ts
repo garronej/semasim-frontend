@@ -5,15 +5,19 @@ import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
 import "minimal-polyfills/dist/lib/Array.from";
 import "minimal-polyfills/dist/lib/String.prototype.startsWith";
 import "frontend-shared/dist/tools/polyfills/Object.assign";
-import * as connection from "frontend-shared/dist/lib/toBackend/connection";
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
-import { UiController } from "./UiController";
-import { dialogApi, startMultiDialogProcess } from "frontend-shared/dist/tools/modal/dialog";
-import * as remoteCoreApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller/core";
-import { registerInteractiveAppEvtHandlers } from "frontend-shared/dist/lib/interactiveAppEvtHandlers";
-import { appEvts } from "frontend-shared/dist/lib/toBackend/appEvts";
-import { restartApp } from "frontend-shared/dist/lib/restartApp";
+import { uiControllerDependencyInjection } from "./UiController";
+import { managerPageLaunch } from "frontend-shared/dist/lib/appLauncher/managerPageLaunch";
+import { Deferred } from "frontend-shared/dist/tools/Deferred";
 
+const dUiController = new Deferred<
+    Pick<
+        import("./UiController").UiController,
+        "interact_createContact" |
+        "interact_deleteContact" |
+        "interact_updateContactName"
+    >
+>();
+const dLoginUser = new Deferred<import("frontend-shared/dist/lib/webApiCaller").WebApi["loginUser"]>();
 
 declare const __dirname: any;
 
@@ -21,7 +25,7 @@ declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;
 };
 
-if( typeof apiExposedByHost !== "undefined" ){
+if (typeof apiExposedByHost !== "undefined") {
 
     window.onerror = (msg, url, lineNumber) => {
         apiExposedByHost.onDone(`${msg}\n'${url}:${lineNumber}`);
@@ -38,68 +42,7 @@ if( typeof apiExposedByHost !== "undefined" ){
 
 }
 
-async function onLoggedIn(): Promise<UiController> {
-
-    connection.connect(((): connection.ConnectParams => {
-
-        const out: connection.ConnectParams.Browser = {
-            "assertJsRuntimeEnv": "browser",
-            "requestTurnCred": false
-        };
-
-        return out;
-
-    })());
-
-    registerInteractiveAppEvtHandlers(
-        Promise.resolve(),
-        appEvts,
-        remoteCoreApiCaller,
-        dialogApi,
-        startMultiDialogProcess,
-        restartApp
-    );
-
-    const uiController = new UiController(
-        await remoteCoreApiCaller.getUsableUserSims()
-    );
-
-    $("#page-payload").html("").append(uiController.structure);
-
-    $("#register-new-sim")
-        .removeClass("hidden")
-        .click(
-            () => dialogApi.create("alert", {
-                "message":
-                    require("fs").readFileSync(__dirname + "/../res/1.txt", "utf8")
-                        .replace(/\n/g, "<br>")
-            }))
-        ;
-
-    return uiController;
-
-}
-
 const apiExposedToHost = (() => {
-
-    const loginAndGetUiController = async (email: string, secret: string): Promise<UiController> => {
-
-        const { status } = await webApiCaller.loginUser(email, secret, undefined);
-
-        if (status !== "SUCCESS") {
-            apiExposedByHost.onDone("Login failed");
-            await new Promise(() => { });
-        }
-
-        return onLoggedIn();
-
-    };
-
-    const onDone = () => {
-        try {
-            apiExposedByHost.onDone(null);
-        } catch{ }
-    };
 
     const START_ACTION = {
         "NO_ACTION": 0,
@@ -136,16 +79,42 @@ const apiExposedToHost = (() => {
 
         (async () => {
 
-            const uiController = await loginAndGetUiController(email, secret);
+            const loginUser = await dLoginUser.pr;
+
+            const loginResult = await loginUser({
+                "assertJsRuntimeEnv": "browser",
+                email,
+                secret,
+                "shouldThrowOnError": true
+            }).catch(() => new Error());
+
+            if (
+                loginResult instanceof Error ||
+                loginResult.status !== "SUCCESS"
+            ) {
+
+                apiExposedByHost.onDone("Login failed");
+                return;
+
+            }
+
+            //const uiController = await prUiController;
+            const uiController = await dUiController.pr;
 
             switch (action) {
                 case START_ACTION.NO_ACTION: return;
-                case START_ACTION.CREATE_CONTACT: await uiController.interact_createContact(imsi!, number!); break;
-                case START_ACTION.UPDATE_CONTACT_NAME: await uiController.interact_updateContactName(number!); break;
-                case START_ACTION.DELETE_CONTACT: await uiController.interact_deleteContact(number!); break;
+                case START_ACTION.CREATE_CONTACT:
+                    await uiController.interact_createContact(imsi!, number!); break;
+                case START_ACTION.UPDATE_CONTACT_NAME:
+                    await uiController.interact_updateContactName(number!); break;
+                case START_ACTION.DELETE_CONTACT:
+                    await uiController.interact_deleteContact(number!); break;
             }
 
-            onDone();
+
+            try {
+                apiExposedByHost.onDone(null);
+            } catch{ }
 
         })();
 
@@ -153,19 +122,56 @@ const apiExposedToHost = (() => {
 
     return { start };
 
-
 })();
 
 Object.assign(window, { apiExposedToHost });
 
-$(document).ready(() => {
+$(document).ready(async () => {
 
     if (typeof apiExposedByHost !== "undefined") {
         return;
     }
 
-	$("#logout").click(() => webApiCaller.logoutUser());
+    const dLogoutUser = new Deferred<import("frontend-shared/dist/lib/types").AccountManagementApi["webApi"]["logoutUser"]>();
 
-    onLoggedIn();
+    $("#logout").click(() => dLogoutUser.pr.then(logoutUser => logoutUser()));
+
+    const {
+        dialogApi,
+        startMultiDialogProcess,
+        createModal,
+        prReadyToAuthenticateStep
+    } = managerPageLaunch({ "assertJsRuntimeEnv": "browser" });
+
+    const { UiController } = uiControllerDependencyInjection({
+        dialogApi,
+        startMultiDialogProcess,
+        createModal
+    });
+
+    const { loginUser, prAccountManagementApi } = await prReadyToAuthenticateStep;
+
+    dLoginUser.resolve(loginUser);
+
+    const accountManagementApi = await prAccountManagementApi;
+
+    dLogoutUser.resolve(accountManagementApi.webApi.logoutUser);
+
+    const uiController = new UiController(accountManagementApi);
+
+    $("#page-payload").html("").append(uiController.structure);
+
+    $("#register-new-sim")
+        .removeClass("hidden")
+        .click(
+            () => dialogApi.create("alert", {
+                "message":
+                    require("fs").readFileSync(__dirname + "/../res/1.txt", "utf8")
+                        .replace(/\n/g, "<br>")
+            }))
+        ;
+
+    dUiController.resolve(uiController);
+
 
 });

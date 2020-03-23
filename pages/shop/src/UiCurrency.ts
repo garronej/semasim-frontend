@@ -1,7 +1,7 @@
 //NOTE: Assert Select2 v4.0.6-rc.0 loaded.
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
@@ -18,9 +18,9 @@ export class UiCurrency {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtChange = new SyncEvent<string>();
+    public readonly evtChange = new Evt<string>();
 
-    private readonly evt$select_on_change= new VoidSyncEvent();
+    private readonly evt$select_on_change= new VoidEvt();
 
     constructor(defaultCurrency: string) {
 

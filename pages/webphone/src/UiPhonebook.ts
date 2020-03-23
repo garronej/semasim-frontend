@@ -1,9 +1,8 @@
 //NOTE: Slimscroll must be loaded on the page.
 
-import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, VoidEvt, NonPostable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import * as types from "frontend-shared/dist/lib/types/userSim";
-import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
+import * as types from "frontend-shared/dist/lib/types";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 
 declare const require: any;
@@ -17,14 +16,17 @@ export class UiPhonebook {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtContactSelected = new SyncEvent<{
-        wdChatPrev: wd.Chat<"PLAIN"> | undefined;
-        wdChat: wd.Chat<"PLAIN">;
+    public readonly evtContactSelected = new Evt<{
+        wdChatPrev: types.wd.Chat | undefined;
+        wdChat: types.wd.Chat;
     }>();
 
     constructor(
-        public readonly userSim: types.UserSim.Usable,
-        public readonly wdChats: wd.Chat<"PLAIN">[]
+        private readonly params: {
+            userSim: types.UserSim.Usable;
+            wdChats: types.wd.Chat[];
+            evtWdChat: NonPostable<types.wd.Evts["evtWdChat"]>;
+        }
     ) {
 
         this.structure.find("ul").slimScroll({
@@ -35,7 +37,7 @@ export class UiPhonebook {
             "size": "5px"
         });
 
-        for (let wdChat of this.wdChats) {
+        for (const wdChat of params.wdChats) {
 
             this.createUiContact(wdChat);
 
@@ -43,11 +45,44 @@ export class UiPhonebook {
 
         this.updateSearch();
 
+        params.evtWdChat.attach(
+            ({ eventType, wdChat }) => {
+
+                switch (eventType) {
+                    case "NEW":
+
+                        this.insertContact(wdChat);
+
+                        //$("body").data("dynamic").panels();
+
+
+                        break;
+                    case "UPDATED":
+
+                        this.notifyContactChanged(wdChat);
+
+
+
+                        break;
+                    case "DELETED":
+
+                        this.notifyContactChanged(wdChat);
+
+                        this.triggerClickOnLastSeenChat();
+
+                        break;
+                }
+
+            }
+        );
+
+
+
     }
 
     public triggerClickOnLastSeenChat() {
 
-        const wdChat= wd.getChatWithLatestActivity(this.wdChats);
+        const wdChat = types.wd.Chat.findLastOpened(this.params.wdChats);
 
         if (!wdChat) {
             return;
@@ -61,16 +96,16 @@ export class UiPhonebook {
     /** mapped by wdChat.ref */
     private readonly uiContacts = new Map<string, UiContact>();
 
-    private createUiContact(wdChat: wd.Chat<"PLAIN">) {
+    private createUiContact(wdChat: types.wd.Chat) {
 
-        let uiContact = new UiContact(this.userSim, wdChat);
+        let uiContact = new UiContact(this.params.userSim, wdChat);
 
         uiContact.evtClick.attach(() => {
 
             let uiContactPrev = Array.from(this.uiContacts.values())
                 .find(({ isSelected }) => isSelected);
 
-            let wdChatPrev: wd.Chat<"PLAIN"> | undefined;
+            let wdChatPrev: types.wd.Chat | undefined;
 
             if (uiContactPrev) {
                 uiContactPrev.unselect();
@@ -126,7 +161,7 @@ export class UiPhonebook {
 
             const uiContact_i = getUiContactFromStructure(lis.get(i));
 
-            if (wd.compareChat(uiContact.wdChat, uiContact_i.wdChat) >= 0) {
+            if (types.wd.Chat.compare(uiContact.wdChat, uiContact_i.wdChat) >= 0) {
 
 
                 uiContact.structure.insertBefore(uiContact_i.structure);
@@ -143,8 +178,8 @@ export class UiPhonebook {
 
 
     /** To create ui contact after init */
-    public insertContact(
-        wdChat: wd.Chat<"PLAIN">
+    private insertContact(
+        wdChat: types.wd.Chat
     ): void {
 
         this.structure.find("input").val("");
@@ -164,11 +199,11 @@ export class UiPhonebook {
      * OR
      * contact deleted
      * */
-    public notifyContactChanged(wdChat: wd.Chat<"PLAIN">) {
+    private notifyContactChanged(wdChat: types.wd.Chat) {
 
         const uiContact = this.uiContacts.get(wdChat.ref)!;
 
-        if (this.wdChats.indexOf(wdChat) < 0) {
+        if (this.params.wdChats.indexOf(wdChat) < 0) {
 
             uiContact.structure.detach();
             this.uiContacts.delete(wdChat.ref);
@@ -186,7 +221,7 @@ export class UiPhonebook {
 
     }
 
-    public triggerContactClick(wdChat: wd.Chat<"PLAIN">) {
+    public triggerContactClick(wdChat: types.wd.Chat) {
         this.uiContacts.get(wdChat.ref)!.evtClick.post();
     }
 
@@ -197,11 +232,11 @@ class UiContact {
     public readonly structure = html.templates.find("li").clone();
 
     /** only forward click event, need to be selected manually from outside */
-    public evtClick = new VoidSyncEvent();
+    public evtClick = new VoidEvt();
 
     constructor(
         public readonly userSim: types.UserSim.Usable,
-        public readonly wdChat: wd.Chat<"PLAIN">
+        public readonly wdChat: types.wd.Chat
     ) {
 
         this.structure
@@ -252,7 +287,7 @@ class UiContact {
             this.structure.removeClass("has-messages");
         }
 
-        const count = wd.getUnreadMessagesCount(this.wdChat);
+        const count = types.wd.Chat.getUnreadMessagesCount(this.wdChat);
 
         const span = this.structure.find("span.id_notifications");
 

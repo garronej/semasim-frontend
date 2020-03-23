@@ -1,207 +1,249 @@
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, IObservable } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    "evtReachabilityStatusChange" |
+    "evtCellularConnectivityChange" |
+    "evtOngoingCall"
+>;
 
 declare const require: any;
 
-$.validator.addMethod(
-    "validateTelInput",
-    (value, element) => {
 
-        try {
+export type UiQuickAction = InstanceType<ReturnType<typeof uiQuickActionDependencyInjection>["UiQuickAction"]>;
 
-            phoneNumber.build(
-                value,
-                $(element).intlTelInput("getSelectedCountryData").iso2,
-                "MUST BE DIALABLE"
-            );
-
-        } catch{
-
-            return false;
-
-        }
-
-        return true;
-    },
-    "Malformed phone number"
-);
-
-const html = loadUiClassHtml(
-    require("../templates/UiQuickAction.html"),
-    "UiQuickAction"
-);
-
-export class UiQuickAction {
-
-    public readonly structure = html.structure.clone();
-    private readonly templates = html.templates.clone();
-
-    public evtVoiceCall = new SyncEvent<phoneNumber>();
-    public evtSms = new SyncEvent<phoneNumber>();
-    public evtNewContact = new SyncEvent<phoneNumber>();
-
-    public notify() {
-
-        this.structure.find(".id_sms")
-            .prop("disabled", !this.getIsSipRegistered())
-            ;
-
-        this.structure.find(".id_contact")
-            .prop("disabled", !this.userSim.reachableSimState)
-            ;
-
-        this.structure.find(".id_call") .prop("disabled", (
-            !this.getIsSipRegistered() || 
-            !this.userSim.reachableSimState ||
-            !this.userSim.reachableSimState.isGsmConnectivityOk ||
-            !!this.userSim.reachableSimState.ongoingCall
-        ));
-
+export function uiQuickActionDependencyInjection(
+    params: {
+        dialogApi: typeof import("frontend-shared/dist/tools/modal/dialog").dialogApi;
     }
+) {
 
-    constructor(
-        public readonly userSim: types.UserSim.Usable,
-        private readonly getIsSipRegistered: ()=> boolean
-    ) {
+    const { dialogApi } = params;
 
-        let input = this.structure.find("input.id_tel-input");
+    $.validator.addMethod(
+        "validateTelInput",
+        (value, element) => {
 
-        //TODO add if bug "utilsScript": "/intl-tel-input/build/js/utils.js",
+            try {
 
-        let simIso = this.userSim.sim.country ? this.userSim.sim.country.iso : undefined;
-        let gwIso = this.userSim.gatewayLocation.countryIso;
+                phoneNumber.build(
+                    value,
+                    $(element).intlTelInput("getSelectedCountryData").iso2,
+                    "MUST BE DIALABLE"
+                );
 
-        (() => {
+            } catch{
 
-            let intlTelInputOptions: IntlTelInput.Options = {
-                "dropdownContainer": "body"
-            };
-
-            let preferredCountries: string[] = [];
-
-            if (simIso) {
-
-                preferredCountries.push(simIso);
+                return false;
 
             }
 
-            if (gwIso && simIso !== gwIso) {
+            return true;
+        },
+        "Malformed phone number"
+    );
 
-                preferredCountries.push(gwIso);
+    const html = loadUiClassHtml(
+        require("../templates/UiQuickAction.html"),
+        "UiQuickAction"
+    );
 
-            }
+    class UiQuickAction {
 
-            if (preferredCountries.length) {
-                intlTelInputOptions.preferredCountries = preferredCountries;
-            }
+        public readonly structure = html.structure.clone();
+        private readonly templates = html.templates.clone();
 
-            if (simIso || gwIso) {
-                intlTelInputOptions.initialCountry = simIso || gwIso;
-            }
+        public evtVoiceCall = new Evt<phoneNumber>();
+        public evtSms = new Evt<phoneNumber>();
+        public evtNewContact = new Evt<phoneNumber>();
 
-            input.intlTelInput(intlTelInputOptions);
 
-        })();
 
-        (() => {
+        constructor(params: {
+            userSim: types.UserSim.Usable;
+            userSimEvts: UserSimEvts;
+            obsIsSipRegistered: IObservable<boolean>;
+        }) {
 
-            let self = this;
+            const { userSim, userSimEvts, obsIsSipRegistered } = params;
 
-            input.on("countrychange", function calleeA(_, countryData: IntlTelInput.CountryData) {
+            const input = this.structure.find("input.id_tel-input");
 
-                if (countryData.iso2 === simIso) return;
+            //TODO add if bug "utilsScript": "/intl-tel-input/build/js/utils.js",
 
-                input.off("countrychange", undefined, calleeA as any);
+            const simIso = userSim.sim.country?.iso;
+            const gwIso = userSim.gatewayLocation.countryIso;
 
-                dialogApi.create("alert", { "message": [
-                    "Warning: Consult ",
-                    self.userSim.sim.serviceProvider.fromImsi || "Your operator",
-                    `'s pricing for Calls/SMS toward ${countryData.name}`
-                ].join("")});
+            (() => {
 
-                input.on("countrychange", function calleeB(_, countryData: IntlTelInput.CountryData) {
+                let intlTelInputOptions: IntlTelInput.Options = {
+                    "dropdownContainer": "body"
+                };
 
-                    if (countryData.iso2 !== simIso) return;
+                let preferredCountries: string[] = [];
 
-                    //staticNotification.close();
+                if (simIso) {
 
-                    input.off("countrychange", undefined, calleeB as any);
+                    preferredCountries.push(simIso);
 
-                    input.on("countrychange", calleeA);
+                }
+
+                if (gwIso && simIso !== gwIso) {
+
+                    preferredCountries.push(gwIso);
+
+                }
+
+                if (preferredCountries.length) {
+                    intlTelInputOptions.preferredCountries = preferredCountries;
+                }
+
+                if (simIso || gwIso) {
+                    intlTelInputOptions.initialCountry = simIso || gwIso;
+                }
+
+                input.intlTelInput(intlTelInputOptions);
+
+            })();
+
+            (() => {
+
+
+                input.on("countrychange", function calleeA(_, countryData: IntlTelInput.CountryData) {
+
+                    if (countryData.iso2 === simIso) return;
+
+                    input.off("countrychange", undefined, calleeA as any);
+
+                    dialogApi.create("alert", {
+                        "message": [
+                            "Warning: Consult ",
+                            userSim.sim.serviceProvider.fromImsi || "Your operator",
+                            `'s pricing for Calls/SMS toward ${countryData.name}`
+                        ].join("")
+                    });
+
+                    input.on("countrychange", function calleeB(_, countryData: IntlTelInput.CountryData) {
+
+                        if (countryData.iso2 !== simIso) return;
+
+                        //staticNotification.close();
+
+                        input.off("countrychange", undefined, calleeB as any);
+
+                        input.on("countrychange", calleeA);
+
+                    });
 
                 });
 
+            })();
+
+            input.popover({
+                "html": true,
+                "trigger": "manual",
+                "placement": "right",
+                "container": "body",
+                "content": () => this.templates.find("div.id_popover").html()
             });
 
-        })();
+            let validator = this.structure.find("form.id_form").validate({
+                "debug": true,
+                "onsubmit": false,
+                "rules": {
+                    "tel-input": {
+                        "validateTelInput": true
+                    }
+                },
+                "errorPlacement": error => {
 
-        input.popover({
-            "html": true,
-            "trigger": "manual",
-            "placement": "right",
-            "container": "body",
-            "content": () => this.templates.find("div.id_popover").html()
-        });
+                    const message = input.val() === "" ? "First enter the number" : $(error).text();
 
-        let validator = this.structure.find("form.id_form").validate({
-            "debug": true,
-            "onsubmit": false,
-            "rules": {
-                "tel-input": {
-                    "validateTelInput": true
+                    this.templates.find("div.id_popover span.id_error-message").html(message);
+
+                    input.popover("show");
+
+                },
+                "success": () => input.popover("hide")
+            });
+
+
+            this.structure.on("mouseleave", () => input.popover("hide"));
+
+            this.structure.find("button").on("click", event => {
+
+                if (!validator.form()) {
+                    return;
                 }
-            },
-            "errorPlacement": error => {
 
-                const message = input.val() === "" ? "First enter the number" : $(error).text();
+                let evt: Evt<phoneNumber>;
 
-                this.templates.find("div.id_popover span.id_error-message").html(message);
+                if ($(event.currentTarget).hasClass("id_call")) {
+                    evt = this.evtVoiceCall;
+                } else if ($(event.currentTarget).hasClass("id_sms")) {
+                    evt = this.evtSms;
+                } else if ($(event.currentTarget).hasClass("id_contact")) {
+                    evt = this.evtNewContact;
+                }
 
-                input.popover("show");
+                evt!.post(
+                    phoneNumber.build(
+                        input.val(),
+                        input.intlTelInput("getSelectedCountryData").iso2
+                    )
+                );
 
-            },
-            "success": () => input.popover("hide")
-        });
+                if (simIso) {
+                    input.intlTelInput("setCountry", simIso);
+                }
+
+                input.intlTelInput("setNumber", "");
+
+            });
 
 
-        this.structure.on("mouseleave", () => input.popover("hide"));
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
+                ...userSimEvts,
+                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange
+            });
 
-        this.structure.find("button").on("click", event => {
-
-            if (!validator.form()) {
-                return;
-            }
-
-            let evt: SyncEvent<phoneNumber>;
-
-            if ($(event.currentTarget).hasClass("id_call")) {
-                evt = this.evtVoiceCall;
-            } else if ($(event.currentTarget).hasClass("id_sms")) {
-                evt = this.evtSms;
-            } else if ($(event.currentTarget).hasClass("id_contact")) {
-                evt = this.evtNewContact;
-            }
-
-            evt!.post(
-                phoneNumber.build(
-                    input.val(),
-                    input.intlTelInput("getSelectedCountryData").iso2
-                )
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_sms")
+                    .prop("disabled", !obsIsSipRegistered.value),
+                ["evtIsSipRegisteredValueChange"]
             );
 
-            if (simIso) {
-                input.intlTelInput("setCountry", simIso);
-            }
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_contact")
+                    .prop("disabled", !userSim.reachableSimState),
+                ["evtReachabilityStatusChange"]
+            );
 
-            input.intlTelInput("setNumber", "");
 
-        });
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_call").prop("disabled", (
+                    !obsIsSipRegistered.value ||
+                    !userSim.reachableSimState ||
+                    !userSim.reachableSimState.isGsmConnectivityOk ||
+                    !!userSim.reachableSimState.ongoingCall
+                )),
+                [
+                    "evtIsSipRegisteredValueChange",
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange",
+                    "evtOngoingCall"
+                ]
+            );
 
-        this.notify();
-
+        }
     }
+
+    return { UiQuickAction };
+
 }
+

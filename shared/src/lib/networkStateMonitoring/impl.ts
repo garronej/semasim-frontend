@@ -1,14 +1,14 @@
 
 
 import { NetworkStateMonitoring, GetApiFn } from "./types";
-import { VoidSyncEvent } from "ts-events-extended";
+import { VoidEvt } from "evt";
 
 
 const api: NetworkStateMonitoring = {
     "getIsOnline": ()=> navigator.onLine,
     "evtStateChange": (()=>{
 
-        const out= new VoidSyncEvent();
+        const out= new VoidEvt();
 
         window.addEventListener("online", ()=> out.post());
         window.addEventListener("offline", ()=> out.post());

@@ -1,8 +1,7 @@
 
-import { AppLifeCycleListener } from "./appLifeCycle";
 import * as rn from "react-native";
 
-export const redrawOnRotate: AppLifeCycleListener = ({
+export const redrawOnRotate: import("./appLifeCycle").AppLifeCycleListener = ({
   evtConstructor,
   evtComponentDidMount,
   evtComponentWillUnmount

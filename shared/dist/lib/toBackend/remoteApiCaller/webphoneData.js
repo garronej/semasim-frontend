@@ -75,26 +75,30 @@ var __read = (this && this.__read) || function (o, n) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
-var wd = require("../../types/webphoneData/logic");
 var md5 = require("md5");
 var cryptoLib = require("../../crypto/cryptoLibProxy");
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var createObjectWithGivenRef_1 = require("../../../tools/createObjectWithGivenRef");
-var id_1 = require("../../../tools/id");
-var assert_1 = require("../../../tools/assert");
+var id_1 = require("../../../tools/typeSafety/id");
+var typeSafety_1 = require("../../../tools/typeSafety");
+var serializer_1 = require("crypto-lib/dist/async/serializer");
+var types = require("../../types");
 var hash = md5;
 //NOTE: time and direction are plain in db, ref does not need to be secure.
 var buildWdMessageRef = function (time, direction) { return hash("" + time + direction); };
 /** Inject send request only when testing */
-function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryptor, userEmail) {
+function getWdApiFactory(params) {
     var _this = this;
+    var sendRequest = params.sendRequest, remoteNotifyEvts = params.remoteNotifyEvts, encryptorDecryptor = params.encryptorDecryptor, userEmail = params.userEmail;
+    var decryptChat = types.wd.Chat.decryptFactory({ decryptThenParseFactory: serializer_1.decryptThenParseFactory });
+    var decryptMessage = types.wd.Message.decryptFactory({ decryptThenParseFactory: serializer_1.decryptThenParseFactory });
     var stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
-    var evtRequestProcessedByBackend = new ts_events_extended_1.SyncEvent();
-    var onRequestProcessedByBackend = function (arg) { return __awaiter(_this, void 0, void 0, function () {
+    var evtRequestProcessedByBackend = new evt_1.Evt();
+    var onRequestProcessedByBackend = function (requestProcessedByBackend) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     var count = 0;
-                    var evtData = __assign(__assign({}, arg), { "handlerCb": function (error) {
+                    var evtData = __assign(__assign({}, requestProcessedByBackend), { "handlerCb": function (error) {
                             if (!!error) {
                                 reject(error);
                                 return;
@@ -105,50 +109,62 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                             }
                             resolve();
                         } });
-                    var handlerCount = evtRequestProcessedByBackend.getHandlers().filter(function (_a) {
-                        var matcher = _a.matcher;
-                        return matcher(evtData);
-                    }).length;
-                    assert_1.assert(handlerCount !== 0);
+                    var handlerCount = evtRequestProcessedByBackend
+                        .getHandlers()
+                        .filter(function (_a) {
+                        var op = _a.op;
+                        return !!evtRequestProcessedByBackend
+                            .getStatelessOp(op)(evtData);
+                    })
+                        .length;
+                    typeSafety_1.assert(handlerCount !== 0);
                     evtRequestProcessedByBackend.post(evtData);
                 })];
         });
     }); };
-    appEvts.evtWdActionFromOtherUa.attach(function (evtData) { return evtRequestProcessedByBackend.post(evtData); });
-    var getGetWdEvts = getGetGetWdEvts(encryptorDecryptor, evtRequestProcessedByBackend);
-    return function getApiCallerForSpecificSim(imsi) {
+    remoteNotifyEvts.evtWdActionFromOtherUa.attach(function (evtData) { return evtRequestProcessedByBackend.post(evtData); });
+    var getGetWdEvts = getGetGetWdEvts({
+        encryptorDecryptor: encryptorDecryptor,
+        evtRequestProcessedByBackend: evtRequestProcessedByBackend,
+        decryptMessage: decryptMessage
+    });
+    return function getWdApi(_a) {
         var _this = this;
+        var imsi = _a.imsi;
         var getWdEvts = getGetWdEvts(imsi);
-        var apiCallerForSpecificSim = {
+        var wdApi = {
             "getUserSimChats": (function () {
                 var methodName = apiDeclaration.wd_getUserSimChats.methodName;
-                return function (maxMessageCountByChat) {
+                return function (_a) {
+                    var maxMessageCountByChat = _a.maxMessageCountByChat;
                     return __awaiter(this, void 0, void 0, function () {
-                        var wdEncryptedChats, wdChats, wdChats_1, wdChats_1_1, wdChat, wdEvts;
-                        var e_1, _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
+                        var wdEncryptedChats, wdChats, wdChats_1, wdChats_1_1, wdChat;
+                        var e_1, _b;
+                        return __generator(this, function (_c) {
+                            switch (_c.label) {
                                 case 0: return [4 /*yield*/, sendRequest(methodName, { imsi: imsi, maxMessageCountByChat: maxMessageCountByChat })];
                                 case 1:
-                                    wdEncryptedChats = _b.sent();
-                                    return [4 /*yield*/, Promise.all(wdEncryptedChats.map(function (chat) { return wd.decryptChat(encryptorDecryptor, chat); }))];
+                                    wdEncryptedChats = _c.sent();
+                                    return [4 /*yield*/, Promise.all(wdEncryptedChats.map(function (chat) { return decryptChat({
+                                            "decryptor": encryptorDecryptor,
+                                            chat: chat
+                                        }); }))];
                                 case 2:
-                                    wdChats = _b.sent();
+                                    wdChats = _c.sent();
                                     try {
                                         for (wdChats_1 = __values(wdChats), wdChats_1_1 = wdChats_1.next(); !wdChats_1_1.done; wdChats_1_1 = wdChats_1.next()) {
                                             wdChat = wdChats_1_1.value;
-                                            wdChat.messages.sort(wd.compareMessage);
+                                            wdChat.messages.sort(types.wd.Message.compare);
                                         }
                                     }
                                     catch (e_1_1) { e_1 = { error: e_1_1 }; }
                                     finally {
                                         try {
-                                            if (wdChats_1_1 && !wdChats_1_1.done && (_a = wdChats_1.return)) _a.call(wdChats_1);
+                                            if (wdChats_1_1 && !wdChats_1_1.done && (_b = wdChats_1.return)) _b.call(wdChats_1);
                                         }
                                         finally { if (e_1) throw e_1.error; }
                                     }
-                                    wdEvts = getWdEvts(wdChats);
-                                    return [2 /*return*/, { wdChats: wdChats, wdEvts: wdEvts }];
+                                    return [2 /*return*/, { wdChats: wdChats, "wdEvts": getWdEvts(wdChats) }];
                             }
                         });
                     });
@@ -157,12 +173,13 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             /** If there is already a chat with the contact number nothing will be done */
             "newChat": (function () {
                 var methodName = apiDeclaration.wd_newChat.methodName;
-                return function (wdChats, contactNumber, contactName, contactIndexInSim) {
+                return function (_a) {
+                    var wdChats = _a.wdChats, contactNumber = _a.contactNumber, contactName = _a.contactName, contactIndexInSim = _a.contactIndexInSim;
                     return __awaiter(this, void 0, void 0, function () {
                         var chatRef, params;
                         var _this = this;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
                                 case 0:
                                     chatRef = hash("" + imsi + contactNumber);
                                     if (!!wdChats.find(function (_a) {
@@ -190,13 +207,13 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                             });
                                         }); })()];
                                 case 1:
-                                    params = _a.sent();
+                                    params = _b.sent();
                                     return [4 /*yield*/, sendRequest(methodName, params)];
                                 case 2:
-                                    _a.sent();
+                                    _b.sent();
                                     return [4 /*yield*/, onRequestProcessedByBackend({ methodName: methodName, params: params })];
                                 case 3:
-                                    _a.sent();
+                                    _b.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -205,30 +222,34 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             })(),
             "fetchOlderMessages": (function () {
                 var methodName = apiDeclaration.wd_fetchOlderMessages.methodName;
-                return function (wdChat, maxMessageCount) {
+                return function (_a) {
+                    var wdChat = _a.wdChat, maxMessageCount = _a.maxMessageCount;
                     return __awaiter(this, void 0, void 0, function () {
-                        var wdMessages, olderThanMessage, olderWdMessages, _a, _b, set, i, message, wdMessages_1, wdMessages_1_1, message;
-                        var e_2, _c;
-                        return __generator(this, function (_d) {
-                            switch (_d.label) {
+                        var wdMessages, olderThanMessage, olderWdMessages, _b, _c, set, i, message, wdMessages_1, wdMessages_1_1, message;
+                        var e_2, _d;
+                        return __generator(this, function (_e) {
+                            switch (_e.label) {
                                 case 0:
                                     wdMessages = wdChat.messages;
                                     if (wdMessages.length === 0) {
                                         return [2 /*return*/, []];
                                     }
                                     olderThanMessage = wdMessages[0];
-                                    _b = (_a = Promise).all;
+                                    _c = (_b = Promise).all;
                                     return [4 /*yield*/, sendRequest(methodName, {
                                             imsi: imsi,
                                             "chatRef": wdChat.ref,
                                             "olderThanTime": olderThanMessage.time,
                                             maxMessageCount: maxMessageCount
                                         })];
-                                case 1: return [4 /*yield*/, _b.apply(_a, [(_d.sent()).map(function (encryptedOlderMessage) {
-                                            return wd.decryptMessage(encryptorDecryptor, encryptedOlderMessage);
+                                case 1: return [4 /*yield*/, _c.apply(_b, [(_e.sent()).map(function (encryptedOlderMessage) {
+                                            return decryptMessage({
+                                                "decryptor": encryptorDecryptor,
+                                                "encryptedMessage": encryptedOlderMessage
+                                            });
                                         })])];
                                 case 2:
-                                    olderWdMessages = _d.sent();
+                                    olderWdMessages = _e.sent();
                                     set = new Set(wdMessages.map(function (_a) {
                                         var ref = _a.ref;
                                         return ref;
@@ -240,7 +261,7 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                         }
                                         wdMessages.unshift(message);
                                     }
-                                    wdMessages.sort(wd.compareMessage);
+                                    wdMessages.sort(types.wd.Message.compare);
                                     olderWdMessages = [];
                                     try {
                                         for (wdMessages_1 = __values(wdMessages), wdMessages_1_1 = wdMessages_1.next(); !wdMessages_1_1.done; wdMessages_1_1 = wdMessages_1.next()) {
@@ -254,7 +275,7 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                     catch (e_2_1) { e_2 = { error: e_2_1 }; }
                                     finally {
                                         try {
-                                            if (wdMessages_1_1 && !wdMessages_1_1.done && (_c = wdMessages_1.return)) _c.call(wdMessages_1);
+                                            if (wdMessages_1_1 && !wdMessages_1_1.done && (_d = wdMessages_1.return)) _d.call(wdMessages_1);
                                         }
                                         finally { if (e_2) throw e_2.error; }
                                     }
@@ -323,72 +344,71 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
              *
              * If same as before the request won't be sent
              *
-             * return true if request was sent
-             *
              * */
             "updateChatContactInfos": (function () {
                 var methodName = apiDeclaration.wd_updateChatContactInfos.methodName;
-                return function (wdChat, contactName, contactIndexInSim) {
+                return function (_a) {
+                    var wdChat = _a.wdChat, contactName = _a.contactName, contactIndexInSim = _a.contactIndexInSim;
                     return __awaiter(this, void 0, void 0, function () {
-                        var fields, params, _a, _b, key, value, _c, _d, _e, _f, _g, _h, _j, _k, _l, e_3_1;
-                        var e_3, _m;
-                        return __generator(this, function (_o) {
-                            switch (_o.label) {
+                        var fields, params, _b, _c, key, value, _d, _e, _f, _g, _h, _j, _k, _l, _m, e_3_1;
+                        var e_3, _o;
+                        return __generator(this, function (_p) {
+                            switch (_p.label) {
                                 case 0:
                                     fields = {
                                         contactName: contactName,
                                         contactIndexInSim: contactIndexInSim
                                     };
                                     params = { imsi: imsi, "chatRef": wdChat.ref };
-                                    _o.label = 1;
+                                    _p.label = 1;
                                 case 1:
-                                    _o.trys.push([1, 9, 10, 11]);
-                                    _a = __values(Object.keys(fields)), _b = _a.next();
-                                    _o.label = 2;
+                                    _p.trys.push([1, 9, 10, 11]);
+                                    _b = __values(Object.keys(fields)), _c = _b.next();
+                                    _p.label = 2;
                                 case 2:
-                                    if (!!_b.done) return [3 /*break*/, 8];
-                                    key = _b.value;
+                                    if (!!_c.done) return [3 /*break*/, 8];
+                                    key = _c.value;
                                     value = fields[key];
                                     if (value === undefined || wdChat[key] === value) {
                                         return [3 /*break*/, 7];
                                     }
-                                    _c = key;
-                                    switch (_c) {
+                                    _d = key;
+                                    switch (_d) {
                                         case "contactName": return [3 /*break*/, 3];
                                         case "contactIndexInSim": return [3 /*break*/, 5];
                                     }
                                     return [3 /*break*/, 7];
                                 case 3:
-                                    _d = params;
-                                    _e = key;
-                                    _f = {};
-                                    _g = "encrypted_string";
+                                    _e = params;
+                                    _f = key;
+                                    _g = {};
+                                    _h = "encrypted_string";
                                     return [4 /*yield*/, stringifyThenEncrypt(value)];
                                 case 4:
-                                    _d[_e] = (_f[_g] = _o.sent(),
-                                        _f);
+                                    _e[_f] = (_g[_h] = _p.sent(),
+                                        _g);
                                     return [3 /*break*/, 7];
                                 case 5:
-                                    _h = params;
-                                    _j = key;
-                                    _k = {};
-                                    _l = "encrypted_number_or_null";
+                                    _j = params;
+                                    _k = key;
+                                    _l = {};
+                                    _m = "encrypted_number_or_null";
                                     return [4 /*yield*/, stringifyThenEncrypt(value)];
                                 case 6:
-                                    _h[_j] = (_k[_l] = _o.sent(),
-                                        _k);
+                                    _j[_k] = (_l[_m] = _p.sent(),
+                                        _l);
                                     return [3 /*break*/, 7];
                                 case 7:
-                                    _b = _a.next();
+                                    _c = _b.next();
                                     return [3 /*break*/, 2];
                                 case 8: return [3 /*break*/, 11];
                                 case 9:
-                                    e_3_1 = _o.sent();
+                                    e_3_1 = _p.sent();
                                     e_3 = { error: e_3_1 };
                                     return [3 /*break*/, 11];
                                 case 10:
                                     try {
-                                        if (_b && !_b.done && (_m = _a.return)) _m.call(_a);
+                                        if (_c && !_c.done && (_o = _b.return)) _o.call(_b);
                                     }
                                     finally { if (e_3) throw e_3.error; }
                                     return [7 /*endfinally*/];
@@ -398,10 +418,10 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                     }
                                     return [4 /*yield*/, sendRequest(methodName, params)];
                                 case 12:
-                                    _o.sent();
+                                    _p.sent();
                                     return [4 /*yield*/, onRequestProcessedByBackend({ methodName: methodName, params: params })];
                                 case 13:
-                                    _o.sent();
+                                    _p.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -410,11 +430,12 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             })(),
             "destroyWdChat": (function () {
                 var methodName = apiDeclaration.wd_destroyChat.methodName;
-                return function (wdChats, refOfTheChatToDelete) {
+                return function (_a) {
+                    var wdChats = _a.wdChats, refOfTheChatToDelete = _a.refOfTheChatToDelete;
                     return __awaiter(this, void 0, void 0, function () {
                         var wdChat, params;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
                                 case 0:
                                     wdChat = wdChats.find(function (_a) {
                                         var ref = _a.ref;
@@ -426,10 +447,10 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                     params = { imsi: imsi, "chatRef": refOfTheChatToDelete };
                                     return [4 /*yield*/, sendRequest(methodName, params)];
                                 case 1:
-                                    _a.sent();
+                                    _b.sent();
                                     return [4 /*yield*/, onRequestProcessedByBackend({ methodName: methodName, params: params })];
                                 case 2:
-                                    _a.sent();
+                                    _b.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -442,60 +463,62 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
              * */
             "newMessage": (function () {
                 var methodName = apiDeclaration.wd_newMessage.methodName;
-                function out(wdChat, arg1) {
+                function out(args) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var _a, wdMessage, onUaFailedToSendMessage, params, _b, _c, _d, _e, _f, _g, _h;
+                        var wdChat, _a, wdMessage, onUaFailedToSendMessage, params, _b, _c, _d, _e, _f, _g, _h;
                         return __generator(this, function (_j) {
                             switch (_j.label) {
                                 case 0:
+                                    wdChat = args.wdChat;
                                     _a = __read((function () {
-                                        switch (arg1.type) {
+                                        switch (args.type) {
                                             case "SERVER TO CLIENT":
                                                 {
-                                                    var bundledData_1 = arg1.bundledData;
-                                                    var direction = "INCOMING";
-                                                    var out_1;
-                                                    if (bundledData_1.type === "MESSAGE") {
-                                                        var time = bundledData_1.pduDateTime;
-                                                        var out_ = {
-                                                            "ref": buildWdMessageRef(time, direction),
-                                                            time: time,
-                                                            direction: direction,
-                                                            "text": bundledData_1.text,
-                                                            "isNotification": false
-                                                        };
-                                                        out_1 = out_;
-                                                    }
-                                                    else {
-                                                        var time = (function () {
-                                                            switch (bundledData_1.type) {
-                                                                case "CALL ANSWERED BY":
-                                                                case "MISSED CALL":
-                                                                    return bundledData_1.dateTime;
-                                                                case "MMS NOTIFICATION":
-                                                                    return bundledData_1.pduDateTime;
-                                                                case "FROM SIP CALL SUMMARY":
-                                                                    return bundledData_1.callPlacedAtDateTime;
-                                                            }
-                                                        })();
-                                                        var out_ = {
-                                                            "ref": buildWdMessageRef(time, direction),
-                                                            time: time,
-                                                            direction: direction,
-                                                            "text": bundledData_1.text,
-                                                            "isNotification": true,
-                                                        };
-                                                        out_1 = out_;
-                                                    }
-                                                    return [out_1, undefined];
+                                                    var bundledData_1 = args.bundledData;
+                                                    var direction_1 = "INCOMING";
+                                                    return [
+                                                        bundledData_1.type === "MESSAGE" ?
+                                                            (function () {
+                                                                var time = bundledData_1.pduDateTime;
+                                                                return id_1.id({
+                                                                    "ref": buildWdMessageRef(time, direction_1),
+                                                                    time: time,
+                                                                    direction: direction_1,
+                                                                    "text": bundledData_1.text,
+                                                                    "isNotification": false
+                                                                });
+                                                            })()
+                                                            :
+                                                                (function () {
+                                                                    var time = (function () {
+                                                                        switch (bundledData_1.type) {
+                                                                            case "CALL ANSWERED BY":
+                                                                            case "MISSED CALL":
+                                                                                return bundledData_1.dateTime;
+                                                                            case "MMS NOTIFICATION":
+                                                                                return bundledData_1.pduDateTime;
+                                                                            case "FROM SIP CALL SUMMARY":
+                                                                                return bundledData_1.callPlacedAtDateTime;
+                                                                        }
+                                                                    })();
+                                                                    return id_1.id({
+                                                                        "ref": buildWdMessageRef(time, direction_1),
+                                                                        time: time,
+                                                                        direction: direction_1,
+                                                                        "text": bundledData_1.text,
+                                                                        "isNotification": true,
+                                                                    });
+                                                                })(),
+                                                        undefined
+                                                    ];
                                                 }
                                                 ;
                                             case "CLIENT TO SERVER":
                                                 {
-                                                    var bundledData = arg1.bundledData;
+                                                    var bundledData = args.bundledData;
                                                     var time = bundledData.exactSendDateTime;
                                                     var direction = "OUTGOING";
-                                                    var out_2 = {
+                                                    var wdMessage_1 = {
                                                         "ref": buildWdMessageRef(time, direction),
                                                         time: time,
                                                         direction: direction,
@@ -503,13 +526,16 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                                         "text": bundledData.text
                                                     };
                                                     return [
-                                                        out_2,
+                                                        wdMessage_1,
                                                         //NOTE: Hack
-                                                        function () { return apiCallerForSpecificSim.notifySendReportReceived(wdChat, {
-                                                            "sendDateTime": null,
-                                                            "messageTowardGsm": {
-                                                                "dateTime": out_2.time,
-                                                                "text": out_2.text
+                                                        function () { return wdApi.notifySendReportReceived({
+                                                            wdChat: wdChat,
+                                                            "bundledData": {
+                                                                "sendDateTime": null,
+                                                                "messageTowardGsm": {
+                                                                    "dateTime": wdMessage_1.time,
+                                                                    "text": wdMessage_1.text
+                                                                }
                                                             }
                                                         }); }
                                                     ];
@@ -557,11 +583,12 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             /**gwTypes.BundledData.ServerToClient.SendReport is assignable to bundledData*/
             "notifySendReportReceived": (function () {
                 var methodName = apiDeclaration.wd_notifySendReportReceived.methodName;
-                return function callee(wdChat, bundledData) {
+                return function callee(_a) {
+                    var wdChat = _a.wdChat, bundledData = _a.bundledData;
                     return __awaiter(this, void 0, void 0, function () {
                         var time, direction, wdMessageRef, wdMessage, params;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
                                 case 0:
                                     time = bundledData.messageTowardGsm.dateTime;
                                     direction = "OUTGOING";
@@ -575,7 +602,8 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                         return [2 /*return*/];
                                     }
                                     if (!(wdMessage === undefined)) return [3 /*break*/, 3];
-                                    return [4 /*yield*/, apiCallerForSpecificSim.newMessage(wdChat, {
+                                    return [4 /*yield*/, wdApi.newMessage({
+                                            wdChat: wdChat,
                                             "type": "CLIENT TO SERVER",
                                             "bundledData": {
                                                 "exactSendDateTime": time,
@@ -583,10 +611,10 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                             }
                                         })];
                                 case 1:
-                                    _a.sent();
-                                    return [4 /*yield*/, callee(wdChat, bundledData)];
+                                    _b.sent();
+                                    return [4 /*yield*/, callee({ wdChat: wdChat, bundledData: bundledData })];
                                 case 2:
-                                    _a.sent();
+                                    _b.sent();
                                     return [2 /*return*/];
                                 case 3:
                                     params = {
@@ -597,10 +625,10 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                     };
                                     return [4 /*yield*/, sendRequest(methodName, params)];
                                 case 4:
-                                    _a.sent();
+                                    _b.sent();
                                     return [4 /*yield*/, onRequestProcessedByBackend({ methodName: methodName, params: params })];
                                 case 5:
-                                    _a.sent();
+                                    _b.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -609,11 +637,12 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             })(),
             "notifyStatusReportReceived": (function () {
                 var methodName = apiDeclaration.wd_notifyStatusReportReceived.methodName;
-                return function callee(wdChat, bundledData) {
+                return function callee(_a) {
+                    var wdChat = _a.wdChat, bundledData = _a.bundledData;
                     return __awaiter(this, void 0, void 0, function () {
-                        var time, direction, wdMessageRef, wdMessage, deliveredTime, sentBy, params, _a, _b, _c, _d, _e, _f, _g;
-                        return __generator(this, function (_h) {
-                            switch (_h.label) {
+                        var time, direction, wdMessageRef, wdMessage, deliveredTime, sentBy, params, _b, _c, _d, _e, _f, _g, _h;
+                        return __generator(this, function (_j) {
+                            switch (_j.label) {
                                 case 0:
                                     time = bundledData.messageTowardGsm.dateTime;
                                     direction = "OUTGOING";
@@ -627,15 +656,18 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                         return [2 /*return*/];
                                     }
                                     if (!(wdMessage === undefined || wdMessage.status === "PENDING")) return [3 /*break*/, 3];
-                                    return [4 /*yield*/, apiCallerForSpecificSim.notifySendReportReceived(wdChat, {
-                                            "sendDateTime": bundledData.statusReport.sendDateTime,
-                                            "messageTowardGsm": bundledData.messageTowardGsm
+                                    return [4 /*yield*/, wdApi.notifySendReportReceived({
+                                            wdChat: wdChat,
+                                            "bundledData": {
+                                                "sendDateTime": bundledData.statusReport.sendDateTime,
+                                                "messageTowardGsm": bundledData.messageTowardGsm
+                                            }
                                         })];
                                 case 1:
-                                    _h.sent();
-                                    return [4 /*yield*/, callee(wdChat, bundledData)];
+                                    _j.sent();
+                                    return [4 /*yield*/, callee({ wdChat: wdChat, bundledData: bundledData })];
                                 case 2:
-                                    _h.sent();
+                                    _j.sent();
                                     return [2 /*return*/];
                                 case 3:
                                     deliveredTime = bundledData.statusReport.isDelivered ?
@@ -643,37 +675,37 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                                     sentBy = bundledData.messageTowardGsm.uaSim.ua.userEmail === userEmail ?
                                         ({ "who": "USER" }) :
                                         ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail });
-                                    _a = {
+                                    _b = {
                                         imsi: imsi,
                                         "chatRef": wdChat.ref,
                                         "messageRef": wdMessageRef,
                                         deliveredTime: deliveredTime
                                     };
-                                    _b = "sentBy";
+                                    _c = "sentBy";
                                     if (!(sentBy.who === "USER")) return [3 /*break*/, 4];
-                                    _c = sentBy;
+                                    _d = sentBy;
                                     return [3 /*break*/, 6];
                                 case 4:
-                                    _d = {
+                                    _e = {
                                         "who": "OTHER"
                                     };
-                                    _e = "email";
-                                    _f = {};
-                                    _g = "encrypted_string";
+                                    _f = "email";
+                                    _g = {};
+                                    _h = "encrypted_string";
                                     return [4 /*yield*/, stringifyThenEncrypt(sentBy.email)];
                                 case 5:
-                                    _c = (_d[_e] = (_f[_g] = _h.sent(), _f),
-                                        _d);
-                                    _h.label = 6;
+                                    _d = (_e[_f] = (_g[_h] = _j.sent(), _g),
+                                        _e);
+                                    _j.label = 6;
                                 case 6:
-                                    params = (_a[_b] = _c,
-                                        _a);
+                                    params = (_b[_c] = _d,
+                                        _b);
                                     return [4 /*yield*/, sendRequest(methodName, params)];
                                 case 7:
-                                    _h.sent();
+                                    _j.sent();
                                     return [4 /*yield*/, onRequestProcessedByBackend({ methodName: methodName, params: params })];
                                 case 8:
-                                    _h.sent();
+                                    _j.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -684,11 +716,14 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
             "notifyUaFailedToSendMessage": function (wdChat, wdMessage) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, apiCallerForSpecificSim.notifySendReportReceived(wdChat, {
-                                "sendDateTime": null,
-                                "messageTowardGsm": {
-                                    "dateTime": wdMessage.time,
-                                    "text": wdMessage.text
+                        case 0: return [4 /*yield*/, wdApi.notifySendReportReceived({
+                                wdChat: wdChat,
+                                "bundledData": {
+                                    "sendDateTime": null,
+                                    "messageTowardGsm": {
+                                        "dateTime": wdMessage.time,
+                                        "text": wdMessage.text
+                                    }
                                 }
                             })];
                         case 1:
@@ -698,20 +733,19 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                 });
             }); }
         };
-        return apiCallerForSpecificSim;
+        return wdApi;
     };
 }
-exports.getApiCallerForSpecificSimFactory = getApiCallerForSpecificSimFactory;
-function getGetGetWdEvts(encryptorDecryptor, 
-//evtRequestProcessedByBackend: { attach: EvtRequestProcessedByBackend["attach"] },
-evtRequestProcessedByBackend) {
+exports.getWdApiFactory = getWdApiFactory;
+function getGetGetWdEvts(params) {
+    var encryptorDecryptor = params.encryptorDecryptor, evtRequestProcessedByBackend = params.evtRequestProcessedByBackend, decryptMessage = params.decryptMessage;
     var decryptThenParse = cryptoLib.decryptThenParseFactory(encryptorDecryptor);
     return function getGetWdEvts(imsi) {
         return function getWdEvts(wdChats) {
             var _this = this;
             var out = {
-                "evtNewUpdatedOrDeletedWdChat": new ts_events_extended_1.SyncEvent(),
-                "evtNewOrUpdatedWdMessage": new ts_events_extended_1.SyncEvent()
+                "evtWdChat": new evt_1.Evt(),
+                "evtWdMessage": new evt_1.Evt()
             };
             evtRequestProcessedByBackend.attach(function (_a) {
                 var imsi_ = _a.params.imsi;
@@ -720,7 +754,7 @@ evtRequestProcessedByBackend) {
                 var _this = this;
                 return __generator(this, function (_a) {
                     return [2 /*return*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                            var _a, params, chatRef_1, _b, contactNumber, contactName, contactIndexInSim, wdChat, params_1, wdChat, params_2, wdChat, _c, contactName, contactIndexInSim, params_3, wdChat, params_4, wdChat, wdMessage_1, params_5, wdChat, wdMessage, params_6, wdChat, wdMessage_beforeUpdate_1, wdMessage, _d, _e;
+                            var _a, params_1, chatRef_1, _b, contactNumber, contactName, contactIndexInSim, wdChat, params_2, wdChat, params_3, indexBefore, wdChat, _c, contactName, contactIndexInSim, params_4, wdChat, params_5, indexBefore, wdChat, wdMessage_2, params_6, wdChatIndexBefore, wdChat, wdMessage, wdMessageIndexBefore, params_7, wdChatIndexBefore, wdChat, wdMessage_beforeUpdate_1, wdMessage, _d, _e, wdMessageIndexBefore;
                             var _this = this;
                             return __generator(this, function (_f) {
                                 switch (_f.label) {
@@ -737,8 +771,8 @@ evtRequestProcessedByBackend) {
                                         }
                                         return [3 /*break*/, 12];
                                     case 1:
-                                        params = evtData.params;
-                                        chatRef_1 = params.chatRef;
+                                        params_1 = evtData.params;
+                                        chatRef_1 = params_1.chatRef;
                                         if (!!wdChats.find(function (_a) {
                                             var ref = _a.ref;
                                             return ref === chatRef_1;
@@ -746,9 +780,9 @@ evtRequestProcessedByBackend) {
                                             return [2 /*return*/];
                                         }
                                         return [4 /*yield*/, Promise.all([
-                                                decryptThenParse(params.contactNumber.encrypted_string),
-                                                decryptThenParse(params.contactName.encrypted_string),
-                                                decryptThenParse(params.contactIndexInSim.encrypted_number_or_null)
+                                                decryptThenParse(params_1.contactNumber.encrypted_string),
+                                                decryptThenParse(params_1.contactName.encrypted_string),
+                                                decryptThenParse(params_1.contactIndexInSim.encrypted_number_or_null)
                                             ])];
                                     case 2:
                                         _b = __read.apply(void 0, [_f.sent(), 3]), contactNumber = _b[0], contactName = _b[1], contactIndexInSim = _b[2];
@@ -761,36 +795,47 @@ evtRequestProcessedByBackend) {
                                             "messages": []
                                         };
                                         wdChats.push(wdChat);
-                                        out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "NEW" });
+                                        wdChats.sort(types.wd.Chat.compare);
+                                        out.evtWdChat.post({ wdChat: wdChat, "eventType": "NEW" });
                                         return [3 /*break*/, 12];
                                     case 3:
                                         {
-                                            params_1 = evtData.params;
+                                            params_2 = evtData.params;
                                             wdChat = wdChats.find(function (_a) {
                                                 var ref = _a.ref;
-                                                return ref === params_1.chatRef;
+                                                return ref === params_2.chatRef;
                                             });
                                             if (!wdChat) {
                                                 return [2 /*return*/];
                                             }
-                                            wdChat.refOfLastMessageSeen = params_1.refOfLastMessageSeen;
-                                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "UPDATED" });
+                                            wdChat.refOfLastMessageSeen = params_2.refOfLastMessageSeen;
+                                            out.evtWdChat.post({
+                                                wdChat: wdChat,
+                                                "eventType": "UPDATED",
+                                                "changes": {
+                                                    "unreadMessageCount": true,
+                                                    "contactInfos": false,
+                                                    "ordering": false
+                                                }
+                                            });
                                         }
                                         return [3 /*break*/, 12];
                                     case 4:
-                                        params_2 = evtData.params;
-                                        wdChat = wdChats.find(function (_a) {
+                                        params_3 = evtData.params;
+                                        indexBefore = wdChats
+                                            .findIndex(function (_a) {
                                             var ref = _a.ref;
-                                            return ref === params_2.chatRef;
+                                            return ref === params_3.chatRef;
                                         });
-                                        if (!wdChat) {
+                                        if (indexBefore < 0) {
                                             return [2 /*return*/];
                                         }
+                                        wdChat = wdChats[indexBefore];
                                         return [4 /*yield*/, Promise.all([
-                                                params_2.contactName !== undefined ?
-                                                    decryptThenParse(params_2.contactName.encrypted_string) : undefined,
-                                                params_2.contactIndexInSim !== undefined ?
-                                                    decryptThenParse(params_2.contactIndexInSim.encrypted_number_or_null) : undefined
+                                                params_3.contactName !== undefined ?
+                                                    decryptThenParse(params_3.contactName.encrypted_string) : undefined,
+                                                params_3.contactIndexInSim !== undefined ?
+                                                    decryptThenParse(params_3.contactIndexInSim.encrypted_number_or_null) : undefined
                                             ])];
                                     case 5:
                                         _c = __read.apply(void 0, [_f.sent(), 2]), contactName = _c[0], contactIndexInSim = _c[1];
@@ -800,88 +845,129 @@ evtRequestProcessedByBackend) {
                                         if (contactIndexInSim !== undefined) {
                                             wdChat.contactIndexInSim = contactIndexInSim;
                                         }
-                                        out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "UPDATED" });
+                                        wdChats.sort(types.wd.Chat.compare);
+                                        out.evtWdChat.post({
+                                            wdChat: wdChat,
+                                            "eventType": "UPDATED",
+                                            "changes": {
+                                                "ordering": wdChats.indexOf(wdChat) !== indexBefore,
+                                                "contactInfos": true,
+                                                "unreadMessageCount": false
+                                            }
+                                        });
                                         return [3 /*break*/, 12];
                                     case 6:
                                         {
-                                            params_3 = evtData.params;
+                                            params_4 = evtData.params;
                                             wdChat = wdChats.find(function (_a) {
                                                 var ref = _a.ref;
-                                                return ref === params_3.chatRef;
+                                                return ref === params_4.chatRef;
                                             });
                                             if (!wdChat) {
                                                 return [2 /*return*/];
                                             }
                                             wdChats.splice(wdChats.indexOf(wdChat), 1);
-                                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "DELETED" });
+                                            out.evtWdChat.post({ wdChat: wdChat, "eventType": "DELETED" });
                                         }
                                         return [3 /*break*/, 12];
                                     case 7:
-                                        params_4 = evtData.params;
-                                        wdChat = wdChats.find(function (_a) {
+                                        params_5 = evtData.params;
+                                        indexBefore = wdChats.findIndex(function (_a) {
                                             var ref = _a.ref;
-                                            return ref === params_4.chatRef;
+                                            return ref === params_5.chatRef;
                                         });
-                                        if (!wdChat) {
+                                        if (indexBefore < 0) {
                                             return [2 /*return*/];
                                         }
-                                        return [4 /*yield*/, wd.decryptMessage(encryptorDecryptor, params_4.message)];
+                                        wdChat = wdChats[indexBefore];
+                                        return [4 /*yield*/, decryptMessage({
+                                                "decryptor": encryptorDecryptor,
+                                                "encryptedMessage": params_5.message
+                                            })];
                                     case 8:
-                                        wdMessage_1 = _f.sent();
+                                        wdMessage_2 = _f.sent();
                                         if (!!wdChat.messages.find(function (_a) {
                                             var ref = _a.ref;
-                                            return ref === wdMessage_1.ref;
+                                            return ref === wdMessage_2.ref;
                                         })) {
                                             return [2 /*return*/];
                                         }
-                                        wdChat.messages.push(wdMessage_1);
-                                        wdChat.messages.sort(wd.compareMessage);
-                                        if (wdMessage_1.direction === "INCOMING") {
-                                            //NOTE: Metadata unreadMessageCount will have changed
-                                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "UPDATED" });
-                                        }
-                                        out.evtNewOrUpdatedWdMessage.post({ wdChat: wdChat, wdMessage: wdMessage_1 });
+                                        wdChat.messages.push(wdMessage_2);
+                                        wdChat.messages.sort(types.wd.Message.compare);
+                                        wdChats.sort(types.wd.Chat.compare);
+                                        out.evtWdChat.post({
+                                            wdChat: wdChat,
+                                            "eventType": "UPDATED",
+                                            "changes": {
+                                                "ordering": wdChats.indexOf(wdChat) !== indexBefore,
+                                                "unreadMessageCount": wdMessage_2.direction === "INCOMING",
+                                                "contactInfos": false
+                                            }
+                                        });
+                                        out.evtWdMessage.post({
+                                            wdChat: wdChat,
+                                            wdMessage: wdMessage_2,
+                                            "eventType": "NEW"
+                                        });
                                         return [3 /*break*/, 12];
                                     case 9:
                                         {
-                                            params_5 = evtData.params;
-                                            wdChat = wdChats.find(function (_a) {
+                                            params_6 = evtData.params;
+                                            wdChatIndexBefore = wdChats.findIndex(function (_a) {
                                                 var ref = _a.ref;
-                                                return ref === params_5.chatRef;
+                                                return ref === params_6.chatRef;
                                             });
-                                            if (!wdChat) {
+                                            if (wdChatIndexBefore < 0) {
                                                 return [2 /*return*/];
                                             }
+                                            wdChat = wdChats[wdChatIndexBefore];
                                             wdMessage = wdChat.messages
-                                                .find(function (wdMessage) { return (wdMessage.ref === params_5.messageRef &&
+                                                .find(function (wdMessage) { return (wdMessage.ref === params_6.messageRef &&
                                                 wdMessage.direction === "OUTGOING" &&
                                                 wdMessage.status === "PENDING"); });
                                             if (wdMessage === undefined) {
                                                 return [2 /*return*/];
                                             }
                                             createObjectWithGivenRef_1.createObjectWithGivenRef(wdMessage, {
-                                                "ref": params_5.messageRef,
+                                                "ref": params_6.messageRef,
                                                 "time": wdMessage.time,
                                                 "direction": "OUTGOING",
                                                 "text": wdMessage.text,
                                                 "status": "SEND REPORT RECEIVED",
-                                                "isSentSuccessfully": params_5.isSentSuccessfully
+                                                "isSentSuccessfully": params_6.isSentSuccessfully
                                             });
-                                            wdChat.messages.sort(wd.compareMessage);
-                                            out.evtNewOrUpdatedWdMessage.post({ wdChat: wdChat, wdMessage: wdMessage });
+                                            wdMessageIndexBefore = wdChat.messages.indexOf(wdMessage);
+                                            wdChat.messages.sort(types.wd.Message.compare);
+                                            wdChats.sort(types.wd.Chat.compare);
+                                            out.evtWdChat.post({
+                                                wdChat: wdChat,
+                                                "eventType": "UPDATED",
+                                                "changes": {
+                                                    "ordering": wdChats.indexOf(wdChat) !== wdChatIndexBefore,
+                                                    "unreadMessageCount": false,
+                                                    "contactInfos": false
+                                                }
+                                            });
+                                            out.evtWdMessage.post({
+                                                wdChat: wdChat,
+                                                wdMessage: wdMessage,
+                                                "eventType": "UPDATED",
+                                                "orderingChange": wdChat.messages.indexOf(wdMessage) !== wdMessageIndexBefore
+                                            });
                                         }
                                         return [3 /*break*/, 12];
                                     case 10:
-                                        params_6 = evtData.params;
-                                        wdChat = wdChats.find(function (_a) {
+                                        params_7 = evtData.params;
+                                        wdChatIndexBefore = wdChats.findIndex(function (_a) {
                                             var ref = _a.ref;
-                                            return ref === params_6.chatRef;
+                                            return ref === params_7.chatRef;
                                         });
-                                        if (!wdChat) {
+                                        if (wdChatIndexBefore < 0) {
                                             return [2 /*return*/];
                                         }
+                                        wdChat = wdChats[wdChatIndexBefore];
                                         wdMessage_beforeUpdate_1 = wdChat.messages
-                                            .find(function (wdMessage) { return (wdMessage.ref === params_6.messageRef &&
+                                            .find(function (wdMessage) { return (wdMessage.ref === params_7.messageRef &&
                                             wdMessage.direction === "OUTGOING" &&
                                             wdMessage.status === "SEND REPORT RECEIVED"); });
                                         if (wdMessage_beforeUpdate_1 === undefined) {
@@ -895,14 +981,14 @@ evtRequestProcessedByBackend) {
                                                     switch (_h.label) {
                                                         case 0:
                                                             part = {
-                                                                "ref": params_6.messageRef,
+                                                                "ref": params_7.messageRef,
                                                                 "time": wdMessage_beforeUpdate_1.time,
                                                                 "direction": "OUTGOING",
                                                                 "text": wdMessage_beforeUpdate_1.text,
                                                                 "status": "STATUS REPORT RECEIVED",
-                                                                "deliveredTime": params_6.deliveredTime
+                                                                "deliveredTime": params_7.deliveredTime
                                                             };
-                                                            sentBy = params_6.sentBy;
+                                                            sentBy = params_7.sentBy;
                                                             if (!(sentBy.who === "USER")) return [3 /*break*/, 1];
                                                             _a = id_1.id(__assign(__assign({}, part), { sentBy: sentBy }));
                                                             return [3 /*break*/, 3];
@@ -926,19 +1012,31 @@ evtRequestProcessedByBackend) {
                                             }); })()];
                                     case 11:
                                         wdMessage = _d.apply(void 0, _e.concat([_f.sent()]));
-                                        wdChat.messages.sort(wd.compareMessage);
-                                        if (wdMessage.sentBy.who === "OTHER") {
-                                            //NOTE: unreadMessageCount will have changed.
-                                            out.evtNewUpdatedOrDeletedWdChat.post({ wdChat: wdChat, "eventType": "UPDATED" });
-                                        }
-                                        out.evtNewOrUpdatedWdMessage.post({ wdChat: wdChat, wdMessage: wdMessage });
+                                        wdMessageIndexBefore = wdChat.messages.indexOf(wdMessage);
+                                        wdChat.messages.sort(types.wd.Message.compare);
+                                        wdChats.sort(types.wd.Chat.compare);
+                                        out.evtWdChat.post({
+                                            wdChat: wdChat,
+                                            "eventType": "UPDATED",
+                                            "changes": {
+                                                "ordering": wdChats.indexOf(wdChat) !== wdChatIndexBefore,
+                                                "unreadMessageCount": wdMessage.sentBy.who === "OTHER",
+                                                "contactInfos": false
+                                            }
+                                        });
+                                        out.evtWdMessage.post({
+                                            wdChat: wdChat,
+                                            wdMessage: wdMessage,
+                                            "eventType": "UPDATED",
+                                            "orderingChange": wdChat.messages.indexOf(wdMessage) !== wdMessageIndexBefore
+                                        });
                                         return [3 /*break*/, 12];
                                     case 12: return [2 /*return*/];
                                 }
                             });
                         }); })()
-                            .then(function () { var _a, _b; return (_b = (_a = evtData).handlerCb) === null || _b === void 0 ? void 0 : _b.call(_a); })
-                            .catch(function (error) { var _a, _b; return (_b = (_a = evtData).handlerCb) === null || _b === void 0 ? void 0 : _b.call(_a, error); })];
+                            .then(function () { var _a; return (_a = evtData.handlerCb) === null || _a === void 0 ? void 0 : _a.call(evtData); })
+                            .catch(function (error) { var _a; return (_a = evtData.handlerCb) === null || _a === void 0 ? void 0 : _a.call(evtData, error); })];
                 });
             }); });
             return out;

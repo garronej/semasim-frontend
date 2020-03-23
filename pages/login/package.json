@@ -12,7 +12,7 @@
     "typescript": "^3.5.1"
   },
   "dependencies": {
-    "minimal-polyfills": "github:garronej/minimal-polyfills",
+    "minimal-polyfills": "^1.0.4",
     "frontend-shared": "file:../../shared"
   }
 }

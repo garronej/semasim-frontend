@@ -1,5 +1,5 @@
 
-import { SyncEvent } from "ts-events-extended";
+import { Evt } from "evt";
 
 export type ApiExposedByHost = {
 	kfd(password: string, saltHex: string, iterations: number, callRef: number): void;
@@ -11,7 +11,7 @@ export type ApiExposedToHost = {
 
 declare const apiExposedByHost: ApiExposedByHost;
 
-const evtKfdResult = new SyncEvent<{
+const evtKfdResult = new Evt<{
 	callRef: number;
 	resultHex: string;
 }>();

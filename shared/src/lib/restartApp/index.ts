@@ -1,6 +1,6 @@
 
 
-export type Default = (reason: string)=>Promise<never>;
+export type RestartApp = (reason: string)=>Promise<never>;
 
 import * as impl from "./impl";
 
@@ -18,7 +18,7 @@ function matchPromise(obj: any): obj is Promise<any> {
     );
 }
 
-export const restartApp: Default = async (...args) => {
+export const restartApp: RestartApp = async (...args) => {
 
     const tasks: Promise<void>[]= [];
 

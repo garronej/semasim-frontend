@@ -1,9 +1,10 @@
 //NOTE: assert maps.googleapis.com/maps/api/js?libraries=places loaded ( or loading ) on the page.
 
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import * as modalApi from "frontend-shared/dist/tools/modal";
+import { Deferred } from "frontend-shared/dist/tools/Deferred";
 
 declare const google: any;
 declare const require: any;
@@ -23,8 +24,8 @@ export class UiShippingForm {
     private readonly hideModal: () => Promise<void>;
     private readonly showModal: () => Promise<void>;
 
-    private readonly evt_id_close_click = new VoidSyncEvent();
-    private readonly evt_button_click = new VoidSyncEvent();
+    private readonly evt_id_close_click = new VoidEvt();
+    private readonly evt_button_click = new VoidEvt();
 
     /** 
      * The evt argument should post be posted whenever.
@@ -108,11 +109,7 @@ export class UiShippingForm {
 
     public async interact_getAddress(): Promise<types.ShippingFormData | undefined> {
 
-        let resolvePrOut: (shippingFormData: types.ShippingFormData | undefined) => void;
-
-        const prOut = new Promise<types.ShippingFormData | undefined>(
-            resolve => resolvePrOut = resolve
-        );
+        const dOut = new Deferred<types.ShippingFormData | undefined>();
 
         this.evt_id_close_click.detach();
         this.evt_button_click.detach();
@@ -121,7 +118,7 @@ export class UiShippingForm {
 
             await this.hideModal();
 
-            resolvePrOut(undefined);
+            dOut.resolve(undefined);
 
         });
 
@@ -166,16 +163,17 @@ export class UiShippingForm {
 
             await this.hideModal();
 
-            resolvePrOut({
+            dOut.resolve({
                 "firstName": this.structure.find(".id_firstName").val(),
                 "lastName": this.structure.find(".id_lastName").val(),
                 "addressComponents": this.autocomplete.getPlace()["address_components"],
                 "addressExtra": this.structure.find(".id_extra").val() || undefined
             });
 
+
         });
 
-        this.evt_id_close_click.attachOnce(() => resolvePrOut(undefined));
+        this.evt_id_close_click.attachOnce(() => dOut.resolve(undefined));
 
         await this.showModal();
 
@@ -183,7 +181,7 @@ export class UiShippingForm {
             await this.initAutocomplete();
         }
 
-        return prOut;
+        return dOut.pr;
 
     }
 

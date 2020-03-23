@@ -1,7 +1,9 @@
 
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Observable, IObservable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/userSim";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 declare const require: (path: string) => any;
 
@@ -12,265 +14,278 @@ const html = loadUiClassHtml(
 
 require("../templates/UiSimRow.less");
 
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    "evtFriendlyNameChange" |
+    "evtReachabilityStatusChange" |
+    "evtCellularConnectivityChange" |
+    "evtCellularSignalStrengthChange" |
+    "evtNewUpdatedOrDeletedContact" |
+    "evtDelete"
+>;
+
 export class UiSimRow {
 
     public readonly structure = html.structure.clone();
 
-    public evtSelected = new VoidSyncEvent();
-
-    public isSelected = false;
-
-    public unselect() {
-
-        this.structure.find(".id_row").removeClass("selected");
-
-        this.isSelected = false;
-
-    }
-
-    public setDetailsVisibility(visibility: "SHOWN" | "HIDDEN") {
-
-        const details = this.structure.find(".id_details");
-
-        switch (visibility) {
-            case "SHOWN": details.show(); break;
-            case "HIDDEN": details.hide(); break;
+    constructor(
+        params: {
+            userSim: types.UserSim.Usable;
+            userSimEvts: UserSimEvts;
+            obsIsSelected: Observable<boolean>;
+            obsAreDetailsVisible: IObservable<boolean>;
+            obsIsVisible: IObservable<boolean>;
         }
+    ) {
+        const { userSim, userSimEvts, obsIsSelected, obsAreDetailsVisible, obsIsVisible } = params;
 
-    }
+        this.structure.click(() => obsIsSelected.onPotentialChange(true));
 
-    public setVisibility(visibility: "SHOWN" | "HIDDEN") {
-
-        switch (visibility) {
-            case "SHOWN": this.structure.show(); break;
-            case "HIDDEN": this.structure.hide(); break;
-        }
-
-    }
-
-
-    /** To call when userSim has changed */
-    public populate() {
-
-        /*
-        this.structure.find(".id_simId").text(
-            (() => {
-
-                let out = this.userSim.friendlyName;
-
-                const number = this.userSim.sim.storage.number
-
-                if (!!number) {
-                    out += " " + phoneNumber.prettyPrint(
-                        phoneNumber.build(
-                            number,
-                            !!this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
-                        )
-                    ) + " ";
-                }
-
-                return out;
-
-            })()
-        );
-        */
-
-        this.structure.find(".id_simId").text(
-            (() => {
-
-                let out = this.userSim.friendlyName;
-
-                const number = this.userSim.sim.storage.number
-
-                if (!!number) {
-                    out += " " + number + " ";
-                }
-
-                return out;
-
-            })()
-        );
+        userSimEvts.evtDelete.attachOnce(() => {
+            obsIsSelected.onPotentialChange(false);
+            this.structure.detach();
+        });
 
         {
 
-            let text: string | undefined = undefined;
 
-            if (!this.userSim.reachableSimState) {
-                text = "Not reachable";
-            } else if (!this.userSim.reachableSimState.isGsmConnectivityOk) {
-                text = "No GSM connection";
-            }
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
+                ...userSimEvts,
+                "evtIsSelectedValueChange": obsIsSelected.evtChange,
+                "evtAreDetailsVisibleValueChange": obsAreDetailsVisible.evtChange,
+                "evtIsVisibleValueChange": obsIsVisible.evtChange
+            });
 
-            const $span = this.structure.find(".id_connectivity");
+            runNowAndWhenEventOccur(
+                () => {
 
-            if (text === undefined) {
-                $span.hide();
-            } else {
-                $span.show().text(text);
-            }
+                    const details = this.structure.find(".id_details");
+
+                    if (obsAreDetailsVisible.value) {
+                        details.show();
+                    } else {
+                        details.hide();
+                    }
+
+
+                },
+                ["evtAreDetailsVisibleValueChange"]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+
+                    if (obsIsVisible.value) {
+                        this.structure.show();
+                    } else {
+                        this.structure.hide();
+                    }
+
+                },
+                ["evtIsVisibleValueChange"]
+            );
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_row")[obsIsSelected.value ? "addClass" : "removeClass"]("selected"),
+                ["evtIsSelectedValueChange"]
+            );
+
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_simId").text(
+                    (() => {
+
+                        let out = userSim.friendlyName;
+
+                        const number = userSim.sim.storage.number
+
+                        if (!!number) {
+                            out += " " + number + " ";
+                        }
+
+                        return out;
+
+                    })(),
+                ),
+                ["evtFriendlyNameChange"]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+
+                    let text: string | undefined = undefined;
+
+                    if (!userSim.reachableSimState) {
+                        text = "Not reachable";
+                    } else if (!userSim.reachableSimState.isGsmConnectivityOk) {
+                        text = "No GSM connection";
+                    }
+
+                    const $span = this.structure.find(".id_connectivity");
+
+                    if (text === undefined) {
+                        $span.hide();
+                    } else {
+                        $span.show().text(text);
+                    }
+                },
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange"
+                ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find("i")
+                    .each((_i, e) => {
+
+                        const $i = $(e);
+
+                        const cellSignalStrength = $i.attr("data-strength");
+
+                        if (!cellSignalStrength) {
+                            return;
+                        }
+
+                        $i[(
+                            !!userSim.reachableSimState &&
+                            userSim.reachableSimState.isGsmConnectivityOk &&
+                            cellSignalStrength === userSim.reachableSimState.cellSignalStrength
+                        ) ? "show" : "hide"
+                        ]();
+
+                    }),
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange",
+                    "evtCellularSignalStrengthChange"
+                ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_row")[
+                    !userSim.reachableSimState || !userSim.reachableSimState.isGsmConnectivityOk ?
+                        "addClass" : "removeClass"
+                ]("offline"),
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange"
+                ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_gw_location").text(
+                    [
+                        userSim.gatewayLocation.city ?? "",
+                        userSim.gatewayLocation.countryIso ?? "",
+                        `( ${userSim.gatewayLocation.ip} )`
+                    ].join(" "),
+                ),
+                ["evtReachabilityStatusChange"]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+
+                    const { dongle } = userSim;
+
+                    this.structure.find(".id_dongle_model").text(
+                        `${dongle.manufacturer} ${dongle.model}`
+                    );
+
+                    this.structure.find(".id_dongle_firm").text(
+                        dongle.firmwareVersion
+                    );
+
+                    this.structure.find(".id_dongle_imei").text(
+                        dongle.imei
+                    );
+
+                    {
+                        const span = this.structure.find(".id_voice_support");
+
+                        if (dongle.isVoiceEnabled === undefined) {
+
+                            span.parent().hide();
+
+                        } else {
+
+                            span.text(
+                                dongle.isVoiceEnabled ?
+                                    "yes" :
+                                    "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>"
+                            );
+
+                        }
+                    }
+
+                },
+                ["evtReachabilityStatusChange"]
+            );
+
+            runNowAndWhenEventOccur(
+                () =>
+
+                    this.structure.find(".id_phonebook").text(
+                        (() => {
+
+                            let n = userSim.sim.storage.contacts.length;
+                            let tot = n + userSim.sim.storage.infos.storageLeft;
+
+                            return `${n}/${tot}`
+
+                        })()
+                    ),
+                ["evtNewUpdatedOrDeletedContact"]
+            );
+
 
         }
 
-        this.structure.find("i")
-            .each((_i, e) => {
-
-                const $i = $(e);
-
-                const cellSignalStrength = $i.attr("data-strength");
-
-                if (!cellSignalStrength) {
-                    return;
-                }
-
-                $i[(
-                    !!this.userSim.reachableSimState &&
-                    this.userSim.reachableSimState.isGsmConnectivityOk &&
-                    cellSignalStrength === this.userSim.reachableSimState.cellSignalStrength
-                ) ? "show" : "hide"
-                ]();
-
-            });
-
-        this.structure.find(".id_row")[
-            !this.userSim.reachableSimState || !this.userSim.reachableSimState.isGsmConnectivityOk ?
-                "addClass" : "removeClass"
-        ]("offline");
-
-
         this.structure.find(".id_ownership").text(
-            this.userSim.ownership.status === "OWNED" ?
-                "" :
-                `owned by: ${this.userSim.ownership.ownerEmail}`
-        );
-
-        this.structure.find(".id_gw_location").text(
-            [
-                this.userSim.gatewayLocation.city || "",
-                this.userSim.gatewayLocation.countryIso || "",
-                `( ${this.userSim.gatewayLocation.ip} )`
-            ].join(" ")
+            userSim.ownership.status === "SHARED CONFIRMED" ?
+                `owned by: ${userSim.ownership.ownerEmail}` :
+                ""
         );
 
         {
 
             const span = this.structure.find(".id_owner");
 
-            if (this.userSim.ownership.status === "OWNED") {
+            if (userSim.ownership.status === "OWNED") {
                 span.parent().hide();
             } else {
-                span.text(this.userSim.ownership.ownerEmail);
+                span.text(userSim.ownership.ownerEmail);
             }
 
         }
 
-        this.structure.find(".id_number").text((() => {
-
-            let n = this.userSim.sim.storage.number;
-
-            return n || "Unknown";
-
-        })());
+        this.structure.find(".id_number").text(
+            userSim.sim.storage.number ?? "Unknown"
+        );
 
         this.structure.find(".id_serviceProvider").text(
             (() => {
 
-                let out: string;
+                const { serviceProvider } = userSim.sim;
 
-                if (this.userSim.sim.serviceProvider.fromImsi) {
-                    out = this.userSim.sim.serviceProvider.fromImsi;
-                } else if (this.userSim.sim.serviceProvider.fromNetwork) {
-                    out = this.userSim.sim.serviceProvider.fromNetwork;
-                } else {
-                    out = "Unknown";
-                }
+                return serviceProvider.fromImsi ?? serviceProvider.fromNetwork ?? "Unknown" +
+                    (userSim.sim.country ? `, ${userSim.sim.country.name}` : "")
+                    ;
 
-                if (this.userSim.sim.country) {
-                    out += `, ${this.userSim.sim.country.name}`;
-                }
-
-                return out;
 
             })()
         );
 
-        {
-
-            const d = this.userSim.dongle;
-
-            this.structure.find(".id_dongle_model").text(
-                `${d.manufacturer} ${d.model}`
-            );
-
-            this.structure.find(".id_dongle_firm").text(
-                d.firmwareVersion
-            );
-
-            this.structure.find(".id_dongle_imei").text(
-                d.imei
-            );
-
-            {
-                const span = this.structure.find(".id_voice_support");
-
-                if (d.isVoiceEnabled === undefined) {
-
-                    span.parent().hide();
-
-                } else {
-
-                    span.text(
-                        d.isVoiceEnabled ?
-                            "yes" :
-                            "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>"
-                    );
-
-                }
-            }
-
-
-        }
 
         this.structure.find(".id_imsi").text(
-            this.userSim.sim.imsi
+            userSim.sim.imsi
         );
 
         this.structure.find(".id_iccid").text(
-            this.userSim.sim.iccid
+            userSim.sim.iccid
         );
 
-
-        this.structure.find(".id_phonebook").text(
-            (() => {
-
-                let n = this.userSim.sim.storage.contacts.length;
-                let tot = n + this.userSim.sim.storage.infos.storageLeft;
-
-                return `${n}/${tot}`
-
-            })()
-        );
-
-    }
-
-    constructor(public readonly userSim: types.UserSim.Usable) {
-
-        this.structure.click(() => {
-
-            if (!this.isSelected) {
-
-                this.isSelected = true;
-
-                this.structure.find(".id_row").addClass("selected");
-
-                this.evtSelected.post();
-
-            }
-
-        });
-
-        this.setDetailsVisibility("HIDDEN");
-
-        this.populate();
 
     }
 

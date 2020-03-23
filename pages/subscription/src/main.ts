@@ -1,16 +1,44 @@
 
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+//TODO: Write a launcher
+import { getWebApi } from "frontend-shared/dist/lib/webApiCaller";
+import { AuthenticatedSessionDescriptorSharedData } from "frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData";
+import * as networkStateMonitoring from "frontend-shared/dist/lib/networkStateMonitoring";
+import { restartApp } from "frontend-shared/dist/lib/restartApp";
+
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiController } from "./UiController";
-import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import "frontend-shared/dist/tools/polyfills/Object.assign";
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
+
+const prWebApi = (async () => {
+
+    const networkStateMonitoringApi = await networkStateMonitoring.getApi();
+
+    return (() => {
+
+        const { getLoginLogoutApi, ...rest } = getWebApi({
+            AuthenticatedSessionDescriptorSharedData,
+            networkStateMonitoringApi,
+            restartApp
+        });
+
+        return {
+            ...rest,
+            ...getLoginLogoutApi({ "assertJsRuntimeEnv": "browser" })
+        };
+
+    })();
+
+
+})();
+
+
 
 declare const apiExposedByHost: {
     onDone(errorMessage: string | null): void;
 };
 
-if( typeof apiExposedByHost !== "undefined" ){
+if (typeof apiExposedByHost !== "undefined") {
 
     window.onerror = (msg, url, lineNumber) => {
         apiExposedByHost.onDone(`${msg}\n'${url}:${lineNumber}`);
@@ -31,21 +59,23 @@ async function onLoggedIn() {
 
     dialogApi.loading("Loading subscription infos");
 
+    const webApi = await prWebApi;
+
     const [
-        subscriptionInfos, 
-        { 
-            location: countryIsoFromLocation, 
-            language: countryIsoForLanguage 
-        } 
+        subscriptionInfos,
+        {
+            location: countryIsoFromLocation,
+            language: countryIsoForLanguage
+        }
     ] = await Promise.all([
-        webApiCaller.getSubscriptionInfos(),
-        webApiCaller.getCountryIso()
+        webApi.getSubscriptionInfos(),
+        webApi.getCountryIso()
     ]);
 
     if (
         typeof apiExposedByHost !== "undefined" &&
         (
-            subscriptionInfos.customerStatus === "EXEMPTED" || 
+            subscriptionInfos.customerStatus === "EXEMPTED" ||
             !!subscriptionInfos.subscription
         )
     ) {
@@ -58,15 +88,16 @@ async function onLoggedIn() {
 
     dialogApi.dismissLoading();
 
-    const uiController = new UiController(
+    const uiController = new UiController({
+        webApi,
         subscriptionInfos,
-        countryIsoFromLocation || countryIsoForLanguage
-    );
+        "guessedCountryIso": countryIsoFromLocation || countryIsoForLanguage
+    });
 
     uiController.evtDone.attachOnce(() => {
 
         if (typeof apiExposedByHost !== "undefined") {
-            
+
             apiExposedByHost.onDone(null);
 
         } else {
@@ -85,11 +116,17 @@ async function onLoggedIn() {
 const apiExposedToHost: {
     login(email: string, secret: string): void;
 } = {
-    "login": (email,secret)=> {
+    "login": (email, secret) => {
 
         (async () => {
 
-            const { status } = await webApiCaller.loginUser(email, secret, undefined);
+            const webApi = await prWebApi;
+
+            const { status } = await webApi.loginUser({ 
+                "assertJsRuntimeEnv": "browser",
+                email, 
+                secret,
+             });
 
             if (status !== "SUCCESS") {
 
@@ -115,9 +152,11 @@ $(document).ready(() => {
 
     $("#logout").click(async () => {
 
-        await webApiCaller.logoutUser();
+        const webApi = await prWebApi;
 
-        location.href = `/${availablePages.PageName.login}`;
+        await webApi.logoutUser();
+
+        restartApp("User logged out");
 
     });
 

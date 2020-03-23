@@ -36,13 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var localStorageApi = require("./localStorageApi");
 var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     /** Can be used to track when the user is logged in */
-    AuthenticatedSessionDescriptorSharedData.evtChange = new ts_events_extended_1.SyncEvent();
+    AuthenticatedSessionDescriptorSharedData.evtChange = new evt_1.Evt();
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;

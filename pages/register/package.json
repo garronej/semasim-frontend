@@ -4,7 +4,7 @@
     "build": "node ../../build-script/dist/cmd build_page"
   },
   "dependencies": {
-    "minimal-polyfills": "github:garronej/minimal-polyfills",
+    "minimal-polyfills": "^1.0.4",
     "frontend-shared": "file:../../shared"
   },
   "devDependencies": {

@@ -1,306 +1,276 @@
-import { UiQuickAction } from "./UiQuickAction";
+import { uiQuickActionDependencyInjection } from "./UiQuickAction";
 import { UiHeader } from "./UiHeader";
 import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import * as wd from "frontend-shared/dist/lib/types/webphoneData/types";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import { Webphone } from "frontend-shared/dist/lib/Webphone";
+import * as types from "frontend-shared/dist/lib/types";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { Webphone } from "frontend-shared/dist/lib/types/Webphone";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: any;
 
-const html = loadUiClassHtml(
-    require("../templates/UiWebphoneController.html"),
-    "UiWebphoneController"
-);
-
-export class UiWebphoneController {
-
-    public readonly structure = html.structure.clone();
-
-    private readonly uiHeader: UiHeader;
-    private readonly uiQuickAction: UiQuickAction;
-    private readonly uiPhonebook: UiPhonebook;
-
-    public constructor(private readonly webphone: Webphone) {
-
-        const { userSim } = webphone;
-
-        const getIsSipRegistered = () => webphone.obsIsSipRegistered.value;
-
-        this.uiHeader = new UiHeader(userSim, getIsSipRegistered);
-
-        this.uiQuickAction = new UiQuickAction(userSim, getIsSipRegistered);
-
-        this.uiPhonebook = new UiPhonebook(userSim, webphone.wdChats);
-
-        this.attachWebphoneEventHandlers();
-
-        this.initUiHeader();
-
-        this.initUiQuickAction();
-
-        this.initUiPhonebook();
-
-        $("body").data("dynamic").panels();
-
-        setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
-
+export function uiWebphoneControllerDependencyInjection(
+    params: {
+        dialogApi: typeof import("frontend-shared/dist/tools/modal/dialog").dialogApi;
     }
+) {
 
+    const { dialogApi } = params;
 
-    private attachWebphoneEventHandlers() {
+    const { UiQuickAction } = uiQuickActionDependencyInjection({ dialogApi });
 
-        this.webphone.wdEvts.evtNewUpdatedOrDeletedWdChat.attach(
-            ({ eventType, wdChat }) => {
+    const html = loadUiClassHtml(
+        require("../templates/UiWebphoneController.html"),
+        "UiWebphoneController"
+    );
 
-                switch (eventType) {
-                    case "NEW":
+    class UiWebphoneController {
 
-                        this.uiPhonebook.insertContact(wdChat);
+        public readonly structure = html.structure.clone();
 
-                        $('body').data('dynamic').panels();
+        private readonly uiHeader: UiHeader;
+        private readonly uiQuickAction: import("./UiQuickAction").UiQuickAction
+        private readonly uiPhonebook: UiPhonebook;
 
-                        this.getOrCreateUiConversation(wdChat);
+        public constructor(private readonly webphone: Webphone) {
 
-                        break;
-                    case "UPDATED":
+            const {
+                userSim,
+                wdChats,
+                wdEvts: { evtWdChat },
+                userSimEvts,
+                obsIsSipRegistered
+            } = webphone;
 
-                        this.uiPhonebook.notifyContactChanged(wdChat);
+            this.uiHeader = new UiHeader({ userSim, userSimEvts, obsIsSipRegistered });
 
-                        this.getOrCreateUiConversation(wdChat)
-                            .notify()
-                            ;
+            this.uiQuickAction = new UiQuickAction({ userSim, userSimEvts, obsIsSipRegistered });
 
-                        break;
-                    case "DELETED":
+            this.uiPhonebook = new UiPhonebook({ userSim, wdChats, evtWdChat });
 
-                        this.uiPhonebook.notifyContactChanged(wdChat);
+            this.initUiHeader();
 
-                        this.getOrCreateUiConversation(wdChat).structure.detach();
+            this.initUiQuickAction();
 
-                        this._uiConversations.delete(wdChat);
+            this.initUiPhonebook();
 
-                        this.uiPhonebook.triggerClickOnLastSeenChat();
+            $("body").data("dynamic").panels();
 
-                        break;
-                }
+            setTimeout(() => this.uiPhonebook.triggerClickOnLastSeenChat(), 0);
 
-            }
-        );
+        }
 
-        this.webphone.wdEvts.evtNewOrUpdatedWdMessage.attach(
-            ({ wdChat, wdMessage }) => this.getOrCreateUiConversation(wdChat)
-                .newOrUpdatedMessage(wdMessage)
-        );
+        private initUiHeader() {
 
-        {
+            this.structure
+                .find("div.id_header")
+                .append(this.uiHeader.structure)
+                ;
 
-            const notify = (onlyHeader?: "ONLY HEADER") => {
+            this.uiHeader.evtJoinCall.attach(number =>
+                this.uiQuickAction.evtVoiceCall.post(number)
+            );
 
-                this.uiHeader.notify();
+        }
 
-                if (!!onlyHeader) {
+        private initUiQuickAction() {
+
+            this.structure
+                .find("div.id_colLeft")
+                .append(this.uiQuickAction.structure);
+
+            const onEvt = async (action: "SMS" | "CALL" | "CONTACT", number: phoneNumber) => {
+
+                const wdChat = await this.webphone.getOrCreateWdChat({ "number_raw": number});
+
+                this.uiPhonebook.triggerContactClick(wdChat);
+
+                if (action === "SMS") {
                     return;
                 }
 
-                this.uiQuickAction.notify();
+                const uiConversation = this.getOrCreateUiConversation(wdChat);
 
-                for (const uiConversation of this._uiConversations.values()) {
-
-                    uiConversation.notify();
-
+                switch (action) {
+                    case "CALL": uiConversation.evtVoiceCall.post(); break;
+                    case "CONTACT": uiConversation.evtUpdateContact.post(); break;
                 }
 
             };
 
-            this.webphone.evtUserSimUpdated.attach(
-                event => notify(event === "cellSignalStrengthChange" ? "ONLY HEADER" : undefined)
-            );
+            this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
 
-            this.webphone.obsIsSipRegistered.evtChange.attach(() => notify());
+            this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
+
+            this.uiQuickAction.evtNewContact.attach(number => onEvt("CONTACT", number));
 
         }
 
+        private initUiPhonebook() {
 
+            this.structure
+                .find("div.id_colLeft")
+                .append(this.uiPhonebook.structure);
 
+            this.uiPhonebook.evtContactSelected.attach(
+                ({ wdChatPrev, wdChat }) => {
 
+                    if (wdChatPrev) {
 
-    }
+                        this.getOrCreateUiConversation(wdChatPrev).unselect();
 
+                    }
 
-    private initUiHeader() {
+                    this.getOrCreateUiConversation(wdChat).setSelected();
 
-        this.structure
-            .find("div.id_header")
-            .append(this.uiHeader.structure)
-            ;
+                }
+            );
 
-        this.uiHeader.evtJoinCall.attach(number =>
-            this.uiQuickAction.evtVoiceCall.post(number)
-        );
+        }
 
-    }
+        private readonly getOrCreateUiConversation = (() => {
 
-    private initUiQuickAction() {
+            const map = new WeakMap<types.wd.Chat, UiConversation>();
 
-        this.structure
-            .find("div.id_colLeft")
-            .append(this.uiQuickAction.structure);
+            return (wdChat: types.wd.Chat): UiConversation => {
 
-        const onEvt = async (action: "SMS" | "CALL" | "CONTACT", number: phoneNumber) => {
+                let uiConversation: UiConversation | undefined;
 
-            const wdChat = await this.webphone.getAndOrCreateAndOrUpdateWdChat(number);
+                {
 
-            this.uiPhonebook.triggerContactClick(wdChat);
+                    uiConversation = map.get(wdChat);
 
-            if (action === "SMS") {
-                return;
-            }
-
-            const uiConversation = this.getOrCreateUiConversation(wdChat);
-
-            switch (action) {
-                case "CALL": uiConversation.evtVoiceCall.post(); break;
-                case "CONTACT": uiConversation.evtUpdateContact.post(); break;
-            }
-
-        };
-
-        this.uiQuickAction.evtSms.attach(number => onEvt("SMS", number));
-
-        this.uiQuickAction.evtVoiceCall.attach(number => onEvt("CALL", number));
-
-        this.uiQuickAction.evtNewContact.attach(number => onEvt("CONTACT", number));
-
-    }
-
-    private initUiPhonebook() {
-
-        this.structure
-            .find("div.id_colLeft")
-            .append(this.uiPhonebook.structure);
-
-        this.uiPhonebook.evtContactSelected.attach(
-            ({ wdChatPrev, wdChat }) => {
-
-                if (wdChatPrev) {
-
-                    this.getOrCreateUiConversation(wdChatPrev).unselect();
+                    if (uiConversation !== undefined) {
+                        return uiConversation;
+                    }
 
                 }
 
-                this.getOrCreateUiConversation(wdChat).setSelected();
+                uiConversation = new UiConversation({
+                    "userSim": this.webphone.userSim,
+                    "userSimEvts": this.webphone.userSimEvts,
+                    "obsIsSipRegistered": this.webphone.obsIsSipRegistered,
+                    wdChat,
+                    "evtUpdatedOrDeletedWdChat": this.webphone.wdEvts.evtWdChat.pipe(
+                        Evt.getCtx(wdChat),
+                        data =>
+                            data.wdChat !== wdChat ?
+                                null : data.eventType === "NEW" ?
+                                    null : [
+                                        data.eventType,
+                                        data.eventType === "DELETED" ?
+                                            { "DETACH": Evt.getCtx(wdChat) } :
+                                            null
+                                    ]
+                    ),
+                    "evtNewOrUpdatedMessage":
+                        this.webphone.wdEvts.evtWdMessage.pipe(
+                            Evt.getCtx(wdChat),
+                            data => data.wdChat !== wdChat ?
+                                null : [data.wdMessage]
+                        ),
+                    "fetchOlderWdMessages": () => this.webphone.fetchOlderWdMessages({ wdChat, "maxMessageCount": 30 })
+                });
 
-            }
-        );
+
+                map.set(wdChat, uiConversation);
+
+                this.structure.find("div.id_colRight").append(uiConversation.structure);
+
+                uiConversation.evtChecked.attach(
+                    () => this.webphone.updateWdChatLastMessageSeen(wdChat)
+                );
+
+                uiConversation.evtSendText.attach(
+                    text => this.webphone.sendMessage({ wdChat, text })
+                );
+
+                /*
+                if (!DetectRTC.isRtpDataChannelsSupported) {
+        
+                    let message = "Call not supported by this browser.";
+        
+                    if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
+        
+                        message += " Android app available";
+        
+                    } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        
+                        message += " iOS app coming soon.";
+        
+                    }
+        
+                    bootbox_custom.alert(message);
+                    return;
+        
+                }
+                */
+
+                uiConversation.evtVoiceCall.attach(
+                    () => this.webphone.placeOutgoingCall(wdChat)
+                );
+
+                uiConversation.evtUpdateContact.attach(async () => {
+
+                    const name = await new Promise<string | null>(
+                        resolve => dialogApi.create("prompt", {
+                            "title": `Contact name for ${wdChat.contactNumber}`,
+                            "value": wdChat.contactName || "",
+                            "callback": result => resolve(result),
+                        })
+                    );
+
+                    if (!name) {
+                        return;
+                    }
+
+                    dialogApi.loading("Create or update contact");
+
+                    await this.webphone.updateWdChatContactName({ wdChat, "contactName": name });
+
+                    dialogApi.dismissLoading();
+
+                });
+
+                uiConversation.evtDelete.attach(async () => {
+
+                    const shouldProceed = await new Promise<boolean>(
+                        resolve => dialogApi.create("confirm", {
+                            "title": "Delete chat",
+                            "message": "Delete contact and conversation ?",
+                            callback: result => resolve(result)
+                        })
+                    );
+
+                    if (!shouldProceed) {
+                        return;
+                    }
+
+                    dialogApi.loading("Deleting contact and conversation");
+
+                    await this.webphone.deleteWdChat(wdChat);
+
+                    dialogApi.dismissLoading();
+
+                });
+
+                return uiConversation;
+
+            };
+
+        })();
+
 
     }
 
-    private readonly _uiConversations = new Map<wd.Chat<"PLAIN">, UiConversation>();
-
-    private getOrCreateUiConversation(wdChat: wd.Chat<"PLAIN">): UiConversation {
-
-        if (this._uiConversations.has(wdChat)) {
-            return this._uiConversations.get(wdChat)!;
-        }
-
-        const uiConversation = new UiConversation(
-            this.webphone.userSim,
-            () => this.webphone.obsIsSipRegistered.value,
-            wdChat,
-            () => this.webphone.fetchOlderWdMessages(wdChat, 100)
-        );
+    return { UiWebphoneController };
 
 
-        this._uiConversations.set(wdChat, uiConversation);
-
-        this.structure.find("div.id_colRight").append(uiConversation.structure);
-
-        uiConversation.evtChecked.attach(
-            () => this.webphone.updateWdChatLastMessageSeen(wdChat)
-        );
-
-        uiConversation.evtSendText.attach(
-            text => this.webphone.sendMessage(wdChat, text)
-        );
-
-        /*
-        if (!DetectRTC.isRtpDataChannelsSupported) {
-
-            let message = "Call not supported by this browser.";
-
-            if (/Android|webOS|Opera Mini/i.test(navigator.userAgent)) {
-
-                message += " Android app available";
-
-            } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-
-                message += " iOS app coming soon.";
-
-            }
-
-            bootbox_custom.alert(message);
-            return;
-
-        }
-        */
-
-        uiConversation.evtVoiceCall.attach(
-            () => this.webphone.placeOutgoingCall(wdChat)
-        );
-
-        uiConversation.evtUpdateContact.attach(async () => {
-
-            const name = await new Promise<string | null>(
-                resolve => dialogApi.create("prompt", {
-                    "title": `Contact name for ${wdChat.contactNumber}`,
-                    "value": wdChat.contactName || "",
-                    "callback": result => resolve(result),
-                })
-            );
-
-            if (!name) {
-                return undefined;
-            }
-
-            dialogApi.loading("Create or update contact");
-
-            await this.webphone.updateNameOfWdChatAndCreateOrUpdateCorespondingContactInSim(
-                wdChat, name
-            );
-
-            dialogApi.dismissLoading();
-
-        });
-
-        uiConversation.evtDelete.attach(async () => {
-
-            const shouldProceed = await new Promise<boolean>(
-                resolve => dialogApi.create("confirm", {
-                    "title": "Delete chat",
-                    "message": "Delete contact and conversation ?",
-                    callback: result => resolve(result)
-                })
-            );
-
-            if (!shouldProceed) {
-                return;
-            }
-
-            dialogApi.loading("Deleting contact and conversation");
-
-            await this.webphone.deleteWdChatAndCorrespondingContactInSim(wdChat);
-
-            dialogApi.dismissLoading();
-
-        });
-
-        return uiConversation;
-
-    }
 
 
 
 }
+
+
+

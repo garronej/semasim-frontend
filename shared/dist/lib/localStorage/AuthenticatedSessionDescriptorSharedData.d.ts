@@ -1,4 +1,4 @@
-import { SyncEvent } from "ts-events-extended";
+import { Evt } from "evt";
 export declare type AuthenticatedSessionDescriptorSharedData = {
     connect_sid: string;
     email: string;
@@ -7,7 +7,7 @@ export declare type AuthenticatedSessionDescriptorSharedData = {
 };
 export declare namespace AuthenticatedSessionDescriptorSharedData {
     /** Can be used to track when the user is logged in */
-    const evtChange: SyncEvent<AuthenticatedSessionDescriptorSharedData | undefined>;
+    const evtChange: Evt<AuthenticatedSessionDescriptorSharedData | undefined>;
     function isPresent(): Promise<boolean>;
     function remove(): Promise<void>;
     /** assert isPresent */

@@ -1,8 +1,14 @@
 import * as cryptoLib from "./cryptoLibProxy";
 /** Must be called before using the async function */
-export declare function preSpawn(): void;
-export declare function computeLoginSecretAndTowardUserKeys(password: string, uniqUserIdentification: string): Promise<{
-    "secret": string;
+export declare function preSpawnIfNotAlreadyDone(): void;
+export declare namespace preSpawnIfNotAlreadyDone {
+    var hasBeenCalled: boolean;
+}
+export declare function computeLoginSecretAndTowardUserKeys(params: {
+    password: string;
+    uniqUserIdentification: string;
+}): Promise<{
+    secret: string;
     towardUserKeys: import("../localStorage/TowardUserKeys").TowardUserKeys;
 }>;
 export declare namespace symmetricKey {

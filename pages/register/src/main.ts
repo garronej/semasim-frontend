@@ -4,7 +4,7 @@ import "frontend-shared/dist/tools/polyfills/Object.assign";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";
-import * as registerPageLogic from "frontend-shared/dist/lib/pageLogic/registerPageLogic";
+import { registerPageLaunch } from "frontend-shared/dist/lib/appLauncher/registerPageLaunch";
 
 //@ts-ignore: so it is clear that some API should be exposed by host.
 declare const apiExposedByHost: (
@@ -21,7 +21,31 @@ const apiExposedToHost: (
 
 Object.assign(window, { apiExposedToHost });
 
-function setHandlers() {
+$(document).ready(() => {
+
+	const prApi= registerPageLaunch({
+		"assertJsRuntimeEnv": "browser",
+		"email": urlGetParameters.parseUrl<availablePages.urlParams.Register>().email,
+		"uiApi": {
+			"emailInput": {
+				"setValue": ({ value, readonly })=> {
+
+					$("#email").val(value);
+					$("#email").prop("readonly", readonly);
+
+				},
+				"getValue": ()=> $("#email").val()
+			},
+			"passwordInput": {
+				"getValue": ()=> $("#password").val()
+			},
+			"redirectToLogin": ({ email })=> 
+				window.location.href = urlGetParameters.buildUrl<availablePages.urlParams.Login>(
+					`/${availablePages.PageName.login}`,
+					{ email }
+				)
+		}
+	});
 
 	/* Start code from template */
 	$("#register-form").validate({
@@ -72,38 +96,10 @@ function setHandlers() {
 
 		if (!$(this).valid()) return;
 
-		const [email, password] = (() => {
+		const { register } = await prApi;
 
-			const [email, password] = ["#email", "#password"]
-				.map(sel => $(sel).val() as string)
-				;
+		register();
 
-			return [email, password];
-
-		})();
-
-		registerPageLogic.register(email, password, {
-			"resetEmail": () => $("#email").val(""),
-			"redirectToLogin": () =>
-				window.location.href = urlGetParameters.buildUrl<availablePages.urlParams.Login>(
-					`/${availablePages.PageName.login}`,
-					{ email }
-				)
-		});
-
-	});
-
-}
-
-$(document).ready(() => {
-
-	setHandlers();
-
-	registerPageLogic.init(urlGetParameters.parseUrl<availablePages.urlParams.Register>(), {
-		"setEmailReadonly": email => {
-			$("#email").val(email);
-			$("#email").prop("readonly", true);
-		}
 	});
 
 

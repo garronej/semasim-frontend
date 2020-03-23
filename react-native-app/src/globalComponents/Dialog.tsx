@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidSyncEvent, SyncEvent, ObservableImpl } from "frontend-shared/node_modules/ts-events-extended";
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
@@ -13,12 +13,8 @@ const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[globalComponent/Dialog]", ...args])) :
     (() => { });
 
-const evtRef = new SyncEvent<Dialog | undefined>();
-const evtNewAppState = new SyncEvent<rn.AppStateStatus>();
-
-let ref: Dialog | undefined = undefined;
-
-evtRef.attach(newRef => ref = newRef);
+const obsRef = new ObservableImpl<Dialog | undefined>(undefined);
+const obsAppState = new ObservableImpl<rn.AppStateStatus>(rn.AppState.currentState);
 
 export const api: types.Api = {
     "create": (dialogType, options) => createModal(dialogType, options),
@@ -40,12 +36,14 @@ export const setComponentIsVisibleStateToImutableFalse = async (): Promise<void>
 
     isSettingIsVisibleToTrueForbidden = true;
 
+    const ref = obsRef.value;
+
     if (ref === undefined) {
         return;
     }
 
     await new Promise<void>(
-        resolve => ref!.setState(
+        resolve => ref.setState(
             { "isVisible": false },
             () => resolve()
         )
@@ -69,10 +67,11 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
             currentModal = modal;
 
             Promise.all<unknown>([
-                ref ?? evtRef.waitFor(),
-                rn.AppState.currentState === "active" ||
-                evtNewAppState.attachOnce(newAppState => newAppState === "active", modal, () => { })
-            ]).then(() => ref!.setState({
+                obsRef.value ??
+                obsRef.evtChange.waitFor((ref): ref is NonNullable<typeof ref> => !!ref),
+                (obsAppState.value === "active") ||
+                obsAppState.evtChange.attachOnce(newAppState => newAppState === "active", modal, () => { })
+            ]).then(() => obsRef.value!.setState({
                 "isVisible": true,
                 dialogType,
                 options
@@ -82,11 +81,11 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
         },
         "hide": () => {
 
-            evtNewAppState.detach(modal);
+            obsAppState.evtChange.detach(modal);
 
-            if (ref !== undefined) {
+            if (obsRef.value !== undefined) {
 
-                ref.setState(
+                obsRef.value.setState(
                     { "isVisible": false },
                     () => modal.evtHidden.post()
                 );
@@ -165,7 +164,7 @@ export class Dialog extends React.Component<Props, State> {
 
     public componentDidMount = () => {
 
-        evtRef.post(this);
+        obsRef.onPotentialChange(this);
 
         rn.AppState.addEventListener("change", this.handleAppStateChange);
 
@@ -173,13 +172,13 @@ export class Dialog extends React.Component<Props, State> {
 
     public componentWillUnmount = () => {
 
-        evtRef.post(undefined);
+        obsRef.onPotentialChange(undefined);
 
         rn.AppState.removeEventListener("change", this.handleAppStateChange);
 
     };
 
-    private handleAppStateChange = (nextAppState: rn.AppStateStatus) => evtNewAppState.post(nextAppState);
+    private handleAppStateChange = (nextAppState: rn.AppStateStatus) => obsAppState.onPotentialChange(nextAppState);
 
 
     private onRequestClose = () => {

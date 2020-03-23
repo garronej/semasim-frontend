@@ -1,6 +1,6 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: any;
 
@@ -15,7 +15,7 @@ export class UiShipTo {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtChange = new SyncEvent<string>();
+    public readonly evtChange = new Evt<string>();
 
     private static getCounter = () => {
 

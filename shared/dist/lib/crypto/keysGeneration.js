@@ -60,18 +60,24 @@ var kfd_1 = require("./kfd");
 var workerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 var workerThreadId;
 /** Must be called before using the async function */
-function preSpawn() {
+function preSpawnIfNotAlreadyDone() {
+    if (preSpawnIfNotAlreadyDone.hasBeenCalled) {
+        return;
+    }
+    preSpawnIfNotAlreadyDone.hasBeenCalled = true;
     cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 1);
     workerThreadId = cryptoLib.workerThreadPool.listIds(workerThreadPoolId)[0];
 }
-exports.preSpawn = preSpawn;
-function computeLoginSecretAndTowardUserKeys(password, uniqUserIdentification) {
+exports.preSpawnIfNotAlreadyDone = preSpawnIfNotAlreadyDone;
+preSpawnIfNotAlreadyDone.hasBeenCalled = false;
+function computeLoginSecretAndTowardUserKeys(params) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, digest1, digest2, towardUserKeys;
+        var password, uniqUserIdentification, _a, digest1, digest2, towardUserKeys;
         var _this = this;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    password = params.password, uniqUserIdentification = params.uniqUserIdentification;
                     dialog_1.dialogApi.loading("Generating cryptographic digest from password \uD83D\uDD10", 0);
                     return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
                             var salt;

@@ -1,537 +1,1057 @@
 
 
-import { sendRequest } from "./sendRequest";
 import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
-import { phoneNumber } from "phone-number/dist/lib";
-import * as types from "../../types/userSim";
+import * as types from "../../types";
+import { Evt } from "evt";
+import { assert } from "../../../tools/typeSafety/assert";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as connection from "../connection";
-import { restartApp } from "../../restartApp";
+import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
+import { id } from "../../../tools/typeSafety/id";
+import { phoneNumber as phoneNumberLib } from "phone-number";
+import { NonPostableEvts } from "../../../tools/NonPostableEvts";
+import * as _ from "../../../tools/reducers";
 
-import { appEvts } from "../appEvts";
+export type RemoteNotifyEvts = Pick<types.RemoteNotifyEvts, "evtUserSimChange">;
+
+export function getCoreApi(
+    sendRequest: ReturnType<typeof import("./getSendRequest").getSendRequest>,
+    remoteNotifyEvts: RemoteNotifyEvts,
+    restartApp: (typeof import("../../restartApp"))["restartApp"],
+    userEmail: string
+) {
+
+    const getUserSimEvts = getGetUserSimEvts({ remoteNotifyEvts, restartApp });
+
+    return {
+        "getUserSims": (() => {
+
+            //TODO: This was before called as soon as the socket is was connected
+            //make sure it is called early.
+
+            const { methodName } = apiDeclaration.getUserSims;
+            type Params = apiDeclaration.getUserSims.Params;
+            type Response = apiDeclaration.getUserSims.Response;
+
+            return async function ({ includeContacts }:{includeContacts: boolean;}): Promise<{
+                userSims: types.UserSim[];
+                userSimEvts: NonPostableEvts<types.UserSim.Evts>;
+            }> {
+
+                const userSims = await sendRequest<Params, Response>(
+                    methodName,
+                    { includeContacts }
+                );
+
+                return {
+                    userSims,
+                    "userSimEvts": getUserSimEvts(userSims)
+                };
+
+            };
+
+        })(),
+        "unlockSim": (() => {
+
+            const { methodName } = apiDeclaration.unlockSim;
+            type Params = apiDeclaration.unlockSim.Params;
+            type Response = apiDeclaration.unlockSim.Response;
+
+            return function ({ lockedDongle, pin }: {
+                lockedDongle: dcTypes.Dongle.Locked;
+                pin: string;
+            }): Promise<Response> {
+
+                return sendRequest<Params, Response>(
+                    methodName,
+                    { "imei": lockedDongle.imei, pin }
+                );
+
+            };
+
+        })(),
+        "registerSim": (() => {
+
+            const { methodName } = apiDeclaration.registerSim;
+            type Params = apiDeclaration.registerSim.Params;
+            type Response = apiDeclaration.registerSim.Response;
+
+            return async function ({dongle, friendlyName}:{
+                dongle: dcTypes.Dongle.Usable;
+                friendlyName: string;
+            }): Promise<void> {
+
+                const { imsi } = dongle.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "NEW" &&
+                            types.UserSim.Owned.match(eventData.userSim) &&
+                            eventData.userSim.sim.imsi === imsi
+
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        {
+                            imsi,
+                            "imei": dongle.imei,
+                            friendlyName
+                        }
+                    ),
+                ]);
 
 
+            };
 
-//TODO: Fix, it's called two times!!
-export const getUsableUserSims = (() => {
+        })(),
+        "unregisterSim": (() => {
 
-    const { methodName } = apiDeclaration.getUsableUserSims;
-    type Params = apiDeclaration.getUsableUserSims.Params;
-    type Response = apiDeclaration.getUsableUserSims.Response;
+            const { methodName } = apiDeclaration.unregisterSim;
+            type Params = apiDeclaration.unregisterSim.Params;
+            type Response = apiDeclaration.unregisterSim.Response;
 
-    const sendGetUsableUserSimsRequest = () =>
-        sendRequest<Params, Response>(
-            methodName,
-            { "includeContacts": true }
-        );
+            return async function ( userSim: types.UserSim.Usable): Promise<void> {
 
-    const updateUserSims = (
-        oldUserSims: types.UserSim.Usable[],
-        newUserSims: types.UserSim.Usable[]
-    ): void => {
+                const { imsi } = userSim.sim;
 
-        for (const newUserSim of newUserSims) {
-
-            const userSim = oldUserSims!
-                .find(({ sim }) => sim.imsi === newUserSim.sim.imsi);
-
-            /*
-            By testing if digests are the same we cover 99% of the case
-            when the sim could have been modified while offline...good enough.
-            */
-            if (
-                !userSim ||
-                userSim.sim.storage.digest !== newUserSim.sim.storage.digest
-            ) {
-
-                restartApp("Sim internal storage changed (subsequent getUsableSim)");
-
-                return;
-
-            }
-
-            /*
-            If userSim is online we received a notification before having the 
-            response of the request... even possible?
-             */
-            if (!!userSim.reachableSimState) {
-                continue;
-            }
-
-            userSim.reachableSimState = newUserSim.reachableSimState;
-
-            userSim.password = newUserSim.password;
-
-            userSim.dongle = newUserSim.dongle;
-
-            userSim.gatewayLocation = newUserSim.gatewayLocation;
-
-            if (!!userSim.reachableSimState) {
-
-                appEvts.evtSimReachabilityStatusChange.post(userSim);
-
-            }
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "DELETE" &&
+                            eventData.cause === "USER UNREGISTER SIM" &&
+                            eventData.imsi === imsi
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi }
+                    )
+                ]);
 
 
-        }
+            };
 
+        })(),
+        /** Assert sim is reachable */
+        "rebootDongle": (() => {
+
+            const { methodName } = apiDeclaration.rebootDongle;
+            type Params = apiDeclaration.rebootDongle.Params;
+            type Response = apiDeclaration.rebootDongle.Response;
+
+            return function (userSim: types.UserSim.Usable): Promise<void> {
+
+                assert(!!userSim.reachableSimState);
+
+                return sendRequest<Params, Response>(
+                    methodName,
+                    { "imsi": userSim.sim.imsi }
+                );
+
+            };
+
+        })(),
+        "shareSim": (() => {
+
+            const { methodName } = apiDeclaration.shareSim;
+            type Params = apiDeclaration.shareSim.Params;
+            type Response = apiDeclaration.shareSim.Response;
+
+            return async function ({ userSim, emails, message }: {
+                userSim: types.UserSim.Owned;
+                emails: string[];
+                message: string;
+            }): Promise<void> {
+
+                const { sim: { imsi }, ownership: { sharedWith } } = userSim;
+
+                emails = emails
+                    .map(email => email.toLowerCase())
+                    .filter(email => email !== userEmail)
+                    .reduce(..._.removeDuplicates<string>())
+                    ;
+
+                if (emails.length === 0) {
+                    return;
+                }
+
+                await Promise.all([
+                    ...emails
+                        .filter(email => (
+                            sharedWith.notConfirmed.indexOf(email) < 0 &&
+                            sharedWith.confirmed.indexOf(email) < 0
+                        ))
+                        .map(email => remoteNotifyEvts.evtUserSimChange.waitFor(
+                            eventData => (
+                                eventData.type === "SHARED USER SET CHANGE" &&
+                                eventData.imsi === imsi &&
+                                eventData.action === "ADD" &&
+                                eventData.targetSet === "NOT CONFIRMED USERS" &&
+                                eventData.email === email
+                            )
+                        )),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi, emails, message }
+                    )
+                ]);
+
+            };
+
+        })(),
+        "stopSharingSim": (() => {
+
+            const { methodName } = apiDeclaration.stopSharingSim;
+            type Params = apiDeclaration.stopSharingSim.Params;
+            type Response = apiDeclaration.stopSharingSim.Response;
+
+            return async function ({ userSim, emails }: {
+                userSim: types.UserSim.Owned;
+                emails: string[];
+            }): Promise<void> {
+
+                const { sim: { imsi }, ownership: { sharedWith } } = userSim;
+
+                emails = emails
+                    .map(email => email.toLowerCase())
+                    .filter(email => email !== userEmail)
+                    .reduce(..._.removeDuplicates<string>())
+                    ;
+
+                if (emails.length === 0) {
+                    return;
+                }
+
+                await Promise.all([
+                    ...emails
+                        .filter(email => (
+                            sharedWith.notConfirmed.indexOf(email) >= 0 &&
+                            sharedWith.confirmed.indexOf(email) >= 0
+                        ))
+                        .map(email => remoteNotifyEvts.evtUserSimChange.waitFor(
+                            eventData => (
+                                eventData.type === "SHARED USER SET CHANGE" &&
+                                eventData.imsi === imsi &&
+                                eventData.action === "REMOVE" &&
+                                eventData.email === email
+                            )
+                        )),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi, emails }
+                    )
+                ]);
+
+
+            };
+
+        })(),
+        "changeSimFriendlyName": (() => {
+
+            const { methodName } = apiDeclaration.changeSimFriendlyName;
+            type Params = apiDeclaration.changeSimFriendlyName.Params;
+            type Response = apiDeclaration.changeSimFriendlyName.Response;
+
+            return async function ({ userSim, friendlyName }: {
+                userSim: types.UserSim.Usable;
+                friendlyName: string;
+            }): Promise<void> {
+
+                const { imsi } = userSim.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "FRIENDLY NAME CHANGE" &&
+                            eventData.imsi === imsi
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi, friendlyName }
+                    )
+                ]);
+
+
+            };
+
+        })(),
+        "acceptSharingRequest": (() => {
+
+            const { methodName } = apiDeclaration.acceptSharingRequest;
+            type Params = apiDeclaration.acceptSharingRequest.Params;
+            type Response = apiDeclaration.acceptSharingRequest.Response;
+
+            return async function ({ notConfirmedUserSim, friendlyName }: {
+                notConfirmedUserSim: types.UserSim.Shared.NotConfirmed;
+                friendlyName: string;
+            }): Promise<void> {
+
+                const { imsi } = notConfirmedUserSim.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "IS NOW CONFIRMED" &&
+                            eventData.imsi === imsi
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi, friendlyName }
+                    )
+                ]);
+
+            };
+
+        })(),
+        "rejectSharingRequest": (() => {
+
+            const { methodName } = apiDeclaration.rejectSharingRequest;
+            type Params = apiDeclaration.rejectSharingRequest.Params;
+            type Response = apiDeclaration.rejectSharingRequest.Response;
+
+            return async function (
+                userSim: types.UserSim.Shared.NotConfirmed
+            ): Promise<void> {
+
+                const { imsi } = userSim.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "DELETE" &&
+                            eventData.cause === "REJECT SHARING REQUEST" &&
+                            eventData.imsi === imsi
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi }
+                    )
+                ]);
+
+            };
+
+        })(),
+        "createContact": (() => {
+
+            const { methodName } = apiDeclaration.createContact;
+            type Params = apiDeclaration.createContact.Params;
+            type Response = apiDeclaration.createContact.Response;
+
+
+            /** Assert there is not already a contact with this number in the phonebook */
+            return async function ({ userSim, name, number_raw }: {
+                userSim: types.UserSim.Usable;
+                name: string;
+                number_raw: string;
+            }): Promise<types.UserSim.Contact> {
+
+                //NOTE: Test assertion
+                {
+
+                    const isSameAsInput = (() => {
+
+                        const formatedNumberInput = phoneNumberLib.build(
+                            number_raw,
+                            userSim.sim.country?.iso
+                        );
+
+                        return (other_number_raw: string) => phoneNumberLib.areSame(
+                            formatedNumberInput,
+                            other_number_raw
+                        );
+
+                    })();
+
+                    if (!!userSim.phonebook.find(({ number_raw }) => isSameAsInput(number_raw))) {
+
+                        throw new Error("Already a contact with this number");
+
+                    }
+
+                }
+
+                const { imsi } = userSim.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "CONTACT CREATED OR UPDATED" &&
+                            eventData.imsi === imsi &&
+                            eventData.number_raw === number_raw
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        { imsi, name, number_raw }
+                    )
+                ]);
+
+                const contact = userSim.phonebook
+                    .find(contact => contact.number_raw === number_raw);
+
+                assert(contact !== undefined);
+
+                return contact;
+
+
+            };
+
+        })(),
+        "updateContactName": (() => {
+
+            const { methodName } = apiDeclaration.updateContactName;
+            type Response = apiDeclaration.updateContactName.Response;
+
+            return async function ({ userSim, contact, newName }: {
+                userSim: types.UserSim.Usable;
+                contact: types.UserSim.Contact;
+                newName: string;
+            }): Promise<void> {
+
+                //NOTE: If formating is needed on newName apply it here.
+                newName = id(newName);
+
+                if (newName === contact.name) {
+                    return;
+                }
+
+                const { imsi } = userSim.sim;
+
+                const prDone = remoteNotifyEvts.evtUserSimChange.waitFor(
+                    eventData => (
+                        eventData.type === "CONTACT CREATED OR UPDATED" &&
+                        eventData.number_raw === contact.number_raw &&
+                        eventData.name === newName
+                    )
+                );
+
+                if (contact.mem_index !== undefined) {
+
+                    type Params = apiDeclaration.updateContactName.contactInSim.Params;
+
+                    await sendRequest<Params, Response>(
+                        methodName,
+                        {
+                            imsi,
+                            "contactRef": { "mem_index": contact.mem_index },
+                            newName
+                        }
+                    );
+
+
+                } else {
+
+                    type Params = apiDeclaration.updateContactName.contactNotInSim.Params;
+
+                    await sendRequest<Params, Response>(
+                        methodName,
+                        {
+                            imsi,
+                            "contactRef": { "number": contact.number_raw },
+                            newName
+                        }
+                    );
+
+                }
+
+                await prDone;
+
+            };
+
+        })(),
+        "deleteContact": (() => {
+
+            const { methodName } = apiDeclaration.deleteContact;
+            type Params = apiDeclaration.deleteContact.Params;
+            type Response = apiDeclaration.deleteContact.Response;
+
+            return async function ({ userSim, contact }: {
+                userSim: types.UserSim.Usable;
+                contact: types.UserSim.Contact;
+            }): Promise<void> {
+
+                const { imsi } = userSim.sim;
+
+                await Promise.all([
+                    remoteNotifyEvts.evtUserSimChange.waitFor(
+                        eventData => (
+                            eventData.type === "CONTACT DELETED" &&
+                            eventData.imsi === imsi &&
+                            eventData.number_raw === contact.number_raw
+                        )
+                    ),
+                    sendRequest<Params, Response>(
+                        methodName,
+                        {
+                            imsi,
+                            "contactRef": contact.mem_index === null ?
+                                ({ "mem_index": contact.mem_index }) :
+                                ({ "number": contact.number_raw })
+                        }
+                    )
+                ]);
+
+            };
+
+        })(),
+        "shouldAppendPromotionalMessage": (() => {
+
+            const { methodName } = apiDeclaration.shouldAppendPromotionalMessage;
+            type Params = apiDeclaration.shouldAppendPromotionalMessage.Params;
+            type Response = apiDeclaration.shouldAppendPromotionalMessage.Response;
+
+            let cachedResponse: Response | undefined = undefined;
+
+            return function (): Promise<boolean> | boolean {
+
+                if (cachedResponse !== undefined) {
+                    return cachedResponse;
+                }
+
+                return sendRequest<Params, Response>(
+                    methodName,
+                    undefined
+                ).then(response => cachedResponse = response);
+
+            };
+
+        })()
     };
 
+}
 
-    const prUserSims: Promise<types.UserSim.Usable[]> =
-        Promise.resolve(connection.get())
-            .then(() => {
+export type CoreApi = ReturnType<typeof getCoreApi>;
 
-                connection.evtConnect.attach(socket => {
+function getGetUserSimEvts(
+    params: {
+        remoteNotifyEvts: RemoteNotifyEvts,
+        restartApp: (typeof import("../../restartApp"))["restartApp"]
+    }
+) {
 
-                    socket.evtClose.attachOnce(async () => {
+    const { remoteNotifyEvts, restartApp } = params;
 
-                        for (const userSim of await prUserSims) {
+    return function getUserSimChangEvts(userSims: types.UserSim[]): NonPostableEvts<types.UserSim.Evts> {
 
-                            userSim.reachableSimState = undefined;
+        const out: types.UserSim.Evts = {
+            "evtNew": new Evt(),
+            "evtNowConfirmed": new Evt(),
+            "evtDelete": new Evt(),
+            "evtReachabilityStatusChange": new Evt(),
+            "evtSipPasswordRenewed": new Evt(),
+            "evtCellularConnectivityChange": new Evt(),
+            "evtCellularSignalStrengthChange": new Evt(),
+            "evtOngoingCall": new Evt(),
+            "evtNewUpdatedOrDeletedContact": new Evt(),
+            "evtSharedUserSetChange": new Evt(),
+            "evtFriendlyNameChange": new Evt()
+        };
 
-                            appEvts.evtSimReachabilityStatusChange.post(userSim);
+        const findUserSim = (imsi: string) => {
+
+            const userSim = userSims.find(({ sim }) => sim.imsi === imsi);
+
+            assert(userSim !== undefined);
+
+            return userSim;
+
+        };
+
+        remoteNotifyEvts.evtUserSimChange.attach(
+            eventData => {
+
+                switch (eventData.type) {
+                    case "NEW": {
+
+                        const { userSim } = eventData;
+
+                        userSims.push(userSim);
+
+                        out.evtNew.post((() => {
+
+                            if (types.UserSim.Owned.match(userSim)) {
+
+
+                                return {
+                                    "cause": "SIM REGISTERED FROM LAN" as const,
+                                    userSim
+                                };
+
+                            }
+
+                            if (types.UserSim.Shared.NotConfirmed.match(userSim)) {
+
+
+                                return {
+                                    "cause": "SHARING REQUEST RECEIVED" as const,
+                                    userSim
+
+                                };
+
+                            }
+
+                            throw new Error("never");
+
+                        })());
+
+
+                    } return;
+                    case "IS NOW CONFIRMED": {
+
+                        const notConfirmedUserSim = findUserSim(eventData.imsi);
+
+                        assert(types.UserSim.Shared.NotConfirmed.match(notConfirmedUserSim));
+
+                        out.evtNowConfirmed.post(
+                            createObjectWithGivenRef(
+                                notConfirmedUserSim,
+                                id<types.UserSim.Shared.Confirmed>({
+                                    ...notConfirmedUserSim,
+                                    "friendlyName": eventData.friendlyName,
+                                    "ownership": {
+                                        "status": "SHARED CONFIRMED",
+                                        "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
+                                        "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
+                                    }
+                                })
+                            )
+                        );
+
+                    } return;
+                    case "DELETE": {
+
+                        const userSim = findUserSim(eventData.imsi);
+
+                        userSims.splice(userSims.indexOf(userSim), 1);
+
+                        out.evtDelete.post((() => {
+
+                            const { cause } = eventData;
+
+                            switch (cause) {
+                                case "USER UNREGISTER SIM":
+
+                                    assert(types.UserSim.Usable.match(userSim));
+
+                                    return { cause, userSim };
+                                case "PERMISSION LOSS":
+
+                                    assert(types.UserSim.Shared.match(userSim));
+
+                                    return { cause, userSim };
+
+                                case "REJECT SHARING REQUEST":
+
+                                    assert(types.UserSim.Shared.NotConfirmed.match(userSim));
+
+                                    return { cause, userSim };
+
+                            }
+
+                        })());
+
+
+                    } return;
+                    case "IS NOW UNREACHABLE": {
+
+                        const userSim = findUserSim(eventData.imsi);
+
+                        const hadOngoingCall = (userSim.reachableSimState !== undefined &&
+                            userSim.reachableSimState.isGsmConnectivityOk &&
+                            userSim.reachableSimState.ongoingCall !== undefined);
+
+                        userSim.reachableSimState = undefined;
+
+                        if (hadOngoingCall) {
+
+                            out.evtOngoingCall.post(userSim);
 
                         }
 
-                    });
+                        out.evtReachabilityStatusChange.post(userSim);
 
-                    Promise.all([
-                        prUserSims,
-                        sendGetUsableUserSimsRequest()
-                    ]).then(
-                        ([oldUserSims, newUserSims]) => updateUserSims(
-                            oldUserSims,
-                            newUserSims
-                        )
-                    );
+                    } return;
+                    case "IS NOW REACHABLE": {
 
-                });
+                        const userSim = findUserSim(eventData.imsi);
 
-                return sendGetUsableUserSimsRequest();
+                        const {
+                            hasInternalSimStorageChanged,
+                            isGsmConnectivityOk,
+                            cellSignalStrength,
+                            password,
+                            simDongle,
+                            gatewayLocation
+                        } = eventData;
 
-            })
-        ;
+                        if (hasInternalSimStorageChanged) {
 
-    return () => prUserSims;
+                            //NOTE: RestartApp should not be used here but we do not refactor 
+                            //as this is a hack to avoid having to write code for very unusual events.
+                            restartApp("Sim internal storage has changed ( notifySimOnline )");
 
+                            return;
 
-})();
 
-export const unlockSim = (() => {
+                        }
 
-    const { methodName } = apiDeclaration.unlockSim;
-    type Params = apiDeclaration.unlockSim.Params;
-    type Response = apiDeclaration.unlockSim.Response;
+                        //NOTE: True when password changed for example.
+                        const wasAlreadyReachable = userSim.reachableSimState !== undefined;
 
-    return function (
-        lockedDongle: dcTypes.Dongle.Locked,
-        pin: string
-    ): Promise<Response> {
+                        userSim.reachableSimState = isGsmConnectivityOk ?
+                            ({ "isGsmConnectivityOk": true, cellSignalStrength, "ongoingCall": undefined }) :
+                            ({ "isGsmConnectivityOk": false, cellSignalStrength })
+                            ;
 
-        return sendRequest<Params, Response>(
-            methodName,
-            { "imei": lockedDongle.imei, pin }
-        );
+                        const hasPasswordChanged = userSim.password !== password;
 
-    };
+                        userSim.password = password;
 
-})();
+                        userSim.dongle = simDongle;
 
-export const registerSim = (() => {
+                        userSim.gatewayLocation = gatewayLocation;
 
-    const { methodName } = apiDeclaration.registerSim;
-    type Params = apiDeclaration.registerSim.Params;
-    type Response = apiDeclaration.registerSim.Response;
+                        if (wasAlreadyReachable && hasPasswordChanged) {
 
-    return async function (
-        dongle: dcTypes.Dongle.Usable,
-        friendlyName: string
-    ): Promise<void> {
+                            out.evtSipPasswordRenewed.post(userSim);
 
-        const userSim = await sendRequest<Params, Response>(
-            methodName,
-            {
-                "imsi": dongle.sim.imsi,
-                "imei": dongle.imei,
-                friendlyName
-            }
-        );
+                            return;
 
-        (await getUsableUserSims()).push(userSim);
+                        }
 
-        appEvts.evtUsableSim.post(userSim);
+                        if (wasAlreadyReachable) {
+                            return;
+                        }
 
-    };
+                        out.evtReachabilityStatusChange.post(userSim);
 
-})();
+                    } return;
+                    case "CELLULAR CONNECTIVITY CHANGE": {
 
-export const unregisterSim = (() => {
+                        const userSim = findUserSim(eventData.imsi);
 
-    const { methodName } = apiDeclaration.unregisterSim;
-    type Params = apiDeclaration.unregisterSim.Params;
-    type Response = apiDeclaration.unregisterSim.Response;
+                        const { reachableSimState } = userSim;
 
-    return async function (
-        userSim: types.UserSim.Usable
-    ): Promise<void> {
+                        assert(reachableSimState !== undefined);
 
-        await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi }
-        );
+                        assert(eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk);
 
-        const usableUserSims = await getUsableUserSims();
+                        if (reachableSimState.isGsmConnectivityOk) {
 
-        usableUserSims.splice(
-            usableUserSims.indexOf(userSim),
-            1
-        );
+                            let hadOngoingCall = false;
 
-    };
+                            if (reachableSimState.ongoingCall !== undefined) {
+                                delete reachableSimState.ongoingCall;
+                                hadOngoingCall = true;
+                            }
 
+                            reachableSimState.isGsmConnectivityOk = false as any;
 
-})();
+                            if (hadOngoingCall) {
+                                out.evtOngoingCall.post(userSim);
+                            }
 
-export const rebootDongle = (() => {
+                        } else {
 
-    const { methodName } = apiDeclaration.rebootDongle;
-    type Params = apiDeclaration.rebootDongle.Params;
-    type Response = apiDeclaration.rebootDongle.Response;
+                            reachableSimState.isGsmConnectivityOk = true as any;
 
-    return function (
-        userSim: types.Online<types.UserSim.Usable>
-    ): Promise<void> {
+                        }
 
-        return sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi }
-        );
 
-    };
+                        out.evtCellularConnectivityChange.post(userSim);
 
-})();
 
-export const shareSim = (() => {
 
-    const { methodName } = apiDeclaration.shareSim;
-    type Params = apiDeclaration.shareSim.Params;
-    type Response = apiDeclaration.shareSim.Response;
+                    } return;
+                    case "CELLULAR SIGNAL STRENGTH CHANGE": {
 
-    return async function (
-        userSim: types.UserSim.Owned,
-        emails: string[],
-        message: string
-    ): Promise<void> {
+                        const userSim = findUserSim(eventData.imsi);
 
-        await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi, emails, message }
-        );
+                        assert(userSim.reachableSimState !== undefined, "sim should be reachable");
 
-        for (const email of emails) {
+                        userSim.reachableSimState.cellSignalStrength = eventData.cellSignalStrength;
 
-            userSim.ownership.sharedWith.notConfirmed.push(email);
+                        out.evtCellularSignalStrengthChange.post(userSim);
 
-        }
+                    } return;
+                    case "ONGOING CALL": {
 
-    };
+                        const userSim = findUserSim(eventData.imsi);
 
-})();
+                        if (eventData.isTerminated) {
 
-export const stopSharingSim = (() => {
+                            const { ongoingCallId } = eventData;
 
-    const { methodName } = apiDeclaration.stopSharingSim;
-    type Params = apiDeclaration.stopSharingSim.Params;
-    type Response = apiDeclaration.stopSharingSim.Response;
+                            const { reachableSimState } = userSim;
 
-    return async function (
-        userSim: types.UserSim.Owned,
-        emails: string[]
-    ): Promise<void> {
+                            if (!reachableSimState) {
+                                //NOTE: The event would have been posted in setSimOffline handler.
+                                return;
+                            }
 
-        await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi, emails }
-        );
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                //NOTE: If we have had event notifying connectivity lost
+                                //before this event the evtOngoingCall will have been posted
+                                //in notifyGsmConnectivityChange handler function.
+                                return;
+                            }
 
-        for (const email of emails) {
+                            if (
+                                reachableSimState.ongoingCall === undefined ||
+                                reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId
+                            ) {
+                                return;
+                            }
 
-            const { notConfirmed, confirmed } = userSim.ownership.sharedWith;
+                            reachableSimState.ongoingCall = undefined;
 
-            let arr: string[];
-            let index: number;
+                        } else {
 
-            index = notConfirmed.indexOf(email);
+                            const { ongoingCall } = eventData;
 
-            if (index > 0) {
-                arr = notConfirmed;
-            } else {
-                index = confirmed.indexOf(email);
-                arr = confirmed;
-            }
+                            const { reachableSimState } = userSim;
 
-            arr.splice(index, 1);
+                            assert(reachableSimState !== undefined);
 
-        }
+                            assert(reachableSimState.isGsmConnectivityOk);
 
-    };
 
+                            if (reachableSimState.ongoingCall === undefined) {
+                                reachableSimState.ongoingCall = ongoingCall;
+                            } else if (reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId) {
 
-})();
+                                reachableSimState.ongoingCall === undefined;
 
-export const changeSimFriendlyName = (() => {
+                                out.evtOngoingCall.post(userSim);
 
-    const { methodName } = apiDeclaration.changeSimFriendlyName;
-    type Params = apiDeclaration.changeSimFriendlyName.Params;
-    type Response = apiDeclaration.changeSimFriendlyName.Response;
+                                reachableSimState.ongoingCall = ongoingCall;
 
-    return async function (
-        userSim: types.UserSim.Usable,
-        friendlyName: string
-    ): Promise<void> {
+                            } else {
 
-        await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi, friendlyName }
-        );
+                                const {
+                                    ongoingCallId,
+                                    from,
+                                    number,
+                                    isUserInCall,
+                                    otherUserInCallEmails
+                                } = ongoingCall;
 
-        userSim.friendlyName = friendlyName;
+                                const prevOngoingCall = reachableSimState.ongoingCall;
 
-    };
+                                Object.assign(prevOngoingCall, { ongoingCallId, from, number, isUserInCall });
 
-})();
+                                prevOngoingCall.otherUserInCallEmails.splice(0, prevOngoingCall.otherUserInCallEmails.length);
 
-export const acceptSharingRequest = (() => {
+                                otherUserInCallEmails.forEach(email => prevOngoingCall.otherUserInCallEmails.push(email));
 
-    const { methodName } = apiDeclaration.acceptSharingRequest;
-    type Params = apiDeclaration.acceptSharingRequest.Params;
-    type Response = apiDeclaration.acceptSharingRequest.Response;
+                            }
 
-    return async function (
-        notConfirmedUserSim: types.UserSim.Shared.NotConfirmed,
-        friendlyName: string
-    ): Promise<void> {
+                        }
 
-        const { password } = await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": notConfirmedUserSim.sim.imsi, friendlyName }
-        );
+                        out.evtOngoingCall.post(userSim);
 
-        const userSim: types.UserSim.Shared.Confirmed = {
-            "sim": notConfirmedUserSim.sim,
-            friendlyName,
-            password,
-            "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
-            "dongle": notConfirmedUserSim.dongle,
-            "gatewayLocation": notConfirmedUserSim.gatewayLocation,
-            "ownership": {
-                "status": "SHARED CONFIRMED",
-                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
-                "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
-            },
-            "phonebook": notConfirmedUserSim.phonebook,
-            "reachableSimState": notConfirmedUserSim.reachableSimState
-        };
 
-        (await getUsableUserSims()).push(userSim);
 
-        appEvts.evtUsableSim.post(userSim);
+                    } return;
+                    case "CONTACT CREATED OR UPDATED": {
 
-    };
+                        const userSim = findUserSim(eventData.imsi);
 
-})();
+                        const { storage, number_raw, name } = eventData;
 
-export const rejectSharingRequest = (() => {
+                        let contact = userSim.phonebook.find(contact => {
 
-    const { methodName } = apiDeclaration.rejectSharingRequest;
-    type Params = apiDeclaration.rejectSharingRequest.Params;
-    type Response = apiDeclaration.rejectSharingRequest.Response;
+                            if (storage !== undefined) {
+                                return contact.mem_index === storage.mem_index;
+                            }
 
-    return async function (
-        userSim: types.UserSim.Shared.NotConfirmed
-    ): Promise<void> {
+                            return contact.number_raw === number_raw;
 
-        await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi }
-        );
+                        });
 
-    };
+                        let eventType: "NEW" | "UPDATED";
 
-})();
+                        if (!!contact) {
 
-export const createContact = (() => {
+                            eventType = "UPDATED";
 
-    const { methodName } = apiDeclaration.createContact;
-    type Params = apiDeclaration.createContact.Params;
-    type Response = apiDeclaration.createContact.Response;
+                            contact.name = name;
 
-    return async function (
-        userSim: types.UserSim.Usable,
-        name: string,
-        number: phoneNumber
-    ): Promise<types.UserSim.Contact> {
+                            if (!!storage) {
 
-        const resp = await sendRequest<Params, Response>(
-            methodName,
-            { "imsi": userSim.sim.imsi, name, number }
-        );
+                                userSim.sim.storage.contacts
+                                    .find(({ index }) => index === storage.mem_index)!.name =
+                                    storage.name_as_stored;
 
-        const contact: types.UserSim.Contact = {
-            "mem_index": !!resp ? resp.mem_index : undefined,
-            name,
-            "number_raw": number
-        };
+                            }
 
-        userSim.phonebook.push(contact);
+                        } else {
 
-        if (!!resp) {
+                            eventType = "NEW";
 
-            userSim.sim.storage.contacts.push({
-                "index": resp.mem_index,
-                name,
-                number
-            });
+                            contact = { name, number_raw };
 
-            userSim.sim.storage.digest = resp.new_digest;
+                            userSim.phonebook.push(contact);
 
-            userSim.sim.storage.infos.storageLeft--;
+                            if (!!storage) {
 
-        }
+                                userSim.sim.storage.infos.storageLeft--;
 
-        return contact;
+                                contact.mem_index = storage.mem_index;
 
-    };
+                                userSim.sim.storage.contacts.push({
+                                    "index": contact.mem_index,
+                                    name,
+                                    "number": number_raw
+                                });
 
-})();
+                            }
 
-export const updateContactName = (() => {
+                        }
 
-    const { methodName } = apiDeclaration.updateContactName;
+                        if (!!storage) {
 
-    /** Assert contact is the ref of the object stored in userSim */
-    return async function (
-        userSim: types.UserSim.Usable,
-        contact: types.UserSim.Contact,
-        newName: string
-    ): Promise<void> {
+                            userSim.sim.storage.digest = storage.new_digest;
 
-        if (contact.mem_index !== undefined) {
+                        }
 
-            type Params = apiDeclaration.updateContactName.contactInSim.Params;
-            type Response = apiDeclaration.updateContactName.contactInSim.Response;
+                        out.evtNewUpdatedOrDeletedContact.post({ eventType, contact, userSim });
 
-            const {
-                name_as_stored_in_sim,
-                new_digest
-            } = await sendRequest<Params, Response>(
-                methodName,
-                {
-                    "imsi": userSim.sim.imsi,
-                    "contactRef": { "mem_index": contact.mem_index },
-                    newName
+                    } return;
+                    case "CONTACT DELETED": {
+
+                        const userSim = findUserSim(eventData.imsi);
+
+                        const { number_raw, storage } = eventData;
+
+                        let contact: types.UserSim.Contact | undefined = undefined;
+
+                        for (let i = 0; i < userSim.phonebook.length; i++) {
+
+                            contact = userSim.phonebook[i];
+
+                            if (
+                                !!storage ?
+                                    storage.mem_index === contact.mem_index :
+                                    contact.number_raw === number_raw
+                            ) {
+
+                                userSim.phonebook.splice(i, 1);
+
+                                break;
+
+                            }
+
+                        }
+
+                        assert(contact !== undefined);
+
+                        if (!!storage) {
+
+                            userSim.sim.storage.digest = storage.new_digest;
+
+                            userSim.sim.storage.infos.storageLeft--;
+
+                            userSim.sim.storage.contacts.splice(
+                                userSim.sim.storage.contacts.indexOf(
+                                    userSim.sim.storage.contacts.find(({ index }) => index === storage.mem_index)!
+                                )
+                                , 1
+                            );
+
+
+                        }
+
+                        out.evtNewUpdatedOrDeletedContact.post({ "eventType": "DELETED", userSim, contact });
+
+                    } return;
+                    case "SHARED USER SET CHANGE": {
+
+                        const userSim = findUserSim(eventData.imsi);
+
+                        const doChange = (action: "ADD" | "REMOVE", targetSet: typeof eventData["targetSet"]) => {
+
+                            const emails = ((ownership: types.UserSim.Ownership): (string[] | null) =>
+                                ownership.status === "OWNED" ? (
+                                    ownership.sharedWith[(() => {
+                                        switch (targetSet) {
+                                            case "CONFIRMED USERS": return "confirmed" as const;
+                                            case "NOT CONFIRMED USERS": return "notConfirmed" as const;
+                                        }
+                                    })()]
+                                ) : (
+                                        targetSet === "NOT CONFIRMED USERS" ?
+                                            null :
+                                            ownership.otherUserEmails
+                                    )
+                            )(userSim.ownership);
+
+                            switch (action) {
+                                case "ADD":
+                                    emails?.push(eventData.email);
+                                    break;
+                                case "REMOVE":
+
+                                    if (emails === null) {
+                                        break;
+                                    }
+
+                                    emails.splice(
+                                        emails.indexOf(eventData.email),
+                                        1
+                                    );
+                                    break;
+                            }
+
+                        };
+
+                        if (eventData.action === "MOVE TO CONFIRMED") {
+                            doChange("REMOVE", "NOT CONFIRMED USERS");
+                            doChange("ADD", "CONFIRMED USERS");
+                        } else {
+                            doChange(eventData.action, eventData.targetSet);
+                        }
+
+
+                        out.evtSharedUserSetChange.post({
+                            ...(() => {
+
+                                const { imsi, type, ...out } = eventData;
+
+                                return out;
+
+                            })(),
+                            userSim
+                        });
+
+
+                    } return;
+                    case "FRIENDLY NAME CHANGE": {
+
+                        const userSim = findUserSim(eventData.imsi);
+
+                        assert(types.UserSim.Usable.match(userSim));
+
+                        userSim.friendlyName = eventData.friendlyName;
+
+                        out.evtFriendlyNameChange.post(userSim);
+
+                    } return;
                 }
-            );
 
-            contact.name = newName;
+                throw new Error("never");
 
-            userSim
-                .sim.storage.contacts.find(({ index }) => index === contact.mem_index)!
-                .name = name_as_stored_in_sim;
-
-            userSim.sim.storage.digest = new_digest;
-
-        } else {
-
-            type Params = apiDeclaration.updateContactName.contactNotInSim.Params;
-            type Response = apiDeclaration.updateContactName.contactNotInSim.Response;
-
-            await sendRequest<Params, Response>(
-                methodName,
-                {
-                    "imsi": userSim.sim.imsi,
-                    "contactRef": { "number": contact.number_raw },
-                    newName
-                }
-            );
-
-            contact.name = newName;
-
-        }
-
-    };
-
-})();
-
-export const deleteContact = (() => {
-
-    const { methodName } = apiDeclaration.deleteContact;
-    type Params = apiDeclaration.deleteContact.Params;
-    type Response = apiDeclaration.deleteContact.Response;
-
-    return async function (
-        userSim: types.UserSim.Usable,
-        contact: types.UserSim.Contact
-    ): Promise<void> {
-
-        const { new_digest } = await sendRequest<Params, Response>(
-            methodName,
-            {
-                "imsi": userSim.sim.imsi,
-                "contactRef": contact.mem_index === null ?
-                    ({ "mem_index": contact.mem_index }) :
-                    ({ "number": contact.number_raw })
             }
         );
 
-        if (contact.mem_index !== null) {
+        return out;
 
-            userSim.sim.storage.contacts.splice(
-                userSim.sim.storage.contacts.findIndex(
-                    ({ index }) => index === contact.mem_index
-                ),
-                1
-            );
-
-        }
-
-        userSim.phonebook.splice(
-            userSim.phonebook.indexOf(contact),
-            1
-        );
-
-        if (new_digest !== undefined) {
-
-            userSim.sim.storage.digest = new_digest;
-
-        }
 
     };
+}
 
-})();
 
-/** Api only called once */
-export const shouldAppendPromotionalMessage = (() => {
-
-    const { methodName } = apiDeclaration.shouldAppendPromotionalMessage;
-    type Params = apiDeclaration.shouldAppendPromotionalMessage.Params;
-    type Response = apiDeclaration.shouldAppendPromotionalMessage.Response;
-
-    let cachedResponse: Response | undefined = undefined;
-
-    return function (
-    ): Promise<boolean> | boolean {
-
-        if (cachedResponse !== undefined) {
-            return cachedResponse;
-        }
-
-        return sendRequest<Params, Response>(
-            methodName,
-            undefined
-        ).then(response => cachedResponse = response);
-
-    };
-
-})();

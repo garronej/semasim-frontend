@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var NetInfo = require("@react-native-community/netinfo");
 var isOnlineFromState = function (_a) {
     var isInternetReachable = _a.isInternetReachable, isConnected = _a.isConnected;
@@ -58,7 +58,7 @@ exports.getApi = function () { return __awaiter(void 0, void 0, void 0, function
                 api = {
                     "getIsOnline": function () { return isOnLine; },
                     "evtStateChange": (function () {
-                        var out = new ts_events_extended_1.VoidSyncEvent();
+                        var out = new evt_1.VoidEvt();
                         NetInfo.addEventListener(function (state) {
                             var newIsOnLine = isOnlineFromState(state);
                             if (newIsOnLine === isOnLine) {

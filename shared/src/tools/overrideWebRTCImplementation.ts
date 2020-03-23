@@ -1,4 +1,4 @@
-import { SyncEvent } from "ts-events-extended";
+import { Evt } from "evt";
 
 /** Api that the host should expose. (apiExposedByHost)*/
 export type Methods = {
@@ -182,23 +182,23 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
 
     })();
 
-    const evtIcecandidate = new SyncEvent<{
+    const evtIcecandidate = new Evt<{
         rtcPeerConnectionRef: number;
         rtcIceCandidateInitOrNullJson: string;
         localDescriptionRTCSessionDescriptionInitOrNullJson: string;
     }>();
 
-    const evtIceconnectionstatechange = new SyncEvent<{
+    const evtIceconnectionstatechange = new Evt<{
         rtcPeerConnectionRef: number;
         iceConnectionState: RTCIceConnectionState;
     }>();
 
-    const evtSignalingstatechange = new SyncEvent<{
+    const evtSignalingstatechange = new Evt<{
         rtcPeerConnectionRef: number;
         rtcSignalingState: RTCSignalingState;
     }>();
 
-    const evtMethodReturn = new SyncEvent<{
+    const evtMethodReturn = new Evt<{
         callRef: number;
         out: string | undefined;
     }>();
@@ -345,28 +345,27 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
             },
             ...(() => {
 
-                const boundToByListener = new WeakMap<(ev: any) => any, Object>();
+                //const ctxByListener = new WeakMap<(ev: any) => any, Object>();
 
                 const addEventListener: <K extends keyof RTCPeerConnectionEventMap>(
                     type: K,
                     listener: (this: RTCPeerConnection, ev: RTCPeerConnectionEventMap[K]) => any
                 ) => void = (type, listener) => {
 
-                    const boundTo = {};
-                    boundToByListener.set(listener, boundTo);
+                    const ctx= Evt.getCtx(listener);
 
                     switch (type) {
                         case "iceconnectionstatechange":
                             evtIceconnectionstatechange.attach(
                                 ({ rtcPeerConnectionRef: ref }) => ref === rtcPeerConnectionRef,
-                                boundTo,
+                                ctx,
                                 () => listener.call(rtcPeerConnectionProxy, undefined)
                             );
                             return;;
                         case "icecandidate":
                             evtIcecandidate.attach(
                                 ({ rtcPeerConnectionRef: ref }) => ref === rtcPeerConnectionRef,
-                                boundTo,
+                                ctx,
                                 ({ rtcIceCandidateInitOrNullJson }) =>
                                     listener.call(
                                         rtcPeerConnectionProxy,
@@ -396,7 +395,7 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
                     listener: (this: RTCPeerConnection, ev: RTCPeerConnectionEventMap[K]) => any, options?: boolean | EventListenerOptions
                 ) => void = (type, listener) => {
 
-                    const evt: SyncEvent<any> | undefined = (() => {
+                    const evt: Evt<any> | undefined = (() => {
 
                         switch (type) {
                             case "iceconnectionstatechange": return evtIceconnectionstatechange;
@@ -410,11 +409,7 @@ export function overrideWebRTCImplementation(methods: Methods): Listeners {
                         return;
                     }
 
-                    evt
-                        .getHandlers()
-                        .find(({ boundTo }) => boundTo === boundToByListener.get(listener))!
-                        .detach()
-                        ;
+                    Evt.getCtx(listener).done();
 
                 };
 

@@ -1,85 +1,59 @@
 
-import * as types from "../lib/types/userSim";
+import * as types from "../lib/types/UserSim";
 
-export namespace notifySimOffline {
+export namespace notifyUserSimChange {
 
-    export const methodName= "notifySimOffline";
+    export const methodName = "evtUserSimChange";
 
-    export type Params = { imsi: string; };
-
-    export type Response = undefined ;
-
-}
-
-export namespace notifySimOnline {
-    
-    export const methodName= "notifySimOnline";
-
-    /** internalStorageChanged is a very rare case, if it ever happen just reload the page */
     export type Params = {
+        type: "NEW";
+        /*
+         * NOTE: 
+         * if userSim is Owned then user registered sim on LAN.
+         * if userSim is Shared.NotConfirmed then user received a sharing request.
+        */
+        userSim: types.UserSim.Owned | types.UserSim.Shared.NotConfirmed;
+    } | {
+        type: "IS NOW CONFIRMED";
+        imsi: string;
+        friendlyName: string;
+    } | {
+        type: "DELETE";
+        /** Permission loss can also mean that the owner of the sim unregistered the sim*/
+        cause: "USER UNREGISTER SIM" | "PERMISSION LOSS" | "REJECT SHARING REQUEST";
+        imsi: string;
+    } | {
+        type: "IS NOW UNREACHABLE";
+        imsi: string;
+    } | {
+        type: "IS NOW REACHABLE";
+        /** internalStorageChanged is a very rare case, if it ever happen just reload the page */
         imsi: string;
         hasInternalSimStorageChanged: boolean;
         password: string;
         simDongle: types.UserSim["dongle"]
         gatewayLocation: types.UserSim.GatewayLocation,
         isGsmConnectivityOk: boolean;
-        cellSignalStrength:
-        types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
-    };
-
-    export type Response = undefined;
-
-}
-
-export namespace notifyGsmConnectivityChange {
-
-    export const methodName = "notifyGsmConnectivityChange";
-
-    export type Params = {
+        cellSignalStrength: types.UserSim.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
+    } | {
+        type: "CELLULAR CONNECTIVITY CHANGE";
         imsi: string;
         isGsmConnectivityOk: boolean;
-    };
-
-    export type Response = undefined;
-
-}
-
-export namespace notifyCellSignalStrengthChange {
-
-    export const methodName = "notifyCellSignalStrengthChange";
-
-    export type Params = {
+    } | {
+        type: "CELLULAR SIGNAL STRENGTH CHANGE";
         imsi: string;
-        cellSignalStrength:
-        types.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
-    };
-
-    export type Response = undefined;
-
-}
-
-export namespace notifyOngoingCall {
-
-    export const methodName = "notifyOngoingCall";
-
-    export type Params = { imsi: string } & ({
+        cellSignalStrength: types.UserSim.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
+    } | ({
+        type: "ONGOING CALL";
+        imsi: string
+    } & ({
         isTerminated: false;
-        ongoingCall: types.OngoingCall;
+        ongoingCall: types.UserSim.OngoingCall;
     } | {
         isTerminated: true;
         ongoingCallId: string;
-    });
-
-    export type Response = undefined;
-
-}
-
-/** posted when an other UA create or update a contact */
-export namespace notifyContactCreatedOrUpdated {
-
-    export const methodName = "notifyContactCreatedOrUpdated";
-
-    export type Params = {
+    })) | {
+        type: "CONTACT CREATED OR UPDATED";
         imsi: string;
         name: string;
         number_raw: string;
@@ -87,87 +61,43 @@ export namespace notifyContactCreatedOrUpdated {
             mem_index: number;
             name_as_stored: string;
             new_digest: string;
-        }
-    }
-
-    export type Response = undefined;
-
-}
-
-export namespace notifyContactDeleted {
-
-    export const methodName = "notifyContactDeleted";
-
-    export type Params = {
+        };
+    } | {
+        type: "CONTACT DELETED";
         imsi: string;
         number_raw: string;
         storage?: {
             mem_index: number;
             new_digest: string;
-        }
+        };
+    } | {
+        //TODO: stopped at unregister sim
+        //NOTE: When a user goes from not confirmed to confirmed
+        //remove user from not confirmed is not fired.
+        type: "SHARED USER SET CHANGE";
+        imsi: string;
+        action: "ADD" | "REMOVE" | "MOVE TO CONFIRMED";
+        targetSet: "CONFIRMED USERS" | "NOT CONFIRMED USERS";
+        email: string;
+    } | {
+        /** Only posted when a usable sim is changed friendly name
+         * not when the user accept sharing request */
+        type: "FRIENDLY NAME CHANGE";
+        imsi: string;
+        friendlyName: string;
     };
+
 
     export type Response = undefined;
 
 }
+
 
 export namespace notifyDongleOnLan {
 
     export const methodName = "notifyDongleOnLan";
 
     export type Params = import("chan-dongle-extended-client").types.Dongle;
-
-    export type Response = undefined;
-
-}
-
-/** 
- * posted when the owner of the sim stop sharing the sim with the user 
- * or when the user unregister the sim from an other ua
- * */
-export namespace notifySimPermissionLost {
-
-    export const methodName = "notifySimPermissionLost";
-
-    export type Params = { imsi: string; }
-
-    export type Response = undefined;
-
-
-}
-
-export namespace notifySimSharingRequest {
-
-    export const methodName = "notifySimSharingRequest";
-
-    export type Params = types.UserSim.Shared.NotConfirmed;
-
-    export type Response = undefined;
-
-}
-
-export namespace notifySharingRequestResponse {
-
-    export const methodName = "notifySharingRequestResponse";
-
-    export type Params = {
-        imsi: string;
-        email: string;
-        isAccepted: boolean;
-    };
-
-    export type Response = undefined;
-
-}
-
-export namespace notifyOtherSimUserUnregisteredSim {
-
-    export const methodName = "notifyOtherSimUserUnregisteredSim";
-
-    export type Params = {
-        imsi: string;
-        email: string;
-    };
 
     export type Response = undefined;
 

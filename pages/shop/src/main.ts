@@ -1,18 +1,48 @@
 
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
+//TODO: Write a launcher
+import { getWebApi } from "frontend-shared/dist/lib/webApiCaller";
+import { AuthenticatedSessionDescriptorSharedData } from "frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData";
+import * as networkStateMonitoring from "frontend-shared/dist/lib/networkStateMonitoring";
+import { restartApp } from "frontend-shared/dist/lib/restartApp";
+
 import { UiController } from "./UiController";
 import { convertFromEuro } from "frontend-shared/dist/tools/currency";
-import * as availablePages from "frontend-shared/dist/lib/availablePages";
+
+const prWebApi = (async () => {
+
+    const networkStateMonitoringApi = await networkStateMonitoring.getApi();
+
+    return (() => {
+
+        const { getLoginLogoutApi, ...rest } = getWebApi({
+            AuthenticatedSessionDescriptorSharedData,
+            networkStateMonitoringApi,
+            restartApp
+        });
+
+        return {
+            ...rest,
+            ...getLoginLogoutApi({ "assertJsRuntimeEnv": "browser" })
+        };
+
+    })();
+
+
+})();
 
 $(document).ready(async () => {
 
     $("#logout").click(async () => {
 
-        await webApiCaller.logoutUser();
+        const webApi = await prWebApi;
 
-        location.href = `/${availablePages.PageName.login}`
+        await webApi.logoutUser();
+
+        restartApp("User logged out");
 
     });
+
+    const webApi = await prWebApi;
 
     const [ 
         changesRates, 
@@ -21,15 +51,18 @@ $(document).ready(async () => {
             language: countryIsoForLanguage 
         } 
     ] = await Promise.all([
-        webApiCaller.getChangesRates(),
-        webApiCaller.getCountryIso()
+        webApi.getChangesRates(),
+        webApi.getCountryIso()
     ]);
 
     convertFromEuro.setChangeRates(changesRates);
 
     console.log({ countryIsoForLanguage, countryIsoFromLocation });
 
-    const uiController = new UiController(countryIsoFromLocation || countryIsoForLanguage);
+    const uiController = new UiController({
+        "defaultCountryIso": countryIsoFromLocation || countryIsoForLanguage,
+        webApi
+    });
 
     $("#page-payload").html("").append(uiController.structure);
 

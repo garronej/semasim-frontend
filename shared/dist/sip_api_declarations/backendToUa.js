@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var getUsableUserSims;
-(function (getUsableUserSims) {
-    getUsableUserSims.methodName = "getUsableUserSims";
-})(getUsableUserSims = exports.getUsableUserSims || (exports.getUsableUserSims = {}));
+var getUserSims;
+(function (getUserSims) {
+    getUserSims.methodName = "getUserSims";
+})(getUserSims = exports.getUserSims || (exports.getUserSims = {}));
 var unlockSim;
 (function (unlockSim) {
     unlockSim.methodName = "unlockSim";

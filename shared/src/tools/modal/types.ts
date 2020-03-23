@@ -1,11 +1,11 @@
 
-export type VoidSyncEvent = import("ts-events-extended").VoidSyncEvent;
+export type VoidEvt = import("evt").VoidEvt;
 export type Structure = import("./types.Structure").Structure;
 
 export type Modal = {
-    evtHide: VoidSyncEvent; //Must fire synchronously after hide() called
-    evtShown: VoidSyncEvent;
-    evtHidden: VoidSyncEvent;
+    evtHide: VoidEvt; //Must fire synchronously after hide() called
+    evtShown: VoidEvt;
+    evtHidden: VoidEvt;
     show(): void;
     hide(): void;
     removeFromDom(): void;

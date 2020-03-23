@@ -1,6 +1,6 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import { env } from "frontend-shared/dist/lib/env";
 import { solve as solveShipping } from "frontend-shared/dist/lib/shipping";
@@ -19,7 +19,7 @@ export class UiCart {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUserClickCheckout = new VoidSyncEvent();
+    public readonly evtUserClickCheckout = new VoidEvt();
 
     private readonly uiCartEntries: UiCartEntry[] = [];
 
@@ -175,8 +175,8 @@ class UiCartEntry {
 
     public readonly structure = html.templates.find(".id_UiCartEntry").clone();
 
-    public readonly evtUserClickDelete = new VoidSyncEvent();
-    public readonly evtQuantityChanged = new VoidSyncEvent();
+    public readonly evtUserClickDelete = new VoidEvt();
+    public readonly evtQuantityChanged = new VoidEvt();
 
 
     private currency!: string;

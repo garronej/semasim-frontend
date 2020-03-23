@@ -9,7 +9,6 @@ import { getCountryCurrency } from "frontend-shared/dist/tools/currency";
 import { UiCurrency } from "./UiCurrency";
 import { UiShippingForm } from "./UiShippingForm";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import * as webApiCaller from "frontend-shared/dist/lib/webApiCaller";
 import * as types from "frontend-shared/dist/lib/types/shop";
 
 declare const Stripe: any;
@@ -21,11 +20,23 @@ const html = loadUiClassHtml(
     "UiController"
 );
 
+type WebApi = Pick<
+    import("frontend-shared/dist/lib/webApiCaller").WebApi,
+    "createStripeCheckoutSessionForShop"
+>;
+
 export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    constructor(defaultCountryIso: string | undefined) {
+    constructor(
+        private readonly params: { 
+            defaultCountryIso: string | undefined; 
+            webApi: WebApi;
+        }
+    ) {
+
+        let { defaultCountryIso } = params;
 
         if (defaultCountryIso === undefined) {
             //TODO: change to "fr"
@@ -124,13 +135,14 @@ export class UiController {
         const {
             stripePublicApiKey,
             checkoutSessionId: sessionId
-        } = await webApiCaller.createStripeCheckoutSessionForShop(
+        } = await this.params.webApi.createStripeCheckoutSessionForShop({
+            
             cart,
             shippingFormData,
             currency,
-            `${url}?success=true`, 
-            `${url}?success=false`
-        );
+            "success_url": `${url}?success=true`, 
+            "cancel_url": `${url}?success=false`
+        });
 
         const stripe = Stripe(stripePublicApiKey);
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 /**
  * Assert bootstrap modal initialized on jQuery element.
  * bootbox already call .modal().
@@ -10,9 +10,9 @@ var ts_events_extended_1 = require("ts-events-extended");
  * NOTE: For dialog remember to invoke removeFromDom once hidden.
  */
 function createGenericProxyForBootstrapModal($initializedModalDiv) {
-    var evtHide = new ts_events_extended_1.VoidSyncEvent();
-    var evtShown = new ts_events_extended_1.VoidSyncEvent();
-    var evtHidden = new ts_events_extended_1.VoidSyncEvent();
+    var evtHide = new evt_1.VoidEvt();
+    var evtShown = new evt_1.VoidEvt();
+    var evtHidden = new evt_1.VoidEvt();
     $initializedModalDiv.on("hide.bs.modal", function () { return evtHide.post(); });
     $initializedModalDiv.on("shown.bs.modal", function () { return evtShown.post(); });
     $initializedModalDiv.on("hidden.bs.modal", function () { return evtHidden.post(); });

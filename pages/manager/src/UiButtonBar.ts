@@ -1,5 +1,8 @@
-import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Observable, IObservable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
+import * as types from "frontend-shared/dist/lib/types/UserSim";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+
 
 declare const require: (path: string) => any;
 
@@ -12,126 +15,117 @@ export class UiButtonBar {
 
     public readonly structure = html.structure.clone();
 
+    public readonly obsAreDetailsShown: IObservable<boolean>;
 
-    /** true if detail was clicked */
-    public readonly evtToggleDetailVisibility = new SyncEvent<boolean>();
-
-    public readonly evtClickDelete = new VoidSyncEvent();
-    public readonly evtClickShare = new VoidSyncEvent();
-    public readonly evtClickRename = new VoidSyncEvent();
-    public readonly evtClickReboot = new VoidSyncEvent();
-    public readonly evtClickContacts = new VoidSyncEvent();
-
-    private readonly buttons = this.structure.find("button");
-
-    public readonly btnDetail = $(this.buttons.get(0));
-    private readonly btnBack = $(this.buttons.get(1));
-    private readonly btnDelete = $(this.buttons.get(2));
-    private readonly btnContacts = $(this.buttons.get(3));
-    private readonly btnShare = $(this.buttons.get(4));
-    private readonly btnRename = $(this.buttons.get(5));
-    private readonly btnReboot = $(this.buttons.get(6));
-
-    public state: UiButtonBar.State;
-
-    public setState(state: Partial<UiButtonBar.State>) {
-
-        for (let key in state) {
-            this.state[key] = state[key];
+    constructor(
+        params: {
+            obsSelectedUserSim: IObservable<types.UserSim.Usable | null>;
+            onButtonClicked(params: { userSim: types.UserSim.Usable; button: "DELETE" | "CONTACTS" | "SHARE" | "REBOOT" | "RENAME"; }): void;
         }
+    ) {
 
-        this.buttons.prop("disabled", false);
-        this.btnDetail.show();
-        this.btnBack.show();
+        const { obsSelectedUserSim } = params;
 
-        if (!this.state.isSimRowSelected) {
+        const obsAreDetailsShown = new Observable(false);
 
-            this.buttons.each(i => {
-                $(this.buttons[i]).prop("disabled", true );
+        this.obsAreDetailsShown = obsAreDetailsShown;
+
+        const onButtonClicked = (button: Parameters<typeof params.onButtonClicked>[0]["button"]) => {
+
+            const userSim = obsSelectedUserSim.value;
+
+            if (userSim === null) {
+                return;
+            }
+
+            params.onButtonClicked({ userSim, button });
+
+        };
+
+        const buttons = this.structure.find("button");
+
+        const btnDetail = $(buttons.get(0));
+        const btnBack = $(buttons.get(1));
+        const btnDelete = $(buttons.get(2));
+        const btnContacts = $(buttons.get(3));
+        const btnShare = $(buttons.get(4));
+        const btnRename = $(buttons.get(5));
+        const btnReboot = $(buttons.get(6));
+
+        btnDetail.click(() => obsAreDetailsShown.onPotentialChange(true));
+
+        btnBack.click(() => obsAreDetailsShown.onPotentialChange(false));
+
+        obsSelectedUserSim.evtChange.attach(
+            () => obsAreDetailsShown.onPotentialChange(false)
+        );
+
+        btnDelete.click(() => onButtonClicked("DELETE"));
+        btnContacts.click(() => onButtonClicked("CONTACTS"));
+
+        btnShare.tooltip();
+        btnShare.click(() => onButtonClicked("SHARE"));
+
+        btnRename.click(() => onButtonClicked("RENAME"));
+
+        btnReboot.tooltip();
+        btnReboot.click(() => onButtonClicked("REBOOT"));
+
+        {
+
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
+                "evtSelectedUserSimChange": obsSelectedUserSim.evtChange,
+                "evtAreDetailsShownChange": obsAreDetailsShown.evtChange
             });
 
+            runNowAndWhenEventOccur(
+                () => {
+
+
+                    buttons.prop("disabled", false);
+                    btnDetail.show();
+                    btnBack.show();
+
+                    if (obsSelectedUserSim.value === null) {
+
+                        buttons.each(i => {
+                            $(buttons[i]).prop("disabled", true);
+                        });
+
+                    }
+
+                    if (obsAreDetailsShown.value) {
+                        btnDetail.hide();
+                    } else {
+                        btnBack.hide();
+                    }
+
+                    if (
+                        obsSelectedUserSim.value !== null &&
+                        types.UserSim.Owned.match(obsSelectedUserSim.value)
+                    ) {
+
+                        btnShare.prop("disabled", true);
+
+                    }
+
+                    if (!obsSelectedUserSim.value?.reachableSimState) {
+                        btnReboot.prop("disabled", true);
+                    }
+
+
+                },
+                [
+                    "evtAreDetailsShownChange",
+                    "evtAreDetailsShownChange"
+                ]
+            );
+
         }
 
-        if (this.state.areDetailsShown) {
-            this.btnDetail.hide();
-        } else {
-            this.btnBack.hide();
-        }
 
-        if (!this.state.isSimSharable) {
-            this.btnShare.prop("disabled", true);
-        }
-
-        if(!this.state.isSimReachable){
-            this.btnReboot.prop("disabled", true);
-        }
-
-    }
-
-    constructor() {
-
-        this.btnDetail.click(() => {
-            this.setState({ "areDetailsShown": true });
-            this.evtToggleDetailVisibility.post(true);
-        });
-
-        this.btnBack.click(() => {
-            this.setState({ "areDetailsShown": false });
-            this.evtToggleDetailVisibility.post(false);
-        });
-
-        this.btnDelete.click(() => this.evtClickDelete.post());
-
-        this.btnContacts.click(()=> this.evtClickContacts.post());
-
-        this.btnShare.tooltip();
-        this.btnShare.click(() => this.evtClickShare.post());
-
-        this.btnRename.click(() => this.evtClickRename.post());
-
-        this.btnReboot.tooltip();
-        this.btnReboot.click(()=> this.evtClickReboot.post());
-
-        this.state = (() => {
-
-            const state: UiButtonBar.State.RowNotSelected = {
-                "isSimRowSelected": false,
-                "isSimSharable": false,
-                "isSimReachable": false,
-                "areDetailsShown": false
-            };
-
-            return state;
-
-        })();
-
-        this.setState({});
 
     }
 
 }
 
-
-export namespace UiButtonBar {
-
-    export type State = State.RowSelected | State.RowNotSelected;
-
-    export namespace State {
-
-        export type RowSelected = {
-            isSimRowSelected: true;
-            isSimSharable: boolean;
-            isSimReachable: boolean;
-            areDetailsShown: boolean;
-        };
-
-        export type RowNotSelected = {
-            isSimRowSelected: false;
-            isSimSharable: false;
-            isSimReachable: false;
-            areDetailsShown: false;
-        };
-
-    }
-
-}

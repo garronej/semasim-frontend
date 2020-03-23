@@ -1,10 +1,11 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { VoidSyncEvent, SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
-import * as types from "frontend-shared/dist/lib/types/userSim";
-import * as wd from "frontend-shared/dist/lib/types/webphoneData/logic";
+import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import {  VoidEvt, Evt, IObservable } from "frontend-shared/node_modules/evt";
+import * as types from "frontend-shared/dist/lib/types";
 import * as moment from "moment";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 declare const ion: any;
 declare const require: any;
@@ -19,9 +20,15 @@ require("../templates/UiConversation.less");
 
 declare const Buffer: any;
 
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    "evtReachabilityStatusChange" |
+    "evtCellularConnectivityChange" |
+    "evtOngoingCall"
+>;
 
 
-const [ checkMark, crossMark ] = [ "e29c93", "e29d8c" ]
+const [checkMark, crossMark] = ["e29c93", "e29d8c"]
     .map(unicode => Buffer.from(unicode, "hex").toString("utf8") as string)
     ;
 
@@ -29,12 +36,12 @@ export class UiConversation {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUpdateContact = new VoidSyncEvent();
-    public readonly evtVoiceCall = new VoidSyncEvent();
-    public readonly evtSendText = new SyncEvent<string>();
-    public readonly evtDelete = new VoidSyncEvent();
+    public readonly evtUpdateContact = new VoidEvt();
+    public readonly evtVoiceCall = new VoidEvt();
+    public readonly evtSendText = new Evt<string>();
+    public readonly evtDelete = new VoidEvt();
 
-    public readonly evtChecked = new VoidSyncEvent();
+    public readonly evtChecked = new VoidEvt();
 
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
@@ -43,76 +50,141 @@ export class UiConversation {
     private readonly btnCall = this.structure.find("button.id_call");
     private readonly btnDelete = this.structure.find("button.id_delete");
 
-    private readonly isDialable: boolean;
 
-    
-    //TODO: See if should be optimized, it is called every times
-    //the chat notification count change ( e.g. every incoming message )
-    //but it current implementation nothing is done in this case.
-    /** To call whenever the widget should be updated */
-    public notify() {
+    constructor(
+        private readonly params: {
+            userSim: types.UserSim.Usable;
+            userSimEvts: UserSimEvts;
+            obsIsSipRegistered: IObservable<boolean>;
+            wdChat: types.wd.Chat,
+            evtUpdatedOrDeletedWdChat: Evt<"UPDATED" | "DELETED">;
+            evtNewOrUpdatedMessage: Evt<types.wd.Message>;
+            fetchOlderWdMessages: () => Promise<types.wd.Message[]>
+        }
+    ) {
 
-        this.structure.find("span.id_name").text(this.wdChat.contactName || "");
+        const { 
+            userSim, 
+            userSimEvts, 
+            obsIsSipRegistered, 
+            wdChat, 
+            evtUpdatedOrDeletedWdChat, 
+            evtNewOrUpdatedMessage, 
+            fetchOlderWdMessages 
+        }= params;
 
-        if (this.isRegistered() && this.isDialable) {
+        {
 
-            this.textarea.removeAttr("disabled");
-            this.aSend.show();
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
+                ...userSimEvts,
+                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange,
+                "evtUpdatedWdChat": (() => {
 
-        } else {
+                    const out = new VoidEvt();
 
-            this.textarea.attr("disabled", true as any);
-            this.aSend.hide();
+                    evtUpdatedOrDeletedWdChat.attach(
+                        eventData => eventData === "UPDATED",
+                        () => out.post()
+                    );
+
+
+                    return out;
+                })()
+
+            });
+
+            const isDialable = phoneNumber.isDialable(wdChat.contactNumber);
+
+
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find("span.id_name")
+                    .text(wdChat.contactName ?? ""),
+                ["evtUpdatedWdChat"]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+
+                    if (obsIsSipRegistered.value && isDialable) {
+
+                        this.textarea.removeAttr("disabled");
+                        this.aSend.show();
+
+                    } else {
+
+                        this.textarea.attr("disabled", true as any);
+                        this.aSend.hide();
+
+                    }
+
+                },
+                [ "evtIsSipRegisteredValueChange" ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+
+                    this.btnUpdateContact.prop("disabled", (
+                        userSim.reachableSimState === undefined ||
+                        !isDialable
+                    ));
+
+                    this.btnDelete.prop(
+                        "disabled",
+                        userSim.reachableSimState === undefined
+                    );
+
+                },
+                ["evtReachabilityStatusChange"]
+            );
+                
+
+
+            runNowAndWhenEventOccur(
+                () => this.btnCall.prop(
+                    "disabled",
+                    !(
+                        isDialable &&
+                        obsIsSipRegistered.value &&
+                        !!userSim.reachableSimState?.isGsmConnectivityOk &&
+                        (
+                            userSim.reachableSimState.ongoingCall === undefined ||
+                            userSim.reachableSimState.ongoingCall.number === this.params.wdChat.contactNumber &&
+                            !userSim.reachableSimState.ongoingCall.isUserInCall
+                        )
+                    )
+                ),
+                [
+                    "evtIsSipRegisteredValueChange",
+                        "evtReachabilityStatusChange",
+                        "evtCellularConnectivityChange",
+                        "evtOngoingCall"
+                ]
+            );
+
+
 
         }
 
-        this.btnUpdateContact.prop("disabled", (
-            this.userSim.reachableSimState === undefined || 
-            !this.isDialable
-        ));
 
-        this.btnDelete.prop("disabled", this.userSim.reachableSimState === undefined);
 
-        this.btnCall.prop(
-            "disabled",
-            (
-                !this.isRegistered() ||
-                !this.isDialable ||
-                this.userSim.reachableSimState === undefined ||
-                !this.userSim.reachableSimState.isGsmConnectivityOk ||
-                (
-                    this.userSim.reachableSimState.ongoingCall !== undefined &&
-                    (
-                        this.userSim.reachableSimState.ongoingCall.number !== this.wdChat.contactNumber ||
-                        this.userSim.reachableSimState.ongoingCall.isUserInCall
-                    )
-                ) ||
-                !this.isRegistered()
+        this.structure.find("span.id_number").text(
+            phoneNumber.prettyPrint(
+                wdChat.contactNumber,
+                userSim.sim.country?.iso
             )
         );
 
+        evtNewOrUpdatedMessage.attach(
+            wdMessage => this.newOrUpdatedMessage(wdMessage)
+        );
 
-    }
+        evtUpdatedOrDeletedWdChat.attach(
+            eventData => eventData === "DELETED",
+            () => this.structure.detach()
+        );
 
-
-    constructor(
-        public readonly userSim: types.UserSim.Usable,
-        private readonly isRegistered: () => boolean,
-        public readonly wdChat: wd.Chat<"PLAIN">,
-        private readonly fetchOlderWdMessages: ()=> Promise<wd.Message<"PLAIN">[]>
-    ) {
-
-        const prettyNumber = phoneNumber.prettyPrint(
-            this.wdChat.contactNumber,
-            this.userSim.sim.country ?
-                this.userSim.sim.country.iso : undefined
-        )
-
-        this.isDialable = phoneNumber.isDialable(this.wdChat.contactNumber);
-
-        this.structure.find("span.id_number").text(prettyNumber);
-
-        this.notify();
 
         this.btnUpdateContact
             .on("click", () => this.evtUpdateContact.post());
@@ -185,7 +257,7 @@ export class UiConversation {
                 return;
             }
 
-            const wdMessages = await this.fetchOlderWdMessages();
+            const wdMessages = await fetchOlderWdMessages();
 
             if (wdMessages.length === 0) {
                 return;
@@ -205,7 +277,7 @@ export class UiConversation {
         }) as any);
 
 
-        for (let wdMessage of this.wdChat.messages) {
+        for (let wdMessage of wdChat.messages) {
 
             this.newOrUpdatedMessage(wdMessage, "MUTE");
 
@@ -241,125 +313,135 @@ export class UiConversation {
     }
 
     public unselect() {
-
         this.structure.hide();
-
     }
 
     private get isSelected(): boolean {
         return this.structure.is(":visible");
     }
 
+    /** new Message or update existing one */
+    private readonly newOrUpdatedMessage = (() => {
 
-    //TODO: Use object references instead of refs.
-    /** indexed by wd.Message.ref */
-    private readonly uiBubbles = new Map<string, UiBubble>();
+        const uiBubbles = new Map<types.wd.Message, UiBubble>();
 
-    /** 
-     * Place uiBubble in the structure, assume all bubbles already sorted 
-     * return true if the bubble is the last <li> of the <ul>
-     * */
-    private placeUiBubble(uiBubble: UiBubble): boolean {
+        /** 
+         * Place uiBubble in the structure, assume all bubbles already sorted 
+         * return true if the bubble is the last <li> of the <ul>
+         * */
+        const placeUiBubble = (() => {
 
-        const getUiBubbleFromStructure = (li_elem: HTMLElement): UiBubble => {
+            const getUiBubbleFromStructure = (li_elem: HTMLElement): UiBubble => {
 
-            for (const uiBubble of this.uiBubbles.values()) {
+                for (const uiBubble of uiBubbles.values()) {
 
-                if (uiBubble.structure.get(0) === li_elem) {
+                    if (uiBubble.structure.get(0) === li_elem) {
 
-                    return uiBubble;
+                        return uiBubble;
+
+                    }
 
                 }
 
+                throw new Error("uiBubble not found");
+
+
+            };
+
+            return (uiBubble: UiBubble): boolean => {
+
+
+                const lis = this.ul.find("li");
+
+                for (let i = lis.length - 1; i >= 0; i--) {
+
+                    const uiBubble_i = getUiBubbleFromStructure(lis.get(i));
+
+                    if (types.wd.Message.compare(uiBubble.wdMessage, uiBubble_i.wdMessage) >= 0) {
+
+                        //Message is more recent than current
+
+                        uiBubble.structure.insertAfter(uiBubble_i.structure);
+
+                        return i === lis.length - 1;
+
+                    }
+
+                }
+
+                this.ul.prepend(uiBubble.structure);
+
+                return false;
+
+            };
+
+        })();
+
+        return (wdMessage: types.wd.Message, mute: "MUTE" | undefined = undefined) => {
+
+            if (uiBubbles.has(wdMessage)) {
+
+                uiBubbles.get(wdMessage)!.structure.remove();
+
+                //this.uiBubbles.delete(wdMessage.ref);
+
             }
 
-            throw new Error("uiBubble not found");
+            let uiBubble: UiBubble;
+
+            if (wdMessage.direction === "INCOMING") {
+
+                if (wdMessage.isNotification) {
+
+                    const uiBubbleIncomingNotification = new UiBubble.IncomingNotification(
+                        wdMessage, this.params.wdChat, this.params.userSim
+                    );
+
+                    uiBubble = uiBubbleIncomingNotification;
+
+                } else {
+
+                    if (!mute) {
+                        ion.sound.play(this.isSelected ? "water_droplet" : "button_tiny");
+                    }
+
+                    const uiBubbleIncomingText = new UiBubble.IncomingText(
+                        wdMessage, this.params.wdChat, this.params.userSim
+                    );
+
+                    uiBubble = uiBubbleIncomingText;
 
 
-        };
-
-        const lis = this.ul.find("li");
-
-        for (let i = lis.length - 1; i >= 0; i--) {
-
-            const uiBubble_i = getUiBubbleFromStructure(lis.get(i));
-
-            if (wd.compareMessage(uiBubble.wdMessage, uiBubble_i.wdMessage) >= 0) {
-
-                //Message is more recent than current
-
-                uiBubble.structure.insertAfter(uiBubble_i.structure);
-
-                return i === lis.length - 1;
-
-            }
-
-        }
-
-        this.ul.prepend(uiBubble.structure);
-
-        return false;
-
-    }
-
-    /** new Message or update existing one */
-    public newOrUpdatedMessage(wdMessage: wd.Message<"PLAIN">, mute: "MUTE" | undefined = undefined) {
-
-        if (this.uiBubbles.has(wdMessage.ref)) {
-
-            this.uiBubbles.get(wdMessage.ref)!.structure.remove();
-
-            this.uiBubbles.delete(wdMessage.ref);
-
-        }
-
-        let uiBubble: UiBubble;
-
-        if (wdMessage.direction === "INCOMING") {
-
-            if (wdMessage.isNotification) {
-
-                const uiBubbleIncomingNotification = new UiBubble.IncomingNotification(
-                    wdMessage, this.wdChat, this.userSim
-                );
-
-                uiBubble = uiBubbleIncomingNotification;
+                }
 
             } else {
 
-                if (!mute) {
-                    ion.sound.play(this.isSelected ? "water_droplet" : "button_tiny");
-                }
+                const uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
 
-                const uiBubbleIncomingText = new UiBubble.IncomingText(
-                    wdMessage, this.wdChat, this.userSim
-                );
-
-                uiBubble = uiBubbleIncomingText;
-
+                uiBubble = uiBubbleOutgoing;
 
             }
 
-        } else {
+            uiBubbles.set(wdMessage, uiBubble);
 
-            const uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
+            const isAtBottom = placeUiBubble(uiBubble);
 
-            uiBubble = uiBubbleOutgoing;
+            if (this.isSelected && isAtBottom) {
 
-        }
+                this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
 
-        this.uiBubbles.set(wdMessage.ref, uiBubble);
+            }
 
-        const isAtBottom = this.placeUiBubble(uiBubble);
-
-        if (this.isSelected && isAtBottom) {
-
-            this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
 
         }
 
 
-    }
+
+
+
+    })();
+
+
 
 
 }
@@ -369,7 +451,7 @@ class UiBubble {
     public readonly structure = html.templates.find("li").clone();
 
     constructor(
-        public readonly wdMessage: wd.Message<"PLAIN">
+        public readonly wdMessage: types.wd.Message
     ) {
 
         this.structure.find("p.id_content")
@@ -386,8 +468,8 @@ namespace UiBubble {
     export class IncomingText extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Incoming.Text<"PLAIN">,
-            public readonly wdChat: wd.Chat<"PLAIN">,
+            public readonly wdMessage: types.wd.Message.Incoming.Text,
+            public readonly wdChat: types.wd.Chat,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -422,8 +504,8 @@ namespace UiBubble {
     export class IncomingNotification extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Incoming.Notification<"PLAIN">,
-            public readonly wdChat: wd.Chat<"PLAIN">,
+            public readonly wdMessage: types.wd.Message.Incoming.Notification,
+            public readonly wdChat: types.wd.Chat,
             public readonly userSim: types.UserSim.Usable
         ) {
 
@@ -438,7 +520,7 @@ namespace UiBubble {
     export class Outgoing extends UiBubble {
 
         constructor(
-            public readonly wdMessage: wd.Message.Outgoing<"PLAIN">
+            public readonly wdMessage: types.wd.Message.Outgoing
         ) {
 
             super(wdMessage);

@@ -1,5 +1,5 @@
 
-import { SyncEvent } from "ts-events-extended";
+import { Evt } from "evt";
 import * as localStorageApi from "./localStorageApi";
 
 const key = "authenticated-session-descriptor-shared-data";
@@ -16,7 +16,7 @@ export type AuthenticatedSessionDescriptorSharedData = {
 export namespace AuthenticatedSessionDescriptorSharedData {
 
     /** Can be used to track when the user is logged in */
-    export const evtChange = new SyncEvent<AuthenticatedSessionDescriptorSharedData | undefined>();
+    export const evtChange = new Evt<AuthenticatedSessionDescriptorSharedData | undefined>();
 
     export async function isPresent(): Promise<boolean> {
 

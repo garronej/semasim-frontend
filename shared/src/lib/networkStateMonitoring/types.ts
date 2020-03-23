@@ -2,7 +2,7 @@
 
 export type NetworkStateMonitoring = {
     getIsOnline: ()=> boolean;
-    evtStateChange: import("ts-events-extended").VoidSyncEvent;
+    evtStateChange: import("evt").VoidEvt;
 };
 
 export type GetApiFn= ()=> Promise<NetworkStateMonitoring>;

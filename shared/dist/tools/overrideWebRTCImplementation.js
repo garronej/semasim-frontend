@@ -74,7 +74,7 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 function overrideWebRTCImplementation(methods) {
     console.log("Using alternative WebRTC implementation !!");
     //NOTE: Polyfills for deprecated RTCSessionDescription constructor.
@@ -165,10 +165,10 @@ function overrideWebRTCImplementation(methods) {
         })();
         return function () { return counter++; };
     })();
-    var evtIcecandidate = new ts_events_extended_1.SyncEvent();
-    var evtIceconnectionstatechange = new ts_events_extended_1.SyncEvent();
-    var evtSignalingstatechange = new ts_events_extended_1.SyncEvent();
-    var evtMethodReturn = new ts_events_extended_1.SyncEvent();
+    var evtIcecandidate = new evt_1.Evt();
+    var evtIceconnectionstatechange = new evt_1.Evt();
+    var evtSignalingstatechange = new evt_1.Evt();
+    var evtMethodReturn = new evt_1.Evt();
     var refByMediaStream = new WeakMap();
     var getUserMediaProxy = function getUserMedia(mediaStreamConstraints) {
         return __awaiter(this, void 0, void 0, function () {
@@ -303,23 +303,22 @@ function overrideWebRTCImplementation(methods) {
                     }
                 });
             }); } }, (function () {
-            var boundToByListener = new WeakMap();
+            //const ctxByListener = new WeakMap<(ev: any) => any, Object>();
             var addEventListener = function (type, listener) {
-                var boundTo = {};
-                boundToByListener.set(listener, boundTo);
+                var ctx = evt_1.Evt.getCtx(listener);
                 switch (type) {
                     case "iceconnectionstatechange":
                         evtIceconnectionstatechange.attach(function (_a) {
                             var ref = _a.rtcPeerConnectionRef;
                             return ref === rtcPeerConnectionRef;
-                        }, boundTo, function () { return listener.call(rtcPeerConnectionProxy, undefined); });
+                        }, ctx, function () { return listener.call(rtcPeerConnectionProxy, undefined); });
                         return;
                         ;
                     case "icecandidate":
                         evtIcecandidate.attach(function (_a) {
                             var ref = _a.rtcPeerConnectionRef;
                             return ref === rtcPeerConnectionRef;
-                        }, boundTo, function (_a) {
+                        }, ctx, function (_a) {
                             var rtcIceCandidateInitOrNullJson = _a.rtcIceCandidateInitOrNullJson;
                             return listener.call(rtcPeerConnectionProxy, {
                                 "candidate": (function () {
@@ -346,13 +345,7 @@ function overrideWebRTCImplementation(methods) {
                 if (evt === undefined) {
                     return;
                 }
-                evt
-                    .getHandlers()
-                    .find(function (_a) {
-                    var boundTo = _a.boundTo;
-                    return boundTo === boundToByListener.get(listener);
-                })
-                    .detach();
+                evt_1.Evt.getCtx(listener).done();
             };
             return { addEventListener: addEventListener, removeEventListener: removeEventListener };
         })()), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });

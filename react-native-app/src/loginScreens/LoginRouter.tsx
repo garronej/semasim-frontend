@@ -2,8 +2,8 @@ import * as React from "react";
 import { LoginScreen } from "./LoginScreen/LoginScreen";
 import { RegisterScreen } from './RegisterScreen';
 import * as imageAssets from "../lib/imageAssets";
-import { tryLoginFromStoredCredentials } from "frontend-shared/dist/lib/tryLoginFromStoredCredentials";
 import { SplashImage } from "../genericComponents/SplashImage";
+import { assert } from "frontend-shared/dist/tools/assert";
 
 
 const log: typeof console.log = true ?
@@ -11,10 +11,12 @@ const log: typeof console.log = true ?
     (() => { });
 
 export type Props = {
-} & typeof defaultProps;
-
-const defaultProps = {
-    onLoggedIn: undefined as ((() => void) | undefined)
+    authenticationApi: Omit<
+        import("frontend-shared/dist/lib/appLauncher/appLaunch")
+        .appLaunch.AuthenticationStep.AuthenticationApi.NeedLogin,
+        "needLogin"
+    >;
+    dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
 };
 
 export type State = {
@@ -28,25 +30,31 @@ export declare namespace State {
 
 export class LoginRouter extends React.Component<Props, State> {
 
-    static readonly defaultProps = defaultProps;
 
     public readonly state: Readonly<State> = {
         "currentScreen": "checking" as const,
         "email": undefined
     };
 
-    constructor(props: any) {
-        super(props);
+    constructor(props_: any) {
+        super(props_);
 
-        tryLoginFromStoredCredentials().then(loginResult => {
+        this.props.authenticationApi.tryLoginWithStoredCredentialIfNotAlreadyLogedIn()
+            .then(loginResult => {
 
-            log({ loginResult });
+                log({ loginResult });
 
-            switch (loginResult) {
-                case "LOGGED IN": this.props.onLoggedIn?.(); break;
-                case "NO VALID CREDENTIALS": this.setState({ "currentScreen": "login" }); break;
-            }
-        });
+                switch (loginResult) {
+                    case "LOGGED IN": return;
+                    case "NO VALID CREDENTIALS":
+                        this.setState({ "currentScreen": "login" });
+                        return;
+                }
+
+                assert(false);
+
+            })
+            ;
 
     }
 
@@ -57,12 +65,15 @@ export class LoginRouter extends React.Component<Props, State> {
                 return <SplashImage imageSource={imageAssets.semasimLogo3} />;
             case "login":
                 return <LoginScreen
+                    dialogApi={this.props.dialogApi}
+                    launchLogin={this.props.authenticationApi.launchLogin}
                     email={this.state.email}
                     goToRegister={() => this.setState({ "currentScreen": "register" })}
-                    onLoggedIn={this.props.onLoggedIn ?? (() => { })}
                 />;
             case "register":
                 return <RegisterScreen
+                    dialogApi={this.props.dialogApi}
+                    launchRegister={this.props.authenticationApi.launchRegister}
                     goToLogin={email => this.setState({ "currentScreen": "login", email })}
                 />;
         }

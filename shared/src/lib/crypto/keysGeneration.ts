@@ -14,7 +14,13 @@ let workerThreadId: cryptoLib.WorkerThreadId;
 
 
 /** Must be called before using the async function */
-export function preSpawn() {
+export function preSpawnIfNotAlreadyDone() {
+
+    if( preSpawnIfNotAlreadyDone.hasBeenCalled){
+        return;
+    }
+
+    preSpawnIfNotAlreadyDone.hasBeenCalled= true;
 
     cryptoLib.workerThreadPool.preSpawn(workerThreadPoolId, 1);
 
@@ -22,10 +28,16 @@ export function preSpawn() {
 
 }
 
+preSpawnIfNotAlreadyDone.hasBeenCalled= false;
+
 export async function computeLoginSecretAndTowardUserKeys(
-    password: string,
-    uniqUserIdentification: string,
+    params: {
+        password: string,
+        uniqUserIdentification: string,
+    }
 ) {
+
+    const { password, uniqUserIdentification } = params;
 
     dialogApi.loading(`Generating cryptographic digest from password 🔐`, 0);
 

@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt } from "frontend-shared/node_modules/evt";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
@@ -13,7 +13,7 @@ export class UiSubscribe {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtRequestSubscribe = new VoidSyncEvent();
+    public readonly evtRequestSubscribe = new VoidEvt();
 
     constructor(currency: string, amount: number) {
 

@@ -1,5 +1,5 @@
 
-import { SyncEvent } from "ts-events-extended";
+import { Evt } from "evt";
 
 type ApiExposedByHost = {
     aesEncryptOrDecrypt(action: "ENCRYPT" | "DECRYPT", keyB64: string, inputDataB64: string, callRef: number): void;
@@ -15,17 +15,17 @@ type ApiExposedToHost = {
 
 declare const apiExposedByHost: ApiExposedByHost;
 
-const evtAesEncryptOrDecryptResult = new SyncEvent<{
+const evtAesEncryptOrDecryptResult = new Evt<{
     callRef: number;
     outputDataB64: string;
 }>();
 
-const evtRsaEncryptOrDecryptResult = new SyncEvent<{
+const evtRsaEncryptOrDecryptResult = new Evt<{
     callRef: number;
     outputDataB64: string;
 }>();
 
-const evtRsaGenerateKeysResult= new SyncEvent<{
+const evtRsaGenerateKeysResult= new Evt<{
     callRef: number;
     publicKeyStr: string;
     privateKeyStr: string;

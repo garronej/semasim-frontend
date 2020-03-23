@@ -1,6 +1,8 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, IObservable } from "frontend-shared/node_modules/evt";
+import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
 
@@ -11,200 +13,233 @@ const html = loadUiClassHtml(
     "UiHeader"
 );
 
+type UserSimEvts = Pick<
+    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    "evtFriendlyNameChange" |
+    "evtReachabilityStatusChange" |
+    "evtCellularConnectivityChange" |
+    "evtCellularSignalStrengthChange" |
+    "evtOngoingCall" |
+    "evtNewUpdatedOrDeletedContact"
+>;
+
 export class UiHeader {
 
     public readonly structure = html.structure.clone();
     private readonly templates = html.templates.clone();
 
-    public readonly evtJoinCall = new SyncEvent<phoneNumber>();
+    public readonly evtJoinCall = new Evt<phoneNumber>();
 
-    public notify(): void {
+    constructor(params: {
+        userSim: types.UserSim.Usable;
+        userSimEvts: UserSimEvts;
+        obsIsSipRegistered: IObservable<boolean>;
+    }) {
 
-        this.structure.find(".id_sip_registration_in_progress")[(
-            !this.userSim.reachableSimState ||
-            this.getIsSipRegistered()
-        ) ? "hide" : "show"]();
+        const { userSim, userSimEvts, obsIsSipRegistered } = params;
+
 
         {
 
-            const text = (() => {
-
-                if (!this.userSim.reachableSimState) {
-                    return "Sim not reachable";
-                }
-
-                if (!this.userSim.reachableSimState.isGsmConnectivityOk) {
-                    return "Not connected to GSM network";
-                }
-
-                return undefined;
-
-            })();
-
-            const $span = this.structure.find(".id_offline");
-
-            if (text === undefined) {
-
-                $span.hide();
-
-            } else {
-
-                $span.show().text(text);
-
-            }
-
-        }
-
-        this.structure.find("i")
-            .each((_i, e) => {
-
-                const $i = $(e);
-
-                const cellSignalStrength = $i.attr("data-strength");
-
-                if (!cellSignalStrength) {
-                    return;
-                }
-
-                $i[(
-                    !!this.userSim.reachableSimState &&
-                    this.userSim.reachableSimState.isGsmConnectivityOk &&
-                    cellSignalStrength === this.userSim.reachableSimState.cellSignalStrength
-                ) ? "show" : "hide"
-                ]();
-
+            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
+                ...userSimEvts,
+                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange
             });
 
-        (() => {
+            runNowAndWhenEventOccur(
+                () => this.structure.find("a.id_friendly_name span")
+                    .text(userSim.friendlyName),
+                ["evtFriendlyNameChange"]
+            );
 
-            const divConf = this.structure.find(".id_conf");
+            runNowAndWhenEventOccur(
+                () => this.structure.find(".id_sip_registration_in_progress")[(
+                    !userSim.reachableSimState ||
+                    obsIsSipRegistered.value
+                ) ? "hide" : "show"](),
+                [
+                    "evtReachabilityStatusChange",
+                    "evtIsSipRegisteredValueChange"
+                ]
+            );
 
-            if (
-                !this.userSim.reachableSimState ||
-                !this.userSim.reachableSimState.isGsmConnectivityOk ||
-                !this.userSim.reachableSimState.ongoingCall
-            ) {
+            runNowAndWhenEventOccur(
+                () => {
+                    const text = (() => {
 
-                divConf.hide();
+                        if (!userSim.reachableSimState) {
+                            return "Sim not reachable";
+                        }
 
-                return;
+                        if (!userSim.reachableSimState.isGsmConnectivityOk) {
+                            return "Not connected to GSM network";
+                        }
 
-            }
+                        return undefined;
 
-            divConf.show();
+                    })();
 
-            const { ongoingCall } = this.userSim.reachableSimState;
+                    const $span = this.structure.find(".id_offline");
 
-            divConf.find("span").text((() => {
+                    if (text === undefined) {
 
-                const contact = this.userSim.phonebook.find(
-                    ({ number_raw }) => phoneNumber.areSame(
-                        ongoingCall.number, number_raw
-                    )
-                );
-
-                let peerId = contact === undefined ?
-                    phoneNumber.prettyPrint(
-                        ongoingCall.number,
-                        this.userSim.sim.country ?
-                            this.userSim.sim.country.iso : undefined
-                    ) : contact.name;
-
-
-
-                const userList = ongoingCall.otherUserInCallEmails.map((email, index) => {
-                    const { length } = ongoingCall.otherUserInCallEmails;
-                    if (index === length - 1) {
-                        return email;
-                    }
-                    if (index === length - 2) {
-                        return `${email} and `;
-                    }
-
-                    return `${email}, `;
-
-                }).join("");
-
-                if (ongoingCall.isUserInCall) {
-
-                    if (userList === "") {
-
-                        return `You are in call with ${peerId}`;
+                        $span.hide();
 
                     } else {
 
-                        return `You alongside with ${userList} are in call with ${peerId}`;
+                        $span.show().text(text);
+
+                    }
+                },
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange"
+                ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => this.structure.find("i")
+                    .each((_i, e) => {
+
+                        const $i = $(e);
+
+                        const cellSignalStrength = $i.attr("data-strength");
+
+                        if (!cellSignalStrength) {
+                            return;
+                        }
+
+                        $i[(
+                            !!userSim.reachableSimState &&
+                            userSim.reachableSimState.isGsmConnectivityOk &&
+                            cellSignalStrength === userSim.reachableSimState.cellSignalStrength
+                        ) ? "show" : "hide"
+                        ]();
+
+                    }),
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange",
+                    "evtCellularSignalStrengthChange"
+                ]
+            );
+
+            runNowAndWhenEventOccur(
+                () => {
+                    const divConf = this.structure.find(".id_conf");
+
+                    if (
+                        !userSim.reachableSimState ||
+                        !userSim.reachableSimState.isGsmConnectivityOk ||
+                        !userSim.reachableSimState.ongoingCall
+                    ) {
+
+                        divConf.hide();
+
+                        return;
 
                     }
 
+                    divConf.show();
 
-                }
+                    const { ongoingCall } = userSim.reachableSimState;
 
-                return [
-                    userList,
-                    ongoingCall.otherUserInCallEmails.length >= 2 ? "are" : "is",
-                    `in call with ${peerId}`
-                ].join(" ");
+                    divConf.find("span").text((() => {
 
-            })());
+                        const contact = userSim.phonebook.find(
+                            ({ number_raw }) => phoneNumber.areSame(
+                                ongoingCall.number, number_raw
+                            )
+                        );
 
-            const $button = divConf.find("button");
-
-            if (ongoingCall.isUserInCall) {
-                $button.hide();
-                return;
-            }
-
-            $button
-                .off("click")
-                .click(() => this.evtJoinCall.post(ongoingCall.number))
-                .show()
-                ;
-
-        })();
+                        let peerId = contact === undefined ?
+                            phoneNumber.prettyPrint(
+                                ongoingCall.number,
+                                userSim.sim.country ?
+                                    userSim.sim.country.iso : undefined
+                            ) : contact.name;
 
 
-    }
+
+                        const userList = ongoingCall.otherUserInCallEmails.map((email, index) => {
+                            const { length } = ongoingCall.otherUserInCallEmails;
+                            if (index === length - 1) {
+                                return email;
+                            }
+                            if (index === length - 2) {
+                                return `${email} and `;
+                            }
+
+                            return `${email}, `;
+
+                        }).join("");
+
+                        if (ongoingCall.isUserInCall) {
+
+                            return userList === "" ?
+                                `You are in call with ${peerId}` :
+                                `You alongside with ${userList} are in call with ${peerId}`
+                                ;
+
+                        }
+
+                        return [
+                            userList,
+                            ongoingCall.otherUserInCallEmails.length >= 2 ? "are" : "is",
+                            `in call with ${peerId}`
+                        ].join(" ");
+
+                    })());
+
+                    const $button = divConf.find("button");
+
+                    if (ongoingCall.isUserInCall) {
+                        $button.hide();
+                        return;
+                    }
+
+                    $button
+                        .off("click")
+                        .click(() => this.evtJoinCall.post(ongoingCall.number))
+                        .show()
+                        ;
+                },
+                [
+                    "evtReachabilityStatusChange",
+                    "evtCellularConnectivityChange",
+                    "evtOngoingCall",
+                    "evtNewUpdatedOrDeletedContact"
+                ]
+            );
+
+        }
 
 
-    constructor(
-        public readonly userSim: types.UserSim.Usable,
-        private readonly getIsSipRegistered: () => boolean
-    ) {
+        this.structure.find("a.id_friendly_name")
+            .popover({
+                "html": true,
+                "trigger": "hover",
+                "placement": "right",
+                "container": "body",
+                "title": "SIM card infos",
+                "content": () => this.templates.find("div.id_popover").html()
+            });
 
-        this.notify();
+        this.structure.find("span.id_number").text(
+            !!userSim.sim.storage.number ? (() => {
 
-        this.structure.find("a.id_friendly_name").popover({
-            "html": true,
-            "trigger": "hover",
-            "placement": "right",
-            "container": "body",
-            "title": "SIM card infos",
-            "content": () => this.templates.find("div.id_popover").html()
-        }).find("span").text(this.userSim.friendlyName);
-
-        this.structure.find("span.id_number").text(() => {
-
-            if (!!this.userSim.sim.storage.number) {
-
-                const iso = this.userSim.sim.country ?
-                    this.userSim.sim.country.iso : undefined;
+                const iso = userSim.sim.country?.iso;
 
                 return phoneNumber.prettyPrint(
                     phoneNumber.build(
-                        this.userSim.sim.storage.number,
+                        userSim.sim.storage.number,
                         iso
                     ),
                     iso
                 );
 
-            } else {
-
-                return "";
-
-            }
-
-        })
+            })() : ""
+        )
             .on("dblclick", e => {
 
                 e.preventDefault();
@@ -223,28 +258,22 @@ export class UiHeader {
             });
 
         this.templates.find("div.id_popover div.id_flag").addClass(
-            this.userSim.sim.country ? this.userSim.sim.country.iso : ""
+            userSim.sim.country?.iso ?? ""
         );
 
         this.templates.find("div.id_popover span.id_network").html(
-            this.userSim.sim.serviceProvider.fromImsi ||
-            this.userSim.sim.serviceProvider.fromNetwork ||
+            userSim.sim.serviceProvider.fromImsi ||
+            userSim.sim.serviceProvider.fromNetwork ||
             "Unknown"
         );
 
         this.templates.find("span.id_geoInfo").html((() => {
 
-            let loc = this.userSim.gatewayLocation;
+            let loc = userSim.gatewayLocation;
 
             return loc.city || loc.subdivisions || loc.countryIso || "?";
 
         })());
-
-        /*
-        this.structure.find("div.id_flag").addClass(
-            this.userSim.gatewayLocation.countryIso || ""
-        );
-        */
 
     }
 

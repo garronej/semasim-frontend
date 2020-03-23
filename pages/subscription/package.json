@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "moment": "^2.20.1",
-    "minimal-polyfills": "github:garronej/minimal-polyfills",
+    "minimal-polyfills": "^1.0.4",
     "frontend-shared": "file:../../shared"
   },
   "devDependencies": {

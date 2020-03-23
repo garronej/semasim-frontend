@@ -1,9 +1,9 @@
-export declare type VoidSyncEvent = import("ts-events-extended").VoidSyncEvent;
+export declare type VoidEvt = import("evt").VoidEvt;
 export declare type Structure = import("./types.Structure").Structure;
 export declare type Modal = {
-    evtHide: VoidSyncEvent;
-    evtShown: VoidSyncEvent;
-    evtHidden: VoidSyncEvent;
+    evtHide: VoidEvt;
+    evtShown: VoidEvt;
+    evtHidden: VoidEvt;
     show(): void;
     hide(): void;
     removeFromDom(): void;
