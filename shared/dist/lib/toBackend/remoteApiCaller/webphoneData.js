@@ -94,6 +94,7 @@ function getWdApiFactory(params) {
     var decryptMessage = types.wd.Message.decryptFactory({ decryptThenParseFactory: serializer_1.decryptThenParseFactory });
     var stringifyThenEncrypt = cryptoLib.stringifyThenEncryptFactory(encryptorDecryptor);
     var evtRequestProcessedByBackend = new evt_1.Evt();
+    evtRequestProcessedByBackend.setMaxHandlers(50);
     var onRequestProcessedByBackend = function (requestProcessedByBackend) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {

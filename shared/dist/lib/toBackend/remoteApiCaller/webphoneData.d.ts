@@ -74,7 +74,7 @@ export declare function getWdApiFactory(params: {
             wdChat: types.wd.Chat<"PLAIN">;
         } & {
             type: "SERVER TO CLIENT";
-            bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+            bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.MissedCall;
         }): Promise<void>;
         (args: {
             wdChat: types.wd.Chat<"PLAIN">;

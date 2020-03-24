@@ -51,6 +51,8 @@ export function getWdApiFactory(
 
     const evtRequestProcessedByBackend: RemoteNotifyEvts["evtWdActionFromOtherUa"] = new Evt();
 
+    evtRequestProcessedByBackend.setMaxHandlers(50);
+
     const onRequestProcessedByBackend = async (requestProcessedByBackend: RequestProcessedByBackend) =>
         new Promise<void>((resolve, reject) => {
 
@@ -786,6 +788,8 @@ function getGetGetWdEvts(
                 "evtWdChat": new Evt(),
                 "evtWdMessage": new Evt()
             };
+
+
 
             evtRequestProcessedByBackend.attach(
                 ({ params: { imsi: imsi_ } }) => imsi_ === imsi,
