@@ -2,8 +2,8 @@
 import * as React from "react";
 import * as rn from "react-native";
 import * as types from "frontend-shared/dist/lib/types";
-import { id } from "frontend-shared/dist/tools/id";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { id } from "frontend-shared/dist/tools/typeSafety/id";
+import { Evt, NonPostable } from "frontend-shared/node_modules/evt";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[MainComponent]", ...args])) :
@@ -100,12 +100,12 @@ function attachWebphoneListeners(
     );
 
     (Object.keys(webphone.userSimEvts) as (keyof typeof webphone.userSimEvts)[]).forEach(evtName =>
-        id<SyncEvent<any>>(webphone.userSimEvts[evtName])
+        id<NonPostable<Evt<any>>>(webphone.userSimEvts[evtName])
             .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
     );
 
     (Object.keys(webphone.wdEvts) as (keyof typeof webphone.wdEvts)[]).forEach(evtName =>
-        id<SyncEvent<any>>(webphone.wdEvts[evtName])
+        id<NonPostable<Evt<any>>>(webphone.wdEvts[evtName])
             .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
     );
 

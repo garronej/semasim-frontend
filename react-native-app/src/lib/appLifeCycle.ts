@@ -1,12 +1,12 @@
 
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as rn from "react-native";
 
 export const appLifeCycleEvents = {
-  "evtConstructor": new SyncEvent<React.Component>(),
-  "evtComponentDidMount": new SyncEvent<React.Component>(),
-  "evtComponentWillUnmount": new SyncEvent<React.Component>(),
-  "evtRootViewOnLayout": new SyncEvent<{
+  "evtConstructor": new Evt<React.Component>(),
+  "evtComponentDidMount": new Evt<React.Component>(),
+  "evtComponentWillUnmount": new Evt<React.Component>(),
+  "evtRootViewOnLayout": new Evt<{
     component: React.Component;
     layoutChangeEvent: rn.LayoutChangeEvent;
   }>(),

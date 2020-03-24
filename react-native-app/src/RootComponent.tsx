@@ -9,7 +9,6 @@ import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";
 
-type RestartApp = import("frontend-shared/dist/lib/restartApp").RestartApp;
 declare const process: any;
 declare const window: any;
 

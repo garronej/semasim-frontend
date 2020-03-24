@@ -3,7 +3,7 @@ import { LoginScreen } from "./LoginScreen/LoginScreen";
 import { RegisterScreen } from './RegisterScreen';
 import * as imageAssets from "../lib/imageAssets";
 import { SplashImage } from "../genericComponents/SplashImage";
-import { assert } from "frontend-shared/dist/tools/assert";
+import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 
 
 const log: typeof console.log = true ?

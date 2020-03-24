@@ -1,7 +1,7 @@
 
 
 import * as rn from "react-native";
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, UnpackEvt } from "frontend-shared/node_modules/evt";
 declare const window: any;
 
 const log: typeof console.log = true ?
@@ -11,7 +11,7 @@ const log: typeof console.log = true ?
 
 const apiExposedToHostInvocationEventName = "apiExposedToHostInvocation";
 
-const evtApiExposeToHostInvocation = new SyncEvent<{
+const evtApiExposeToHostInvocation = new Evt<{
     functionName: string;
     params: (string | number | null)[];
 }>();
@@ -19,8 +19,8 @@ const evtApiExposeToHostInvocation = new SyncEvent<{
 //NOTE: We do it here or we risk missing events.
 rn.DeviceEventEmitter.addListener(
     apiExposedToHostInvocationEventName,
-    (eventData: SyncEvent.Type<typeof evtApiExposeToHostInvocation>) =>
-        evtApiExposeToHostInvocation.postOnceMatched(eventData)
+    (eventData: UnpackEvt<typeof evtApiExposeToHostInvocation>) =>
+        evtApiExposeToHostInvocation.postAsyncOnceHandled(eventData)
 );
 
 export async function run() {
@@ -88,11 +88,11 @@ export function doHeadlessTaskRegistering(
 
     registerHeadlessTask(
         apiExposedToHostInvocationEventName,
-        () => async (eventData: SyncEvent.Type<typeof evtApiExposeToHostInvocation>) => {
+        () => async (eventData: UnpackEvt<typeof evtApiExposeToHostInvocation>) => {
 
             log(`==========> ${eventData.functionName} called from HeadlessJS`);
 
-            evtApiExposeToHostInvocation.postOnceMatched(eventData);
+            evtApiExposeToHostInvocation.postAsyncOnceHandled(eventData);
 
         }
     );

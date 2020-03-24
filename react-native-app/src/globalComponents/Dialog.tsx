@@ -1,11 +1,11 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import { VoidSyncEvent, SyncEvent, ObservableImpl } from "frontend-shared/node_modules/ts-events-extended";
+import { VoidEvt, Evt, Observable } from "frontend-shared/node_modules/evt";
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
-import { assert } from "frontend-shared/dist/tools/assert";
+import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 //NOTE: Type only import.
 import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
@@ -13,8 +13,8 @@ const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[globalComponent/Dialog]", ...args])) :
     (() => { });
 
-const obsRef = new ObservableImpl<Dialog | undefined>(undefined);
-const obsAppState = new ObservableImpl<rn.AppStateStatus>(rn.AppState.currentState);
+const obsRef = new Observable<Dialog | undefined>(undefined);
+const obsAppState = new Observable<rn.AppStateStatus>(rn.AppState.currentState);
 
 export const api: types.Api = {
     "create": (dialogType, options) => createModal(dialogType, options),
@@ -59,18 +59,28 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
     }
 
     const modal: types.Modal = {
-        "evtHide": new VoidSyncEvent(),
-        "evtShown": new VoidSyncEvent(),
-        "evtHidden": new VoidSyncEvent(),
+        "evtHide": new VoidEvt(),
+        "evtShown": new VoidEvt(),
+        "evtHidden": new VoidEvt(),
         "show": () => {
 
             currentModal = modal;
 
+            const ctx = Evt.getCtx(modal);
+
             Promise.all<unknown>([
-                obsRef.value ??
-                obsRef.evtChange.waitFor((ref): ref is NonNullable<typeof ref> => !!ref),
-                (obsAppState.value === "active") ||
-                obsAppState.evtChange.attachOnce(newAppState => newAppState === "active", modal, () => { })
+                ...obsRef.value ? [] : [
+                    obsRef.evtChange.waitFor(
+                        (ref): ref is NonNullable<typeof ref> => !!ref,
+                        ctx
+                    )
+                ],
+                ...obsAppState.value == "active" ? [] : [
+                    obsAppState.evtChange.waitFor(
+                        newAppState => newAppState === "active",
+                        ctx
+                    )
+                ]
             ]).then(() => obsRef.value!.setState({
                 "isVisible": true,
                 dialogType,
@@ -81,7 +91,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
         },
         "hide": () => {
 
-            obsAppState.evtChange.detach(modal);
+            Evt.getCtx(modal).done();
 
             if (obsRef.value !== undefined) {
 

@@ -26,7 +26,7 @@ export declare function createSipUserAgentFactory(params: {
     password: string;
     towardSimEncryptKeyStr: string;
     ownership: {
-        status: "SHARED CONFIRMED" | "OWNED";
+        status: "OWNED" | "SHARED CONFIRMED";
     };
     reachableSimState: Object | undefined;
 }) => SipUserAgent;
@@ -51,7 +51,7 @@ declare class SipUserAgent {
     private register;
     readonly evtIncomingMessage: Evt<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.SendReport;
+        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
         handlerCb: () => void;
     }>;
     private onMessage;

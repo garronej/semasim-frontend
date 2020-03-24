@@ -6,7 +6,7 @@ import { NoBackendConnectionBanner, notConnectedUserFeedback } from "./globalCom
 import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotification";
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
-import { id } from "frontend-shared/dist/tools/id";
+import { id } from "frontend-shared/dist/tools/typeSafety/id";
 
 import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
 import { appLaunch } from "frontend-shared/dist/lib/appLauncher/appLaunch";

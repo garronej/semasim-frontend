@@ -1,7 +1,7 @@
 
 import { firebase } from '@react-native-firebase/messaging';
 import * as rn from "react-native";
-import { id } from "frontend-shared/dist/tools/id";
+import { id } from "frontend-shared/dist/tools/typeSafety/id";
 
 type AppLifeCycleListener = import("./appLifeCycle").AppLifeCycleListener;
 

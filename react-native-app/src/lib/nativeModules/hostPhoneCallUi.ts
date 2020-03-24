@@ -1,5 +1,5 @@
 
-import { SyncEvent, VoidSyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/nativeModules/hostPhoneCallUi]", ...args])) :
@@ -39,24 +39,24 @@ type ApiExposedToHost = {
 declare const apiExposedByHost: ApiExposedByHost;
 
 
-const evtOpenPhoneAccountSettingsResult = new SyncEvent<{ callRef: number; }>();
-const evtSetIsPhoneAccountSipRegisteredResult = new SyncEvent<{ callRef: number; }>();
-const evtRegisterOrUpdatePhoneAccountResult = new SyncEvent<{ callRef: number; }>();
-const evtGetIsSimPhoneAccountEnabledResult = new SyncEvent<{ callRef: number; isSimPhoneAccountEnabled: boolean; }>();
-const evtUnregisterOtherPhoneAccountsResult = new SyncEvent<{ callRef: number; }>();
+const evtOpenPhoneAccountSettingsResult = new Evt<{ callRef: number; }>();
+const evtSetIsPhoneAccountSipRegisteredResult = new Evt<{ callRef: number; }>();
+const evtRegisterOrUpdatePhoneAccountResult = new Evt<{ callRef: number; }>();
+const evtGetIsSimPhoneAccountEnabledResult = new Evt<{ callRef: number; isSimPhoneAccountEnabled: boolean; }>();
+const evtUnregisterOtherPhoneAccountsResult = new Evt<{ callRef: number; }>();
 
-export const evtUiOpenForOutgoingCall = new SyncEvent<{
+export const evtUiOpenForOutgoingCall = new Evt<{
     phoneCallRef: number;
     imsi: string;
     phoneNumberRaw: string;
     setContactName: (contactName: string | undefined)=> void;
-    evtDtmf: SyncEvent<{dtmf: string; }>;
-    evtEndCall: VoidSyncEvent;
+    evtDtmf: Evt<{dtmf: string; }>;
+    evtEndCall: VoidEvt;
 }>();
 
-const evtCallAnswered = new SyncEvent<{ phoneCallRef: number; }>();
-const evtDtmf = new SyncEvent<{ phoneCallRef: number; dtmf: string; }>();
-const evtEndCall = new SyncEvent<{ phoneCallRef: number; }>();
+const evtCallAnswered = new Evt<{ phoneCallRef: number; }>();
+const evtDtmf = new Evt<{ phoneCallRef: number; dtmf: string; }>();
+const evtEndCall = new Evt<{ phoneCallRef: number; }>();
 
 
 
@@ -79,7 +79,7 @@ export const apiExposedToHost: ApiExposedToHost = {
     "notifyEndCall": phoneCallRef =>
         evtEndCall.post({ phoneCallRef }),
     "notifyUiOpenForOutgoingCallAndGetContactName": (phoneCallRef, imsi, phoneNumberRaw) =>
-        evtUiOpenForOutgoingCall.postOnceMatched({
+        evtUiOpenForOutgoingCall.postAsyncOnceHandled({
             phoneCallRef,
             imsi,
             phoneNumberRaw,
@@ -87,11 +87,11 @@ export const apiExposedToHost: ApiExposedToHost = {
                 apiExposedByHost.onGetContactNameResponse(phoneCallRef, contactName ?? null),
             "evtDtmf": (() => {
 
-                const out = new SyncEvent<{ dtmf: string; }>();
+                const out = new Evt<{ dtmf: string; }>();
 
                 evtDtmf.attach(
                     ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
-                    ({ dtmf }) => out.postOnceMatched({ dtmf })
+                    ({ dtmf }) => out.postAsyncOnceHandled({ dtmf })
                 );
 
                 return out;
@@ -99,11 +99,11 @@ export const apiExposedToHost: ApiExposedToHost = {
             })(),
             "evtEndCall": (() => {
 
-                const out = new VoidSyncEvent();
+                const out = new VoidEvt();
 
                 evtEndCall.attach(
                     ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
-                    () => out.postOnceMatched()
+                    () => out.postAsyncOnceHandled()
                 );
 
                 return out;

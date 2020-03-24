@@ -39,7 +39,7 @@ export class LoginScreen extends React.Component<Props, State> {
         super(props_);
 
         log("Constructor");
-        //TODO: confirm that it is reinstantiated every time we switch from 
+        //TODO: confirm that it is re-instantiated every time we switch from 
         //register to login screen.
 
         this.prApi = this.dComponentDidMount.pr.then(

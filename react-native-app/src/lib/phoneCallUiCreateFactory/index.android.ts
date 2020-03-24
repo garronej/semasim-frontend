@@ -1,10 +1,10 @@
 
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt, UnpackEvt } from "frontend-shared/node_modules/evt";
 import * as hostPhoneCallUi from "../nativeModules/hostPhoneCallUi";
 import * as hostKeepAlive from "../nativeModules/hostKeepAlive";
 import * as types from "frontend-shared/dist/lib/types/PhoneCallUi";
 import { askUserForPermissions } from "../askUserForPermissions";
-import { assert } from "frontend-shared/dist/tools/assert";
+import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/phoneCallUiCreateFactory/index.android]", ...args])) :
@@ -109,7 +109,7 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
             "openUiForIncomingCall": wdChat => {
                 throw new Error("TODO");
             },
-            "evtUiOpenedForOutgoingCall": new SyncEvent()
+            "evtUiOpenedForOutgoingCall": new Evt()
         };
 
         hostPhoneCallUi.evtUiOpenForOutgoingCall.attach(
@@ -169,10 +169,10 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
 
 //function getOnEstablishedReturnedApi(phoneCallRef: number): ReturnType<types.PhoneCallUi.OnEstablished> {
 function getOnEstablishedReturnedApi(
-    {evtDtmf, evtEndCall}: Pick<SyncEvent.Type<typeof hostPhoneCallUi.evtUiOpenForOutgoingCall>, "evtDtmf" | "evtEndCall">
+    {evtDtmf, evtEndCall}: Pick<UnpackEvt<typeof hostPhoneCallUi.evtUiOpenForOutgoingCall>, "evtDtmf" | "evtEndCall">
 ): ReturnType<types.PhoneCallUi.OnEstablished> {
 
-    const evtUserInput = new SyncEvent<types.PhoneCallUi.InCallUserAction>();
+    const evtUserInput = new Evt<types.PhoneCallUi.InCallUserAction>();
 
     evtDtmf.attach(
         ({ dtmf }) => evtUserInput.post({

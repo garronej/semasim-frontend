@@ -20,7 +20,7 @@ firebase.messaging().setBackgroundMessageHandler(async message => {
 
         log("Waiting for an handler to be attached to evt");
 
-        await evtBackgroundPushNotification.evtAttach.waitFor();
+        await evtBackgroundPushNotification.getEvtAttach().waitFor();
 
     }
 

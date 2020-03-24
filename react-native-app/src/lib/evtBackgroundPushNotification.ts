@@ -1,4 +1,4 @@
 
-import { SyncEvent } from "frontend-shared/node_modules/ts-events-extended";
+import { Evt } from "frontend-shared/node_modules/evt";
 
-export const evtBackgroundPushNotification = new SyncEvent<any>();
+export const evtBackgroundPushNotification = new Evt<any>();

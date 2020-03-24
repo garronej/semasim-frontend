@@ -2,15 +2,15 @@
 import * as React from "react";
 import * as rn from "react-native";
 import { h } from "../lib/dimensions";
-import { ObservableImpl } from "frontend-shared/node_modules/ts-events-extended";
-import { id } from "frontend-shared/dist/tools/id";
+import { Observable } from "frontend-shared/node_modules/evt";
+import { id } from "frontend-shared/dist/tools/typeSafety/id";
 
 const log: typeof console.log = true ?
     ((...args) => console.log(...["[globalComponents/NoBackendConnectionBanner]", ...args])) :
     (() => { });
 
 
-const obsRef = new ObservableImpl<NoBackendConnectionBanner | undefined>(undefined);
+const obsRef = new Observable<NoBackendConnectionBanner | undefined>(undefined);
 
 
 type NotConnectedUserFeedback = import("frontend-shared/dist/lib/appLauncher/appLaunch")
