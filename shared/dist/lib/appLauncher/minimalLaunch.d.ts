@@ -12,6 +12,7 @@ export declare namespace minimalLaunch {
             networkStateMonitoringApi: import("../networkStateMonitoring").NetworkStateMonitoring;
             tryLoginWithStoredCredentialIfNotAlreadyLogedIn: import("../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory").TryLoginWithStoredCredentialIfNotAlreadyLogedIn;
             AuthenticatedSessionDescriptorSharedData: typeof import("../localStorage/AuthenticatedSessionDescriptorSharedData").AuthenticatedSessionDescriptorSharedData;
+            requestTurnCred: boolean;
         };
         type Browser = Common_ & {
             assertJsRuntimeEnv: "browser";
