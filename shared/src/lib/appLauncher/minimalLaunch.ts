@@ -20,6 +20,7 @@ export namespace minimalLaunch {
             networkStateMonitoringApi: import("../networkStateMonitoring").NetworkStateMonitoring;
             tryLoginWithStoredCredentialIfNotAlreadyLogedIn: import("../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory").TryLoginWithStoredCredentialIfNotAlreadyLogedIn;
             AuthenticatedSessionDescriptorSharedData: typeof import("../localStorage/AuthenticatedSessionDescriptorSharedData").AuthenticatedSessionDescriptorSharedData;
+            requestTurnCred: boolean;
         };
 
         export type Browser = Common_ & {
@@ -56,7 +57,8 @@ export async function minimalLaunch(
         startMultiDialogProcess,
         networkStateMonitoringApi,
         tryLoginWithStoredCredentialIfNotAlreadyLogedIn,
-        AuthenticatedSessionDescriptorSharedData
+        AuthenticatedSessionDescriptorSharedData,
+        requestTurnCred
     } = params;
 
 
@@ -68,7 +70,7 @@ export async function minimalLaunch(
     assert(await AuthenticatedSessionDescriptorSharedData.isPresent());
 
     const connectionApi = connection.connectAndGetApi({
-        "requestTurnCred": true,
+        requestTurnCred,
         restartApp,
         "notConnectedUserFeedback": params.assertJsRuntimeEnv === "react-native" ?
             params.notConnectedUserFeedback :

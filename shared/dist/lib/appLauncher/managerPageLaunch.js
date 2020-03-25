@@ -139,7 +139,8 @@ function onceLoggedIn(params) {
                             dialogApi: dialog_1.dialogApi, startMultiDialogProcess: dialog_1.startMultiDialogProcess,
                             networkStateMonitoringApi: networkStateMonitoringApi,
                             tryLoginWithStoredCredentialIfNotAlreadyLogedIn: tryLoginWithStoredCredentialIfNotAlreadyLogedIn,
-                            AuthenticatedSessionDescriptorSharedData: AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData
+                            AuthenticatedSessionDescriptorSharedData: AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData,
+                            "requestTurnCred": false
                         })];
                 case 1:
                     _a = _d.sent(), coreApi = _a.coreApi, readyToDisplayUnsolicitedDialogs = _a.readyToDisplayUnsolicitedDialogs, userSims = _a.userSims, userSimEvts = _a.userSimEvts;

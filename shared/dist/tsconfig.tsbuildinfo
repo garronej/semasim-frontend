@@ -678,8 +678,8 @@
         "signature": "29367fed01d93eac422eabc9ca4ad8f8e70e114f31f29ae5020091d4d2d61257"
       },
       "../src/lib/applauncher/minimallaunch.ts": {
-        "version": "a03c74784e821baff79e2e3c82188cf943dc9223a4f6bf1c286df2c14c45325c",
-        "signature": "026bc00498d0c184a9ca393ec384def50fef46446912783ae29cff991da8bdea"
+        "version": "6bf4718c737ee6aaaccf0cbc3cc2998febeebca88110f0d70f63cffd48ff69f4",
+        "signature": "71517a52157e3b6b0f5af853e4200986d61003d7606415ac883face1aa75be73"
       },
       "../src/tools/modal/getapi.ts": {
         "version": "155e6944701b498a9f49796aaddda027a12c8d6335785937119a3871e73f7f3a",
@@ -690,7 +690,7 @@
         "signature": "85ff1c3e00570d6c7462d0c93052550b279183a521f3c2d551e32e520d33acd7"
       },
       "../src/lib/applauncher/applaunch.ts": {
-        "version": "20a458ad7ddcf68700a513e0fdc54ea6186308cd5adbec218e70035a06facfe4",
+        "version": "2fcfe8dbc9ba82fb44d498c160ed563007b5a2010ac0fdeb6b5567c3fe0289e2",
         "signature": "3c5d1d4e9aae34367f9a5bfb9d55a76486043026067f75f22f993003ab56f645"
       },
       "../src/lib/applauncher/loginpagelaunch.ts": {
@@ -698,7 +698,7 @@
         "signature": "d443a037add0d180d3d88c6462aad8fa31dbe09cf511d74ccff95d20ff110603"
       },
       "../src/lib/applauncher/managerpagelaunch.ts": {
-        "version": "80fc0f1720452df2637025edccd0c7a6d9c144190595d38fbaae2aabd9667c7c",
+        "version": "17865128c9999f0631f70fe08232eed9675544f65dc881b0e5b5d36da4570457",
         "signature": "7b7a78dd0068f98a9fe2eaebc78e3dd9b8ddcafabb0c781597c947214e44c5df"
       },
       "../src/lib/applauncher/registerpagelaunch.ts": {
@@ -826,6 +826,8 @@
         "bootstrap",
         "jquery"
       ],
+      "project": "../tsconfig.json",
+      "watch": true,
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
@@ -2277,6 +2279,8 @@
       "../src/lib/localstorage/towarduserkeys.ts",
       "../src/lib/crypto/keysgeneration.ts",
       "../src/lib/crypto/appcryptosetuphelper.ts",
+      "../src/lib/createsipuseragentfactory.ts",
+      "../src/lib/createwebphonefactory.ts",
       "../src/lib/loaduiclasshtml.ts",
       "../src/lib/registerinteractiveremotenotifyevthandlers.ts",
       "../src/lib/shipping.ts",
@@ -2288,11 +2292,9 @@
       "../src/lib/pagelogic/register.ts",
       "../src/tools/overwritereadonlyprop.ts",
       "../src/tools/deferred.ts",
-      "../src/lib/applauncher/minimallaunch.ts",
       "../src/tools/modal/getapi.ts",
       "../src/tools/modal/index.ts",
       "../src/lib/applauncher/loginpagelaunch.ts",
-      "../src/lib/applauncher/managerpagelaunch.ts",
       "../src/lib/applauncher/registerpagelaunch.ts",
       "../src/lib/env/impl.native.ts",
       "../src/lib/getpushtoken/impl.native.ts",
@@ -2318,9 +2320,9 @@
       "../src/tools/testing/index.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/createsipuseragentfactory.ts",
-      "../src/lib/applauncher/applaunch.ts",
-      "../src/lib/createwebphonefactory.ts"
+      "../src/lib/applauncher/minimallaunch.ts",
+      "../src/lib/applauncher/managerpagelaunch.ts",
+      "../src/lib/applauncher/applaunch.ts"
     ]
   },
   "version": "3.8.3"

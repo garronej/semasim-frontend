@@ -289,7 +289,8 @@ function onceLoggedIn(params) {
                                 startMultiDialogProcess: dialog_1.startMultiDialogProcess,
                                 networkStateMonitoringApi: networkStateMonitoringApi,
                                 tryLoginWithStoredCredentialIfNotAlreadyLogedIn: tryLoginWithStoredCredentialIfNotAlreadyLogedIn,
-                                AuthenticatedSessionDescriptorSharedData: AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData
+                                AuthenticatedSessionDescriptorSharedData: AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData,
+                                "requestTurnCred": true
                             };
                             switch (params.assertJsRuntimeEnv) {
                                 case "browser": return id_1.id(__assign({ "assertJsRuntimeEnv": params.assertJsRuntimeEnv }, common_));

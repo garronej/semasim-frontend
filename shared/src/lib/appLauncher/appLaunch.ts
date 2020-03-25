@@ -350,7 +350,8 @@ async function onceLoggedIn(
 			startMultiDialogProcess,
 			networkStateMonitoringApi,
 			tryLoginWithStoredCredentialIfNotAlreadyLogedIn,
-			AuthenticatedSessionDescriptorSharedData
+			AuthenticatedSessionDescriptorSharedData,
+			"requestTurnCred": true
 		};
 
 		switch (params.assertJsRuntimeEnv) {

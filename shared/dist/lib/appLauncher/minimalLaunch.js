@@ -46,18 +46,18 @@ var Deferred_1 = require("../../tools/Deferred");
 /** Assert user logged in ( AuthenticatedSessionDescriptorSharedData.isPresent ) */
 function minimalLaunch(params) {
     return __awaiter(this, void 0, void 0, function () {
-        var restartApp, dialogApi, startMultiDialogProcess, networkStateMonitoringApi, tryLoginWithStoredCredentialIfNotAlreadyLogedIn, AuthenticatedSessionDescriptorSharedData, _a, connectionApi, _b, getCoreApi, getWdApiFactory, coreApi, _c, _d, _e, _f, userSims, userSimEvts, dReadyToDisplayUnsolicitedDialogs;
+        var restartApp, dialogApi, startMultiDialogProcess, networkStateMonitoringApi, tryLoginWithStoredCredentialIfNotAlreadyLogedIn, AuthenticatedSessionDescriptorSharedData, requestTurnCred, _a, connectionApi, _b, getCoreApi, getWdApiFactory, coreApi, _c, _d, _e, _f, userSims, userSimEvts, dReadyToDisplayUnsolicitedDialogs;
         return __generator(this, function (_g) {
             switch (_g.label) {
                 case 0:
-                    restartApp = params.restartApp, dialogApi = params.dialogApi, startMultiDialogProcess = params.startMultiDialogProcess, networkStateMonitoringApi = params.networkStateMonitoringApi, tryLoginWithStoredCredentialIfNotAlreadyLogedIn = params.tryLoginWithStoredCredentialIfNotAlreadyLogedIn, AuthenticatedSessionDescriptorSharedData = params.AuthenticatedSessionDescriptorSharedData;
+                    restartApp = params.restartApp, dialogApi = params.dialogApi, startMultiDialogProcess = params.startMultiDialogProcess, networkStateMonitoringApi = params.networkStateMonitoringApi, tryLoginWithStoredCredentialIfNotAlreadyLogedIn = params.tryLoginWithStoredCredentialIfNotAlreadyLogedIn, AuthenticatedSessionDescriptorSharedData = params.AuthenticatedSessionDescriptorSharedData, requestTurnCred = params.requestTurnCred;
                     assert_1.assert(params.assertJsRuntimeEnv === env_1.env.jsRuntimeEnv, "Wrong params for js runtime environnement");
                     _a = assert_1.assert;
                     return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.isPresent()];
                 case 1:
                     _a.apply(void 0, [_g.sent()]);
                     connectionApi = connection.connectAndGetApi({
-                        "requestTurnCred": true,
+                        requestTurnCred: requestTurnCred,
                         restartApp: restartApp,
                         "notConnectedUserFeedback": params.assertJsRuntimeEnv === "react-native" ?
                             params.notConnectedUserFeedback :

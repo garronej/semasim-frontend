@@ -101,7 +101,8 @@ async function onceLoggedIn(
         dialogApi, startMultiDialogProcess,
         networkStateMonitoringApi,
         tryLoginWithStoredCredentialIfNotAlreadyLogedIn,
-        AuthenticatedSessionDescriptorSharedData
+        AuthenticatedSessionDescriptorSharedData,
+        "requestTurnCred": false
     });
 
     readyToDisplayUnsolicitedDialogs();
