@@ -28,7 +28,9 @@ declare const Buffer: any;
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 
-type ConnectionApi = Pick<import("./toBackend/connection").ConnectionApi, "url" | "getSocket" | "evtConnect"> & { remoteNotifyEvts: Pick<types.RemoteNotifyEvts, "rtcIceServer"> };
+type ConnectionApi = Pick<import("./toBackend/connection").ConnectionApi, "url" | "getSocket" | "evtConnect"> & 
+{ remoteNotifyEvts: Pick<types.RemoteNotifyEvts, "getRtcIceServer"> };
+
 type UserSimEvts = Pick<
     NonPostableEvts<types.UserSim.Evts>,
     "evtSipPasswordRenewed" | "evtDelete" | "evtReachabilityStatusChange"
@@ -62,7 +64,7 @@ export function createSipUserAgentFactory(
 
     const { towardUserDecryptor } = params.cryptoRelatedParams;
 
-    const getCurrentRtcIceServers = () => params.connectionApi.remoteNotifyEvts.rtcIceServer.getCurrent();
+    const getCurrentRtcIceServers = () => params.connectionApi.remoteNotifyEvts.getRtcIceServer();
 
     return function createSipUserAgent(
         userSim: {

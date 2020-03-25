@@ -88,7 +88,7 @@ export declare function factory(params: {
         unlockSim: ({ lockedDongle, pin }: {
             lockedDongle: import("chan-dongle-extended-client/dist/lib/types").Dongle.Locked;
             pin: string;
-        }) => Promise<import("chan-dongle-extended-client/dist/lib/types").UnlockResult.Success | import("chan-dongle-extended-client/dist/lib/types").UnlockResult.Failed | undefined>;
+        }) => Promise<import("../../../sip_api_declarations/backendToUa").unlockSim.Response>;
         registerSim: ({ dongle, friendlyName }: {
             dongle: import("chan-dongle-extended-client/dist/lib/types").Dongle.Usable;
             friendlyName: string;

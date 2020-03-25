@@ -10,47 +10,44 @@ export function getHandlers(): {
     remoteNotifyEvts: types.RemoteNotifyEvts;
 } {
 
+    const evtRtcIceServer = new Evt<{
+        rtcIceServer: types.DOM_RTCIceServer_subset;
+        attachOnNoLongerValid: (onNoLongerValid: () => void) => void;
+    }>();
+
     const remoteNotifyEvts: types.RemoteNotifyEvts = {
         "evtUserSimChange": new Evt(),
         "evtDongleOnLan": new Evt(),
         "evtOpenElsewhere": new VoidEvt(),
-        "rtcIceServer": (() => {
+        "getRtcIceServer": (() => {
 
-            const evt: types.RemoteNotifyEvts["rtcIceServer"]["evt"] = new Evt();
 
-            return {
-                evt,
-                "getCurrent": (() => {
+            let current: types.DOM_RTCIceServer_subset | undefined = undefined;
 
-                    let current: types.DOM_RTCIceServer_subset | undefined = undefined;
+            const evtUpdated = new VoidEvt();
 
-                    const evtUpdated = new VoidEvt();
+            evtRtcIceServer.attach(({ rtcIceServer, attachOnNoLongerValid }) => {
 
-                    evt.attach(({ rtcIceServer, attachOnNoLongerValid }) => {
+                attachOnNoLongerValid(() => current = undefined);
 
-                        attachOnNoLongerValid(() => current = undefined);
+                current = rtcIceServer;
 
-                        current = rtcIceServer;
+                evtUpdated.post();
 
-                        evtUpdated.post();
+            });
 
-                    });
+            return async function callee(): Promise<types.DOM_RTCIceServer_subset> {
 
-                    return async function callee(): Promise<types.DOM_RTCIceServer_subset> {
+                if (current !== undefined) {
+                    return current;
+                }
 
-                        if (current !== undefined) {
-                            return current;
-                        }
+                await evtUpdated.waitFor();
 
-                        await evtUpdated.waitFor();
+                return callee();
 
-                        return callee();
+            };
 
-                    };
-
-                })()
-
-            }
 
 
 
@@ -119,7 +116,7 @@ export function getHandlers(): {
                     evtUsableDongle.post({ "imei": dongle.imei });
                 }
 
-                remoteNotifyEvts.evtDongleOnLan.post(data);
+                remoteNotifyEvts.evtDongleOnLan.postAsyncOnceHandled(data);
 
                 return undefined;
 
@@ -139,7 +136,7 @@ export function getHandlers(): {
         const handler: sipLibrary.api.Server.Handler<Params, Response> = {
             "handler": () => {
 
-                remoteNotifyEvts.evtOpenElsewhere.post();
+                remoteNotifyEvts.evtOpenElsewhere.postAsyncOnceHandled();
 
                 return Promise.resolve(undefined);
 
@@ -160,7 +157,7 @@ export function getHandlers(): {
         const handler: sipLibrary.api.Server.Handler<Params, Response> = {
             "handler": (params, fromSocket) => {
 
-                remoteNotifyEvts.rtcIceServer.evt.post({
+                evtRtcIceServer.post({
                     "rtcIceServer": params !== undefined ? params :
                         ({
                             "urls": [

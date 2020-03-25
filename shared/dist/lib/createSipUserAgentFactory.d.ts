@@ -9,7 +9,7 @@ declare type Decryptor = import("./crypto/cryptoLibProxy").Decryptor;
 declare type CryptoRelatedParams = AsyncReturnType<typeof import("./crypto/appCryptoSetupHelper")["appCryptoSetupHelper"]>["paramsNeededToInstantiateUa"];
 import { NonPostableEvts } from "../tools/NonPostableEvts";
 declare type ConnectionApi = Pick<import("./toBackend/connection").ConnectionApi, "url" | "getSocket" | "evtConnect"> & {
-    remoteNotifyEvts: Pick<types.RemoteNotifyEvts, "rtcIceServer">;
+    remoteNotifyEvts: Pick<types.RemoteNotifyEvts, "getRtcIceServer">;
 };
 declare type UserSimEvts = Pick<NonPostableEvts<types.UserSim.Evts>, "evtSipPasswordRenewed" | "evtDelete" | "evtReachabilityStatusChange">;
 export declare function createSipUserAgentFactory(params: {

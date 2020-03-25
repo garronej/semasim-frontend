@@ -1,10 +1,14 @@
 
 <% if( component === "style" ) { %>
 
+
+<% if( false ) { %>
 <link href="<%-assets_root%>plugins/misc/starry_sky/style.css" rel="stylesheet" />
+<% } %>
 
 <% }else if( component === "structure" ) { %>
 
+<% if( false ) { %>
 <div id="particles-background" class="vertical-centered-box"></div>
 <div id="particles-foreground" class="vertical-centered-box"></div>
 <div class="vertical-centered-box">
@@ -43,9 +47,12 @@
       </svg>
    </div>
 </div>
+<% } %>
 
 <% }else if( component === "script" ){ %>
 
+<% if( false ) { %>
 <script src="<%-assets_root%>plugins/misc/starry_sky/script.js"></script>
+<% } %>
 
 <% } %>

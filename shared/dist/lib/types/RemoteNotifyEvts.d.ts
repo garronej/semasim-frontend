@@ -12,13 +12,7 @@ export declare type RemoteNotifyEvts = {
         dongle: dcTypes.Dongle.Usable;
     }>;
     evtOpenElsewhere: VoidEvt;
-    rtcIceServer: {
-        evt: Evt<{
-            rtcIceServer: DOM_RTCIceServer_subset;
-            attachOnNoLongerValid: (onNoLongerValid: () => void) => void;
-        }>;
-        getCurrent: () => Promise<DOM_RTCIceServer_subset>;
-    };
+    getRtcIceServer: () => Promise<DOM_RTCIceServer_subset>;
     evtWdActionFromOtherUa: Evt<import("../../sip_api_declarations/uaToBackend").wd_notifyActionFromOtherUa.Params>;
 };
 export declare type DOM_RTCIceServer_subset = {

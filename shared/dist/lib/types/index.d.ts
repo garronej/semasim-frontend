@@ -1,5 +1,4 @@
-import * as wd from "./webphoneData";
-export { wd };
+export * as wd from "./webphoneData";
 export * from "./UserSim";
 export * from "./Webphone";
 export * from "./AccountManagementApi";

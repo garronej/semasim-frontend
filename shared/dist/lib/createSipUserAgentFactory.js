@@ -91,7 +91,7 @@ function createSipUserAgentFactory(params) {
         })()
     };
     var towardUserDecryptor = params.cryptoRelatedParams.towardUserDecryptor;
-    var getCurrentRtcIceServers = function () { return params.connectionApi.remoteNotifyEvts.rtcIceServer.getCurrent(); };
+    var getCurrentRtcIceServers = function () { return params.connectionApi.remoteNotifyEvts.getRtcIceServer(); };
     return function createSipUserAgent(userSim) {
         var imsi = userSim.sim.imsi;
         var getPrReachable = function () { return params.userSimEvts.evtReachabilityStatusChange.waitFor(function (_a) {
