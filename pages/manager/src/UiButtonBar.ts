@@ -3,7 +3,6 @@ import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
 import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 
-
 declare const require: (path: string) => any;
 
 const html = loadUiClassHtml(
@@ -81,7 +80,6 @@ export class UiButtonBar {
             runNowAndWhenEventOccur(
                 () => {
 
-
                     buttons.prop("disabled", false);
                     btnDetail.show();
                     btnBack.show();
@@ -101,8 +99,8 @@ export class UiButtonBar {
                     }
 
                     if (
-                        obsSelectedUserSim.value !== null &&
-                        types.UserSim.Owned.match(obsSelectedUserSim.value)
+                        obsSelectedUserSim.value === null ||
+                        !types.UserSim.Owned.match(obsSelectedUserSim.value)
                     ) {
 
                         btnShare.prop("disabled", true);
@@ -116,7 +114,7 @@ export class UiButtonBar {
 
                 },
                 [
-                    "evtAreDetailsShownChange",
+                    "evtSelectedUserSimChange",
                     "evtAreDetailsShownChange"
                 ]
             );
