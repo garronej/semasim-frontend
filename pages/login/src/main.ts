@@ -71,11 +71,11 @@ $(document).ready(async () => {
 		})(),
 		"uiApi": {
 			"emailInput": {
-				"getValue": $("#email").val(),
+				"getValue": ()=> $("#email").val(),
 				"setValue": email => $("#email").val(email)
 			},
 			"passwordInput": {
-				"getValue": $("#password").val(),
+				"getValue": ()=> $("#password").val(),
 				"setValue": password => $("#password").val(password)
 			},
 			"triggerClickButtonLogin": () => $("#login-btn").trigger("click"),
