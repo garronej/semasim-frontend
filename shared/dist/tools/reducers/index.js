@@ -29,3 +29,7 @@ var partition_1 = require("./partition");
 exports.partition = partition_1.partition;
 var diff_1 = require("./diff");
 exports.diff = diff_1.diff;
+var push_1 = require("./push");
+exports.push = push_1.push;
+var concat_1 = require("./concat");
+exports.concat = concat_1.concat;

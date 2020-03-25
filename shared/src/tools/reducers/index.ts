@@ -1,28 +1,16 @@
 
-import { allEquals, allEqualsFactory } from "./allEquals";
-import { allEqualsTo, allEqualsToFactory } from "./allEqualsTo";
-import { allUniq, allUniqFactory } from "./allUniq";
-import { and } from "./and";
-import { includes } from "./includes";
-import { count } from "./count";
-import { every } from "./every";
-import { or } from "./or";
-import { removeDuplicates, removeDuplicatesFactory } from "./removeDuplicates";
-import { sameAs, sameAsFactory } from "./sameAs";
-import { partition } from "./partition";
-import { diff } from "./diff";
+export { allEquals, allEqualsFactory } from "./allEquals";
+export { allEqualsTo, allEqualsToFactory } from "./allEqualsTo";
+export { allUniq, allUniqFactory } from "./allUniq";
+export { and } from "./and";
+export { includes } from "./includes";
+export { count } from "./count";
+export { every } from "./every";
+export { or } from "./or";
+export { removeDuplicates, removeDuplicatesFactory } from "./removeDuplicates";
+export { sameAs, sameAsFactory } from "./sameAs";
+export { partition } from "./partition";
+export { diff } from "./diff";
+export { push } from "./push";
+export { concat } from "./concat";
 
-export {
-    allEquals, allEqualsFactory,
-    allEqualsTo, allEqualsToFactory,
-    allUniq, allUniqFactory,
-    and,
-    includes,
-    count,
-    every,
-    or,
-    removeDuplicates, removeDuplicatesFactory,
-    sameAs, sameAsFactory,
-    partition,
-    diff
-};

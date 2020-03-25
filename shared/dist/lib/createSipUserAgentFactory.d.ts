@@ -51,7 +51,7 @@ declare class SipUserAgent {
     private register;
     readonly evtIncomingMessage: Evt<{
         fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+        bundledData: gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.SendReport;
         handlerCb: () => void;
     }>;
     private onMessage;

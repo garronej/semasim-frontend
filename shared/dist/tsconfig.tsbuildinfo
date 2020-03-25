@@ -429,9 +429,17 @@
         "version": "86bbd73fd7799c720748931beb16e12a64bbfdb061098aae64fa3d77084d9b00",
         "signature": "4a22d17e6e2c07c402d9ea80ff4f5db530a67f75ac34e665a5b10d5735d735aa"
       },
+      "../src/tools/reducers/push.ts": {
+        "version": "d0c503de91b335ea1e21b19a78d01b41963b75a73eaea7924672782e2f52932f",
+        "signature": "8fc44b2692cbf556d5b3f5161f62b499e58a9ee71d139a8b189efe0c8868e4d0"
+      },
+      "../src/tools/reducers/concat.ts": {
+        "version": "c5c6a556951ab8f4a4eff934a7078a55bca47addcd2fc6d39db7b32cd2b4df0d",
+        "signature": "35a29fe18863bcfde25736f55c3a1676c4c62fdc1ef856888f529cd3dfcbedd2"
+      },
       "../src/tools/reducers/index.ts": {
-        "version": "b6c5e8782a47727ccfdacb74bc4658ea6142d639fc9213cbd0dbbda9811623a2",
-        "signature": "b7bb91742bc0e30860fa386eccb171222d64229137f7c0824eb63a9871923bc6"
+        "version": "a73579012f28645044ef38b68721811ce51195e07111825de8da8af416276b71",
+        "signature": "0d257a1abc0fe64fc8d9c97e70fad4ce5ca44ea1d307da6d30c66452ca883630"
       },
       "../../local_modules/ts-sip/dist/lib/index.d.ts": {
         "version": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
@@ -543,11 +551,11 @@
       },
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": {
         "version": "41a7cfe9308568c75b7c9552d8cfe992232fa13fff114508f0781745721bdd39",
-        "signature": "25e6178e747386903781686b868cb172cc6d5d365cae5ebf5822866073ef008e"
+        "signature": "8d2a108f7d1f17da829540a12441e0a3db001edec1931582964c74567cb5f6d0"
       },
       "../src/lib/tobackend/remoteapicaller/index.ts": {
         "version": "d1851a21538ad5f989e4f9aaa7bc1e23119aa29318efa8f53bcc9ccb4ce74070",
-        "signature": "2a449e3260e9c85beef03481698839bc42b850a21ab76a15c76de971a8ae3d45"
+        "signature": "7f5e5e8a1c254bd6cad7ddc73a683fd2d49689a2a9fbc3c9a999851f30d260d4"
       },
       "../src/lib/types/accountmanagementapi.ts": {
         "version": "b1e341a2fed424e6ce6c1029122028440ff444afd9f22ce818eeeef0df253f81",
@@ -627,7 +635,7 @@
       },
       "../src/lib/createsipuseragentfactory.ts": {
         "version": "327b943cee45d5060c573cf41faccfc6e74463166991a5fb1db56b58963eb0fb",
-        "signature": "4f9dad7577de79af84cb65aa3ddcab449a2c3942a1ff280e2822f42cb5377db1"
+        "signature": "97a8d86e034fb73dabcea1c47387c4b7debb9be62eb613be1cb0212754b5046c"
       },
       "../src/lib/createwebphonefactory.ts": {
         "version": "ed71e4745b974a4e041a03f92cdf099591ccf41ec52cb064e57e2aa5cef0ebd4",
@@ -1108,6 +1116,12 @@
         "../src/tools/reducers/contains.ts",
         "../src/tools/reducers/removeduplicates.ts"
       ],
+      "../src/tools/reducers/push.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/concat.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
       "../src/tools/reducers/index.ts": [
         "../src/tools/reducers/allequals.ts",
         "../src/tools/reducers/allequalsto.ts",
@@ -1120,7 +1134,9 @@
         "../src/tools/reducers/removeduplicates.ts",
         "../src/tools/reducers/sameas.ts",
         "../src/tools/reducers/partition.ts",
-        "../src/tools/reducers/diff.ts"
+        "../src/tools/reducers/diff.ts",
+        "../src/tools/reducers/push.ts",
+        "../src/tools/reducers/concat.ts"
       ],
       "../../local_modules/ts-sip/dist/lib/index.d.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
@@ -1822,6 +1838,12 @@
       "../src/tools/reducers/diff.ts": [
         "../src/tools/reducers/reduceify.ts"
       ],
+      "../src/tools/reducers/push.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/concat.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
       "../src/tools/reducers/index.ts": [
         "../src/tools/reducers/allequals.ts",
         "../src/tools/reducers/allequalsto.ts",
@@ -1834,7 +1856,9 @@
         "../src/tools/reducers/removeduplicates.ts",
         "../src/tools/reducers/sameas.ts",
         "../src/tools/reducers/partition.ts",
-        "../src/tools/reducers/diff.ts"
+        "../src/tools/reducers/diff.ts",
+        "../src/tools/reducers/push.ts",
+        "../src/tools/reducers/concat.ts"
       ],
       "../../local_modules/ts-sip/dist/lib/index.d.ts": [
         "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
@@ -1923,7 +1947,7 @@
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
         "../src/lib/types/index.ts",
         "../src/tools/nonpostableevts.ts",
@@ -2230,6 +2254,8 @@
       "../src/tools/reducers/partition.ts",
       "../src/tools/reducers/contains.ts",
       "../src/tools/reducers/diff.ts",
+      "../src/tools/reducers/push.ts",
+      "../src/tools/reducers/concat.ts",
       "../src/tools/reducers/index.ts",
       "../../local_modules/ts-sip/dist/lib/index.d.ts",
       "../src/sip_api_declarations/uatobackend.ts",
@@ -2255,7 +2281,6 @@
       "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
       "../src/lib/tobackend/connection.ts",
       "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
-      "../src/lib/tobackend/remoteapicaller/core.ts",
       "../src/lib/nativemodules/hostcryptolib.ts",
       "../src/lib/crypto/cryptolibproxy.ts",
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
@@ -2292,9 +2317,12 @@
       "../src/lib/pagelogic/register.ts",
       "../src/tools/overwritereadonlyprop.ts",
       "../src/tools/deferred.ts",
+      "../src/lib/applauncher/minimallaunch.ts",
       "../src/tools/modal/getapi.ts",
       "../src/tools/modal/index.ts",
+      "../src/lib/applauncher/applaunch.ts",
       "../src/lib/applauncher/loginpagelaunch.ts",
+      "../src/lib/applauncher/managerpagelaunch.ts",
       "../src/lib/applauncher/registerpagelaunch.ts",
       "../src/lib/env/impl.native.ts",
       "../src/lib/getpushtoken/impl.native.ts",
@@ -2320,9 +2348,7 @@
       "../src/tools/testing/index.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/applauncher/minimallaunch.ts",
-      "../src/lib/applauncher/managerpagelaunch.ts",
-      "../src/lib/applauncher/applaunch.ts"
+      "../src/lib/tobackend/remoteapicaller/core.ts"
     ]
   },
   "version": "3.8.3"
