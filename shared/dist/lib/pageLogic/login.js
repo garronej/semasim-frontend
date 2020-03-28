@@ -51,7 +51,7 @@ var cryptoLib = require("../crypto/cryptoLibProxy");
 var crypto = require("../crypto/keysGeneration");
 var assert_1 = require("../../tools/typeSafety/assert");
 var env_1 = require("../env");
-var v3_1 = require("uuid/v3");
+var uuidv5 = require("uuid/v5");
 function factory(params) {
     var webApi = params.webApi, dialogApi = params.dialogApi, JustRegistered = params.JustRegistered, TowardUserKeys = params.TowardUserKeys;
     var validateEmail = validateEmailFactory({ dialogApi: dialogApi, webApi: webApi }).validateEmail;
@@ -197,7 +197,7 @@ function factory(params) {
                                                         };
                                                         case "react-native": return {
                                                             "assertJsRuntimeEnv": "react-native",
-                                                            "uaInstanceId": "\"<urn:uuid:" + v3_1.default(params.getDeviceUniqIdentifier(), (new Array(16)).fill(0)) + ">\""
+                                                            "uaInstanceId": "\"<urn:uuid:" + uuidv5(params.getDeviceUniqIdentifier(), "1514baa7-6d21-4eeb-86f5-f7ccd6a85afd") + ">\""
                                                         };
                                                     }
                                                 })())).catch(function () { return new Error(); })];

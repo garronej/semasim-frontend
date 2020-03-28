@@ -166,8 +166,8 @@
         "signature": "0072eeba252eab988da79ad35311573f29ec4cdce3b9564e2146ed84812de591"
       },
       "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/to.d.ts": {
-        "version": "b9a266f3f7547d2967aa823a74e14d0ee2d9cecc2a0126f0040e22d95a6f6eec",
-        "signature": "b9a266f3f7547d2967aa823a74e14d0ee2d9cecc2a0126f0040e22d95a6f6eec"
+        "version": "7595d59599c282270e2064a9abce83376bf0ce3f866f94c16fb89dcd18249713",
+        "signature": "7595d59599c282270e2064a9abce83376bf0ce3f866f94c16fb89dcd18249713"
       },
       "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/index.d.ts": {
         "version": "044cfc9b10e86f355d9b22ddbff8cd86e4dfe2647d21d44038c2b0c9dd9b6b48",
@@ -539,7 +539,7 @@
       },
       "../src/lib/tobackend/remoteapicaller/core.ts": {
         "version": "4e937024db4c3ebbdacac1e7c3421ad4ba4a59f085239d4c617ae58e870d9f2e",
-        "signature": "e6b8b653a8ef1a423d01f1d164cd6607253c01cb8745e01811ae2e35fa7ffe9c"
+        "signature": "de04895ce6d83cd263d311033d6ca12ac0e62778b8edc986c59844b9a1caae59"
       },
       "../src/lib/nativemodules/hostcryptolib.ts": {
         "version": "d2edef8e6169186602fec90ba334b9e533002c70a378c1ec76b3f499ff4c78e6",
@@ -551,11 +551,11 @@
       },
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": {
         "version": "41a7cfe9308568c75b7c9552d8cfe992232fa13fff114508f0781745721bdd39",
-        "signature": "8d2a108f7d1f17da829540a12441e0a3db001edec1931582964c74567cb5f6d0"
+        "signature": "25e6178e747386903781686b868cb172cc6d5d365cae5ebf5822866073ef008e"
       },
       "../src/lib/tobackend/remoteapicaller/index.ts": {
         "version": "d1851a21538ad5f989e4f9aaa7bc1e23119aa29318efa8f53bcc9ccb4ce74070",
-        "signature": "7f5e5e8a1c254bd6cad7ddc73a683fd2d49689a2a9fbc3c9a999851f30d260d4"
+        "signature": "c053fb870f1c55319eea41cd6e2fa90101df3a4f7c172b036487de439ea1ca86"
       },
       "../src/lib/types/accountmanagementapi.ts": {
         "version": "b1e341a2fed424e6ce6c1029122028440ff444afd9f22ce818eeeef0df253f81",
@@ -626,7 +626,7 @@
         "signature": "ab4fa7caca294cb7d2c7d813dcbc906e6b6aef653b4ed56c0f60363848dfcc5d"
       },
       "../src/lib/crypto/keysgeneration.ts": {
-        "version": "77a668ef5ecd7984bf958c981cebcd6a81aefa8608c8b4f973899da94a2d87e1",
+        "version": "a00469b72c5ea5e6853a950a1d983eaa1f804a35d7a498c5b08310859900acf6",
         "signature": "d5e5a07f2ee54b54ca2e0181c84814d9fb352796bc65416cc44994319785b159"
       },
       "../src/lib/crypto/appcryptosetuphelper.ts": {
@@ -635,7 +635,7 @@
       },
       "../src/lib/createsipuseragentfactory.ts": {
         "version": "327b943cee45d5060c573cf41faccfc6e74463166991a5fb1db56b58963eb0fb",
-        "signature": "97a8d86e034fb73dabcea1c47387c4b7debb9be62eb613be1cb0212754b5046c"
+        "signature": "4f9dad7577de79af84cb65aa3ddcab449a2c3942a1ff280e2822f42cb5377db1"
       },
       "../src/lib/createwebphonefactory.ts": {
         "version": "ed71e4745b974a4e041a03f92cdf099591ccf41ec52cb064e57e2aa5cef0ebd4",
@@ -657,20 +657,12 @@
         "version": "35da7c58973ae1ce768c3a3eb7571a00d40e8afb35d1255289d17195200ba353",
         "signature": "5d906a1f41cb5b12a54c54ce398661aef69a8d040f3e159fe4d5f4e1087c47eb"
       },
-      "../src/lib/getpushtoken/impl.ts": {
-        "version": "59b4389eb32ec449706aafc4790c9921c52a0971eeae7d9ab4f44ae1e7c43e15",
-        "signature": "30dd92fd197702e13b2c8ccddb26805ffbb65ff0b4ec136f97ecdb3b8373aad3"
-      },
-      "../src/lib/getpushtoken/index.ts": {
-        "version": "55a8d766c5430eb72a5d72896b6513e8cda0b01f7f1cb27f0a5e00f240542693",
-        "signature": "1c4dda52bd4f0d108144738caaddfb41794677c0147bb61f52d29b1b455df381"
-      },
       "../src/lib/localstorage/justregistered.ts": {
         "version": "e1b49f3cd205a934b20a280058b2a77c10c729516fc2f41bd670edbbf30ce4ee",
         "signature": "8e3f6e3fefc4080d511acf97d06d0522ffc4af62b2325ff8c3c7ed085f5c7257"
       },
       "../src/lib/pagelogic/login.ts": {
-        "version": "9f561193d75a487ea1a2254e78ceb301cf769d8f9b824a25c4564d559e561540",
+        "version": "87691dc330405a9ad6947f4967c70202c21b6fc8b47db253bfbe7be33761968e",
         "signature": "4c35173ac02ccdebeacdee817a0954df2efe45059ae4ac7076e36bce01a9275c"
       },
       "../src/lib/pagelogic/register.ts": {
@@ -698,8 +690,8 @@
         "signature": "85ff1c3e00570d6c7462d0c93052550b279183a521f3c2d551e32e520d33acd7"
       },
       "../src/lib/applauncher/applaunch.ts": {
-        "version": "2fcfe8dbc9ba82fb44d498c160ed563007b5a2010ac0fdeb6b5567c3fe0289e2",
-        "signature": "3c5d1d4e9aae34367f9a5bfb9d55a76486043026067f75f22f993003ab56f645"
+        "version": "3e286289cb427a416fe8fa60f1eef7e841ac27987a40afbeeddf23d1f2147270",
+        "signature": "5f56c522995fb7f270ca6e2c0af1fb70c667dcfa63a6037c834f8342be1e84af"
       },
       "../src/lib/applauncher/loginpagelaunch.ts": {
         "version": "83bbf23cf50b115c7649ee0498757c2e3309cb27edda471b58237b19e04f0009",
@@ -716,10 +708,6 @@
       "../src/lib/env/impl.native.ts": {
         "version": "ab1fa9cdf0254f9f1d57f0c05cc39bae386dac04c8dce97a177ba825a47b18f8",
         "signature": "cf9766b1fb83c104d966f6299cfcda078ac26e2fcea0d4250912923333e8ecec"
-      },
-      "../src/lib/getpushtoken/impl.native.ts": {
-        "version": "771aa6459d8e1ef7322edebca35366df3d83d79f22224b22d6a53da3e92c7c7b",
-        "signature": "30dd92fd197702e13b2c8ccddb26805ffbb65ff0b4ec136f97ecdb3b8373aad3"
       },
       "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": {
         "version": "09ef617b5f2d66ae1fca23974ef5d63ec5ea2b3894a06033c197fed3c3ee0e7a",
@@ -835,7 +823,6 @@
         "jquery"
       ],
       "project": "../tsconfig.json",
-      "watch": true,
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
@@ -1398,12 +1385,6 @@
       "../src/lib/shopproducts.ts": [
         "../src/lib/types/shop.ts"
       ],
-      "../src/lib/getpushtoken/impl.ts": [
-        "../src/lib/getpushtoken/index.ts"
-      ],
-      "../src/lib/getpushtoken/index.ts": [
-        "../src/lib/getpushtoken/impl.ts"
-      ],
       "../src/lib/localstorage/justregistered.ts": [
         "../src/lib/localstorage/localstorageapi/index.ts",
         "../src/lib/localstorage/towarduserkeys.ts"
@@ -1461,7 +1442,6 @@
         "../src/lib/restartapp/index.ts",
         "../src/lib/env/index.ts",
         "../src/tools/modal/dialog/index.ts",
-        "../src/lib/getpushtoken/index.ts",
         "../../local_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/types/index.ts",
         "../src/lib/types/webphone.ts",
@@ -1479,6 +1459,7 @@
         "../src/lib/pagelogic/register.ts",
         "../src/lib/applauncher/minimallaunch.ts",
         "../src/tools/modal/index.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/lib/tobackend/connection.ts"
       ],
       "../src/lib/applauncher/loginpagelaunch.ts": [
@@ -1515,9 +1496,6 @@
       ],
       "../src/lib/env/impl.native.ts": [
         "../src/lib/env/index.ts"
-      ],
-      "../src/lib/getpushtoken/impl.native.ts": [
-        "../src/lib/getpushtoken/index.ts"
       ],
       "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
         "../res/@types/@react-native-community/async-storage/index.d.ts"
@@ -1732,11 +1710,11 @@
         "../../../gateway/dist/web_api_declaration.d.ts"
       ],
       "../node_modules/evt/dist/lib/index.d.ts": [
-        "../node_modules/evt/dist/lib/evt.d.ts",
-        "../node_modules/evt/dist/lib/ctx.d.ts",
-        "../node_modules/evt/dist/lib/types/index.d.ts",
-        "../node_modules/evt/dist/lib/observable.d.ts",
-        "../node_modules/evt/dist/lib/util/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts"
       ],
       "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
         "../../local_modules/crypto-lib/dist/sync/types.d.ts"
@@ -1749,24 +1727,24 @@
       "../src/lib/types/webphonedata.ts": [
         "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
         "../../local_modules/crypto-lib/dist/async/index.d.ts",
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../src/tools/nonpostableevts.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../src/lib/types/usersim.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/tools/nonpostableevts.ts"
       ],
       "../src/lib/types/webphone.ts": [
         "../src/lib/types/usersim.ts",
         "../src/tools/nonpostableevts.ts",
         "../src/lib/types/webphonedata.ts",
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/index.d.ts": [
@@ -1779,7 +1757,7 @@
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
         "../node_modules/trackable-map/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
@@ -1891,7 +1869,7 @@
         "../src/lib/restartapp/index.ts"
       ],
       "../src/lib/networkstatemonitoring/types.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../src/lib/networkstatemonitoring/impl.ts": [
         "../src/lib/networkstatemonitoring/types.ts"
@@ -1901,7 +1879,7 @@
         "../src/lib/networkstatemonitoring/impl.ts"
       ],
       "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../src/lib/localstorage/credentials.ts": [
         "../src/web_api_declaration.ts"
@@ -1927,7 +1905,7 @@
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
         "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/lib/types/index.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/getsendrequest.ts": [
@@ -1939,8 +1917,7 @@
         "../src/lib/restartapp/index.ts",
         "../src/lib/types/index.ts",
         "../src/tools/nonpostableevts.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../src/sip_api_declarations/backendtoua.ts"
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
       "../src/lib/crypto/cryptolibproxy.ts": [
         "../../local_modules/crypto-lib/dist/async/index.d.ts"
@@ -1963,7 +1940,6 @@
         "../../../gateway/dist/lib/types.d.ts",
         "../src/lib/types/index.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../src/sip_api_declarations/backendtoua.ts",
         "../src/lib/tobackend/connection.ts"
       ],
       "../src/lib/types/accountmanagementapi.ts": [
@@ -1973,12 +1949,12 @@
         "../src/tools/nonpostableevts.ts"
       ],
       "../node_modules/evt/dist/lib/observable.d.ts": [
-        "../node_modules/evt/dist/lib/evt.d.ts",
-        "../node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
       ],
       "../src/lib/types/phonecallui.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts",
-        "../node_modules/evt/dist/lib/observable.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts"
       ],
       "../src/lib/types/index.ts": [
         "../src/lib/types/webphonedata.ts",
@@ -1990,7 +1966,7 @@
         "../src/lib/types/websocketconnectionparams.ts"
       ],
       "../src/tools/modal/types.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/tools/modal/types.structure.ts"
       ],
       "../src/tools/modal/stack.ts": [
@@ -2048,12 +2024,6 @@
       "../src/lib/shopproducts.ts": [
         "../src/lib/types/shop.ts"
       ],
-      "../src/lib/getpushtoken/impl.ts": [
-        "../src/lib/getpushtoken/index.ts"
-      ],
-      "../src/lib/getpushtoken/index.ts": [
-        "../src/lib/getpushtoken/impl.ts"
-      ],
       "../src/lib/localstorage/justregistered.ts": [
         "../src/lib/localstorage/towarduserkeys.ts"
       ],
@@ -2090,13 +2060,14 @@
       ],
       "../src/lib/applauncher/applaunch.ts": [
         "../src/lib/tobackend/connection.ts",
-        "../src/lib/types/index.ts",
         "../src/tools/modal/dialog/index.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
         "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
         "../src/tools/modal/index.ts",
         "../src/lib/restartapp/index.ts",
         "../src/lib/pagelogic/login.ts",
-        "../src/lib/pagelogic/register.ts"
+        "../src/lib/pagelogic/register.ts",
+        "../src/lib/types/index.ts"
       ],
       "../src/lib/applauncher/loginpagelaunch.ts": [
         "../src/lib/pagelogic/login.ts"
@@ -2112,9 +2083,6 @@
       ],
       "../src/lib/env/impl.native.ts": [
         "../src/lib/env/index.ts"
-      ],
-      "../src/lib/getpushtoken/impl.native.ts": [
-        "../src/lib/getpushtoken/index.ts"
       ],
       "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
         "../res/@types/@react-native-community/async-storage/index.d.ts"
@@ -2133,7 +2101,7 @@
         "../src/lib/restartapp/index.ts"
       ],
       "../src/tools/runnowandwheneventoccurfactory.ts": [
-        "../node_modules/evt/dist/lib/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
       "../src/tools/indepthcomparison/index.ts": [
         "../src/tools/indepthcomparison/assertrepresentssamedata.ts",
@@ -2281,6 +2249,7 @@
       "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
       "../src/lib/tobackend/connection.ts",
       "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
+      "../src/lib/tobackend/remoteapicaller/core.ts",
       "../src/lib/nativemodules/hostcryptolib.ts",
       "../src/lib/crypto/cryptolibproxy.ts",
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
@@ -2302,7 +2271,6 @@
       "../src/lib/nativemodules/hostkfd.ts",
       "../src/lib/crypto/kfd.ts",
       "../src/lib/localstorage/towarduserkeys.ts",
-      "../src/lib/crypto/keysgeneration.ts",
       "../src/lib/crypto/appcryptosetuphelper.ts",
       "../src/lib/createsipuseragentfactory.ts",
       "../src/lib/createwebphonefactory.ts",
@@ -2310,8 +2278,6 @@
       "../src/lib/registerinteractiveremotenotifyevthandlers.ts",
       "../src/lib/shipping.ts",
       "../src/lib/shopproducts.ts",
-      "../src/lib/getpushtoken/impl.ts",
-      "../src/lib/getpushtoken/index.ts",
       "../src/lib/localstorage/justregistered.ts",
       "../src/lib/pagelogic/login.ts",
       "../src/lib/pagelogic/register.ts",
@@ -2325,7 +2291,6 @@
       "../src/lib/applauncher/managerpagelaunch.ts",
       "../src/lib/applauncher/registerpagelaunch.ts",
       "../src/lib/env/impl.native.ts",
-      "../src/lib/getpushtoken/impl.native.ts",
       "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts",
       "../src/tools/overridewebrtcimplementation.ts",
       "../src/lib/nativemodules/hostwebrtc.ts",
@@ -2348,7 +2313,7 @@
       "../src/tools/testing/index.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/tobackend/remoteapicaller/core.ts"
+      "../src/lib/crypto/keysgeneration.ts"
     ]
   },
   "version": "3.8.3"

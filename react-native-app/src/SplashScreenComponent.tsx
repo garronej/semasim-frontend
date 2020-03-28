@@ -7,6 +7,7 @@ import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotificati
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
+import { getPrObsPushNotificationToken } from "./lib/trackPushNotificationToken";
 
 import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
 import { appLaunch } from "frontend-shared/dist/lib/appLauncher/appLaunch";
@@ -35,7 +36,8 @@ const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
         "assertJsRuntimeEnv": "react-native",
         notConnectedUserFeedback,
         "actionToPerformBeforeAppRestart": () => setComponentIsVisibleStateToImutableFalse(),
-        dialogBaseApi
+        dialogBaseApi,
+        "prObsPushNotificationToken": getPrObsPushNotificationToken()
     });
 
     return {
@@ -71,14 +73,8 @@ export type State =
     } & Omit<import("./MainComponent").Props, "dialogApi" | "restartApp">
     ;
 
-export type Props = {
-    //NOTE: Expose restartApp to RootComponent.
-    resolvePrRestartApp(
-        restartApp: import("frontend-shared/dist/lib/restartApp").RestartApp
-    ): void;
-};
 
-export class SplashScreenComponent extends React.Component<Props, State> {
+export class SplashScreenComponent extends React.Component<{}, State> {
 
     public setState(
         state: State,
@@ -93,12 +89,10 @@ export class SplashScreenComponent extends React.Component<Props, State> {
 
     public readonly state: Readonly<State> = { "type": "SPLASH SCREEN" };
 
-    constructor(props: Props) {
+    constructor(props: any) {
         super(props);
 
         log("constructor");
-
-        props.resolvePrRestartApp(appLaunchOut.restartApp);
 
         appLaunchOut.prAuthenticationStep.then(authenticationApi =>
             this.setState(

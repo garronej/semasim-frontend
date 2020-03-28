@@ -1,4 +1,3 @@
-import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
 import * as types from "../../types";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import { NonPostableEvts } from "../../../tools/NonPostableEvts";
@@ -13,7 +12,7 @@ export declare function getCoreApi(sendRequest: ReturnType<typeof import("./getS
     unlockSim: ({ lockedDongle, pin }: {
         lockedDongle: dcTypes.Dongle.Locked;
         pin: string;
-    }) => Promise<apiDeclaration.unlockSim.Response>;
+    }) => Promise<dcTypes.UnlockResult.Success | dcTypes.UnlockResult.Failed | undefined>;
     registerSim: ({ dongle, friendlyName }: {
         dongle: dcTypes.Dongle.Usable;
         friendlyName: string;

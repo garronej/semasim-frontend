@@ -4,7 +4,7 @@ import * as rn from "react-native";
 import { appLifeCycleEvents, addAppLifeCycleListeners } from "./lib/appLifeCycle";
 import { redrawOnRotate } from "./lib/redrawOnRotate";
 import { fixDimensions } from "./lib/dimensions";
-import { restartAppIfPushNotificationTokenChangeFacotry, testForegroundPushNotification } from "./lib/restartAppIfPushNotificationTokenChange";
+import { trackPushNotificationToken, testForegroundPushNotification } from "./lib/trackPushNotificationToken";
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";
@@ -64,9 +64,7 @@ const dRestartApp = new Deferred<import("frontend-shared/dist/lib/restartApp").R
 addAppLifeCycleListeners([
     redrawOnRotate,
     fixDimensions,
-    restartAppIfPushNotificationTokenChangeFacotry({
-        "prRestartApp": dRestartApp.pr
-    }),
+    trackPushNotificationToken,
     testForegroundPushNotification
 ]);
 
@@ -99,7 +97,7 @@ class RootComponent extends React.Component<{}, State> {
         >
             {!this.state.isDoneImporting ?
                 <SplashImage imageSource={imageAssets.semasimLogo1} /> :
-                <SplashScreenComponent resolvePrRestartApp={dRestartApp.resolve} />}
+                <SplashScreenComponent/>}
         </rn.View>
     );
 

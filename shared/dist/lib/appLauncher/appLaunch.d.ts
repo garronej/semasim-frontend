@@ -4,20 +4,19 @@ import * as types from "../types";
 import * as loginPageLogic from "../pageLogic/login";
 import * as registerPageLogic from "../pageLogic/register";
 import { createModal } from "../../tools/modal";
+import { IObservable } from "evt";
 export declare namespace appLaunch {
     type Params = Params.Browser | Params.ReactNative;
     namespace Params {
-        type Common_ = {
-            phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
-        };
-        type Browser = Common_ & {
+        type Browser = {
             assertJsRuntimeEnv: "browser";
         };
-        type ReactNative = Common_ & {
+        type ReactNative = {
             assertJsRuntimeEnv: "react-native";
             notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
             actionToPerformBeforeAppRestart: () => Promise<void>;
             dialogBaseApi: dialogBaseTypes.Api;
+            prObsPushNotificationToken: Promise<IObservable<string>>;
         };
     }
     type Out = {
@@ -54,14 +53,7 @@ export declare namespace appLaunch {
         }): Promise<types.Webphone[]>;
     };
 }
-export declare function appLaunch(params: {
-    assertJsRuntimeEnv: "browser";
-} | {
-    assertJsRuntimeEnv: "react-native";
-    notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
-    actionToPerformBeforeAppRestart: () => Promise<void>;
-    dialogBaseApi: dialogBaseTypes.Api;
-}): appLaunch.Out;
+export declare function appLaunch(params: appLaunch.Params): appLaunch.Out;
 export declare namespace appLaunch {
     var hasBeedCalled: boolean;
 }

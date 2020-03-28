@@ -2,8 +2,8 @@ import * as cryptoLib from "../crypto/cryptoLibProxy";
 import * as crypto from "../crypto/keysGeneration";
 import { assert } from "../../tools/typeSafety/assert";
 import { env } from "../env";
-import { default as uuidv3 } from "uuid/v3"
 import { AsyncReturnType } from "../../tools/typeSafety/AsyncReturnType";
+import * as uuidv5 from "uuid/v5";
 
 export type LaunchLogin = ReturnType<typeof factory>;
 
@@ -226,7 +226,7 @@ export function factory(params: {
 							};
 							case "react-native": return {
 								"assertJsRuntimeEnv": "react-native" as const,
-								"uaInstanceId": `"<urn:uuid:${uuidv3(params.getDeviceUniqIdentifier(), (new Array(16)).fill(0))}>"`
+								"uaInstanceId": `"<urn:uuid:${uuidv5(params.getDeviceUniqIdentifier(), "1514baa7-6d21-4eeb-86f5-f7ccd6a85afd")}>"`
 							};
 						}
 					})()

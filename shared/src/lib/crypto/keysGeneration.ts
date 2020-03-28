@@ -33,7 +33,7 @@ preSpawnIfNotAlreadyDone.hasBeenCalled= false;
 export async function computeLoginSecretAndTowardUserKeys(
     params: {
         password: string,
-        uniqUserIdentification: string,
+        uniqUserIdentification: string, //Spaces and case will be ignored.
     }
 ) {
 
@@ -54,7 +54,12 @@ export async function computeLoginSecretAndTowardUserKeys(
                         realm,
                         addPadding(
                             "LEFT",
-                            Buffer.from(uniqUserIdentification, "utf8"),
+                            Buffer.from(
+                                uniqUserIdentification
+                                .replace(/\s/g, "")
+                                .toLowerCase(),
+                                "utf8"
+                            ),
                             100 - realm.length
                         )
                     )

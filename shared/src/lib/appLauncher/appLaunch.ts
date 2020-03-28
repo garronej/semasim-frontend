@@ -9,7 +9,6 @@ import {
 	provideCustomImplementationOfBaseApi as provideCustomImplementationOfDialogBaseApi,
 	dialogApi, startMultiDialogProcess
 } from "../../tools/modal/dialog";
-import { getPushToken } from "../getPushToken";
 import { phoneNumber } from "phone-number/dist/lib";
 import * as types from "../types";
 import { Webphone } from "../types/Webphone";
@@ -27,6 +26,7 @@ import * as loginPageLogic from "../pageLogic/login";
 import * as registerPageLogic from "../pageLogic/register";
 import { minimalLaunch } from "./minimalLaunch";
 import { createModal } from "../../tools/modal";
+import { IObservable } from "evt";
 
 
 const log: typeof console.log = true ?
@@ -40,21 +40,16 @@ export namespace appLaunch {
 
 	export namespace Params {
 
-		export type Common_ = {
-			phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory;
-		};
-
-
-		export type Browser = Common_ & {
+		export type Browser =  {
 			assertJsRuntimeEnv: "browser";
 		};
 
-
-		export type ReactNative = Common_ & {
+		export type ReactNative =  {
 			assertJsRuntimeEnv: "react-native";
-			notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
-			actionToPerformBeforeAppRestart: () => Promise<void>;
-			dialogBaseApi: dialogBaseTypes.Api;
+		notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
+		actionToPerformBeforeAppRestart: () => Promise<void>;
+		dialogBaseApi: dialogBaseTypes.Api;
+			prObsPushNotificationToken: Promise<IObservable<string>>;
 		};
 
 	}
@@ -96,7 +91,7 @@ export namespace appLaunch {
 	}
 
 	export type GetAccountManagementApiAndWebphoneLauncher = (
-		params: { prReadyToDisplayUnsolicitedDialogs: Promise<void>; }
+		params: { prReadyToDisplayUnsolicitedDialogs: Promise<void> }
 	) => Promise<AccountManagementApiAndWebphoneLauncher>;
 
 	export type AccountManagementApiAndWebphoneLauncher = {
@@ -104,19 +99,12 @@ export namespace appLaunch {
 		getWebphones(params: { phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory }): Promise<types.Webphone[]>;
 	};
 
+
+
 }
 
 
-export function appLaunch(
-	params: {
-		assertJsRuntimeEnv: "browser";
-	} | {
-		assertJsRuntimeEnv: "react-native";
-		notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
-		actionToPerformBeforeAppRestart: () => Promise<void>;
-		dialogBaseApi: dialogBaseTypes.Api;
-	}
-): appLaunch.Out {
+export function appLaunch(params: appLaunch.Params): appLaunch.Out {
 
 	assert(!appLaunch.hasBeedCalled, "Should be called only once");
 
@@ -201,7 +189,7 @@ export function appLaunch(
 					"needLogin": false as const
 				})),
 				"getAccountManagementApiAndWebphoneLauncher": id<appLaunch.GetAccountManagementApiAndWebphoneLauncher>(
-					async ({ prReadyToDisplayUnsolicitedDialogs }) => {
+					async ({prReadyToDisplayUnsolicitedDialogs}) => {
 
 						if (needLogin) {
 
@@ -233,6 +221,7 @@ export function appLaunch(
 								case "react-native": return id<onceLoggedIn.Params.ReactNative>({
 									"assertJsRuntimeEnv": params.assertJsRuntimeEnv,
 									"notConnectedUserFeedback": params.notConnectedUserFeedback,
+									"prObsPushNotificationToken": params.prObsPushNotificationToken,
 									...common_
 								});
 							}
@@ -277,6 +266,7 @@ namespace onceLoggedIn {
 		export type ReactNative = Common_ & {
 			assertJsRuntimeEnv: "react-native";
 			notConnectedUserFeedback: appLaunch.Params.ReactNative["notConnectedUserFeedback"];
+			prObsPushNotificationToken: appLaunch.Params.ReactNative["prObsPushNotificationToken"];
 		};
 
 	}
@@ -312,16 +302,39 @@ async function onceLoggedIn(
 			return;
 		}
 
-		pushNotificationToken = await getPushToken({
-			"assertJsRuntimeEnv": params.assertJsRuntimeEnv
-		});
+		pushNotificationToken = await (async () => {
+
+			const obsPushNotificationToken = await params.prObsPushNotificationToken;
+
+			obsPushNotificationToken.evtChangeDiff.attachOnce(
+				({ newValue, previousValue }) => restartApp([
+					`Push notification token changed: new token: ${newValue}, `,
+					`previous token: ${previousValue}`
+				].join(""))
+			);
+
+			return obsPushNotificationToken.value;
+
+		})();
+
 
 		if (pushNotificationToken === await declaredPushNotificationToken.get()) {
 			return;
 		}
 
-		log("Declaring UA");
+		/*
+declare const require: any;
 
+//const { firebase }: typeof import("../../../../react-native-app/node_modules/@react-native-firebase/messaging/lib/index") = require("@react-native-firebase/messaging");
+const { firebase }: any = require("@react-native-firebase/messaging");
+
+const default_: import("./index").Default = ()=> firebase.messaging().getToken();
+
+export default default_;
+*/
+
+
+		log("Declaring UA");
 
 		await webApi.declareUa({
 			"assertJsRuntimeEnv": params.assertJsRuntimeEnv,

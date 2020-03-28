@@ -84,7 +84,6 @@ var createWebphoneFactory_1 = require("../createWebphoneFactory");
 var restartApp_1 = require("../restartApp");
 var env_1 = require("../env");
 var dialog_1 = require("../../tools/modal/dialog");
-var getPushToken_1 = require("../getPushToken");
 var lib_1 = require("phone-number/dist/lib");
 var types = require("../types");
 var Webphone_1 = require("../types/Webphone");
@@ -201,7 +200,7 @@ function appLaunch(params) {
                                                         };
                                                         switch (params.assertJsRuntimeEnv) {
                                                             case "browser": return id_1.id(__assign({ "assertJsRuntimeEnv": params.assertJsRuntimeEnv }, common_));
-                                                            case "react-native": return id_1.id(__assign({ "assertJsRuntimeEnv": params.assertJsRuntimeEnv, "notConnectedUserFeedback": params.notConnectedUserFeedback }, common_));
+                                                            case "react-native": return id_1.id(__assign({ "assertJsRuntimeEnv": params.assertJsRuntimeEnv, "notConnectedUserFeedback": params.notConnectedUserFeedback, "prObsPushNotificationToken": params.prObsPushNotificationToken }, common_));
                                                         }
                                                     })())];
                                             }
@@ -243,15 +242,31 @@ function onceLoggedIn(params) {
                     //the same user account. ( change need to be made in webApiCaller.loginUser )
                     return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
                             var _a;
+                            var _this = this;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
                                     case 0:
                                         if (params.assertJsRuntimeEnv === "browser") {
                                             return [2 /*return*/];
                                         }
-                                        return [4 /*yield*/, getPushToken_1.getPushToken({
-                                                "assertJsRuntimeEnv": params.assertJsRuntimeEnv
-                                            })];
+                                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                                var obsPushNotificationToken;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0: return [4 /*yield*/, params.prObsPushNotificationToken];
+                                                        case 1:
+                                                            obsPushNotificationToken = _a.sent();
+                                                            obsPushNotificationToken.evtChangeDiff.attachOnce(function (_a) {
+                                                                var newValue = _a.newValue, previousValue = _a.previousValue;
+                                                                return restartApp_1.restartApp([
+                                                                    "Push notification token changed: new token: " + newValue + ", ",
+                                                                    "previous token: " + previousValue
+                                                                ].join(""));
+                                                            });
+                                                            return [2 /*return*/, obsPushNotificationToken.value];
+                                                    }
+                                                });
+                                            }); })()];
                                     case 1:
                                         pushNotificationToken = _b.sent();
                                         _a = pushNotificationToken;
@@ -260,6 +275,16 @@ function onceLoggedIn(params) {
                                         if (_a === (_b.sent())) {
                                             return [2 /*return*/];
                                         }
+                                        /*
+                                declare const require: any;
+                                
+                                //const { firebase }: typeof import("../../../../react-native-app/node_modules/@react-native-firebase/messaging/lib/index") = require("@react-native-firebase/messaging");
+                                const { firebase }: any = require("@react-native-firebase/messaging");
+                                
+                                const default_: import("./index").Default = ()=> firebase.messaging().getToken();
+                                
+                                export default default_;
+                                */
                                         log("Declaring UA");
                                         return [4 /*yield*/, webApi.declareUa({
                                                 "assertJsRuntimeEnv": params.assertJsRuntimeEnv,
