@@ -1,9 +1,9 @@
 import * as cryptoLib from "../crypto/cryptoLibProxy";
-import * as crypto from "../crypto/keysGeneration";
+import * as keyGeneration from "../crypto/keysGeneration";
 import { assert } from "../../tools/typeSafety/assert";
 import { env } from "../env";
 import { AsyncReturnType } from "../../tools/typeSafety/AsyncReturnType";
-import * as uuidv5 from "uuid/v5";
+import { generateUaInstanceId } from "../crypto/generateUaInstanceId";
 
 export type LaunchLogin = ReturnType<typeof factory>;
 
@@ -68,7 +68,7 @@ export function factory(params: {
 
 		const { intent, uiApi } = params;
 
-		crypto.preSpawnIfNotAlreadyDone();
+		keyGeneration.preSpawnIfNotAlreadyDone();
 
 		{
 
@@ -209,7 +209,7 @@ export function factory(params: {
 
 				const { secret, towardUserKeys } =
 					justRegistered ??
-					await crypto.computeLoginSecretAndTowardUserKeys({
+					await keyGeneration.computeLoginSecretAndTowardUserKeys({
 						"password": uiApi.passwordInput.getValue(),
 						"uniqUserIdentification": email
 					})
@@ -226,7 +226,7 @@ export function factory(params: {
 							};
 							case "react-native": return {
 								"assertJsRuntimeEnv": "react-native" as const,
-								"uaInstanceId": `"<urn:uuid:${uuidv5(params.getDeviceUniqIdentifier(), "1514baa7-6d21-4eeb-86f5-f7ccd6a85afd")}>"`
+								"uaInstanceId": generateUaInstanceId(params.getDeviceUniqIdentifier())
 							};
 						}
 					})()
@@ -514,7 +514,7 @@ function renewPasswordFactory(
 
 			}
 
-			const { secret: newSecret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys({
+			const { secret: newSecret, towardUserKeys } = await keyGeneration.computeLoginSecretAndTowardUserKeys({
 				"password": newPassword,
 				"uniqUserIdentification": email
 			});
@@ -527,7 +527,7 @@ function renewPasswordFactory(
 				"newTowardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
 					towardUserKeys.encryptKey
 				),
-				"newEncryptedSymmetricKey": await crypto.symmetricKey.createThenEncryptKey(
+				"newEncryptedSymmetricKey": await keyGeneration.symmetricKey.createThenEncryptKey(
 					towardUserKeys.encryptKey
 				),
 				token,

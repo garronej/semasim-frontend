@@ -48,10 +48,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("../crypto/cryptoLibProxy");
-var crypto = require("../crypto/keysGeneration");
+var keyGeneration = require("../crypto/keysGeneration");
 var assert_1 = require("../../tools/typeSafety/assert");
 var env_1 = require("../env");
-var uuidv5 = require("uuid/v5");
+var generateUaInstanceId_1 = require("../crypto/generateUaInstanceId");
 function factory(params) {
     var webApi = params.webApi, dialogApi = params.dialogApi, JustRegistered = params.JustRegistered, TowardUserKeys = params.TowardUserKeys;
     var validateEmail = validateEmailFactory({ dialogApi: dialogApi, webApi: webApi }).validateEmail;
@@ -64,7 +64,7 @@ function factory(params) {
                 switch (_b.label) {
                     case 0:
                         intent = params.intent, uiApi = params.uiApi;
-                        crypto.preSpawnIfNotAlreadyDone();
+                        keyGeneration.preSpawnIfNotAlreadyDone();
                         {
                             email = params.intent.email;
                             if (email !== undefined) {
@@ -180,7 +180,7 @@ function factory(params) {
                                             if (!(justRegistered !== null && justRegistered !== void 0)) return [3 /*break*/, 1];
                                             _b = justRegistered;
                                             return [3 /*break*/, 3];
-                                        case 1: return [4 /*yield*/, crypto.computeLoginSecretAndTowardUserKeys({
+                                        case 1: return [4 /*yield*/, keyGeneration.computeLoginSecretAndTowardUserKeys({
                                                 "password": uiApi.passwordInput.getValue(),
                                                 "uniqUserIdentification": email
                                             })];
@@ -197,7 +197,7 @@ function factory(params) {
                                                         };
                                                         case "react-native": return {
                                                             "assertJsRuntimeEnv": "react-native",
-                                                            "uaInstanceId": "\"<urn:uuid:" + uuidv5(params.getDeviceUniqIdentifier(), "1514baa7-6d21-4eeb-86f5-f7ccd6a85afd") + ">\""
+                                                            "uaInstanceId": generateUaInstanceId_1.generateUaInstanceId(params.getDeviceUniqIdentifier())
                                                         };
                                                     }
                                                 })())).catch(function (error) { return error; })];
@@ -424,7 +424,7 @@ function renewPasswordFactory(params) {
                                         _f.sent();
                                         callee(resolve);
                                         return [2 /*return*/];
-                                    case 6: return [4 /*yield*/, crypto.computeLoginSecretAndTowardUserKeys({
+                                    case 6: return [4 /*yield*/, keyGeneration.computeLoginSecretAndTowardUserKeys({
                                             "password": newPassword,
                                             "uniqUserIdentification": email
                                         })];
@@ -438,7 +438,7 @@ function renewPasswordFactory(params) {
                                             "newTowardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey)
                                         };
                                         _e = "newEncryptedSymmetricKey";
-                                        return [4 /*yield*/, crypto.symmetricKey.createThenEncryptKey(towardUserKeys.encryptKey)];
+                                        return [4 /*yield*/, keyGeneration.symmetricKey.createThenEncryptKey(towardUserKeys.encryptKey)];
                                     case 8: return [4 /*yield*/, _c.apply(_b, [(_d[_e] = _f.sent(),
                                                 _d.token = token,
                                                 _d["shouldThrowOnError"] = true,

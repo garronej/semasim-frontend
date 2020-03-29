@@ -7,7 +7,8 @@
   "dependencies": {
     "chan-dongle-extended-client": "github:garronej/chan-dongle-extended-client",
     "md5": "^2.2.1",
-    "semasim-gateway": "file:../../gateway"
+    "semasim-gateway": "file:../../gateway",
+    "uuid": "3.4.0"
   },
   "devDependencies": {
     "@types/bootstrap": "3.3.28",
@@ -18,7 +19,6 @@
     "transfer-tools": "garronej/transfer-tools",
     "evt": "~1.0.0",
     "ts-sip": "file:../local_modules/ts-sip",
-    "typescript": "^3.8.0",
-    "uuid": "3.4.0"
+    "typescript": "^3.8.0"
   }
 }

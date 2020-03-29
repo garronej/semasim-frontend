@@ -1,5 +1,5 @@
 
-import * as crypto from "../crypto/keysGeneration";
+import * as keyGeneration from "../crypto/keysGeneration";
 import * as cryptoLib from "../crypto/cryptoLibProxy";
 import { AsyncReturnType } from "../../tools/typeSafety/AsyncReturnType";
 
@@ -42,7 +42,7 @@ export function factory(
 
 		const { email, uiApi } = params;
 
-		crypto.preSpawnIfNotAlreadyDone();
+		keyGeneration.preSpawnIfNotAlreadyDone();
 
 		if (email !== undefined) {
 
@@ -59,7 +59,7 @@ export function factory(
 				const email = uiApi.emailInput.getValue();
 				const password = uiApi.passwordInput.getValue()
 
-				const { secret, towardUserKeys } = await crypto.computeLoginSecretAndTowardUserKeys({
+				const { secret, towardUserKeys } = await keyGeneration.computeLoginSecretAndTowardUserKeys({
 					password,
 					"uniqUserIdentification": email
 				});
@@ -72,7 +72,7 @@ export function factory(
 					"towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(
 						towardUserKeys.encryptKey
 					),
-					"encryptedSymmetricKey": await crypto.symmetricKey.createThenEncryptKey(
+					"encryptedSymmetricKey": await keyGeneration.symmetricKey.createThenEncryptKey(
 						towardUserKeys.encryptKey
 					),
 					"shouldThrowOnError": true
