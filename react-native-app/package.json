@@ -31,7 +31,8 @@
     "react-native-device-info": "^4.0.1",
     "react-native-restart": "^0.0.13",
     "@react-native-firebase/app": "^6.0.2",
-    "@react-native-firebase/messaging": "^6.0.2"
+    "@react-native-firebase/messaging": "^6.0.2",
+    "exponential-backoff": "^2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
