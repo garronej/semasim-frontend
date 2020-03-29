@@ -200,10 +200,11 @@ function factory(params) {
                                                             "uaInstanceId": "\"<urn:uuid:" + uuidv5(params.getDeviceUniqIdentifier(), "1514baa7-6d21-4eeb-86f5-f7ccd6a85afd") + ">\""
                                                         };
                                                     }
-                                                })())).catch(function () { return new Error(); })];
+                                                })())).catch(function (error) { return error; })];
                                         case 4:
                                             resp = _d.sent();
                                             if (!(resp instanceof Error)) return [3 /*break*/, 6];
+                                            console.log(resp);
                                             return [4 /*yield*/, dialogApi.create("alert", { "message": "Please try again later" })];
                                         case 5:
                                             _d.sent();

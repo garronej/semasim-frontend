@@ -230,9 +230,11 @@ export function factory(params: {
 							};
 						}
 					})()
-				}).catch(() => new Error());
+				}).catch(error => error);
 
 				if (resp instanceof Error) {
+
+					console.log(resp);
 
 					await dialogApi.create(
 						"alert",

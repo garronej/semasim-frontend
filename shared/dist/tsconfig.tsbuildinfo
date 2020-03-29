@@ -662,7 +662,7 @@
         "signature": "8e3f6e3fefc4080d511acf97d06d0522ffc4af62b2325ff8c3c7ed085f5c7257"
       },
       "../src/lib/pagelogic/login.ts": {
-        "version": "87691dc330405a9ad6947f4967c70202c21b6fc8b47db253bfbe7be33761968e",
+        "version": "3a34e922ce2a7c4c3f8c536d285671eef493964fb66a9b02792c70ef0cec94fc",
         "signature": "4c35173ac02ccdebeacdee817a0954df2efe45059ae4ac7076e36bce01a9275c"
       },
       "../src/lib/pagelogic/register.ts": {
@@ -2271,6 +2271,7 @@
       "../src/lib/nativemodules/hostkfd.ts",
       "../src/lib/crypto/kfd.ts",
       "../src/lib/localstorage/towarduserkeys.ts",
+      "../src/lib/crypto/keysgeneration.ts",
       "../src/lib/crypto/appcryptosetuphelper.ts",
       "../src/lib/createsipuseragentfactory.ts",
       "../src/lib/createwebphonefactory.ts",
@@ -2279,7 +2280,6 @@
       "../src/lib/shipping.ts",
       "../src/lib/shopproducts.ts",
       "../src/lib/localstorage/justregistered.ts",
-      "../src/lib/pagelogic/login.ts",
       "../src/lib/pagelogic/register.ts",
       "../src/tools/overwritereadonlyprop.ts",
       "../src/tools/deferred.ts",
@@ -2313,7 +2313,7 @@
       "../src/tools/testing/index.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../src/lib/crypto/keysgeneration.ts"
+      "../src/lib/pagelogic/login.ts"
     ]
   },
   "version": "3.8.3"
