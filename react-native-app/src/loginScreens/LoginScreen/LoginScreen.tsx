@@ -11,8 +11,6 @@ const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[LoginScreen]", ...args])) :
     (() => { });
 
-type Api = import("frontend-shared/dist/lib/pageLogic/login").LaunchLogin.Api;
-
 export type Props = {
     dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
     launchLogin: import("frontend-shared/dist/lib/appLauncher/appLaunch")
@@ -32,45 +30,33 @@ log("imported");
 
 export class LoginScreen extends React.Component<Props, State> {
 
-    private readonly prApi: Promise<Api>;
-
-    constructor(props_: any) {
-
-        super(props_);
-
-        log("Constructor");
-        //TODO: confirm that it is re-instantiated every time we switch from 
-        //register to login screen.
-
-        this.prApi = this.dComponentDidMount.pr.then(
-            () => this.props.launchLogin({
-                "intent": {
-                    "action": "LOGIN",
-                    "email": this.props.email
-                },
-                "uiApi": {
-                    "emailInput": {
-                        "getValue": () => this.emailInput!.getInputValue(),
-                        "setValue": email => this.emailInput!.setInputValue(email)
-                    },
-                    "passwordInput": {
-                        "getValue": () => this.passwordInput!.getInputValue(),
-                        "setValue": password => this.passwordInput!.setInputValue(password)
-                    },
-                    "triggerClickButtonLogin": () => this.onGetStartedClick(),
-                    "redirectToRegister": () => this.props.goToRegister(),
-                    //NOTE: start spinning until screen replaced
-                    "onLoginSuccess": () => this.setState({ "isAwaitingLoginResponse": true })
-                }
-            })
-        );
-
-
-    }
-
-    private dComponentDidMount = new VoidDeferred();
-
+    private readonly dComponentDidMount = new VoidDeferred();
     public componentDidMount = this.dComponentDidMount.resolve;
+
+    //NOTE: This is called every time we come back on the screen as it should.
+    private readonly prApi = this.dComponentDidMount.pr.then(
+        () => this.props.launchLogin({
+            "intent": {
+                "action": "LOGIN",
+                "email": this.props.email
+            },
+            "uiApi": {
+                "emailInput": {
+                    "getValue": () => this.emailInput!.getInputValue(),
+                    "setValue": email => this.emailInput!.setInputValue(email)
+                },
+                "passwordInput": {
+                    "getValue": () => this.passwordInput!.getInputValue(),
+                    "setValue": password => this.passwordInput!.setInputValue(password)
+                },
+                "triggerClickButtonLogin": () => this.onGetStartedClick(),
+                "redirectToRegister": () => this.props.goToRegister(),
+                //NOTE: start spinning until screen replaced
+                "onLoginSuccess": () => this.setState({ "isAwaitingLoginResponse": true })
+            }
+        })
+    );
+
 
     public readonly state: Readonly<State> = {
         "isEmailInputHighlightedInRed": false,

@@ -3,6 +3,9 @@ import { firebase } from '@react-native-firebase/messaging';
 import * as rn from "react-native";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";
 import { IObservable, Observable } from "frontend-shared/node_modules/evt";
+import { getApi as getNetworkStateMonitoringApi } from "frontend-shared/dist/lib/networkStateMonitoring";
+import { backOff } from 'exponential-backoff';
+import { Evt } from "frontend-shared/node_modules/evt";
 
 type AppLifeCycleListener = import("./appLifeCycle").AppLifeCycleListener;
 
@@ -38,30 +41,58 @@ export const trackPushNotificationToken: AppLifeCycleListener = ({ evtComponentD
         return;
     }
 
+    const onToken = (token: string) => {
+
+        console.log("Got token: ", token);
+
+        if (obsPushNotificationToken === undefined) {
+
+            dObsPushNotificationToken.resolve(
+                obsPushNotificationToken = new Observable(token)
+            );
+
+            return;
+
+        }
+
+        obsPushNotificationToken.onPotentialChange(token);
+
+    };
+
     const firebaseCloudMessaging = firebase.messaging();
 
+    getNetworkStateMonitoringApi().then(async connectivity => {
+
+        const ctxToken = Evt.newCtx<string>();
+
+        ctxToken.getPrDone().then(token => onToken(token));
+
+        const getToken = () => backOff(
+            () => firebaseCloudMessaging.getToken(),
+            {
+                "retry": () => connectivity.getIsOnline(),
+                "startingDelay": 0
+            }
+        )
+            .then(tokenObj => ctxToken.done(tokenObj.toString()))
+            .catch(() => { })
+            ;
+
+        connectivity.evtStateChange.attach(
+            () => connectivity.getIsOnline(),
+            ctxToken,
+            () => getToken()
+        );
+
+        getToken();
+
+    });
 
     evtComponentDidMount.attach(() => {
 
-        const unsubscribe = firebaseCloudMessaging.onTokenRefresh(async token => {
-
-            token= `${token}`;
-
-            console.log("Got token: ", token);
-
-            if (obsPushNotificationToken === undefined) {
-
-                dObsPushNotificationToken.resolve(
-                    obsPushNotificationToken = new Observable(token)
-                );
-
-                return;
-
-            }
-
-            obsPushNotificationToken.onPotentialChange(token);
-
-        })
+        const unsubscribe = firebaseCloudMessaging.onTokenRefresh(
+            tokenObj => onToken(tokenObj.toString())
+        );
 
         evtComponentWillUnmount.attachOnce(() => unsubscribe());
 

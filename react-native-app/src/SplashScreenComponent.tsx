@@ -8,6 +8,8 @@ import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
 import { getPrObsPushNotificationToken } from "./lib/trackPushNotificationToken";
+import { Evt } from "frontend-shared/node_modules/evt";
+import { evtFromPromise } from "frontend-shared/dist/tools/evtFromPromise";
 
 import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
 import { appLaunch } from "frontend-shared/dist/lib/appLauncher/appLaunch";
@@ -30,7 +32,11 @@ type AppLaunchOut = Pick<
     prAuthenticationStep: Promise<appLaunch.AuthenticationStep.AuthenticationApi>;
 };
 
+
 const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
+
+
+    console.log("ok it's updated");
 
     const appLaunchOut = appLaunch({
         "assertJsRuntimeEnv": "react-native",
@@ -44,7 +50,8 @@ const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
         "appLaunchOut": id<AppLaunchOut>(appLaunchOut),
         "prAccountManagementAndWebphones": (async () => {
 
-            const { getAccountManagementApiAndWebphoneLauncher } = await appLaunchOut.prAuthenticationStep;
+            const { getAccountManagementApiAndWebphoneLauncher } = 
+                await appLaunchOut.prAuthenticationStep;
 
             const { accountManagementApi, getWebphones } =
                 await getAccountManagementApiAndWebphoneLauncher({
@@ -74,6 +81,7 @@ export type State =
     ;
 
 
+
 export class SplashScreenComponent extends React.Component<{}, State> {
 
     public setState(
@@ -89,25 +97,32 @@ export class SplashScreenComponent extends React.Component<{}, State> {
 
     public readonly state: Readonly<State> = { "type": "SPLASH SCREEN" };
 
+    private static ctx= Evt.newCtx();
+
     constructor(props: any) {
         super(props);
 
         log("constructor");
 
-        appLaunchOut.prAuthenticationStep.then(authenticationApi =>
-            this.setState(
-                authenticationApi.needLogin ?
-                    {
+        const { ctx } = SplashScreenComponent;
+
+        ctx.done();
+
+        evtFromPromise(appLaunchOut.prAuthenticationStep).attachOnce(
+            ctx,
+            authenticationApi =>
+                this.setState(
+                    authenticationApi.needLogin ? {
                         "type": "LOGIN",
                         authenticationApi
-
                     } : {
-                        "type": "SPLASH SCREEN"
-                    }
-            )
+                            "type": "SPLASH SCREEN"
+                        }
+                )
         );
 
-        prAccountManagementAndWebphones.then(
+        evtFromPromise(prAccountManagementAndWebphones).attachOnce(
+            ctx,
             ({ accountManagementApi, webphones }) => this.setState({
                 "type": "MAIN",
                 accountManagementApi,

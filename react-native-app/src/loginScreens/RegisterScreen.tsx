@@ -9,8 +9,6 @@ const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[RegisterScreen]", ...args])) :
     (() => { });
 
-type Api = import("frontend-shared/dist/lib/pageLogic/register").LaunchRegister.Api;
-
 export type Props = {
     dialogApi: import("frontend-shared/dist/tools/modal/dialog").DialogApi;
     launchRegister: import("frontend-shared/dist/lib/appLauncher/appLaunch")
@@ -29,37 +27,25 @@ log("imported");
 
 export class RegisterScreen extends React.Component<Props> {
 
-
-    private readonly prApi: Promise<Api>;
-
-    constructor(props_: any) {
-
-        super(props_);
-
-        log("constructor");
-
-        this.prApi = this.dPrComponentDidMount.pr.then(
-            () => this.props.launchRegister({
-                "email": undefined,
-                "uiApi": {
-                    "emailInput": {
-                        "setValue": ({ value, readonly }) => this.emailInput!.setInputValue(value),
-                        "getValue": () => this.emailInput!.getInputValue()
-                    },
-                    "passwordInput": {
-                        "getValue": () => this.passwordInput!.getInputValue()
-                    },
-                    "redirectToLogin": ({ email }) => this.props.goToLogin(email)
-                }
-            })
-        );
-
-
-    }
-
-    private dPrComponentDidMount = new VoidDeferred();
-
+    private readonly dPrComponentDidMount = new VoidDeferred();
     public componentDidMount = this.dPrComponentDidMount.resolve;
+
+    private readonly prApi = this.dPrComponentDidMount.pr.then(
+        () => this.props.launchRegister({
+            "email": undefined,
+            "uiApi": {
+                "emailInput": {
+                    "setValue": ({ value, readonly }) => this.emailInput!.setInputValue(value),
+                    "getValue": () => this.emailInput!.getInputValue()
+                },
+                "passwordInput": {
+                    "getValue": () => this.passwordInput!.getInputValue()
+                },
+                "redirectToLogin": ({ email }) => this.props.goToLogin(email)
+            }
+        })
+    );
+
 
     public readonly state: Readonly<State> = {
         "isEmailInputHighlightedInRed": false,
@@ -67,13 +53,6 @@ export class RegisterScreen extends React.Component<Props> {
         "isRepeatPasswordInputHighlightedInRed": false,
         "isAwaitingAccountCreationResponse": false
     };
-
-    /*
-    public componentDidMount = () => sharedPageLogic.init(
-        {},
-        { "setEmailReadonly": email => this.emailInput!.setInputValue(email) }
-    );
-    */
 
     private emailInput: InputField | null = null;
     private passwordInput: InputField | null = null;
@@ -128,43 +107,38 @@ export class RegisterScreen extends React.Component<Props> {
         const Continue: React.FunctionComponent<{
             click(): void;
             isAwaitingAccountCreationResponse: boolean;
-        }> = props => {
-
-            log("Render [RegisterScreen]Continue");
-
-            return (
-                <rn.TouchableOpacity
-                    activeOpacity={0.5}
-                    onPress={props.click}
-                    style={{
-                        "width": w(85),
-                        "alignSelf": "center",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "backgroundColor": "transparent",
-                        "paddingVertical": w(2),
-                        "borderRadius": w(10),
-                        "borderColor": "#E0E0E0",
-                        "borderWidth": 1,
-                        "marginTop": h(3),
-                        "height": percentageOfDiagonalDp(7)
-                    }}>
-                    {props.isAwaitingAccountCreationResponse ?
-                        <rn.ActivityIndicator
-                            size="large"
-                            style={{ "height": h(0.75) }}
-                            color="black"
-                        />
-                        :
-                        <rn.Text style={{
-                            "color": "black",
-                            "fontWeight": '600',
-                            "paddingVertical": h(1),
-                            "fontSize": percentageOfDiagonalDp(1.7)
-                        }}>Continue</rn.Text>}
-                </rn.TouchableOpacity>
-            );
-        }
+        }> = props => (
+            <rn.TouchableOpacity
+                activeOpacity={0.5}
+                onPress={props.click}
+                style={{
+                    "width": w(85),
+                    "alignSelf": "center",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "backgroundColor": "transparent",
+                    "paddingVertical": w(2),
+                    "borderRadius": w(10),
+                    "borderColor": "#E0E0E0",
+                    "borderWidth": 1,
+                    "marginTop": h(3),
+                    "height": percentageOfDiagonalDp(7)
+                }}>
+                {props.isAwaitingAccountCreationResponse ?
+                    <rn.ActivityIndicator
+                        size="large"
+                        style={{ "height": h(0.75) }}
+                        color="black"
+                    />
+                    :
+                    <rn.Text style={{
+                        "color": "black",
+                        "fontWeight": '600',
+                        "paddingVertical": h(1),
+                        "fontSize": percentageOfDiagonalDp(1.7)
+                    }}>Continue</rn.Text>}
+            </rn.TouchableOpacity>
+        );
 
         return () => (<rn.KeyboardAvoidingView
             style={({

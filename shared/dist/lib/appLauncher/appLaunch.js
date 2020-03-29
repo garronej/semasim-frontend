@@ -275,16 +275,6 @@ function onceLoggedIn(params) {
                                         if (_a === (_b.sent())) {
                                             return [2 /*return*/];
                                         }
-                                        /*
-                                declare const require: any;
-                                
-                                //const { firebase }: typeof import("../../../../react-native-app/node_modules/@react-native-firebase/messaging/lib/index") = require("@react-native-firebase/messaging");
-                                const { firebase }: any = require("@react-native-firebase/messaging");
-                                
-                                const default_: import("./index").Default = ()=> firebase.messaging().getToken();
-                                
-                                export default default_;
-                                */
                                         log("Declaring UA");
                                         return [4 /*yield*/, webApi.declareUa({
                                                 "assertJsRuntimeEnv": params.assertJsRuntimeEnv,

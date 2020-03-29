@@ -694,7 +694,7 @@
         "signature": "85ff1c3e00570d6c7462d0c93052550b279183a521f3c2d551e32e520d33acd7"
       },
       "../src/lib/applauncher/applaunch.ts": {
-        "version": "3e286289cb427a416fe8fa60f1eef7e841ac27987a40afbeeddf23d1f2147270",
+        "version": "6c40ba4c1af6ebded4df2b5bf1ed22268ea046f211421b54e6166fe1a66bedda",
         "signature": "5f56c522995fb7f270ca6e2c0af1fb70c667dcfa63a6037c834f8342be1e84af"
       },
       "../src/lib/applauncher/loginpagelaunch.ts": {
@@ -748,6 +748,10 @@
       "../src/lib/restartapp/impl.native.ts": {
         "version": "36ec594ab5387d42aa14d41b7fd324867ee8f6039e2b9c749dec3b2881189a44",
         "signature": "066bf4d9d07bce93eac5afdbbe6d93fc0b3f9cac87d8777073916ff3d556c7a3"
+      },
+      "../src/tools/evtfrompromise.ts": {
+        "version": "70f7e4cf327b869303244f65ed88908ef6ad441df3e0b0e6c410351cbabb1490",
+        "signature": "bf08218083b8c6c7f6df39e55613c42bbc5cb6ed6b6dad67525695d6f5d699ba"
       },
       "../src/tools/observer.ts": {
         "version": "ccb41635813db85ca85d303eff0db5a3088540b612474063ec82f2328be39e9c",
@@ -826,7 +830,6 @@
         "bootstrap",
         "jquery"
       ],
-      "project": "../tsconfig.json",
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
@@ -1524,6 +1527,9 @@
         "../../react-native-app/node_modules/@types/react-native-restart/index.d.ts",
         "../src/lib/restartapp/index.ts"
       ],
+      "../src/tools/evtfrompromise.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
       "../src/tools/runnowandwheneventoccurfactory.ts": [
         "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ],
@@ -1562,12 +1568,332 @@
       ]
     },
     "exportedModulesMap": {
-      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
-        "../res/@types/@react-native-community/async-storage/index.d.ts"
-      ],
       "../src/web_api_declaration.ts": [
         "../src/lib/types/subscription.ts",
         "../src/lib/types/shop.ts"
+      ],
+      "../../../gateway/dist/lib/misc/bundleddata.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../../gateway/dist/lib/types.d.ts"
+      ],
+      "../src/gateway/bundleddata.ts": [
+        "../../../gateway/dist/lib/misc/bundleddata.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/merge.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/from.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/eventtargetlike.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/lib.dom.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/evt.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/merge.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/from.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackctx.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/helper/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackctx.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/evterror.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/lib.dom.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/observable.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/scan.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/throttletime.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/to.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/scan.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/throttletime.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/to.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/compose.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/invokeoperator.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/compose.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/invokeoperator.d.ts"
+      ],
+      "../../../gateway/node_modules/evt/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/colors/index.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
+      ],
+      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      ],
+      "../../../gateway/dist/lib/misc/siprouting.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts"
+      ],
+      "../src/gateway/readimsi.ts": [
+        "../../../gateway/dist/lib/misc/siprouting.d.ts"
+      ],
+      "../../../gateway/dist/lib/misc/serializeduaobjectcarriedoversipcontactparameter.d.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
+      ],
+      "../src/gateway/serializeduaobjectcarriedoversipcontactparameter.ts": [
+        "../../../gateway/dist/lib/misc/serializeduaobjectcarriedoversipcontactparameter.d.ts"
+      ],
+      "../src/gateway/types.ts": [
+        "../../../gateway/dist/lib/types.d.ts"
+      ],
+      "../src/gateway/webapipath.ts": [
+        "../../../gateway/dist/web_api_declaration.d.ts"
+      ],
+      "../node_modules/evt/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts"
+      ],
+      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
+        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
+      ],
+      "../src/lib/types/webphonedata.ts": [
+        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../../local_modules/crypto-lib/dist/async/index.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../src/tools/nonpostableevts.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../src/lib/types/usersim.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../src/tools/nonpostableevts.ts"
+      ],
+      "../src/lib/types/webphone.ts": [
+        "../src/lib/types/usersim.ts",
+        "../src/tools/nonpostableevts.ts",
+        "../src/lib/types/webphonedata.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
+      ],
+      "../node_modules/trackable-map/dist/lib/index.d.ts": [
+        "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
+        "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
+      ],
+      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      ],
+      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
+        "../node_modules/trackable-map/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
+      ],
+      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
+        "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      ],
+      "../src/sip_api_declarations/backendtoua.ts": [
+        "../src/lib/types/index.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
+      ],
+      "../src/tools/reducers/every.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/allequalsto.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/allequals.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/removeduplicates.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/alluniq.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/and.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/includes.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/count.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/or.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/sameas.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/typesafety/index.ts": [
+        "../src/tools/typesafety/asyncreturntype.ts",
+        "../src/tools/typesafety/unpackpromise.ts",
+        "../src/tools/typesafety/unpacktypeguard.ts",
+        "../src/tools/typesafety/id.ts",
+        "../src/tools/typesafety/typeguard.ts",
+        "../src/tools/typesafety/assert.ts",
+        "../src/tools/typesafety/matchvoid.ts"
+      ],
+      "../src/tools/reducers/partition.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/contains.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/diff.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/push.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/concat.ts": [
+        "../src/tools/reducers/reduceify.ts"
+      ],
+      "../src/tools/reducers/index.ts": [
+        "../src/tools/reducers/allequals.ts",
+        "../src/tools/reducers/allequalsto.ts",
+        "../src/tools/reducers/alluniq.ts",
+        "../src/tools/reducers/and.ts",
+        "../src/tools/reducers/includes.ts",
+        "../src/tools/reducers/count.ts",
+        "../src/tools/reducers/every.ts",
+        "../src/tools/reducers/or.ts",
+        "../src/tools/reducers/removeduplicates.ts",
+        "../src/tools/reducers/sameas.ts",
+        "../src/tools/reducers/partition.ts",
+        "../src/tools/reducers/diff.ts",
+        "../src/tools/reducers/push.ts",
+        "../src/tools/reducers/concat.ts"
+      ],
+      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
+      ],
+      "../src/sip_api_declarations/uatobackend.ts": [
+        "../src/lib/types/usersim.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
+        "../src/sip_api_declarations/backendtoua.ts"
+      ],
+      "../src/lib/types/remotenotifyevts.ts": [
+        "../src/sip_api_declarations/uatobackend.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      ],
+      "../src/lib/tobackend/localapihandlers.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
+        "../src/lib/types/remotenotifyevts.ts"
+      ],
+      "../src/lib/env/impl.ts": [
+        "../src/lib/env/index.ts"
+      ],
+      "../src/lib/env/index.ts": [
+        "../src/lib/env/impl.ts"
+      ],
+      "../src/lib/restartapp/impl.ts": [
+        "../src/lib/restartapp/index.ts"
+      ],
+      "../src/lib/networkstatemonitoring/types.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../src/lib/networkstatemonitoring/impl.ts": [
+        "../src/lib/networkstatemonitoring/types.ts"
+      ],
+      "../src/lib/networkstatemonitoring/index.ts": [
+        "../src/lib/networkstatemonitoring/types.ts",
+        "../src/lib/networkstatemonitoring/impl.ts"
+      ],
+      "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../src/lib/localstorage/credentials.ts": [
+        "../src/web_api_declaration.ts"
       ],
       "../src/lib/webapicaller/index.ts": [
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
@@ -1580,92 +1906,32 @@
         "../src/lib/webapicaller/sendrequest.ts",
         "../src/web_api_declaration.ts"
       ],
-      "../src/lib/applauncher/registerpagelaunch.ts": [
-        "../src/lib/pagelogic/register.ts"
-      ],
-      "../src/lib/applauncher/managerpagelaunch.ts": [
+      "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts": [
         "../src/lib/webapicaller/index.ts",
-        "../src/tools/modal/dialog/index.ts",
-        "../src/tools/modal/index.ts",
-        "../src/lib/types/index.ts"
+        "../src/lib/localstorage/credentials.ts"
       ],
-      "../src/lib/applauncher/loginpagelaunch.ts": [
-        "../src/lib/pagelogic/login.ts"
-      ],
-      "../src/lib/applauncher/applaunch.ts": [
-        "../src/lib/tobackend/connection.ts",
-        "../src/tools/modal/dialog/index.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
-        "../src/tools/modal/index.ts",
+      "../src/lib/tobackend/connection.ts": [
         "../src/lib/restartapp/index.ts",
-        "../src/lib/pagelogic/login.ts",
-        "../src/lib/pagelogic/register.ts",
-        "../src/lib/types/index.ts"
-      ],
-      "../src/lib/pagelogic/register.ts": [
-        "../src/tools/typesafety/asyncreturntype.ts",
-        "../src/lib/webapicaller/index.ts",
-        "../src/tools/modal/dialog/index.ts",
-        "../src/lib/localstorage/justregistered.ts"
-      ],
-      "../src/lib/pagelogic/login.ts": [
-        "../src/tools/typesafety/asyncreturntype.ts",
-        "../src/lib/webapicaller/index.ts",
-        "../src/tools/modal/dialog/index.ts",
-        "../src/lib/localstorage/justregistered.ts",
-        "../src/lib/localstorage/towarduserkeys.ts"
-      ],
-      "../src/lib/types/accountmanagementapi.ts": [
-        "../src/lib/tobackend/remoteapicaller/index.ts",
-        "../src/lib/webapicaller/index.ts",
-        "../src/lib/types/usersim.ts",
-        "../src/tools/nonpostableevts.ts"
-      ],
-      "../src/lib/types/index.ts": [
-        "../src/lib/types/webphonedata.ts",
-        "../src/lib/types/usersim.ts",
-        "../src/lib/types/webphone.ts",
-        "../src/lib/types/accountmanagementapi.ts",
-        "../src/lib/types/phonecallui.ts",
-        "../src/lib/types/remotenotifyevts.ts",
-        "../src/lib/types/websocketconnectionparams.ts"
-      ],
-      "../src/lib/registerinteractiveremotenotifyevthandlers.ts": [
-        "../src/tools/modal/dialog/index.ts",
-        "../src/lib/restartapp/index.ts",
-        "../src/lib/types/index.ts",
-        "../src/lib/tobackend/remoteapicaller/index.ts",
-        "../src/tools/nonpostableevts.ts"
-      ],
-      "../src/lib/applauncher/minimallaunch.ts": [
-        "../src/lib/restartapp/index.ts",
-        "../src/tools/modal/dialog/index.ts",
         "../src/lib/networkstatemonitoring/index.ts",
-        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
-        "../src/lib/tobackend/connection.ts",
-        "../src/lib/tobackend/remoteapicaller/index.ts",
-        "../src/lib/types/usersim.ts",
-        "../src/tools/nonpostableevts.ts"
-      ],
-      "../src/lib/createwebphonefactory.ts": [
-        "../src/lib/createsipuseragentfactory.ts",
-        "../src/lib/tobackend/remoteapicaller/index.ts",
-        "../src/lib/types/index.ts",
-        "../src/tools/nonpostableevts.ts"
-      ],
-      "../src/lib/createsipuseragentfactory.ts": [
-        "../src/lib/crypto/appcryptosetuphelper.ts",
-        "../src/lib/tobackend/connection.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../src/gateway/types.ts",
-        "../src/lib/crypto/cryptolibproxy.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
-        "../src/lib/types/index.ts",
+        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../src/tools/typesafety/asyncreturntype.ts",
-        "../src/tools/nonpostableevts.ts"
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../src/lib/types/index.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/getsendrequest.ts": [
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/tobackend/connection.ts"
+      ],
+      "../src/lib/tobackend/remoteapicaller/core.ts": [
+        "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/types/index.ts",
+        "../src/tools/nonpostableevts.ts",
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+      ],
+      "../src/lib/crypto/cryptolibproxy.ts": [
+        "../../local_modules/crypto-lib/dist/async/index.d.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
@@ -1687,169 +1953,40 @@
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
         "../src/lib/tobackend/connection.ts"
       ],
-      "../src/lib/tobackend/remoteapicaller/core.ts": [
-        "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
-        "../src/lib/restartapp/index.ts",
-        "../src/lib/types/index.ts",
-        "../src/tools/nonpostableevts.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../src/lib/tobackend/connection.ts": [
-        "../src/lib/restartapp/index.ts",
-        "../src/lib/networkstatemonitoring/index.ts",
-        "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
-        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../src/lib/types/index.ts"
-      ],
-      "../src/lib/tobackend/remoteapicaller/getsendrequest.ts": [
-        "../src/lib/restartapp/index.ts",
-        "../src/lib/tobackend/connection.ts"
-      ],
-      "../src/sip_api_declarations/backendtoua.ts": [
-        "../src/lib/types/index.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts"
-      ],
-      "../src/sip_api_declarations/uatobackend.ts": [
-        "../src/lib/types/usersim.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
-        "../src/sip_api_declarations/backendtoua.ts"
-      ],
-      "../src/lib/tobackend/localapihandlers.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../src/lib/types/remotenotifyevts.ts"
-      ],
-      "../src/lib/types/remotenotifyevts.ts": [
-        "../src/sip_api_declarations/uatobackend.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts": [
+      "../src/lib/types/accountmanagementapi.ts": [
+        "../src/lib/tobackend/remoteapicaller/index.ts",
         "../src/lib/webapicaller/index.ts",
-        "../src/lib/localstorage/credentials.ts"
+        "../src/lib/types/usersim.ts",
+        "../src/tools/nonpostableevts.ts"
       ],
-      "../src/lib/localstorage/credentials.ts": [
-        "../src/web_api_declaration.ts"
+      "../node_modules/evt/dist/lib/observable.d.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
+        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
       ],
-      "../src/lib/shopproducts.ts": [
-        "../src/lib/types/shop.ts"
-      ],
-      "../../../gateway/dist/lib/misc/bundleddata.d.ts": [
-        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
-        "../../../gateway/dist/lib/types.d.ts"
-      ],
-      "../src/gateway/bundleddata.ts": [
-        "../../../gateway/dist/lib/misc/bundleddata.d.ts"
-      ],
-      "../src/gateway/types.ts": [
-        "../../../gateway/dist/lib/types.d.ts"
-      ],
-      "../../../gateway/dist/lib/misc/serializeduaobjectcarriedoversipcontactparameter.d.ts": [
-        "../../../gateway/dist/lib/types.d.ts"
-      ],
-      "../src/gateway/serializeduaobjectcarriedoversipcontactparameter.ts": [
-        "../../../gateway/dist/lib/misc/serializeduaobjectcarriedoversipcontactparameter.d.ts"
-      ],
-      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts"
-      ],
-      "../../../gateway/dist/lib/misc/siprouting.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts"
-      ],
-      "../src/gateway/readimsi.ts": [
-        "../../../gateway/dist/lib/misc/siprouting.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/client.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/api/server.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/colors/index.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
-      ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts": [
+      "../src/lib/types/phonecallui.ts": [
         "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts",
-        "../../../gateway/node_modules/colors/index.d.ts"
+        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts"
       ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/iconnection.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../src/lib/types/index.ts": [
+        "../src/lib/types/webphonedata.ts",
+        "../src/lib/types/usersim.ts",
+        "../src/lib/types/webphone.ts",
+        "../src/lib/types/accountmanagementapi.ts",
+        "../src/lib/types/phonecallui.ts",
+        "../src/lib/types/remotenotifyevts.ts",
+        "../src/lib/types/websocketconnectionparams.ts"
       ],
-      "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
+      "../src/tools/modal/types.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../src/tools/modal/types.structure.ts"
       ],
-      "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
+      "../src/tools/modal/stack.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/evterror.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/lib.dom.d.ts"
-      ],
-      "../node_modules/evt/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts"
-      ],
-      "../src/tools/runnowandwheneventoccurfactory.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../src/lib/networkstatemonitoring/impl.native.ts": [
-        "../src/lib/networkstatemonitoring/types.ts"
-      ],
-      "../src/lib/nativemodules/hostwebrtc.ts": [
-        "../src/tools/overridewebrtcimplementation.ts"
-      ],
-      "../src/lib/crypto/keysgeneration.ts": [
-        "../src/lib/localstorage/towarduserkeys.ts",
-        "../src/lib/crypto/cryptolibproxy.ts"
-      ],
-      "../src/lib/crypto/appcryptosetuphelper.ts": [
-        "../src/lib/localstorage/towarduserkeys.ts",
-        "../src/lib/crypto/cryptolibproxy.ts"
+      "../src/tools/modal/dialog/types.ts": [
+        "../src/tools/modal/types.ts"
       ],
       "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": [
-        "../src/tools/modal/types.ts"
-      ],
-      "../src/tools/modal/getapi.ts": [
-        "../src/tools/modal/types.ts"
-      ],
-      "../src/tools/modal/index.ts": [
-        "../src/tools/modal/getapi.ts",
         "../src/tools/modal/types.ts"
       ],
       "../src/tools/modal/dialog/getapi.ts": [
@@ -1859,267 +1996,151 @@
         "../src/tools/modal/dialog/types.ts",
         "../src/tools/modal/dialog/getapi.ts"
       ],
-      "../src/tools/modal/types.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../src/tools/modal/types.structure.ts"
-      ],
-      "../src/tools/modal/dialog/types.ts": [
-        "../src/tools/modal/types.ts"
-      ],
-      "../src/tools/modal/stack.ts": [
-        "../src/tools/modal/types.ts"
-      ],
-      "../src/lib/types/phonecallui.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/observable.d.ts"
-      ],
-      "../src/lib/crypto/cryptolibproxy.ts": [
-        "../../local_modules/crypto-lib/dist/async/index.d.ts"
-      ],
-      "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../src/lib/networkstatemonitoring/impl.ts": [
-        "../src/lib/networkstatemonitoring/types.ts"
-      ],
-      "../src/lib/networkstatemonitoring/index.ts": [
-        "../src/lib/networkstatemonitoring/types.ts",
-        "../src/lib/networkstatemonitoring/impl.ts"
-      ],
-      "../src/lib/networkstatemonitoring/types.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
-        "../node_modules/trackable-map/dist/lib/index.d.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts"
-      ],
-      "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
-        "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
-      ],
-      "../node_modules/trackable-map/dist/lib/index.d.ts": [
-        "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
-        "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
-      ],
-      "../src/lib/types/webphone.ts": [
-        "../src/lib/types/usersim.ts",
-        "../src/tools/nonpostableevts.ts",
-        "../src/lib/types/webphonedata.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../src/lib/types/usersim.ts": [
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
-        "../src/tools/nonpostableevts.ts"
-      ],
-      "../src/tools/nonpostableevts.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../src/lib/types/webphonedata.ts": [
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-        "../../local_modules/crypto-lib/dist/async/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/throttletime.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/scan.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/throttletime.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/to.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/index.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/compose.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/invokeoperator.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/scan.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/evt.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/merge.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/util/from.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
-      ],
-      "../node_modules/evt/dist/lib/observable.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/observable.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/from.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/eventtargetlike.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/lib.dom.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/merge.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/types/helper/index.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackevt.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackctx.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/types/helper/nonpostable.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/handler.d.ts",
-        "../../../gateway/node_modules/evt/dist/lib/evt.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/types/helper/unpackctx.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/ctx.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/invokeoperator.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/compose.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
-      ],
-      "../../../gateway/node_modules/evt/dist/lib/util/genericoperators/to.d.ts": [
-        "../../../gateway/node_modules/evt/dist/lib/types/operator.d.ts"
-      ],
-      "../src/gateway/webapipath.ts": [
-        "../../../gateway/dist/web_api_declaration.d.ts"
-      ],
       "../src/lib/localstorage/towarduserkeys.ts": [
         "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../src/lib/crypto/keysgeneration.ts": [
+        "../src/lib/localstorage/towarduserkeys.ts",
+        "../src/lib/crypto/cryptolibproxy.ts"
+      ],
+      "../src/lib/crypto/appcryptosetuphelper.ts": [
+        "../src/lib/localstorage/towarduserkeys.ts",
+        "../src/lib/crypto/cryptolibproxy.ts"
+      ],
+      "../src/lib/createsipuseragentfactory.ts": [
+        "../src/lib/crypto/appcryptosetuphelper.ts",
+        "../src/lib/tobackend/connection.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../src/gateway/types.ts",
+        "../src/lib/crypto/cryptolibproxy.ts",
+        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../src/lib/types/index.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
+        "../src/tools/typesafety/asyncreturntype.ts",
+        "../src/tools/nonpostableevts.ts"
+      ],
+      "../src/lib/createwebphonefactory.ts": [
+        "../src/lib/createsipuseragentfactory.ts",
+        "../src/lib/tobackend/remoteapicaller/index.ts",
+        "../src/lib/types/index.ts",
+        "../src/tools/nonpostableevts.ts"
+      ],
+      "../src/lib/registerinteractiveremotenotifyevthandlers.ts": [
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/types/index.ts",
+        "../src/lib/tobackend/remoteapicaller/index.ts",
+        "../src/tools/nonpostableevts.ts"
+      ],
+      "../src/lib/shopproducts.ts": [
+        "../src/lib/types/shop.ts"
       ],
       "../src/lib/localstorage/justregistered.ts": [
         "../src/lib/localstorage/towarduserkeys.ts"
       ],
-      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts"
-      ],
-      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
-      ],
-      "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts": [
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
-      ],
-      "../src/tools/typesafety/index.ts": [
+      "../src/lib/pagelogic/login.ts": [
         "../src/tools/typesafety/asyncreturntype.ts",
-        "../src/tools/typesafety/unpackpromise.ts",
-        "../src/tools/typesafety/unpacktypeguard.ts",
-        "../src/tools/typesafety/id.ts",
-        "../src/tools/typesafety/typeguard.ts",
-        "../src/tools/typesafety/assert.ts",
-        "../src/tools/typesafety/matchvoid.ts"
+        "../src/lib/webapicaller/index.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/localstorage/justregistered.ts",
+        "../src/lib/localstorage/towarduserkeys.ts"
       ],
-      "../src/tools/testing/index.ts": [
-        "../src/tools/testing/getpromiseassertionapi.ts"
+      "../src/lib/pagelogic/register.ts": [
+        "../src/tools/typesafety/asyncreturntype.ts",
+        "../src/lib/webapicaller/index.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/localstorage/justregistered.ts"
       ],
-      "../src/tools/reducers/partition.ts": [
-        "../src/tools/reducers/reduceify.ts"
+      "../src/lib/applauncher/minimallaunch.ts": [
+        "../src/lib/restartapp/index.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/lib/networkstatemonitoring/index.ts",
+        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
+        "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
+        "../src/lib/tobackend/connection.ts",
+        "../src/lib/tobackend/remoteapicaller/index.ts",
+        "../src/lib/types/usersim.ts",
+        "../src/tools/nonpostableevts.ts"
       ],
-      "../src/tools/reducers/index.ts": [
-        "../src/tools/reducers/allequals.ts",
-        "../src/tools/reducers/allequalsto.ts",
-        "../src/tools/reducers/alluniq.ts",
-        "../src/tools/reducers/and.ts",
-        "../src/tools/reducers/includes.ts",
-        "../src/tools/reducers/count.ts",
-        "../src/tools/reducers/every.ts",
-        "../src/tools/reducers/or.ts",
-        "../src/tools/reducers/removeduplicates.ts",
-        "../src/tools/reducers/sameas.ts",
-        "../src/tools/reducers/partition.ts",
-        "../src/tools/reducers/diff.ts",
-        "../src/tools/reducers/push.ts",
-        "../src/tools/reducers/concat.ts"
+      "../src/tools/modal/getapi.ts": [
+        "../src/tools/modal/types.ts"
       ],
-      "../src/tools/indepthcomparison/index.ts": [
-        "../src/tools/indepthcomparison/assertrepresentssamedata.ts",
-        "../src/tools/indepthcomparison/representssamedata.ts"
+      "../src/tools/modal/index.ts": [
+        "../src/tools/modal/getapi.ts",
+        "../src/tools/modal/types.ts"
       ],
-      "../src/tools/reducers/concat.ts": [
-        "../src/tools/reducers/reduceify.ts"
+      "../src/lib/applauncher/applaunch.ts": [
+        "../src/lib/tobackend/connection.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts",
+        "../src/lib/tryloginwithstoredcredentialifnotalreadylogedinfactory.ts",
+        "../src/tools/modal/index.ts",
+        "../src/lib/restartapp/index.ts",
+        "../src/lib/pagelogic/login.ts",
+        "../src/lib/pagelogic/register.ts",
+        "../src/lib/types/index.ts"
       ],
-      "../src/tools/reducers/push.ts": [
-        "../src/tools/reducers/reduceify.ts"
+      "../src/lib/applauncher/loginpagelaunch.ts": [
+        "../src/lib/pagelogic/login.ts"
       ],
-      "../src/tools/reducers/diff.ts": [
-        "../src/tools/reducers/reduceify.ts"
+      "../src/lib/applauncher/managerpagelaunch.ts": [
+        "../src/lib/webapicaller/index.ts",
+        "../src/tools/modal/dialog/index.ts",
+        "../src/tools/modal/index.ts",
+        "../src/lib/types/index.ts"
       ],
-      "../src/tools/reducers/contains.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/sameas.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/or.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/count.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/includes.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/and.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/alluniq.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/removeduplicates.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/allequals.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/allequalsto.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/tools/reducers/every.ts": [
-        "../src/tools/reducers/reduceify.ts"
-      ],
-      "../src/lib/env/impl.ts": [
-        "../src/lib/env/index.ts"
-      ],
-      "../src/lib/env/index.ts": [
-        "../src/lib/env/impl.ts"
+      "../src/lib/applauncher/registerpagelaunch.ts": [
+        "../src/lib/pagelogic/register.ts"
       ],
       "../src/lib/env/impl.native.ts": [
         "../src/lib/env/index.ts"
       ],
-      "../src/lib/restartapp/impl.ts": [
-        "../src/lib/restartapp/index.ts"
+      "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.native.ts": [
+        "../res/@types/@react-native-community/async-storage/index.d.ts"
       ],
-      "../src/lib/restartapp/impl.native.ts": [
-        "../src/lib/restartapp/index.ts"
+      "../src/lib/nativemodules/hostwebrtc.ts": [
+        "../src/tools/overridewebrtcimplementation.ts"
       ],
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": [
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts"
       ],
+      "../src/lib/networkstatemonitoring/impl.native.ts": [
+        "../src/lib/networkstatemonitoring/types.ts"
+      ],
+      "../src/lib/restartapp/impl.native.ts": [
+        "../src/lib/restartapp/index.ts"
+      ],
+      "../src/tools/runnowandwheneventoccurfactory.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
+      ],
+      "../src/tools/indepthcomparison/index.ts": [
+        "../src/tools/indepthcomparison/assertrepresentssamedata.ts",
+        "../src/tools/indepthcomparison/representssamedata.ts"
+      ],
+      "../src/tools/testing/index.ts": [
+        "../src/tools/testing/getpromiseassertionapi.ts"
+      ],
       "../node_modules/@types/bootstrap/index.d.ts": [
         "../node_modules/@types/jquery/index.d.ts"
+      ],
+      "../src/tools/evtfrompromise.ts": [
+        "../../../gateway/node_modules/evt/dist/lib/index.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
+      "../node_modules/typescript/lib/lib.es5.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.d.ts",
+      "../node_modules/typescript/lib/lib.dom.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
       "../res/@types/@react-native-community/async-storage/index.d.ts",
       "../src/lib/types/subscription.ts",
       "../src/tools/currency.ts",
@@ -2281,7 +2302,6 @@
       "../src/lib/applauncher/minimallaunch.ts",
       "../src/tools/modal/getapi.ts",
       "../src/tools/modal/index.ts",
-      "../src/lib/applauncher/applaunch.ts",
       "../src/lib/applauncher/loginpagelaunch.ts",
       "../src/lib/applauncher/managerpagelaunch.ts",
       "../src/lib/applauncher/registerpagelaunch.ts",
@@ -2308,18 +2328,8 @@
       "../src/tools/testing/index.ts",
       "../node_modules/@types/jquery/index.d.ts",
       "../node_modules/@types/bootstrap/index.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.d.ts",
-      "../node_modules/typescript/lib/lib.es5.d.ts",
-      "../node_modules/typescript/lib/lib.dom.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.core.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.collection.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.generator.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.iterable.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.promise.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.proxy.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.reflect.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.symbol.d.ts",
-      "../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts"
+      "../src/lib/applauncher/applaunch.ts",
+      "../src/tools/evtfrompromise.ts"
     ]
   },
   "version": "3.8.3"

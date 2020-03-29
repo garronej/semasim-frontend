@@ -31,11 +31,11 @@ export const notConnectedUserFeedback = (() => {
 
         const setState = () => Promise.resolve(
             obsRef.value ??
-            obsRef.evtChange.waitFor((ref): ref is NonNullable<typeof ref> => !!ref)
-        ).then(ref => ref.setState({
-            "isVisible": state.isVisible,
-            ...(state.isVisible ? ({ "message": state.message }) : ({}))
-        }));
+            obsRef.evtChange.waitFor(ref => !ref ? null : [ref])
+        ).then(ref => state.isVisible ?
+            ref.setState(state) :
+            ref.setState(state)
+        ); //^ To cope with the type system 
 
         if (state.isVisible) {
 

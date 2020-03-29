@@ -71,7 +71,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
             Promise.all<unknown>([
                 ...obsRef.value ? [] : [
                     obsRef.evtChange.waitFor(
-                        (ref): ref is NonNullable<typeof ref> => !!ref,
+                        ref=> !!ref,
                         ctx
                     )
                 ],
@@ -81,11 +81,17 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
                         ctx
                     )
                 ]
-            ]).then(() => obsRef.value!.setState({
-                "isVisible": true,
-                dialogType,
-                options
-            }, () => modal.evtShown.post()));
+            ]).then(() => {
+
+                ctx.done();
+
+                obsRef.value!.setState({
+                    "isVisible": true,
+                    dialogType,
+                    options
+                }, () => modal.evtShown.post());
+
+            });
 
 
         },
