@@ -8,7 +8,6 @@ import { trackPushNotificationToken, testForegroundPushNotification } from "./li
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { Evt } from "frontend-shared/node_modules/evt";
-import { evtFromPromise } from "frontend-shared/dist/tools/evtFromPromise";
 
 declare const process: any;
 declare const window: any;
@@ -46,8 +45,9 @@ const prDoneImporting = (async () => {
         ]).then(wraps => wraps.forEach(wrap => Object.assign(window, wrap)));
 
         await Promise.all([
-            import("static_js_libs/jssip_compat/jssip" as any)
+            import("frontend-static/jssip" as any)
                 .then(JsSIP => Object.assign(window, { JsSIP })),
+            import("frontend-static/utils" as any),
             import("./lib/exposeNativeModules").then(({ run }) => run())
         ]);
 
@@ -58,8 +58,6 @@ const prDoneImporting = (async () => {
     SplashScreenComponent = (await import("./SplashScreenComponent")).SplashScreenComponent;
 
 })();
-
-
 
 addAppLifeCycleListeners([
     redrawOnRotate,
@@ -74,30 +72,36 @@ class RootComponent extends React.Component<{}, State> {
 
     public readonly state: Readonly<State> = { "isDoneImporting": false };
 
-    private static ctx = Evt.newCtx();
-
     constructor(props: any) {
 
         super(props);
 
         log("constructor");
 
-        const { ctx } = RootComponent;
-
-        ctx.done();
-
         appLifeCycleEvents.evtConstructor.post(this);
 
-        evtFromPromise(prDoneImporting).attachOnce(
-            ctx,
+    }
+
+    private ctx = Evt.newCtx();
+
+    componentDidMount = () => {
+
+        appLifeCycleEvents.evtComponentDidMount.post(this);
+
+        Evt.from(prDoneImporting).attachOnce(
+            this.ctx,
             () => this.setState({ "isDoneImporting": true })
         );
 
     }
 
-    public componentDidMount = () => appLifeCycleEvents.evtComponentDidMount.post(this);
+    componentWillUnmount = () => { 
 
-    public componentWillUnmount = () => appLifeCycleEvents.evtComponentWillUnmount.post(this);
+        appLifeCycleEvents.evtComponentWillUnmount.post(this);
+
+        this.ctx.done();
+
+    }
 
     public render = () => (
         <rn.View

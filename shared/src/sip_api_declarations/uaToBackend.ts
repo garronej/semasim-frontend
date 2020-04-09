@@ -34,7 +34,7 @@ export namespace notifyUserSimChange {
         simDongle: types.UserSim["dongle"]
         gatewayLocation: types.UserSim.GatewayLocation,
         isGsmConnectivityOk: boolean;
-        cellSignalStrength: types.UserSim.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
+        cellSignalStrength: types.UserSim.ReachableSimState["cellSignalStrength"];
     } | {
         type: "CELLULAR CONNECTIVITY CHANGE";
         imsi: string;
@@ -42,7 +42,7 @@ export namespace notifyUserSimChange {
     } | {
         type: "CELLULAR SIGNAL STRENGTH CHANGE";
         imsi: string;
-        cellSignalStrength: types.UserSim.ReachableSimState.ConnectedToCellularNetwork["cellSignalStrength"];
+        cellSignalStrength: types.UserSim.ReachableSimState["cellSignalStrength"];
     } | ({
         type: "ONGOING CALL";
         imsi: string

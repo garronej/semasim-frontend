@@ -1,4 +1,4 @@
-import { Observable, IObservable } from "frontend-shared/node_modules/evt";
+import { Tracked, Trackable } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { UiButtonBar } from "./UiButtonBar";
@@ -7,9 +7,9 @@ import { UiSimRow } from "./UiSimRow";
 import { uiShareSimDependencyInjection } from "./UiShareSim";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
 import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -54,7 +54,7 @@ export function uiControllerDependencyInjection(
     const { dialogApi, startMultiDialogProcess, createModal } = params;
 
     const { UiPhonebook } = uiPhonebookDependencyInjection({ startMultiDialogProcess, createModal });
-    const { UiShareSim } = uiShareSimDependencyInjection({ createModal, dialogApi });
+    const { UiShareSim } = uiShareSimDependencyInjection({ createModal, dialogApi });
 
     const html = loadUiClassHtml(
         require("../templates/UiController.html"),
@@ -77,20 +77,20 @@ export function uiControllerDependencyInjection(
 
             const uiShareSim = new UiShareSim({
                 userSimEvts,
-                "shareSim": ({ userSim, emails, message }) => coreApi.shareSim({ userSim, emails, message}),
+                "shareSim": ({ userSim, emails, message }) => coreApi.shareSim({ userSim, emails, message }),
                 "stopSharingSim": ({ userSim, emails }) => coreApi.stopSharingSim({ userSim, emails })
             });
 
-            const obsSelectedUserSim = new Observable<types.UserSim.Usable | null>(null);
+            const trkSelectedUserSim = new Tracked<types.UserSim.Usable | null>(null);
 
 
             const { obsAreDetailsShown } = this.initUiButtonBar({
-                obsSelectedUserSim,
+                obsSelectedUserSim: trkSelectedUserSim,
                 uiShareSim
             });
 
             const { addUserSim } = this.addUserSimFactory({
-                obsSelectedUserSim,
+                obsSelectedUserSim: trkSelectedUserSim,
                 obsAreDetailsShown
             });
 
@@ -102,9 +102,7 @@ export function uiControllerDependencyInjection(
 
             userSimEvts.evtNew.attach(({ userSim }) => addUserSim({ userSim }));
 
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory(userSimEvts);
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
 
                     const hasSim = userSims.length !== 0
@@ -114,20 +112,24 @@ export function uiControllerDependencyInjection(
                     this.structure[hasSim ? "show" : "hide"]();
 
                 },
-                ["evtNew", "evtDelete"]
+                Evt.merge([
+                    userSimEvts.evtNew,
+                    userSimEvts.evtDelete
+                ])
             );
+
 
         }
 
         private initUiButtonBar(params: {
-            obsSelectedUserSim: Observable<types.UserSim.Usable | null>;
+            trkSelectedUserSim: Trackable<types.UserSim.Usable | null>;
             uiShareSim: Pick<UiShareSim, "open">;
-        }): { obsAreDetailsShown: IObservable<boolean>; } {
+        }): { trkAreDetailsShown: Trackable<boolean>; } {
 
-            const { obsSelectedUserSim, uiShareSim } = params;
+            const { trkSelectedUserSim, uiShareSim } = params;
 
             const uiButtonBar = new UiButtonBar({
-                "obsSelectedUserSim": obsSelectedUserSim,
+                "obsSelectedUserSim": trkSelectedUserSim,
                 "onButtonClicked": async ({ userSim, button }) => {
 
                     switch (button) {
@@ -164,7 +166,7 @@ export function uiControllerDependencyInjection(
 
                             await this.params.coreApi.changeSimFriendlyName({
                                 userSim,
-                                "friendlyName":friendlyNameSubmitted
+                                "friendlyName": friendlyNameSubmitted
                             });
 
                         } break;
@@ -225,18 +227,18 @@ export function uiControllerDependencyInjection(
 
             this.structure.append(uiButtonBar.structure);
 
-            return { "obsAreDetailsShown": uiButtonBar.obsAreDetailsShown };
+            return { "trkAreDetailsShown": uiButtonBar.trkAreDetailsShown };
 
         }
 
         private addUserSimFactory(
             params: {
-                obsSelectedUserSim: Observable<types.UserSim.Usable | null>;
-                obsAreDetailsShown: IObservable<boolean>;
+                trkSelectedUserSim: Tracked<types.UserSim.Usable | null>;
+                trkAreDetailsShown: Trackable<boolean>;
             }
         ) {
 
-            const { obsSelectedUserSim, obsAreDetailsShown } = params;
+            const { trkSelectedUserSim, trkAreDetailsShown } = params;
 
             const addUserSim = (
                 params: {
@@ -246,25 +248,13 @@ export function uiControllerDependencyInjection(
 
                 const { userSim } = params;
 
-                const obsIsSelected = (() => {
+                const trkIsSelected = Tracked.from(trkSelectedUserSim, val => val === userSim);
 
-                    const getValue = () => obsSelectedUserSim.value === userSim;
-
-                    const out = new Observable<boolean>(getValue());
-
-                    obsSelectedUserSim.evtChange.attach(
-                        () => out.onPotentialChange(getValue())
-                    );
-
-                    return out;
-
-                })();
-
-                obsIsSelected.evtChange.attach(isSelected => {
+                trkIsSelected.evt.attach(isSelected => {
 
                     if (isSelected) {
 
-                        obsSelectedUserSim.onPotentialChange(userSim);
+                        trkSelectedUserSim.val =userSim;
 
                         return;
 
@@ -293,12 +283,12 @@ export function uiControllerDependencyInjection(
                             "evtDelete"
                         ]
                     ),
-                    obsIsSelected,
+                    trkIsSelected,
                     "obsAreDetailsVisible": (() => {
 
                         const getValue = () => (
-                            obsIsSelected.value &&
-                            obsAreDetailsShown.value
+                            trkIsSelected.val &&
+                            trkAreDetailsShown.val
                         );
 
                         const out = new Observable<boolean>(getValue());
@@ -385,7 +375,7 @@ export function uiControllerDependencyInjection(
                             ]
                         ),
                         "createContact": ({ name, number }) => this.params.coreApi.createContact({
-                            userSim, name, "number_raw":number
+                            userSim, name, "number_raw": number
                         }).then(() => { }),
                         "deleteContacts": contacts => Promise.all(
                             contacts.map(contact => this.params.coreApi.deleteContact({

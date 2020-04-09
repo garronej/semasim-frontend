@@ -18,7 +18,7 @@ declare const apiExposedByHost: ApiExposedByHost;
 const evtAesEncryptOrDecryptResult = new Evt<{
     callRef: number;
     outputDataB64: string;
-}>();
+}>().setMaxHandlers(Infinity);
 
 const evtRsaEncryptOrDecryptResult = new Evt<{
     callRef: number;

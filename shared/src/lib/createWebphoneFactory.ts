@@ -102,7 +102,7 @@ export function createWebphoneFactory(
                     case "react-native": {
                         return id<types.PhoneCallUi.Create.Params.ReactNative>({
                             "assertJsRuntimeEnv": "react-native",
-                            "obsIsSipRegistered": sipUserAgent.obsIsRegistered,
+                            "trkIsSipRegistered": sipUserAgent.trkIsRegistered,
                             ..._common
                         });
                     }
@@ -126,7 +126,7 @@ export function createWebphoneFactory(
             ),
             wdChats,
             wdEvts,
-            "obsIsSipRegistered": sipUserAgent.obsIsRegistered,
+            "trkIsSipRegistered": sipUserAgent.trkIsRegistered,
             "sendMessage": async ({ wdChat, text }) => {
 
                 const bundledData: gwTypes.BundledData.ClientToServer.Message = {
@@ -177,7 +177,7 @@ export function createWebphoneFactory(
 
                 const contactNumber = phoneNumber.build(
                     number_raw,
-                    userSim.sim.country ? userSim.sim.country.iso : undefined
+                    userSim.sim.country?.iso 
                 );
 
                 const contact = userSim.phonebook.find(({ number_raw }) =>

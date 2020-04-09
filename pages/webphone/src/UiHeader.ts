@@ -1,7 +1,6 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
 import { Evt, IObservable } from "frontend-shared/node_modules/evt";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
@@ -41,29 +40,24 @@ export class UiHeader {
 
         {
 
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
-                ...userSimEvts,
-                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange
-            });
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find("a.id_friendly_name span")
                     .text(userSim.friendlyName),
-                ["evtFriendlyNameChange"]
+                userSimEvts.evtFriendlyNameChange
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_sip_registration_in_progress")[(
                     !userSim.reachableSimState ||
                     obsIsSipRegistered.value
                 ) ? "hide" : "show"](),
-                [
-                    "evtReachabilityStatusChange",
-                    "evtIsSipRegisteredValueChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    obsIsSipRegistered.evtChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
                     const text = (() => {
 
@@ -91,13 +85,13 @@ export class UiHeader {
 
                     }
                 },
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find("i")
                     .each((_i, e) => {
 
@@ -117,27 +111,21 @@ export class UiHeader {
                         ]();
 
                     }),
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange",
-                    "evtCellularSignalStrengthChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange,
+                    userSimEvts.evtCellularConnectivityChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
+
                     const divConf = this.structure.find(".id_conf");
 
-                    if (
-                        !userSim.reachableSimState ||
-                        !userSim.reachableSimState.isGsmConnectivityOk ||
-                        !userSim.reachableSimState.ongoingCall
-                    ) {
-
+                    if( !userSim.reachableSimState?.ongoingCall ){
                         divConf.hide();
-
                         return;
-
                     }
 
                     divConf.show();
@@ -203,14 +191,19 @@ export class UiHeader {
                         .click(() => this.evtJoinCall.post(ongoingCall.number))
                         .show()
                         ;
+
                 },
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange",
-                    "evtOngoingCall",
-                    "evtNewUpdatedOrDeletedContact"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange,
+                    userSimEvts.evtOngoingCall,
+                    userSimEvts.evtNewUpdatedOrDeletedContact
+                ])
             );
+
+
+
+
 
         }
 

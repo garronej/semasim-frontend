@@ -2,7 +2,6 @@ import { Evt, IObservable } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 type UserSimEvts = Pick<
@@ -206,38 +205,31 @@ export function uiQuickActionDependencyInjection(
 
             });
 
+            Evt.useEffect(
+                () => {
 
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
-                ...userSimEvts,
-                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange
-            });
+                    this.structure.find(".id_sms")
+                        .prop("disabled", !obsIsSipRegistered.value);
 
-            runNowAndWhenEventOccur(
-                () => this.structure.find(".id_sms")
-                    .prop("disabled", !obsIsSipRegistered.value),
-                ["evtIsSipRegisteredValueChange"]
+                    this.structure.find(".id_contact")
+                        .prop("disabled", !userSim.reachableSimState);
+                },
+                obsIsSipRegistered.evtChange
             );
 
-            runNowAndWhenEventOccur(
-                () => this.structure.find(".id_contact")
-                    .prop("disabled", !userSim.reachableSimState),
-                ["evtReachabilityStatusChange"]
-            );
-
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_call").prop("disabled", (
                     !obsIsSipRegistered.value ||
                     !userSim.reachableSimState ||
                     !userSim.reachableSimState.isGsmConnectivityOk ||
                     !!userSim.reachableSimState.ongoingCall
                 )),
-                [
-                    "evtIsSipRegisteredValueChange",
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange",
-                    "evtOngoingCall"
-                ]
+                Evt.merge([
+                    obsIsSipRegistered.evtChange,
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange,
+                    userSimEvts.evtOngoingCall
+                ])
             );
 
         }

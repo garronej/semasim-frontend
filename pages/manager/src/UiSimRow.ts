@@ -2,8 +2,8 @@
 import { Observable, IObservable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/userSim";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -48,50 +48,22 @@ export class UiSimRow {
 
         {
 
-
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
-                ...userSimEvts,
-                "evtIsSelectedValueChange": obsIsSelected.evtChange,
-                "evtAreDetailsVisibleValueChange": obsAreDetailsVisible.evtChange,
-                "evtIsVisibleValueChange": obsIsVisible.evtChange
-            });
-
-            runNowAndWhenEventOccur(
-                () => {
-
-                    const details = this.structure.find(".id_details");
-
-                    if (obsAreDetailsVisible.value) {
-                        details.show();
-                    } else {
-                        details.hide();
-                    }
-
-
-                },
-                ["evtAreDetailsVisibleValueChange"]
+            Evt.useEffect(
+                () => this.structure.find(".id_details")[obsAreDetailsVisible.value ? "show" : "hide"](),
+                obsAreDetailsVisible.evtChange
             );
 
-            runNowAndWhenEventOccur(
-                () => {
-
-                    if (obsIsVisible.value) {
-                        this.structure.show();
-                    } else {
-                        this.structure.hide();
-                    }
-
-                },
-                ["evtIsVisibleValueChange"]
+            Evt.useEffect(
+                () => this.structure[obsIsVisible.value ? "show" : "hide"](),
+                obsIsVisible.evtChange
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_row")[obsIsSelected.value ? "addClass" : "removeClass"]("selected"),
-                ["evtIsSelectedValueChange"]
+                obsIsSelected.evtChange
             );
 
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_simId").text(
                     (() => {
 
@@ -107,10 +79,10 @@ export class UiSimRow {
 
                     })(),
                 ),
-                ["evtFriendlyNameChange"]
+                userSimEvts.evtFriendlyNameChange
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
 
                     let text: string | undefined = undefined;
@@ -129,13 +101,13 @@ export class UiSimRow {
                         $span.show().text(text);
                     }
                 },
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find("i")
                     .each((_i, e) => {
 
@@ -155,25 +127,25 @@ export class UiSimRow {
                         ]();
 
                     }),
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange",
-                    "evtCellularSignalStrengthChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange,
+                    userSimEvts.evtCellularSignalStrengthChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_row")[
                     !userSim.reachableSimState || !userSim.reachableSimState.isGsmConnectivityOk ?
                         "addClass" : "removeClass"
                 ]("offline"),
-                [
-                    "evtReachabilityStatusChange",
-                    "evtCellularConnectivityChange"
-                ]
+                Evt.merge([
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange
+                ])
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find(".id_gw_location").text(
                     [
                         userSim.gatewayLocation.city ?? "",
@@ -181,10 +153,10 @@ export class UiSimRow {
                         `( ${userSim.gatewayLocation.ip} )`
                     ].join(" "),
                 ),
-                ["evtReachabilityStatusChange"]
+                userSimEvts.evtReachabilityStatusChange
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
 
                     const { dongle } = userSim;
@@ -220,23 +192,22 @@ export class UiSimRow {
                     }
 
                 },
-                ["evtReachabilityStatusChange"]
+                userSimEvts.evtReachabilityStatusChange
+
             );
 
-            runNowAndWhenEventOccur(
-                () =>
+            Evt.useEffect(
+                () => this.structure.find(".id_phonebook").text(
+                    (() => {
 
-                    this.structure.find(".id_phonebook").text(
-                        (() => {
+                        let n = userSim.sim.storage.contacts.length;
+                        let tot = n + userSim.sim.storage.infos.storageLeft;
 
-                            let n = userSim.sim.storage.contacts.length;
-                            let tot = n + userSim.sim.storage.infos.storageLeft;
+                        return `${n}/${tot}`
 
-                            return `${n}/${tot}`
-
-                        })()
-                    ),
-                ["evtNewUpdatedOrDeletedContact"]
+                    })()
+                ),
+                userSimEvts.evtNewUpdatedOrDeletedContact
             );
 
 

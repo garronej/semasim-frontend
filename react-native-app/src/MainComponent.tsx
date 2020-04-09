@@ -4,6 +4,7 @@ import * as rn from "react-native";
 import * as types from "frontend-shared/dist/lib/types";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
 import { Evt, NonPostable } from "frontend-shared/node_modules/evt";
+import { Webphone } from "frontend-shared/dist/lib/types/Webphone";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[MainComponent]", ...args])) :
@@ -39,18 +40,11 @@ async function makeTestCall(
         return;
     }
 
-    if (!webphone.obsIsSipRegistered.value) {
+    const wdChat = await webphone.getOrCreateWdChat({ "number_raw": "06 36 78 63 85" });
 
+    const { canCall } = Webphone.canCallFactory(webphone);
 
-    }
-
-    const { userSim } = webphone;
-
-    if (!(
-        webphone.obsIsSipRegistered.value &&
-        userSim.reachableSimState?.isGsmConnectivityOk &&
-        userSim.reachableSimState.ongoingCall === undefined
-    )) {
+    if (!canCall(wdChat.contactNumber)) {
 
         dialogApi.create(
             "alert",
@@ -63,7 +57,6 @@ async function makeTestCall(
 
     log("Making test call");
 
-    const wdChat = webphone.wdChats.find(o => o.contactNumber === "+33636786385")!;
     //const wdChat = webphone.wdChats.find(o => o.contactNumber === "666")!;
     //const wdChat= await webphone.getAndOrCreateAndOrUpdateWdChat("+33146094949");
 
@@ -73,46 +66,6 @@ async function makeTestCall(
 
 
 
-function attachWebphoneListeners(
-    params: {
-        webphone: types.Webphone | undefined;
-    }
-) {
-
-    const { webphone } = params;
-
-    if (webphone === undefined) {
-        return;
-    }
-
-    if (attachWebphoneListeners.alreadyDone.indexOf(webphone) >= 0) {
-        return;
-    }
-
-    attachWebphoneListeners.alreadyDone.push(webphone);
-
-    log("attachWebphoneListeners");
-
-    log(JSON.stringify({ "wdChats": webphone.wdChats }, null, 2));
-
-    webphone.obsIsSipRegistered.evtChange.attach(
-        isSipRegistered => log(`evtIsSipRegisteredValueChanged ${isSipRegistered}`)
-    );
-
-    (Object.keys(webphone.userSimEvts) as (keyof typeof webphone.userSimEvts)[]).forEach(evtName =>
-        id<NonPostable<Evt<any>>>(webphone.userSimEvts[evtName])
-            .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
-    );
-
-    (Object.keys(webphone.wdEvts) as (keyof typeof webphone.wdEvts)[]).forEach(evtName =>
-        id<NonPostable<Evt<any>>>(webphone.wdEvts[evtName])
-            .attach(eventData => log(`${evtName}: ${JSON.stringify(eventData, null, 2)}`))
-    );
-
-
-}
-
-attachWebphoneListeners.alreadyDone = id<types.Webphone[]>([]);
 
 
 export type Props = {
@@ -122,17 +75,89 @@ export type Props = {
     accountManagementApi: types.AccountManagementApi;
 };
 
-export class MainComponent extends React.Component<Props, {}> {
+export type State = {
+    lastUserSimEvent: string;
+    lastWdChatEvent: string;
+    lastWdMessageEvent: string;
+    isSipRegistered: boolean;
 
-    constructor(props: any) {
-        super(props);
+};
 
-        attachWebphoneListeners({ "webphone": this.props.webphones[0] });
+export class MainComponent extends React.Component<Props, State> {
 
-    }
+    public readonly state: Readonly<State> = {
+        lastUserSimEvent: "",
+        lastWdChatEvent: "",
+        lastWdMessageEvent: "",
+        isSipRegistered: false
+    };
+
+
+    private ctx = Evt.newCtx();
+
+    componentDidMount = () => {
+
+        Evt.merge(
+            Object.entries(this.props.accountManagementApi.userSimEvts)
+                .map<Evt<string>>(
+                    ([key, evt]) => id<NonPostable<Evt<any>>>(evt)
+                        .pipe(this.ctx, () => [key] as const)
+                )
+        ).attach(lastUserSimEvent => {
+            console.log("root", { lastUserSimEvent });
+            this.setState({ lastUserSimEvent });
+        });
+
+        //this.props.accountManagementApi.
+        (() => {
+
+            const [webphone] = this.props.webphones;
+
+            if (!webphone) {
+                return;
+            }
+
+            Evt.useEffect(
+                () => this.setState({ "isSipRegistered": webphone.obsIsSipRegistered.value }),
+                webphone.obsIsSipRegistered.evtChange.pipe(this.ctx)
+            );
+
+            Evt.merge(
+                Object.entries(webphone.userSimEvts)
+                    .map<Evt<string>>(
+                        ([key, evt]) => id<NonPostable<Evt<any>>>(evt)
+                            .pipe(this.ctx, () => [key] as const)
+                    )
+            ).attach(lastUserSimEvent => console.log("delegate", { lastUserSimEvent }));
+
+
+            webphone.wdEvts.evtWdChat.attach(this.ctx, ({ wdChat, ...rest }) => {
+                log("lastWdChatEvent", rest);
+                this.setState({ "lastWdChatEvent": JSON.stringify(rest) })
+            });
+            webphone.wdEvts.evtWdMessage.attach(this.ctx, ({ wdChat, wdMessage, ...rest }) => {
+                log("lastWdMessageEvent", rest);
+                this.setState({ "lastWdMessageEvent": JSON.stringify(rest) });
+            });
+
+
+        })();
+
+
+
+    };
+
+    componentWillUnmount = () => this.ctx.done();
+
 
     public render = () => (
         <rn.View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <rn.Text>Webphone count: {this.props.webphones.length}</rn.Text>
+            <rn.Text>Logged with: {this.props.accountManagementApi.email}</rn.Text>
+            <rn.Text>Last userSim event: {this.state.lastUserSimEvent}</rn.Text>
+            <rn.Text>webphone[0] isSipRegistered: {`${this.state.isSipRegistered}`} </rn.Text>
+            <rn.Text>webphone[0] data last chat event: {this.state.lastWdChatEvent} </rn.Text>
+            <rn.Text>webphone[0] data last message event: {this.state.lastWdMessageEvent} </rn.Text>
             <rn.TouchableOpacity
                 style={{ backgroundColor: "blue" }}
                 onPress={() => makeTestCall({

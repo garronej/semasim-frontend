@@ -9,7 +9,6 @@ import { SplashImage } from "./genericComponents/SplashImage";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
 import { getPrObsPushNotificationToken } from "./lib/trackPushNotificationToken";
 import { Evt } from "frontend-shared/node_modules/evt";
-import { evtFromPromise } from "frontend-shared/dist/tools/evtFromPromise";
 
 import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
 import { appLaunch } from "frontend-shared/dist/lib/appLauncher/appLaunch";
@@ -35,9 +34,6 @@ type AppLaunchOut = Pick<
 
 const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
 
-
-    console.log("ok it's updated");
-
     const appLaunchOut = appLaunch({
         "assertJsRuntimeEnv": "react-native",
         notConnectedUserFeedback,
@@ -50,7 +46,7 @@ const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
         "appLaunchOut": id<AppLaunchOut>(appLaunchOut),
         "prAccountManagementAndWebphones": (async () => {
 
-            const { getAccountManagementApiAndWebphoneLauncher } = 
+            const { getAccountManagementApiAndWebphoneLauncher } =
                 await appLaunchOut.prAuthenticationStep;
 
             const { accountManagementApi, getWebphones } =
@@ -97,40 +93,28 @@ export class SplashScreenComponent extends React.Component<{}, State> {
 
     public readonly state: Readonly<State> = { "type": "SPLASH SCREEN" };
 
-    private static ctx= Evt.newCtx();
+    private ctx = Evt.newCtx();
 
-    constructor(props: any) {
-        super(props);
-
-        log("constructor");
-
-        const { ctx } = SplashScreenComponent;
-
-        ctx.done();
-
-        evtFromPromise(appLaunchOut.prAuthenticationStep).attachOnce(
-            ctx,
+    componentDidMount = () =>
+        Evt.from(appLaunchOut.prAuthenticationStep).attachOnce(
+            this.ctx,
             authenticationApi =>
                 this.setState(
-                    authenticationApi.needLogin ? {
-                        "type": "LOGIN",
-                        authenticationApi
-                    } : {
-                            "type": "SPLASH SCREEN"
-                        }
+                    authenticationApi.needLogin ?
+                        { "type": "LOGIN", authenticationApi } :
+                        { "type": "SPLASH SCREEN" },
+                    () => Evt.from(prAccountManagementAndWebphones).attachOnce(
+                        this.ctx,
+                        ({ accountManagementApi, webphones }) => this.setState({
+                            "type": "MAIN",
+                            accountManagementApi,
+                            webphones
+                        })
+                    )
                 )
         );
 
-        evtFromPromise(prAccountManagementAndWebphones).attachOnce(
-            ctx,
-            ({ accountManagementApi, webphones }) => this.setState({
-                "type": "MAIN",
-                accountManagementApi,
-                webphones
-            })
-        );
-
-    }
+    componentWillUnmount = () => this.ctx.done();
 
     public render = () => [
         <Dialog key={0} />,

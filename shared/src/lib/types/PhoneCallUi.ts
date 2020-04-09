@@ -1,6 +1,6 @@
 
 type Evt<T> = import("evt").Evt<T>;
-type IObservable<T> = import("evt/dist/lib/Observable").IObservable<T>;
+type Trackable<T> = import("evt").Trackable<T>;
 
 export type PhoneCallUi = {
     openUiForOutgoingCall(phoneNumberRaw: string): void;
@@ -60,7 +60,7 @@ export namespace PhoneCallUi {
                 sims: {
                     imsi: string;
                     friendlyName: string;
-                    phoneNumber: string | undefined; //NOTE: formated
+                    phoneNumber: string | undefined; //NOTE: formatted
                     serviceProvider: string | undefined;
                 }[]
         };
@@ -87,7 +87,7 @@ export namespace PhoneCallUi {
 
             export type ReactNative = _Common & {
                 assertJsRuntimeEnv: "react-native";
-                obsIsSipRegistered: IObservable<boolean>;
+                trkIsSipRegistered: Trackable<boolean>;
             };
 
         }

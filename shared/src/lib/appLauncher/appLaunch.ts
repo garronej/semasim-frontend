@@ -26,7 +26,7 @@ import * as loginPageLogic from "../pageLogic/login";
 import * as registerPageLogic from "../pageLogic/register";
 import { minimalLaunch } from "./minimalLaunch";
 import { createModal } from "../../tools/modal";
-import { IObservable } from "evt";
+import { Trackable } from "evt";
 
 
 const log: typeof console.log = true ?
@@ -49,7 +49,7 @@ export namespace appLaunch {
 		notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
 		actionToPerformBeforeAppRestart: () => Promise<void>;
 		dialogBaseApi: dialogBaseTypes.Api;
-			prObsPushNotificationToken: Promise<IObservable<string>>;
+			prObsPushNotificationToken: Promise<Trackable<string>>;
 		};
 
 	}
@@ -306,14 +306,14 @@ async function onceLoggedIn(
 
 			const obsPushNotificationToken = await params.prObsPushNotificationToken;
 
-			obsPushNotificationToken.evtChangeDiff.attachOnce(
-				({ newValue, previousValue }) => restartApp([
-					`Push notification token changed: new token: ${newValue}, `,
-					`previous token: ${previousValue}`
+			obsPushNotificationToken.evtDiff.attachOnce(
+				({ newVal, prevVal }) => restartApp([
+					`Push notification token changed: new token: ${newVal}, `,
+					`previous token: ${prevVal}`
 				].join(""))
 			);
 
-			return obsPushNotificationToken.value;
+			return obsPushNotificationToken.val;
 
 		})();
 

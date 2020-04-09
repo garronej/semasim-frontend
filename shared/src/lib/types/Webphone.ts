@@ -1,8 +1,10 @@
 
 import { UserSim } from "./UserSim";
 import * as wd from "./webphoneData";
-type IObservable<T> = import("evt").IObservable<T>;
+type Trackable<T> = import("evt").Trackable<T>;
 import { NonPostableEvts } from "../../tools/NonPostableEvts";
+import { phoneNumber as phoneNumberLib } from "phone-number/dist/lib";
+import { Evt, Tracked } from "evt";
 
 export type Webphone = {
     userSim: UserSim.Usable;
@@ -26,16 +28,15 @@ export type Webphone = {
     placeOutgoingCall: (wdChat: wd.Chat) => void;
     fetchOlderWdMessages(params: { wdChat: wd.Chat; maxMessageCount: number; }): Promise<wd.Message[]>;
     updateWdChatLastMessageSeen: (wdChat: wd.Chat) => void;
-    obsIsSipRegistered: IObservable<boolean>;
+    trkIsSipRegistered: Trackable<boolean>;
 };
 
 export namespace Webphone {
 
-    type Webphone_ = Pick<Webphone, "userSim" | "wdChats">;
 
     export function sortPuttingFirstTheOneThatWasLastUsed(
-        webphone1: Webphone_,
-        webphone2: Webphone_
+        webphone1: sortPuttingFirstTheOneThatWasLastUsed.WebphoneLike,
+        webphone2: sortPuttingFirstTheOneThatWasLastUsed.WebphoneLike
     ): -1 | 0 | 1 {
 
         if (!!webphone1.userSim.reachableSimState !== !!webphone2.userSim.reachableSimState) {
@@ -61,5 +62,127 @@ export namespace Webphone {
         }
 
     };
+
+    export namespace sortPuttingFirstTheOneThatWasLastUsed {
+        export type WebphoneLike = Pick<Webphone, "userSim" | "wdChats">;
+    }
+
+
+
+    export function canCallFactory(webphone: canCallFactory.WebphoneLike) {
+
+        const{ userSim, trkIsSipRegistered } = webphone;
+
+        function canCall(number_raw: string): boolean {
+
+            const number= 
+                phoneNumberLib.build(
+                    number_raw,
+                    userSim.sim.country?.iso
+                )
+                ;
+
+            return (
+                phoneNumberLib.isDialable(number) &&
+                trkIsSipRegistered.val &&
+                !!userSim.reachableSimState?.isGsmConnectivityOk &&
+                (
+                    userSim.reachableSimState.ongoingCall === undefined ||
+                    userSim.reachableSimState.ongoingCall.number === number &&
+                    !userSim.reachableSimState.ongoingCall.isUserInCall
+                )
+            );
+
+        }
+
+        return { canCall };
+
+    }
+
+    export namespace canCallFactory {
+
+        /*
+        export type WebphoneLike = {
+            userSim: { 
+                sim: { country: Webphone["userSim"]["sim"]["country"]; };
+                reachableSimState: Webphone["userSim"]["reachableSimState"];
+            },
+            obsIsSipRegistered: Webphone["obsIsSipRegistered"];
+        };
+        */
+
+        export type WebphoneLike = Webphone;
+
+    }
+
+    export function useEffect(
+        canCallEffect: (canCall: boolean) => void,
+        trkWebphone: Trackable<Webphone>,
+        trkPhoneNumberRaw: Trackable<string>,
+        ctx: import("evt").Ctx<any>
+    ) {
+
+        const obsPhoneNumber= Tracked.from(
+            ctx,
+            trkPhoneNumberRaw,
+            number_raw => phoneNumberLib.build(
+                number_raw,
+                trkWebphone.val.userSim.sim.country?.iso
+            )
+        );
+
+        const trkIsNumberDialable = Tracked.from(
+            obsPhoneNumber,
+            number=> phoneNumberLib.isDialable(number)
+        );
+
+        trkIsNumberDialable;
+
+        
+
+
+
+        Evt.useEffect(
+            previousWebphone => {
+
+                if (!!previousWebphone) {
+                    Evt.getCtx(previousWebphone).done();
+                }
+
+                const webphone = trkWebphone.val;
+
+                const { canCall } = canCallFactory(webphone);
+
+                const webphoneCtx = Evt.getCtx(webphone);
+
+                ctx.evtDoneOrAborted.attach(
+                    webphoneCtx,
+                    () => webphoneCtx.done()
+                );
+
+                Evt.useEffect(
+                    () => canCallEffect(canCall(trkPhoneNumberRaw.val)),
+                    Evt.merge(
+                        webphoneCtx,
+                        [
+                            trkPhoneNumberRaw.evt,
+                            webphone.trkIsSipRegistered.evt,
+                            webphone.userSimEvts.evtReachabilityStatusChange,
+                            webphone.userSimEvts.evtCellularConnectivityChange,
+                            webphone.userSimEvts.evtOngoingCall
+                        ]
+                    )
+                );
+
+            },
+            trkWebphone.evtDiff.pipe(
+                ctx,
+                ({ prevVal }) => [prevVal]
+            )
+        );
+
+    }
+
+
 
 }

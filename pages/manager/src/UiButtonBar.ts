@@ -1,7 +1,7 @@
-import { Observable, IObservable } from "frontend-shared/node_modules/evt";
+import { Tracked, Trackable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -14,24 +14,24 @@ export class UiButtonBar {
 
     public readonly structure = html.structure.clone();
 
-    public readonly obsAreDetailsShown: IObservable<boolean>;
+    public readonly trkAreDetailsShown: Trackable<boolean>;
 
     constructor(
         params: {
-            obsSelectedUserSim: IObservable<types.UserSim.Usable | null>;
+            obsSelectedUserSim: Trackable<types.UserSim.Usable | null>;
             onButtonClicked(params: { userSim: types.UserSim.Usable; button: "DELETE" | "CONTACTS" | "SHARE" | "REBOOT" | "RENAME"; }): void;
         }
     ) {
 
         const { obsSelectedUserSim } = params;
 
-        const obsAreDetailsShown = new Observable(false);
+        const obsAreDetailsShown = new Tracked(false);
 
-        this.obsAreDetailsShown = obsAreDetailsShown;
+        this.trkAreDetailsShown = obsAreDetailsShown;
 
         const onButtonClicked = (button: Parameters<typeof params.onButtonClicked>[0]["button"]) => {
 
-            const userSim = obsSelectedUserSim.value;
+            const userSim = obsSelectedUserSim.val;
 
             if (userSim === null) {
                 return;
@@ -51,12 +51,12 @@ export class UiButtonBar {
         const btnRename = $(buttons.get(5));
         const btnReboot = $(buttons.get(6));
 
-        btnDetail.click(() => obsAreDetailsShown.onPotentialChange(true));
+        btnDetail.click(() => obsAreDetailsShown.val= true);
 
-        btnBack.click(() => obsAreDetailsShown.onPotentialChange(false));
+        btnBack.click(() => obsAreDetailsShown.val =false);
 
-        obsSelectedUserSim.evtChange.attach(
-            () => obsAreDetailsShown.onPotentialChange(false)
+        obsSelectedUserSim.evt.attach(
+            () => obsAreDetailsShown.val= false
         );
 
         btnDelete.click(() => onButtonClicked("DELETE"));
@@ -70,58 +70,48 @@ export class UiButtonBar {
         btnReboot.tooltip();
         btnReboot.click(() => onButtonClicked("REBOOT"));
 
-        {
-
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
-                "evtSelectedUserSimChange": obsSelectedUserSim.evtChange,
-                "evtAreDetailsShownChange": obsAreDetailsShown.evtChange
-            });
-
-            runNowAndWhenEventOccur(
-                () => {
-
-                    buttons.prop("disabled", false);
-                    btnDetail.show();
-                    btnBack.show();
-
-                    if (obsSelectedUserSim.value === null) {
-
-                        buttons.each(i => {
-                            $(buttons[i]).prop("disabled", true);
-                        });
-
-                    }
-
-                    if (obsAreDetailsShown.value) {
-                        btnDetail.hide();
-                    } else {
-                        btnBack.hide();
-                    }
-
-                    if (
-                        obsSelectedUserSim.value === null ||
-                        !types.UserSim.Owned.match(obsSelectedUserSim.value)
-                    ) {
-
-                        btnShare.prop("disabled", true);
-
-                    }
-
-                    if (!obsSelectedUserSim.value?.reachableSimState) {
-                        btnReboot.prop("disabled", true);
-                    }
 
 
-                },
-                [
-                    "evtSelectedUserSimChange",
-                    "evtAreDetailsShownChange"
-                ]
-            );
+        Evt.useEffect(
+            () => {
 
-        }
+                buttons.prop("disabled", false);
+                btnDetail.show();
+                btnBack.show();
 
+                if (obsSelectedUserSim.val === null) {
 
+                    buttons.each(i => {
+                        $(buttons[i]).prop("disabled", true);
+                    });
+
+                }
+
+                if (obsAreDetailsShown.val) {
+                    btnDetail.hide();
+                } else {
+                    btnBack.hide();
+                }
+
+                if (
+                    obsSelectedUserSim.val === null ||
+                    !types.UserSim.Owned.match(obsSelectedUserSim.val)
+                ) {
+
+                    btnShare.prop("disabled", true);
+
+                }
+
+                if (!obsSelectedUserSim.val?.reachableSimState) {
+                    btnReboot.prop("disabled", true);
+                }
+
+            },
+            Evt.merge([
+                obsSelectedUserSim.evt,
+                obsAreDetailsShown.evt
+            ])
+        );
 
     }
 

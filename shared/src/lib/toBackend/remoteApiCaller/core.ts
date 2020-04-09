@@ -660,9 +660,7 @@ function getGetUserSimEvts(
 
                         const userSim = findUserSim(eventData.imsi);
 
-                        const hadOngoingCall = (userSim.reachableSimState !== undefined &&
-                            userSim.reachableSimState.isGsmConnectivityOk &&
-                            userSim.reachableSimState.ongoingCall !== undefined);
+                        const hadOngoingCall = !!userSim.reachableSimState?.ongoingCall;
 
                         userSim.reachableSimState = undefined;
 
@@ -702,10 +700,11 @@ function getGetUserSimEvts(
                         //NOTE: True when password changed for example.
                         const wasAlreadyReachable = userSim.reachableSimState !== undefined;
 
-                        userSim.reachableSimState = isGsmConnectivityOk ?
-                            ({ "isGsmConnectivityOk": true, cellSignalStrength, "ongoingCall": undefined }) :
-                            ({ "isGsmConnectivityOk": false, cellSignalStrength })
-                            ;
+                        userSim.reachableSimState = {
+                            isGsmConnectivityOk,
+                            cellSignalStrength,
+                            "ongoingCall": undefined
+                        };
 
                         const hasPasswordChanged = userSim.password !== password;
 
@@ -736,35 +735,14 @@ function getGetUserSimEvts(
 
                         const { reachableSimState } = userSim;
 
-                        assert(reachableSimState !== undefined);
+                        assert(
+                            reachableSimState !== undefined &&
+                            eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk
+                        );
 
-                        assert(eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk);
-
-                        if (reachableSimState.isGsmConnectivityOk) {
-
-                            let hadOngoingCall = false;
-
-                            if (reachableSimState.ongoingCall !== undefined) {
-                                delete reachableSimState.ongoingCall;
-                                hadOngoingCall = true;
-                            }
-
-                            reachableSimState.isGsmConnectivityOk = false as any;
-
-                            if (hadOngoingCall) {
-                                out.evtOngoingCall.post(userSim);
-                            }
-
-                        } else {
-
-                            reachableSimState.isGsmConnectivityOk = true as any;
-
-                        }
-
+                        reachableSimState.isGsmConnectivityOk = eventData.isGsmConnectivityOk;
 
                         out.evtCellularConnectivityChange.post(userSim);
-
-
 
                     } return;
                     case "CELLULAR SIGNAL STRENGTH CHANGE": {
@@ -793,13 +771,6 @@ function getGetUserSimEvts(
                                 return;
                             }
 
-                            if (!reachableSimState.isGsmConnectivityOk) {
-                                //NOTE: If we have had event notifying connectivity lost
-                                //before this event the evtOngoingCall will have been posted
-                                //in notifyGsmConnectivityChange handler function.
-                                return;
-                            }
-
                             if (
                                 reachableSimState.ongoingCall === undefined ||
                                 reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId
@@ -816,9 +787,6 @@ function getGetUserSimEvts(
                             const { reachableSimState } = userSim;
 
                             assert(reachableSimState !== undefined);
-
-                            assert(reachableSimState.isGsmConnectivityOk);
-
 
                             if (reachableSimState.ongoingCall === undefined) {
                                 reachableSimState.ongoingCall = ongoingCall;

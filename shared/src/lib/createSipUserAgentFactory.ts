@@ -1,6 +1,6 @@
 //NOTE: Require jssip_compat loaded on the page.
 
-import { Evt, VoidEvt, UnpackEvt, Observable, IObservable } from "evt";
+import { Evt, VoidEvt, UnpackEvt, Tracked, Trackable } from "evt";
 
 import { types as gwTypes } from "../gateway/types";
 import { extractBundledDataFromHeaders, smuggleBundledDataInHeaders, } from "../gateway/bundledData";
@@ -129,7 +129,7 @@ export function createSipUserAgentFactory(
 
 class SipUserAgent {
 
-    public readonly obsIsRegistered: IObservable<boolean>;
+    public readonly trkIsRegistered: Trackable<boolean>;
 
     private readonly jsSipUa: any;
     private evtRingback = new Evt<string>();
@@ -174,12 +174,12 @@ class SipUserAgent {
 
         let lastRegisterTime = 0;
 
-        const obsIsRegistered = new Observable(false);
-        this.obsIsRegistered = obsIsRegistered;
+        const trkIsRegistered = new Tracked(false);
+        this.trkIsRegistered = trkIsRegistered;
 
         this.jsSipUa.on("registrationExpiring", async () => {
 
-            if (!obsIsRegistered.value) {
+            if (!trkIsRegistered.val) {
                 return;
             }
 
@@ -231,11 +231,11 @@ class SipUserAgent {
 
             lastRegisterTime = Date.now();
 
-            obsIsRegistered.onPotentialChange(true);
+            trkIsRegistered.val = true;
 
         });
 
-        this.jsSipUa.on("unregistered", () => obsIsRegistered.onPotentialChange(false));
+        this.jsSipUa.on("unregistered", () => trkIsRegistered.val = false);
 
         this.jsSipUa.on("newMessage", ({ originator, request }) => {
 

@@ -1,6 +1,6 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 
-import { Evt, VoidEvt, UnpackEvt, NonPostable } from "evt";
+import { Evt, VoidEvt, UnpackEvt, NonPostable, EvtLike } from "evt";
 import { id } from "../../tools/typeSafety/id";
 import { assert } from "../../tools/typeSafety/assert";
 import { NonPostableEvts } from "../../tools/NonPostableEvts";
@@ -97,29 +97,11 @@ export namespace UserSim {
 
     }
 
-
-
-    export type ReachableSimState =
-        ReachableSimState.ConnectedToCellularNetwork |
-        ReachableSimState.NotConnectedToCellularNetwork
-        ;
-
-    export namespace ReachableSimState {
-
-        export type Common_ = {
-            cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
-        };
-
-        export type NotConnectedToCellularNetwork = Common_ & {
-            isGsmConnectivityOk: false;
-        };
-
-        export type ConnectedToCellularNetwork = Common_ & {
-            isGsmConnectivityOk: true;
-            ongoingCall: OngoingCall | undefined;
-        };
-
-    }
+    export type ReachableSimState = {
+        cellSignalStrength: dcTypes.Dongle.Usable.CellSignalStrength;
+        isGsmConnectivityOk: boolean;
+        ongoingCall: OngoingCall | undefined;
+    };
 
     export type OngoingCall = {
         ongoingCallId: string;
@@ -306,9 +288,18 @@ export namespace UserSim {
                 userSimEvts: NonPostableEvts<Evts>;
             } {
 
+
                 const userSims = params.userSims.filter(Usable.match);
+
+                const ctx = Evt.newCtx();
+
                 const userSimEvts: Evts = {
-                    "evtNew": new Evt(),
+                    "evtNew": Evt.merge([
+                        params.userSimEvts.evtNew
+                            .pipe(ctx, data => data.cause === "SHARING REQUEST RECEIVED" ? null : [data]),
+                        params.userSimEvts.evtNowConfirmed
+                            .pipe(ctx, userSim => [{ "cause": "SHARED SIM CONFIRMED" as const, userSim }])
+                    ]).pipe(({ userSim }) => { userSims.push(userSim); return true; }),
                     "evtDelete": new Evt(),
                     "evtReachabilityStatusChange": new Evt(),
                     "evtSipPasswordRenewed": new Evt(),
@@ -320,67 +311,6 @@ export namespace UserSim {
                     "evtFriendlyNameChange": new Evt()
                 };
 
-                const ctx= Evt.newCtx();
-
-                params.userSimEvts.evtNew.attach(
-                    ctx,
-                    eventData => {
-
-                        if (eventData.cause === "SHARING REQUEST RECEIVED") {
-                            return;
-                        }
-
-                        userSims.push(eventData.userSim);
-
-                        userSimEvts.evtNew.post(eventData);
-
-
-                    }
-                );
-
-                params.userSimEvts.evtNowConfirmed.attach(
-                    ctx,
-                    userSim => {
-
-                        userSims.push(userSim);
-
-                        userSimEvts.evtNew.post({
-                            "cause": "SHARED SIM CONFIRMED",
-                            userSim
-                        });
-
-                    }
-                );
-
-                params.userSimEvts.evtDelete.attach(
-                    ctx,
-                    eventData => {
-
-                        let newEventData: UnpackEvt<Evts["evtDelete"]>;
-
-                        switch (eventData.cause) {
-                            case "REJECT SHARING REQUEST":
-                                return;
-                            case "PERMISSION LOSS":
-                                if (Shared.NotConfirmed.match(eventData.userSim)) {
-                                    return;
-                                }
-                                newEventData = {
-                                    "cause": eventData.cause,
-                                    "userSim": eventData.userSim
-                                };
-                                break;
-                            case "USER UNREGISTER SIM":
-                                newEventData = eventData;
-                                break;
-                        }
-
-                        userSims.splice(userSims.indexOf(newEventData.userSim), 1);
-
-                        userSimEvts.evtDelete.post(newEventData);
-
-                    }
-                );
 
                 (Object.keys(userSimEvts) as (keyof typeof userSimEvts)[]).forEach(eventName => {
 
@@ -409,6 +339,10 @@ export namespace UserSim {
                     });
 
                 });
+
+                userSimEvts.evtDelete = userSimEvts.evtDelete
+                    .pipe(({ userSim }) => { userSims.splice(userSims.indexOf(userSim), 1); return true })
+                    ;
 
                 return { userSims, userSimEvts };
 
@@ -580,7 +514,7 @@ function buildEvtsForSpecificSimFactory(
 
 
 
-export type RemoveUserSim<T> = T extends Evt<infer U> ?
+export type RemoveUserSim<T> = T extends EvtLike<infer U> ?
     (
         U extends UserSim ?
         VoidEvt
@@ -606,7 +540,7 @@ export type RemoveUserSim<T> = T extends Evt<infer U> ?
     T
     ;
 
-export type ReplaceByUsable<T> = T extends Evt<infer U> ?
+export type ReplaceByUsable<T> = T extends EvtLike<infer U> ?
     (
         U extends UserSim ?
         Evt<UserSim.Usable>

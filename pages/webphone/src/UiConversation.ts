@@ -1,10 +1,9 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import {  VoidEvt, Evt, IObservable } from "frontend-shared/node_modules/evt";
+import { VoidEvt, Evt, IObservable } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types";
 import * as moment from "moment";
-import { runNowAndWhenEventOccurFactory } from "frontend-shared/dist/tools/runNowAndWhenEventOccurFactory";
 import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 declare const ion: any;
@@ -63,47 +62,27 @@ export class UiConversation {
         }
     ) {
 
-        const { 
-            userSim, 
-            userSimEvts, 
-            obsIsSipRegistered, 
-            wdChat, 
-            evtUpdatedOrDeletedWdChat, 
-            evtNewOrUpdatedMessage, 
-            fetchOlderWdMessages 
-        }= params;
+        const {
+            userSim,
+            userSimEvts,
+            obsIsSipRegistered,
+            wdChat,
+            evtUpdatedOrDeletedWdChat,
+            evtNewOrUpdatedMessage,
+            fetchOlderWdMessages
+        } = params;
 
         {
 
-            const { runNowAndWhenEventOccur } = runNowAndWhenEventOccurFactory({
-                ...userSimEvts,
-                "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange,
-                "evtUpdatedWdChat": (() => {
-
-                    const out = new VoidEvt();
-
-                    evtUpdatedOrDeletedWdChat.attach(
-                        eventData => eventData === "UPDATED",
-                        () => out.post()
-                    );
-
-
-                    return out;
-                })()
-
-            });
-
             const isDialable = phoneNumber.isDialable(wdChat.contactNumber);
 
-
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.structure.find("span.id_name")
                     .text(wdChat.contactName ?? ""),
-                ["evtUpdatedWdChat"]
+                evtUpdatedOrDeletedWdChat.pipe(event => event === "UPDATED")
             );
 
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => {
 
                     if (obsIsSipRegistered.value && isDialable) {
@@ -119,11 +98,11 @@ export class UiConversation {
                     }
 
                 },
-                [ "evtIsSipRegisteredValueChange" ]
+                obsIsSipRegistered.evtChange
             );
 
-            runNowAndWhenEventOccur(
-                () => {
+            Evt.useEffect(
+                ()=>{
 
                     this.btnUpdateContact.prop("disabled", (
                         userSim.reachableSimState === undefined ||
@@ -134,14 +113,11 @@ export class UiConversation {
                         "disabled",
                         userSim.reachableSimState === undefined
                     );
-
                 },
-                ["evtReachabilityStatusChange"]
+                userSimEvts.evtReachabilityStatusChange
             );
-                
 
-
-            runNowAndWhenEventOccur(
+            Evt.useEffect(
                 () => this.btnCall.prop(
                     "disabled",
                     !(
@@ -155,15 +131,13 @@ export class UiConversation {
                         )
                     )
                 ),
-                [
-                    "evtIsSipRegisteredValueChange",
-                        "evtReachabilityStatusChange",
-                        "evtCellularConnectivityChange",
-                        "evtOngoingCall"
-                ]
+                Evt.merge([
+                    obsIsSipRegistered.evtChange,
+                    userSimEvts.evtReachabilityStatusChange,
+                    userSimEvts.evtCellularConnectivityChange,
+                    userSimEvts.evtOngoingCall
+                ])
             );
-
-
 
         }
 
