@@ -2,7 +2,7 @@
 declare const require: any;
 
 import { NetworkStateMonitoring, GetApiFn } from "./types";
-import { VoidEvt } from "evt";
+import { Evt } from "evt";
 const NetInfo: typeof import("../../../../react-native-app/node_modules/@react-native-community/netinfo") = require("@react-native-community/netinfo");
 type NetInfoState = import("../../../../react-native-app/node_modules/@react-native-community/netinfo").NetInfoState;
 
@@ -23,7 +23,7 @@ export const getApi: GetApiFn = async () => {
         "getIsOnline": () => isOnLine,
         "evtStateChange": (() => {
 
-            const out = new VoidEvt();
+            const out = Evt.create();
 
             NetInfo.addEventListener(state => {
 

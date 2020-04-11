@@ -1,15 +1,13 @@
 
 import { UserSim } from "./UserSim";
 import * as wd from "./webphoneData";
-type Trackable<T> = import("evt").Trackable<T>;
-import { NonPostableEvts } from "../../tools/NonPostableEvts";
 import { phoneNumber as phoneNumberLib } from "phone-number/dist/lib";
-import { Evt, Tracked } from "evt";
+import type { StatefulReadonlyEvt } from "evt";
 
 export type Webphone = {
     userSim: UserSim.Usable;
     userSimEvts: Pick<
-        NonPostableEvts<UserSim.Usable.Evts.ForSpecificSim>,
+        UserSim.Usable.Evts.ForSpecificSim,
         "evtFriendlyNameChange" |
         "evtReachabilityStatusChange" |
         "evtCellularConnectivityChange" |
@@ -19,7 +17,7 @@ export type Webphone = {
     >;
     /** NOTE: At all time there is a Chat for every contact of the phonebook */
     wdChats: wd.Chat[];
-    wdEvts: NonPostableEvts<wd.Evts>;
+    wdEvts: wd.Evts;
     getOrCreateWdChat(params: { number_raw: string; }): Promise<wd.Chat>;
     updateWdChatContactName(params: { wdChat: wd.Chat; contactName: string; }): Promise<void>;
     /** NOTE: If a contact for the number exist in userSim's phonebook an empty chat will be recreated*/
@@ -28,7 +26,7 @@ export type Webphone = {
     placeOutgoingCall: (wdChat: wd.Chat) => void;
     fetchOlderWdMessages(params: { wdChat: wd.Chat; maxMessageCount: number; }): Promise<wd.Message[]>;
     updateWdChatLastMessageSeen: (wdChat: wd.Chat) => void;
-    trkIsSipRegistered: Trackable<boolean>;
+    evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
 };
 
 export namespace Webphone {
@@ -71,7 +69,7 @@ export namespace Webphone {
 
     export function canCallFactory(webphone: canCallFactory.WebphoneLike) {
 
-        const{ userSim, trkIsSipRegistered } = webphone;
+        const{ userSim, evtIsSipRegistered } = webphone;
 
         function canCall(number_raw: string): boolean {
 
@@ -84,7 +82,7 @@ export namespace Webphone {
 
             return (
                 phoneNumberLib.isDialable(number) &&
-                trkIsSipRegistered.val &&
+                evtIsSipRegistered.state &&
                 !!userSim.reachableSimState?.isGsmConnectivityOk &&
                 (
                     userSim.reachableSimState.ongoingCall === undefined ||
@@ -114,6 +112,7 @@ export namespace Webphone {
         export type WebphoneLike = Webphone;
 
     }
+    /*
 
     export function useEffect(
         canCallEffect: (canCall: boolean) => void,
@@ -182,6 +181,7 @@ export namespace Webphone {
         );
 
     }
+    */
 
 
 

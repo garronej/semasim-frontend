@@ -4,12 +4,11 @@ import { types as gwTypes } from "../../../gateway/types";
 import { phoneNumber } from "phone-number/dist/lib";
 import * as md5 from "md5";
 import * as cryptoLib from "../../crypto/cryptoLibProxy";
-import { Evt, UnpackEvt } from "evt";
+import { Evt, UnpackEvt, ToPostableEvt } from "evt";
 import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
 import { id } from "../../../tools/typeSafety/id";
 import { assert } from "../../../tools/typeSafety";
 import { decryptThenParseFactory } from "crypto-lib/dist/async/serializer";
-import { NonPostableEvts } from "../../../tools/NonPostableEvts";
 import * as types from "../../types";
 
 const hash: (str: string) => string = md5;
@@ -117,7 +116,7 @@ export function getWdApiFactory(
 
                 return async function ({ maxMessageCountByChat }: { maxMessageCountByChat: number; }): Promise<{
                     wdChats: types.wd.Chat[];
-                    wdEvts: NonPostableEvts<types.wd.Evts>
+                    wdEvts: types.wd.Evts
                 }> {
 
                     const wdEncryptedChats = await sendRequest<Params, Response>(
@@ -782,9 +781,9 @@ function getGetGetWdEvts(
 
     return function getGetWdEvts(imsi: string) {
 
-        return function getWdEvts(wdChats: types.wd.Chat[]): NonPostableEvts<types.wd.Evts> {
+        return function getWdEvts(wdChats: types.wd.Chat[]): types.wd.Evts {
 
-            const out: types.wd.Evts = {
+            const out: ToPostableEvt<types.wd.Evts> = {
                 "evtWdChat": new Evt(),
                 "evtWdMessage": new Evt()
             };

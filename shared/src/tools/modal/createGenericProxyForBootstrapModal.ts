@@ -1,6 +1,6 @@
 
 import { Modal } from "./types";
-import { VoidEvt } from "evt";
+import { Evt } from "evt";
 
 /** 
  * Assert bootstrap modal initialized on jQuery element.
@@ -14,9 +14,9 @@ export function createGenericProxyForBootstrapModal(
     $initializedModalDiv: JQuery
 ): Modal {
 
-    const evtHide = new VoidEvt();
-    const evtShown = new VoidEvt();
-    const evtHidden = new VoidEvt();
+    const evtHide = Evt.create();
+    const evtShown = Evt.create();
+    const evtHidden = Evt.create();
 
     $initializedModalDiv.on("hide.bs.modal", () => evtHide.post());
     $initializedModalDiv.on("shown.bs.modal", () => evtShown.post());

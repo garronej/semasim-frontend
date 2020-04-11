@@ -1,9 +1,11 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 
-import { Evt, VoidEvt, UnpackEvt, NonPostable, EvtLike } from "evt";
+import { Evt, VoidEvt, UnpackEvt, ToNonPostableEvt, ToPostableEvt, SwapEvtType, NonPostableEvt } from "evt";
 import { id } from "../../tools/typeSafety/id";
 import { assert } from "../../tools/typeSafety/assert";
-import { NonPostableEvts } from "../../tools/NonPostableEvts";
+import { typeGuard } from "../../tools/typeSafety/typeGuard";
+import { objectKeys } from "../../tools/typeSafety/objectKeys";
+import { exclude } from "../../tools/typeSafety/exclude";
 
 export type UserSim = UserSim.Shared | UserSim.Owned;
 
@@ -124,12 +126,10 @@ export namespace UserSim {
         city: string | undefined;
     };
 
-
-    export function assertIs(userSim: any): asserts userSim is UserSim {
-
-        const o = userSim as UserSim;
-
-        if (
+    export function match(o: any): o is UserSim {
+        return (
+            typeGuard<UserSim>(o) &&
+            !!o &&
             o instanceof Object &&
             o.sim instanceof Object &&
             typeof o.friendlyName === "string" &&
@@ -143,15 +143,11 @@ export namespace UserSim {
                 o.reachableSimState === undefined ||
                 o.reachableSimState instanceof Object
             )
-        ) {
-            return;
-        }
-
-        throw new Error("Not a UserSim");
-
+        );
     }
 
-    export type Evts = {
+
+    export type Evts = ToNonPostableEvt<{
         evtNew: Evt<{
             cause: "SIM REGISTERED FROM LAN";
             userSim: UserSim.Owned;
@@ -187,43 +183,48 @@ export namespace UserSim {
             email: string;
         }>;
         evtFriendlyNameChange: Evt<UserSim.Usable>;
-    };
+    }>;
 
     export namespace Evts {
 
         export type ForSpecificSim = {
-            [key in Exclude<keyof Evts, "evtNew">]: RemoveUserSim<Evts[key]>;
+            [key in Exclude<keyof Evts, "evtNew">]: SwapEvtType<
+                Evts[key],
+                RemoveUserSim<UnpackEvt<Evts[key]>>
+            >;
         };
 
         export namespace ForSpecificSim {
 
-            const buildForSpecificSim = buildEvtsForSpecificSimFactory(() => ({
-                "evtNowConfirmed": new VoidEvt(),
-                "evtDelete": new Evt(),
-                "evtReachabilityStatusChange": new VoidEvt(),
-                "evtSipPasswordRenewed": new VoidEvt(),
-                "evtCellularConnectivityChange": new VoidEvt(),
-                "evtCellularSignalStrengthChange": new VoidEvt(),
-                "evtOngoingCall": new VoidEvt(),
-                "evtNewUpdatedOrDeletedContact": new Evt(),
-                "evtSharedUserSetChange": new Evt(),
-                "evtFriendlyNameChange": new VoidEvt()
-            }));
+            const buildForSpecificSim = buildEvtsForSpecificSimFactory({
+                "createNewInstance": () => ({
+                    "evtNowConfirmed": Evt.create(),
+                    "evtDelete": new Evt(),
+                    "evtReachabilityStatusChange": Evt.create(),
+                    "evtSipPasswordRenewed": Evt.create(),
+                    "evtCellularConnectivityChange": Evt.create(),
+                    "evtCellularSignalStrengthChange": Evt.create(),
+                    "evtOngoingCall": Evt.create(),
+                    "evtNewUpdatedOrDeletedContact": new Evt(),
+                    "evtSharedUserSetChange": new Evt(),
+                    "evtFriendlyNameChange": Evt.create()
+                })
+            });
 
             export function build(
-                userSimEvts: NonPostableEvts<Evts>,
+                userSimEvts: Evts,
                 userSim: UserSim
-            ): NonPostableEvts<ForSpecificSim>;
+            ): ForSpecificSim;
             export function build<Keys extends keyof ForSpecificSim>(
-                userSimEvts: Pick<NonPostableEvts<Evts>, Keys>,
+                userSimEvts: Pick<Evts, Keys>,
                 userSim: UserSim,
                 keys: Keys[]
-            ): Pick<NonPostableEvts<ForSpecificSim>, Keys>;
+            ): Pick<ForSpecificSim, Keys>;
             export function build<Keys extends keyof ForSpecificSim>(
-                userSimEvts: Pick<NonPostableEvts<Evts>, Keys>,
+                userSimEvts: Pick<Evts, Keys>,
                 userSim: UserSim,
                 keys?: Keys[]
-            ): Pick<NonPostableEvts<ForSpecificSim>, Keys> {
+            ): Pick<ForSpecificSim, Keys> {
                 return buildForSpecificSim(userSimEvts, userSim, keys);
             }
 
@@ -254,9 +255,9 @@ export namespace UserSim {
          */
         export type Evts = {
             [key in Exclude<keyof UserSim.Evts, "evtNowConfirmed" | "evtNew" | "evtDelete">]:
-            ReplaceByUsable<UserSim.Evts[key]>;
+            SwapEvtType<UserSim.Evts[key], ReplaceByUsable<UnpackEvt<UserSim.Evts[key]>>>
         } & {
-            evtNew: Evt<
+            evtNew: NonPostableEvt<
                 Exclude<
                     UnpackEvt<UserSim.Evts["evtNew"]>,
                     { cause: "SHARING REQUEST RECEIVED" }
@@ -265,7 +266,7 @@ export namespace UserSim {
                     userSim: UserSim.Shared.Confirmed;
                 }
             >;
-            evtDelete: Evt<
+            evtDelete: NonPostableEvt<
                 Exclude<
                     UnpackEvt<UserSim.Evts["evtDelete"]>,
                     { cause: "REJECT SHARING REQUEST" | "PERMISSION LOSS"; }
@@ -278,27 +279,22 @@ export namespace UserSim {
 
         export namespace Evts {
 
-            export function build(
-                params: {
-                    userSims: UserSim[];
-                    userSimEvts: NonPostableEvts<UserSim.Evts>;
-                }
-            ): {
+            export function build(params: {
+                userSims: UserSim[];
+                userSimEvts: UserSim.Evts;
+            }): {
                 userSims: UserSim.Usable[];
-                userSimEvts: NonPostableEvts<Evts>;
+                userSimEvts: Evts;
             } {
-
 
                 const userSims = params.userSims.filter(Usable.match);
 
-                const ctx = Evt.newCtx();
-
-                const userSimEvts: Evts = {
+                const userSimEvts: ToPostableEvt<Evts> = {
                     "evtNew": Evt.merge([
                         params.userSimEvts.evtNew
-                            .pipe(ctx, data => data.cause === "SHARING REQUEST RECEIVED" ? null : [data]),
+                            .pipe(data => data.cause === "SHARING REQUEST RECEIVED" ? null : [data]),
                         params.userSimEvts.evtNowConfirmed
-                            .pipe(ctx, userSim => [{ "cause": "SHARED SIM CONFIRMED" as const, userSim }])
+                            .pipe(userSim => [{ "cause": "SHARED SIM CONFIRMED" as const, userSim }])
                     ]).pipe(({ userSim }) => { userSims.push(userSim); return true; }),
                     "evtDelete": new Evt(),
                     "evtReachabilityStatusChange": new Evt(),
@@ -311,34 +307,20 @@ export namespace UserSim {
                     "evtFriendlyNameChange": new Evt()
                 };
 
-
-                (Object.keys(userSimEvts) as (keyof typeof userSimEvts)[]).forEach(eventName => {
-
-                    const srcEvt = id<NonPostable<Evt<any>>>(params.userSimEvts[eventName]);
-
-                    if (!!srcEvt.getHandlers().find(handler => handler.ctx === ctx)) {
-                        return;
-                    }
-
-                    srcEvt.attach(eventData => {
-
-                        {
-
-                            const userSim: any = eventData.userSim ?? eventData;
-
-                            UserSim.assertIs(userSim);
-
-                            if (!Usable.match(userSim)) {
-                                return;
-                            }
-
-                        }
-
-                        userSimEvts[eventName].post(eventData);
-
-                    });
-
-                });
+                objectKeys(userSimEvts)
+                    .filter(exclude("evtNew"))
+                    .forEach(eventName =>
+                        Evt.factorize(params.userSimEvts[eventName])
+                            .attach(
+                                eventData => Usable.match(
+                                    "userSim" in eventData ?
+                                        eventData.userSim : eventData
+                                ),
+                                eventData => Evt.factorize(userSimEvts[eventName])
+                                    .post(eventData as any)
+                            )
+                    )
+                    ;
 
                 userSimEvts.evtDelete = userSimEvts.evtDelete
                     .pipe(({ userSim }) => { userSims.splice(userSims.indexOf(userSim), 1); return true })
@@ -349,38 +331,43 @@ export namespace UserSim {
             }
 
             export type ForSpecificSim = {
-                [key in Exclude<keyof Evts, "evtNew">]: RemoveUserSim<Evts[key]>;
+                [key in Exclude<keyof Evts, "evtNew">]: SwapEvtType<
+                    Evts[key],
+                    RemoveUserSim<UnpackEvt<Evts[key]>>
+                >;
             };
 
             export namespace ForSpecificSim {
 
                 /** NOTE: Hack on the types here to avoid copy pasting */
-                const buildForSpecificSim = buildEvtsForSpecificSimFactory(() => id<ForSpecificSim>({
-                    "evtDelete": new Evt(),
-                    "evtReachabilityStatusChange": new VoidEvt(),
-                    "evtSipPasswordRenewed": new VoidEvt(),
-                    "evtCellularConnectivityChange": new VoidEvt(),
-                    "evtCellularSignalStrengthChange": new VoidEvt(),
-                    "evtOngoingCall": new VoidEvt(),
-                    "evtNewUpdatedOrDeletedContact": new Evt(),
-                    "evtSharedUserSetChange": new Evt(),
-                    "evtFriendlyNameChange": new VoidEvt()
-                }) as UserSim.Evts.ForSpecificSim) as any;
+                const buildForSpecificSim = buildEvtsForSpecificSimFactory({
+                    "createNewInstance": () => id<ForSpecificSim>({
+                        "evtDelete": new Evt(),
+                        "evtReachabilityStatusChange": Evt.create(),
+                        "evtSipPasswordRenewed": Evt.create(),
+                        "evtCellularConnectivityChange": Evt.create(),
+                        "evtCellularSignalStrengthChange": Evt.create(),
+                        "evtOngoingCall": Evt.create(),
+                        "evtNewUpdatedOrDeletedContact": new Evt(),
+                        "evtSharedUserSetChange": new Evt(),
+                        "evtFriendlyNameChange": Evt.create()
+                    }) as ToPostableEvt<UserSim.Evts.ForSpecificSim>
+                }) as any;
 
                 export function build(
-                    userSimEvts: NonPostableEvts<Evts>,
+                    userSimEvts: Evts,
                     userSim: UserSim.Usable
-                ): NonPostableEvts<ForSpecificSim>;
+                ): ForSpecificSim;
                 export function build<Keys extends keyof ForSpecificSim>(
-                    userSimEvts: Pick<NonPostableEvts<Evts>, Keys>,
+                    userSimEvts: Pick<Evts, Keys>,
                     userSim: UserSim.Usable,
                     keys: Keys[]
-                ): Pick<NonPostableEvts<ForSpecificSim>, Keys>;
+                ): Pick<ForSpecificSim, Keys>;
                 export function build<Keys extends keyof ForSpecificSim>(
-                    userSimEvts: Pick<NonPostableEvts<Evts>, Keys>,
+                    userSimEvts: Pick<Evts, Keys>,
                     userSim: UserSim.Usable,
                     keys?: Keys[]
-                ): Pick<NonPostableEvts<ForSpecificSim>, Keys> {
+                ): Pick<ForSpecificSim, Keys> {
 
                     return buildForSpecificSim(userSimEvts, userSim, keys);
 
@@ -414,63 +401,76 @@ type EvtsForSpecificSim_ = UserSim.Evts.ForSpecificSim;
 //type EvtsForSpecificSim_ = UserSim.Usable.Evts.ForSpecificSim;
 
 function buildEvtsForSpecificSimFactory(
-    createNewInstance: () => EvtsForSpecificSim_
+    params: { createNewInstance: () => ToPostableEvt<EvtsForSpecificSim_>; }
 ) {
 
+    const { createNewInstance } = params;
+
     return function buildForSpecificSim<Keys extends keyof EvtsForSpecificSim_>(
-        userSimEvts: Pick<NonPostableEvts<Evts_>, Keys>,
+        userSimEvts: Pick<Evts_, Keys>,
         userSim: UserSim_,
         keys?: Keys[]
-    ): Pick<NonPostableEvts<EvtsForSpecificSim_>, Keys> {
+    ): Pick<EvtsForSpecificSim_, Keys> {
 
         const out = (() => {
 
             const out = createNewInstance();
 
+
             if (keys === undefined) {
                 return out;
             }
 
-            Object.keys(out)
+            objectKeys(out)
                 .filter(eventName => id<string[]>(keys).indexOf(eventName) < 0)
                 .forEach(eventName => delete out[eventName])
                 ;
 
-            return out as Pick<EvtsForSpecificSim_, Keys>;
+            return out as Pick<ReturnType<typeof createNewInstance>, Keys>;
 
         })();
 
+        objectKeys(out).forEach(eventName => {
 
-        (Object.keys(out) as (keyof typeof out)[]).forEach(eventName => {
+            const evt = Evt.factorize(out[eventName]);
 
-            const evt = out[eventName];
+            Evt.factorize(userSimEvts[eventName]).attach(
+                data => {
 
-            id<NonPostable<Evt<any>>>(userSimEvts[eventName]).attach(
-                evt instanceof VoidEvt ? ((eventData: any) => {
+                    if (UserSim.match(data)) {
 
+                        if (data !== userSim) {
+                            return;
+                        }
 
-                    if (eventData !== userSim) {
+                        assert(typeGuard<VoidEvt>(evt));
+
+                        evt.post();
+
                         return;
+
+                    } else {
+
+
+                        const { userSim: userSim_, ...rest } = id<Object>(data) as any;
+
+                        assert(UserSim.match(userSim_));
+
+                        if (userSim_ !== userSim) {
+                            return;
+                        }
+
+                        evt.post(rest);
+
                     }
 
-                    evt.post();
-
-                }) : ((eventData: any) => {
-
-                    assert(eventData instanceof Object);
-
-                    const { userSim: userSim_, ...rest } = eventData;
-
-                    UserSim.assertIs(userSim_);
-
-                    if (userSim_ !== userSim) {
-                        return;
-                    }
-
-                    evt.post(rest);
-
-                })
+                }
             );
+
+
+
+
+
 
         });
 
@@ -488,19 +488,19 @@ function buildEvtsForSpecificSimFactory(
     const buildForSpecificSim: ReturnType<typeof buildEvtsForSpecificSimFactory> = null as any;
 
     function build(
-        userSimEvts: NonPostableEvts<Evts_>,
+        userSimEvts: Evts_,
         userSim: UserSim_
-    ): NonPostableEvts<EvtsForSpecificSim_>;
+    ): EvtsForSpecificSim_;
     function build<Keys extends keyof EvtsForSpecificSim_>(
-        userSimEvts: Pick<NonPostableEvts<Evts_>, Keys>,
+        userSimEvts: Pick<Evts_, Keys>,
         userSim: UserSim_,
         keys: Keys[]
-    ): Pick<NonPostableEvts<EvtsForSpecificSim_>, Keys>;
+    ): Pick<EvtsForSpecificSim_, Keys>;
     function build<Keys extends keyof EvtsForSpecificSim_>(
         userSimEvts: Pick<Evts_, Keys>,
         userSim: UserSim_,
         keys?: Keys[]
-    ): Pick<NonPostableEvts<EvtsForSpecificSim_>, Keys> {
+    ): Pick<EvtsForSpecificSim_, Keys> {
         return buildForSpecificSim(userSimEvts, userSim, keys);
     }
 
@@ -511,47 +511,44 @@ function buildEvtsForSpecificSimFactory(
 
 
 
-
-
-
-export type RemoveUserSim<T> = T extends EvtLike<infer U> ?
+/** 
+ * Think of is as: 
+ * 
+ * type RemoveUserSim<T> =
+ *    T extends UserSim ? void :
+ *    T extends { userSim: UserSim } ? Omit<T, "userSim"> :
+ *    T
+ *    ;
+ * 
+*/
+type RemoveUserSim<T> =
+    T extends UserSim ? void
+    :
     (
-        U extends UserSim ?
-        VoidEvt
+        T extends UnpackEvt<UserSim.Evts["evtNew"]> ?
+        { cause: UnpackEvt<UserSim.Evts["evtNew"]>["cause"]; }
         :
         (
-            U extends UnpackEvt<UserSim.Evts["evtNew"]> ?
-            Evt<{ cause: UnpackEvt<UserSim.Evts["evtNew"]>["cause"]; }>
+            T extends UnpackEvt<UserSim.Evts["evtDelete"]> ?
+            { cause: UnpackEvt<UserSim.Evts["evtDelete"]>["cause"]; }
             :
             (
-                U extends UnpackEvt<UserSim.Evts["evtDelete"]> ?
-                Evt<{ cause: UnpackEvt<UserSim.Evts["evtDelete"]>["cause"]; }>
+                T extends { userSim: UserSim } ?
+                Omit<T, "userSim">
                 :
-                (
-                    U extends { userSim: UserSim } ?
-                    Evt<Omit<U, "userSim">>
-                    :
-                    T
-                )
+                T
             )
         )
     )
-    :
-    T
     ;
 
-export type ReplaceByUsable<T> = T extends EvtLike<infer U> ?
+export type ReplaceByUsable<T> =
+    T extends UserSim ? UserSim.Usable :
     (
-        U extends UserSim ?
-        Evt<UserSim.Usable>
+        T extends { userSim: UserSim; } ?
+        Omit<T, "userSim"> & { userSim: UserSim.Usable; }
         :
-        (
-            U extends { userSim: UserSim; } ?
-            Evt<Omit<U, "userSim"> & { userSim: UserSim.Usable; }>
-            :
-            T
-        )
+        T
     )
-    :
-    T
     ;
+

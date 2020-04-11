@@ -26,7 +26,7 @@ import * as loginPageLogic from "../pageLogic/login";
 import * as registerPageLogic from "../pageLogic/register";
 import { minimalLaunch } from "./minimalLaunch";
 import { createModal } from "../../tools/modal";
-import { Trackable } from "evt";
+import type { StatefulReadonlyEvt } from "evt";
 
 
 const log: typeof console.log = true ?
@@ -44,12 +44,12 @@ export namespace appLaunch {
 			assertJsRuntimeEnv: "browser";
 		};
 
-		export type ReactNative =  {
+		export type ReactNative = {
 			assertJsRuntimeEnv: "react-native";
-		notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
-		actionToPerformBeforeAppRestart: () => Promise<void>;
-		dialogBaseApi: dialogBaseTypes.Api;
-			prObsPushNotificationToken: Promise<Trackable<string>>;
+			notConnectedUserFeedback: import("../toBackend/connection").Params["notConnectedUserFeedback"];
+			actionToPerformBeforeAppRestart: () => Promise<void>;
+			dialogBaseApi: dialogBaseTypes.Api;
+			prEvtPushNotificationToken: Promise<StatefulReadonlyEvt<string>>;
 		};
 
 	}
@@ -189,7 +189,7 @@ export function appLaunch(params: appLaunch.Params): appLaunch.Out {
 					"needLogin": false as const
 				})),
 				"getAccountManagementApiAndWebphoneLauncher": id<appLaunch.GetAccountManagementApiAndWebphoneLauncher>(
-					async ({prReadyToDisplayUnsolicitedDialogs}) => {
+					async ({ prReadyToDisplayUnsolicitedDialogs }) => {
 
 						if (needLogin) {
 
@@ -221,7 +221,7 @@ export function appLaunch(params: appLaunch.Params): appLaunch.Out {
 								case "react-native": return id<onceLoggedIn.Params.ReactNative>({
 									"assertJsRuntimeEnv": params.assertJsRuntimeEnv,
 									"notConnectedUserFeedback": params.notConnectedUserFeedback,
-									"prObsPushNotificationToken": params.prObsPushNotificationToken,
+									"prEvtPushNotificationToken": params.prEvtPushNotificationToken,
 									...common_
 								});
 							}
@@ -266,7 +266,7 @@ namespace onceLoggedIn {
 		export type ReactNative = Common_ & {
 			assertJsRuntimeEnv: "react-native";
 			notConnectedUserFeedback: appLaunch.Params.ReactNative["notConnectedUserFeedback"];
-			prObsPushNotificationToken: appLaunch.Params.ReactNative["prObsPushNotificationToken"];
+			prEvtPushNotificationToken: appLaunch.Params.ReactNative["prEvtPushNotificationToken"];
 		};
 
 	}
@@ -304,16 +304,16 @@ async function onceLoggedIn(
 
 		pushNotificationToken = await (async () => {
 
-			const obsPushNotificationToken = await params.prObsPushNotificationToken;
+			const evtPushNotificationToken = await params.prEvtPushNotificationToken;
 
-			obsPushNotificationToken.evtDiff.attachOnce(
-				({ newVal, prevVal }) => restartApp([
-					`Push notification token changed: new token: ${newVal}, `,
-					`previous token: ${prevVal}`
+			evtPushNotificationToken.evtChangeDiff.attachOnce(
+				({ newState, prevState }) => restartApp([
+					`Push notification token changed: new token: ${newState}, `,
+					`previous token: ${prevState}`
 				].join(""))
 			);
 
-			return obsPushNotificationToken.val;
+			return evtPushNotificationToken.state;
 
 		})();
 

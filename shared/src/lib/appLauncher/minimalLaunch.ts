@@ -5,7 +5,11 @@ import * as types from "../types/UserSim";
 import { assert } from "../../tools/typeSafety/assert";
 import { env } from "../env";
 import { VoidDeferred } from "../../tools/Deferred";
-import { NonPostableEvts } from "../../tools/NonPostableEvts";
+import type { TryLoginWithStoredCredentialIfNotAlreadyLogedIn } from "../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory";
+import type { AuthenticatedSessionDescriptorSharedData } from "../localStorage/AuthenticatedSessionDescriptorSharedData";
+import type { RestartApp } from "../restartApp";
+import type { DialogApi, startMultiDialogProcess } from "../../tools/modal/dialog";
+import type { NetworkStateMonitoring } from "../networkStateMonitoring";
 
 export namespace minimalLaunch {
 
@@ -14,12 +18,12 @@ export namespace minimalLaunch {
     export namespace Params {
 
         export type Common_ = {
-            restartApp: import("../restartApp").RestartApp;
-            dialogApi: import("../../tools/modal/dialog").DialogApi,
-            startMultiDialogProcess: typeof import("../../tools/modal/dialog").startMultiDialogProcess;
-            networkStateMonitoringApi: import("../networkStateMonitoring").NetworkStateMonitoring;
-            tryLoginWithStoredCredentialIfNotAlreadyLogedIn: import("../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory").TryLoginWithStoredCredentialIfNotAlreadyLogedIn;
-            AuthenticatedSessionDescriptorSharedData: typeof import("../localStorage/AuthenticatedSessionDescriptorSharedData").AuthenticatedSessionDescriptorSharedData;
+            restartApp: RestartApp;
+            dialogApi: DialogApi,
+            startMultiDialogProcess: typeof startMultiDialogProcess;
+            networkStateMonitoringApi: NetworkStateMonitoring;
+            tryLoginWithStoredCredentialIfNotAlreadyLogedIn: TryLoginWithStoredCredentialIfNotAlreadyLogedIn;
+            AuthenticatedSessionDescriptorSharedData: typeof AuthenticatedSessionDescriptorSharedData;
             requestTurnCred: boolean;
         };
 
@@ -48,7 +52,7 @@ export async function minimalLaunch(
     coreApi: Omit<remoteApiCaller.CoreApi, "getUserSims">;
     readyToDisplayUnsolicitedDialogs(): void;
     userSims: types.UserSim[];
-    userSimEvts: NonPostableEvts<types.UserSim.Evts>;
+    userSimEvts: types.UserSim.Evts;
 }> {
 
     const {
@@ -105,7 +109,7 @@ export async function minimalLaunch(
 
     const { userSims, userSimEvts } = await coreApi.getUserSims({ "includeContacts": true });
 
-    const dReadyToDisplayUnsolicitedDialogs= new VoidDeferred();
+    const dReadyToDisplayUnsolicitedDialogs = new VoidDeferred();
 
     registerInteractiveRemoteNotifyEvtHandlers({
         "getUsableSimFriendlyNames": () => userSims

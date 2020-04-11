@@ -2,13 +2,12 @@
 
 import * as apiDeclaration from "../../../sip_api_declarations/backendToUa";
 import * as types from "../../types";
-import { Evt } from "evt";
+import { Evt, ToPostableEvt } from "evt";
 import { assert } from "../../../tools/typeSafety/assert";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import { createObjectWithGivenRef } from "../../../tools/createObjectWithGivenRef";
 import { id } from "../../../tools/typeSafety/id";
 import { phoneNumber as phoneNumberLib } from "phone-number";
-import { NonPostableEvts } from "../../../tools/NonPostableEvts";
 import * as _ from "../../../tools/reducers";
 
 export type RemoteNotifyEvts = Pick<types.RemoteNotifyEvts, "evtUserSimChange">;
@@ -34,7 +33,7 @@ export function getCoreApi(
 
             return async function ({ includeContacts }:{includeContacts: boolean;}): Promise<{
                 userSims: types.UserSim[];
-                userSimEvts: NonPostableEvts<types.UserSim.Evts>;
+                userSimEvts: types.UserSim.Evts;
             }> {
 
                 const userSims = await sendRequest<Params, Response>(
@@ -535,9 +534,9 @@ function getGetUserSimEvts(
 
     const { remoteNotifyEvts, restartApp } = params;
 
-    return function getUserSimChangEvts(userSims: types.UserSim[]): NonPostableEvts<types.UserSim.Evts> {
+    return function getUserSimChangEvts(userSims: types.UserSim[]): types.UserSim.Evts {
 
-        const out: types.UserSim.Evts = {
+        const out: ToPostableEvt<types.UserSim.Evts> = {
             "evtNew": new Evt(),
             "evtNowConfirmed": new Evt(),
             "evtDelete": new Evt(),

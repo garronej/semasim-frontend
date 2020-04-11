@@ -4,7 +4,6 @@ import * as types from "./types";
 import { phoneNumber } from "phone-number/dist/lib";
 import { env } from "./env";
 import { id } from "../tools/typeSafety/id";
-import { NonPostableEvts } from "../tools/NonPostableEvts";
 
 
 type WdApi = import("./toBackend/remoteApiCaller").WdApi;
@@ -18,7 +17,7 @@ type CoreApi = Pick<
 >;
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts>,
+    types.UserSim.Usable.Evts,
     "evtFriendlyNameChange" |
     "evtReachabilityStatusChange" |
     "evtCellularConnectivityChange" |
@@ -102,7 +101,7 @@ export function createWebphoneFactory(
                     case "react-native": {
                         return id<types.PhoneCallUi.Create.Params.ReactNative>({
                             "assertJsRuntimeEnv": "react-native",
-                            "trkIsSipRegistered": sipUserAgent.trkIsRegistered,
+                            "evtIsSipRegistered": sipUserAgent.evtIsRegistered,
                             ..._common
                         });
                     }
@@ -126,7 +125,7 @@ export function createWebphoneFactory(
             ),
             wdChats,
             wdEvts,
-            "trkIsSipRegistered": sipUserAgent.trkIsRegistered,
+            "evtIsSipRegistered": sipUserAgent.evtIsRegistered,
             "sendMessage": async ({ wdChat, text }) => {
 
                 const bundledData: gwTypes.BundledData.ClientToServer.Message = {

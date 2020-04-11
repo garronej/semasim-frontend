@@ -1,13 +1,15 @@
 
-import * as types from "./UserSim";
-import { NonPostableEvts } from "../../tools/NonPostableEvts";
+import type * as types from "./UserSim";
+import type { CoreApi } from "../toBackend/remoteApiCaller";
+import type { WebApi } from "../webApiCaller";
+
 
 /** Remove the events and methods that should not be exposed */
 export type AccountManagementApi = {
     email: string;
     userSims: types.UserSim.Usable[];
     userSimEvts: Pick<
-        NonPostableEvts<types.UserSim.Usable.Evts>,
+        types.UserSim.Usable.Evts,
         "evtNew" | 
         "evtDelete" |
         "evtReachabilityStatusChange" |
@@ -19,7 +21,7 @@ export type AccountManagementApi = {
         "evtFriendlyNameChange"
     >;
     coreApi: Pick<
-        import("../toBackend/remoteApiCaller").CoreApi,
+        CoreApi,
         "unregisterSim" |
         "rebootDongle" |
         "shareSim" |
@@ -30,7 +32,7 @@ export type AccountManagementApi = {
         "deleteContact"
     >;
     webApi: Pick<
-        import("../webApiCaller").WebApi,
+        WebApi,
         "logoutUser" |
         "getSubscriptionInfos" |
         "subscribeOrUpdateSource" |

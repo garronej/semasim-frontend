@@ -1,9 +1,9 @@
 
 import * as apiDeclaration from "../../sip_api_declarations/uaToBackend";
 import * as sipLibrary from "ts-sip";
-import { Evt, VoidEvt, UnpackEvt } from "evt";
+import { Evt, UnpackEvt } from "evt";
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import * as types from "../types/RemoteNotifyEvts";
+import type * as types from "../types/RemoteNotifyEvts";
 
 export function getHandlers(): {
     handlers: sipLibrary.api.Server.Handlers
@@ -18,13 +18,13 @@ export function getHandlers(): {
     const remoteNotifyEvts: types.RemoteNotifyEvts = {
         "evtUserSimChange": new Evt(),
         "evtDongleOnLan": new Evt(),
-        "evtOpenElsewhere": new VoidEvt(),
+        "evtOpenElsewhere": Evt.create(),
         "getRtcIceServer": (() => {
 
 
             let current: types.DOM_RTCIceServer_subset | undefined = undefined;
 
-            const evtUpdated = new VoidEvt();
+            const evtUpdated = Evt.create();
 
             evtRtcIceServer.attach(({ rtcIceServer, attachOnNoLongerValid }) => {
 

@@ -49,3 +49,7 @@
 export function typeGuard<T>(o: any, isMatched: boolean = true): o is T {
     return isMatched;
 }
+
+
+
+

@@ -1,5 +1,6 @@
 
-type Decryptor = import("crypto-lib").Decryptor;
+import type { Decryptor } from "crypto-lib";
+import type { ToNonPostableEvt } from "evt";
 import { isAscendingAlphabeticalOrder } from "../../tools/isAscendingAlphabeticalOrder";
 
 type Evt<T> = import("evt").Evt<T>;
@@ -435,7 +436,7 @@ export namespace Message {
 }
 
 
-export type Evts = {
+export type Evts = ToNonPostableEvt<{
     evtWdChat: Evt<{
         wdChat: Chat;
     } & ({
@@ -460,7 +461,7 @@ export type Evts = {
         orderingChange: boolean;
     })>;
 
-};
+}>;
 
 
 

@@ -1,9 +1,6 @@
-
-
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 import * as types from "./types";
 import { env } from "./env";
-import { NonPostableEvts } from "../tools/NonPostableEvts";
 
 type DialogApi = import("../tools/modal/dialog").DialogApi;
 
@@ -17,7 +14,7 @@ type CoreApi = Pick<import("./toBackend/remoteApiCaller").CoreApi,
 type RemoteNotifyEvts = Pick<types.RemoteNotifyEvts, "evtDongleOnLan" | "evtOpenElsewhere">;
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Evts>,
+    types.UserSim.Evts,
     "evtNew" | "evtSharedUserSetChange"
 >;
 

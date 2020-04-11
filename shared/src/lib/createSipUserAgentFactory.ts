@@ -1,8 +1,8 @@
 //NOTE: Require jssip_compat loaded on the page.
 
-import { Evt, VoidEvt, UnpackEvt, Tracked, Trackable } from "evt";
+import { Evt, VoidEvt, UnpackEvt } from "evt";
 
-import { types as gwTypes } from "../gateway/types";
+import type { types as gwTypes } from "../gateway/types";
 import { extractBundledDataFromHeaders, smuggleBundledDataInHeaders, } from "../gateway/bundledData";
 import { readImsi } from "../gateway/readImsi";
 import * as  serializedUaObjectCarriedOverSipContactParameter from "../gateway/serializedUaObjectCarriedOverSipContactParameter";
@@ -19,7 +19,6 @@ type Decryptor = import("./crypto/cryptoLibProxy").Decryptor;
 type CryptoRelatedParams = AsyncReturnType<
     typeof import("./crypto/appCryptoSetupHelper")["appCryptoSetupHelper"]
 >["paramsNeededToInstantiateUa"];
-import { NonPostableEvts } from "../tools/NonPostableEvts";
 
 
 declare const JsSIP: any;
@@ -28,11 +27,11 @@ declare const Buffer: any;
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
 
-type ConnectionApi = Pick<import("./toBackend/connection").ConnectionApi, "url" | "getSocket" | "evtConnect"> & 
+type ConnectionApi = Pick<import("./toBackend/connection").ConnectionApi, "url" | "getSocket" | "evtConnect"> &
 { remoteNotifyEvts: Pick<types.RemoteNotifyEvts, "getRtcIceServer"> };
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Evts>,
+    types.UserSim.Evts,
     "evtSipPasswordRenewed" | "evtDelete" | "evtReachabilityStatusChange"
 >;
 
@@ -129,7 +128,7 @@ export function createSipUserAgentFactory(
 
 class SipUserAgent {
 
-    public readonly trkIsRegistered: Trackable<boolean>;
+    public readonly evtIsRegistered = Evt.asNonPostable(Evt.create(false));
 
     private readonly jsSipUa: any;
     private evtRingback = new Evt<string>();
@@ -174,12 +173,10 @@ class SipUserAgent {
 
         let lastRegisterTime = 0;
 
-        const trkIsRegistered = new Tracked(false);
-        this.trkIsRegistered = trkIsRegistered;
 
         this.jsSipUa.on("registrationExpiring", async () => {
 
-            if (!trkIsRegistered.val) {
+            if (!this.evtIsRegistered.state) {
                 return;
             }
 
@@ -219,7 +216,7 @@ class SipUserAgent {
 
             this.jsSipUa.emit("unregistered");
 
-            prReRegister.then(()=> this.register());
+            prReRegister.then(() => this.register());
 
         });
 
@@ -231,11 +228,11 @@ class SipUserAgent {
 
             lastRegisterTime = Date.now();
 
-            trkIsRegistered.val = true;
+            Evt.asPostable(this.evtIsRegistered).state = true;
 
         });
 
-        this.jsSipUa.on("unregistered", () => trkIsRegistered.val = false);
+        this.jsSipUa.on("unregistered", () => Evt.asPostable(this.evtIsRegistered).state = false);
 
         this.jsSipUa.on("newMessage", ({ originator, request }) => {
 
@@ -297,11 +294,17 @@ class SipUserAgent {
 
 
 
-    public readonly evtIncomingMessage = new Evt<{
-        fromNumber: phoneNumber;
-        bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
-        handlerCb: () => void;
-    }>();
+    public readonly evtIncomingMessage = Evt.asNonPostable(
+        Evt.create<{
+            fromNumber: phoneNumber;
+            bundledData: Exclude<
+                gwTypes.BundledData.ServerToClient,
+                gwTypes.BundledData.ServerToClient.Ringback
+            >;
+            handlerCb: () => void;
+        }>()
+    );
+
 
     private async onMessage(request): Promise<void> {
 
@@ -347,10 +350,10 @@ class SipUserAgent {
 
             const pr = new Promise<void>(resolve => handlerCb = resolve);
 
-            this.evtIncomingMessage.post({
+            Evt.asPostable(this.evtIncomingMessage).post({
                 ...evtData,
                 handlerCb
-            });
+            })
 
             return pr;
 
@@ -383,24 +386,27 @@ class SipUserAgent {
 
     }
 
-    public readonly evtIncomingCall = new Evt<{
-        fromNumber: phoneNumber;
-        terminate(): void;
-        prTerminated: Promise<void>;
-        onAccepted(): Promise<{
-            state: "ESTABLISHED";
-            sendDtmf(signal: types.PhoneCallUi.DtmFSignal, duration: number): void;
-        }>
-    }>();
+    public readonly evtIncomingCall = Evt.asNonPostable(
+        Evt.create<{
+            fromNumber: phoneNumber;
+            terminate(): void;
+            prTerminated: Promise<void>;
+            onAccepted(): Promise<{
+                state: "ESTABLISHED";
+                sendDtmf(signal: types.PhoneCallUi.DtmFSignal, duration: number): void;
+            }>
+        }>()
+    );
+
 
 
     private onIncomingCall(jsSipRtcSession: any, request: any): void {
 
-        const evtRequestTerminate = new VoidEvt();
-        const evtAccepted = new VoidEvt();
-        const evtTerminated = new VoidEvt();
-        const evtDtmf = new Evt<{ signal: types.PhoneCallUi.DtmFSignal; duration: number; }>();
-        const evtEstablished = new VoidEvt();
+        const evtRequestTerminate = Evt.create();
+        const evtAccepted = Evt.create();
+        const evtTerminated = Evt.create();
+        const evtDtmf = Evt.create<{ signal: types.PhoneCallUi.DtmFSignal; duration: number; }>();
+        const evtEstablished = Evt.create();
 
 
         evtRequestTerminate.attachOnce(() => jsSipRtcSession.terminate());
@@ -435,7 +441,7 @@ class SipUserAgent {
         jsSipRtcSession.once("failed", () => evtTerminated.post());
 
 
-        this.evtIncomingCall.post({
+        Evt.asPostable(this.evtIncomingCall).post({
             "fromNumber": request.from.uri.user,
             "terminate": () => evtRequestTerminate.post(),
             "prTerminated": Promise.race([
@@ -471,11 +477,11 @@ class SipUserAgent {
         }>
     }> {
 
-        const evtEstablished = new VoidEvt();
-        const evtTerminated = new VoidEvt();
-        const evtDtmf = new Evt<{ signal: types.PhoneCallUi.DtmFSignal; duration: number; }>();
-        const evtRequestTerminate = new VoidEvt();
-        const evtRingback = new VoidEvt();
+        const evtEstablished = Evt.create();
+        const evtTerminated = Evt.create();
+        const evtDtmf = Evt.create<{ signal: types.PhoneCallUi.DtmFSignal; duration: number; }>();
+        const evtRequestTerminate = Evt.create();
+        const evtRingback = Evt.create();
 
         const rtcICEServer = await this.params.getCurrentRtcIceServers();
 
@@ -619,8 +625,8 @@ interface Hacks {
 
 class JsSipSocket implements IjsSipSocket, Hacks {
 
-    public readonly evtSipRegistrationSuccess = new VoidEvt();
-    public readonly evtUnderlyingSocketClose = new VoidEvt();
+    public readonly evtSipRegistrationSuccess = Evt.create();
+    public readonly evtUnderlyingSocketClose = Evt.create();
 
     public readonly via_transport: sip.TransportProtocol = "WSS";
 

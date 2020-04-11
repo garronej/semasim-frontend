@@ -1,6 +1,6 @@
 
-type Evt<T> = import("evt").Evt<T>;
-type Trackable<T> = import("evt").Trackable<T>;
+import type { NonPostableEvt, StatefulReadonlyEvt } from "evt";
+
 
 export type PhoneCallUi = {
     openUiForOutgoingCall(phoneNumberRaw: string): void;
@@ -13,7 +13,7 @@ export type PhoneCallUi = {
             userAction: "REJECT";
         }>;
     };
-    evtUiOpenedForOutgoingCall: Evt<{
+    evtUiOpenedForOutgoingCall: NonPostableEvt<{
         phoneNumberRaw: string;
         onTerminated(message: string): void;
         onRingback(): {
@@ -47,7 +47,7 @@ export namespace PhoneCallUi {
 
     }
 
-    export type OnEstablished = () => { evtUserInput: Evt<PhoneCallUi.InCallUserAction> };
+    export type OnEstablished = () => { evtUserInput: NonPostableEvt<PhoneCallUi.InCallUserAction> };
 
 
     export type CreateFactory = (params: CreateFactory.Params) =>
@@ -87,7 +87,7 @@ export namespace PhoneCallUi {
 
             export type ReactNative = _Common & {
                 assertJsRuntimeEnv: "react-native";
-                trkIsSipRegistered: Trackable<boolean>;
+                evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
             };
 
         }

@@ -1,14 +1,14 @@
 
 
 import { NetworkStateMonitoring, GetApiFn } from "./types";
-import { VoidEvt } from "evt";
+import { Evt } from "evt";
 
 
 const api: NetworkStateMonitoring = {
     "getIsOnline": ()=> navigator.onLine,
     "evtStateChange": (()=>{
 
-        const out= new VoidEvt();
+        const out= Evt.create();
 
         window.addEventListener("online", ()=> out.post());
         window.addEventListener("offline", ()=> out.post());
