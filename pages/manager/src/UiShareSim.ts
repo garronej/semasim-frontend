@@ -1,7 +1,6 @@
 import { Evt } from "frontend-shared/node_modules/evt"
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 
 declare const require: any;
@@ -14,7 +13,7 @@ const html = loadUiClassHtml(
 require("../templates/UiShareSim.less");
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts>,
+    types.UserSim.Usable.Evts,
     "evtSharedUserSetChange" |
     "evtDelete"
 >;

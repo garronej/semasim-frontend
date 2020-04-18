@@ -7,7 +7,7 @@ import { restartApp } from "frontend-shared/dist/lib/restartApp";
 
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 import { UiController } from "./UiController";
-import "frontend-shared/dist/tools/polyfills/Object.assign";
+import "minimal-polyfills/dist/lib/Object.assign";
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
 
 const prWebApi = (async () => {

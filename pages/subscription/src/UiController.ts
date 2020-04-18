@@ -2,7 +2,7 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
-import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/subscription";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 import { env } from "frontend-shared/dist/lib/env";
@@ -37,7 +37,7 @@ export class UiController {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtDone = new VoidEvt();
+    public readonly evtDone = Evt.asNonPostable(Evt.create());
 
     private async interact_checkout(
         currency: string
@@ -185,7 +185,7 @@ export class UiController {
 
                 dialogApi.dismissLoading();
 
-                this.evtDone.post();
+                Evt.asPostable(this.evtDone).post();
 
             });
 
@@ -289,7 +289,7 @@ export class UiController {
 
                 dialogApi.dismissLoading();
 
-                this.evtDone.post();
+                Evt.asPostable(this.evtDone).post();
 
             });
 

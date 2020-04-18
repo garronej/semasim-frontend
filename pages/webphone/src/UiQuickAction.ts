@@ -1,11 +1,10 @@
-import { Evt, IObservable } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    types.UserSim.Usable.Evts.ForSpecificSim,
     "evtReachabilityStatusChange" |
     "evtCellularConnectivityChange" |
     "evtOngoingCall"
@@ -66,10 +65,10 @@ export function uiQuickActionDependencyInjection(
         constructor(params: {
             userSim: types.UserSim.Usable;
             userSimEvts: UserSimEvts;
-            obsIsSipRegistered: IObservable<boolean>;
+            evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
         }) {
 
-            const { userSim, userSimEvts, obsIsSipRegistered } = params;
+            const { userSim, userSimEvts, evtIsSipRegistered } = params;
 
             const input = this.structure.find("input.id_tel-input");
 
@@ -209,23 +208,23 @@ export function uiQuickActionDependencyInjection(
                 () => {
 
                     this.structure.find(".id_sms")
-                        .prop("disabled", !obsIsSipRegistered.value);
+                        .prop("disabled", !evtIsSipRegistered.state);
 
                     this.structure.find(".id_contact")
                         .prop("disabled", !userSim.reachableSimState);
                 },
-                obsIsSipRegistered.evtChange
+                evtIsSipRegistered.evtChange
             );
 
             Evt.useEffect(
                 () => this.structure.find(".id_call").prop("disabled", (
-                    !obsIsSipRegistered.value ||
+                    !evtIsSipRegistered.state ||
                     !userSim.reachableSimState ||
                     !userSim.reachableSimState.isGsmConnectivityOk ||
                     !!userSim.reachableSimState.ongoingCall
                 )),
                 Evt.merge([
-                    obsIsSipRegistered.evtChange,
+                    evtIsSipRegistered.evtChange,
                     userSimEvts.evtReachabilityStatusChange,
                     userSimEvts.evtCellularConnectivityChange,
                     userSimEvts.evtOngoingCall

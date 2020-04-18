@@ -1,9 +1,7 @@
 
-import { Observable, IObservable } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/userSim";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
-import { Evt } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt, StatefulEvt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -15,7 +13,7 @@ const html = loadUiClassHtml(
 require("../templates/UiSimRow.less");
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    types.UserSim.Usable.Evts.ForSpecificSim,
     "evtFriendlyNameChange" |
     "evtReachabilityStatusChange" |
     "evtCellularConnectivityChange" |
@@ -28,39 +26,58 @@ export class UiSimRow {
 
     public readonly structure = html.structure.clone();
 
+
     constructor(
         params: {
             userSim: types.UserSim.Usable;
             userSimEvts: UserSimEvts;
-            obsIsSelected: Observable<boolean>;
-            obsAreDetailsVisible: IObservable<boolean>;
-            obsIsVisible: IObservable<boolean>;
+            evtSelectedUserSim: StatefulEvt<types.UserSim.Usable | null>;
+            evtAreDetailsShown: StatefulReadonlyEvt<boolean>;
+
         }
     ) {
-        const { userSim, userSimEvts, obsIsSelected, obsAreDetailsVisible, obsIsVisible } = params;
+        const { userSim, userSimEvts, evtSelectedUserSim, evtAreDetailsShown } = params;
 
-        this.structure.click(() => obsIsSelected.onPotentialChange(true));
+        this.structure.click(() => evtSelectedUserSim.state = userSim);
 
-        userSimEvts.evtDelete.attachOnce(() => {
-            obsIsSelected.onPotentialChange(false);
+        const evtIsRowSelected = Evt.asNonPostable(evtSelectedUserSim.statefulPipe(userSim_ => [userSim_ === userSim]));
+
+
+
+        userSimEvts.evtDelete.attachOnce(()=>{
+            if( evtIsRowSelected.state ){
+                evtSelectedUserSim.state = null;
+            }
             this.structure.detach();
         });
+
+        const evtIsVisible = Evt.merge([
+            evtIsRowSelected.evtChange,
+            evtAreDetailsShown.evtChange
+        ])
+            .toStateful()
+            .statefulPipe(() => [
+                !evtAreDetailsShown.state || 
+                evtIsRowSelected
+            ])
+            ;
 
         {
 
             Evt.useEffect(
-                () => this.structure.find(".id_details")[obsAreDetailsVisible.value ? "show" : "hide"](),
-                obsAreDetailsVisible.evtChange
+                () => this.structure[evtIsVisible.state ? "show" : "hide"](),
+                evtIsVisible.evtChange
             );
 
             Evt.useEffect(
-                () => this.structure[obsIsVisible.value ? "show" : "hide"](),
-                obsIsVisible.evtChange
+                () => this.structure.find(".id_details")[evtAreDetailsShown.state ? "show" : "hide"](),
+                evtAreDetailsShown.evtChange
             );
 
+
             Evt.useEffect(
-                () => this.structure.find(".id_row")[obsIsSelected.value ? "addClass" : "removeClass"]("selected"),
-                obsIsSelected.evtChange
+                () => this.structure.find(".id_row")[evtIsRowSelected.state ? "addClass" : "removeClass"]("selected"),
+                evtIsRowSelected.evtChange
             );
 
             Evt.useEffect(

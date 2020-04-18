@@ -1,7 +1,6 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { Evt, IObservable } from "frontend-shared/node_modules/evt";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
+import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
 
@@ -13,7 +12,7 @@ const html = loadUiClassHtml(
 );
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    types.UserSim.Usable.Evts.ForSpecificSim,
     "evtFriendlyNameChange" |
     "evtReachabilityStatusChange" |
     "evtCellularConnectivityChange" |
@@ -32,10 +31,10 @@ export class UiHeader {
     constructor(params: {
         userSim: types.UserSim.Usable;
         userSimEvts: UserSimEvts;
-        obsIsSipRegistered: IObservable<boolean>;
+        evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
     }) {
 
-        const { userSim, userSimEvts, obsIsSipRegistered } = params;
+        const { userSim, userSimEvts, evtIsSipRegistered } = params;
 
 
         {
@@ -49,11 +48,11 @@ export class UiHeader {
             Evt.useEffect(
                 () => this.structure.find(".id_sip_registration_in_progress")[(
                     !userSim.reachableSimState ||
-                    obsIsSipRegistered.value
+                    evtIsSipRegistered.state
                 ) ? "hide" : "show"](),
                 Evt.merge([
                     userSimEvts.evtReachabilityStatusChange,
-                    obsIsSipRegistered.evtChange
+                    evtIsSipRegistered.evtChange
                 ])
             );
 

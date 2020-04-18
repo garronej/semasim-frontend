@@ -17,8 +17,9 @@
     "phone-number": "file:../local_modules/phone-number",
     "run-exclusive": "^2.1.6",
     "transfer-tools": "garronej/transfer-tools",
-    "evt": "^1.6.3",
+    "evt": "^1.6.6",
     "ts-sip": "file:../local_modules/ts-sip",
-    "typescript": "^3.8.0"
+    "typescript": "^3.8.0",
+    "minimal-polyfills": "^1.0.8"
   }
 }

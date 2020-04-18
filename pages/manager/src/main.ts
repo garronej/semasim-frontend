@@ -1,10 +1,12 @@
 
 declare const require: Function;
 
+console.log("up!!!");
+
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
 import "minimal-polyfills/dist/lib/Array.from";
 import "minimal-polyfills/dist/lib/String.prototype.startsWith";
-import "frontend-shared/dist/tools/polyfills/Object.assign";
+import "minimal-polyfills/dist/lib/Object.assign";
 import { uiControllerDependencyInjection } from "./UiController";
 import { managerPageLaunch } from "frontend-shared/dist/lib/appLauncher/managerPageLaunch";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";

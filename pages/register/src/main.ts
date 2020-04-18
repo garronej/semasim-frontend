@@ -1,6 +1,6 @@
 
 import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
-import "frontend-shared/dist/tools/polyfills/Object.assign";
+import "minimal-polyfills/dist/lib/Object.assign";
 import * as urlGetParameters from "frontend-shared/dist/tools/urlGetParameters";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 import * as hostKfd from "frontend-shared/dist/lib/nativeModules/hostKfd";

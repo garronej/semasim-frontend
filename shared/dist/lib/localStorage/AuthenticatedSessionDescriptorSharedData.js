@@ -42,6 +42,7 @@ var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     /** Can be used to track when the user is logged in */
+    //export const evtChange = new Evt<AuthenticatedSessionDescriptorSharedData | undefined>();
     AuthenticatedSessionDescriptorSharedData.evtChange = new evt_1.Evt();
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
@@ -62,7 +63,7 @@ var AuthenticatedSessionDescriptorSharedData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        AuthenticatedSessionDescriptorSharedData.evtChange.post(undefined);
+                        evt_1.Evt.asPostable(AuthenticatedSessionDescriptorSharedData.evtChange).post(undefined);
                         return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
@@ -102,7 +103,7 @@ var AuthenticatedSessionDescriptorSharedData;
                     case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
-                        AuthenticatedSessionDescriptorSharedData.evtChange.post(authenticatedSessionDescriptorSharedData);
+                        evt_1.Evt.asPostable(AuthenticatedSessionDescriptorSharedData.evtChange).post(authenticatedSessionDescriptorSharedData);
                         return [2 /*return*/];
                 }
             });

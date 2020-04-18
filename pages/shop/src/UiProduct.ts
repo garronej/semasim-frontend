@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import { convertFromEuro } from "frontend-shared/dist/tools/currency";
 
@@ -25,7 +25,7 @@ export class UiProduct {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUserClickAddToCart = new VoidEvt();
+    public readonly evtUserClickAddToCart = Evt.asNonPostable(Evt.create());
 
     private currency!: string;
 
@@ -104,7 +104,7 @@ export class UiProduct {
         this.structure.find(".id_product_description").text(product.description);
 
         this.structure.find(".id_add_to_cart")
-            .on("click", () => this.evtUserClickAddToCart.post())
+            .on("click", () => Evt.asPostable(this.evtUserClickAddToCart).post())
             ;
 
         this.updateCurrency( currency );

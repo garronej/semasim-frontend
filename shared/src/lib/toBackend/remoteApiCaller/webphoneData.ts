@@ -674,7 +674,7 @@ export function getWdApiFactory(
                         wdChat: types.wd.Chat,
                         bundledData: gwTypes.BundledData.ServerToClient.StatusReport
                     }
-                ) {
+                ):Promise<void> {
 
 
                     const time = bundledData.messageTowardGsm.dateTime;

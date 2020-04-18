@@ -1,10 +1,9 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
-import { VoidEvt, Evt, IObservable } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types";
 import * as moment from "moment";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
 
 declare const ion: any;
 declare const require: any;
@@ -20,7 +19,7 @@ require("../templates/UiConversation.less");
 declare const Buffer: any;
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts.ForSpecificSim>,
+    types.UserSim.Usable.Evts.ForSpecificSim,
     "evtReachabilityStatusChange" |
     "evtCellularConnectivityChange" |
     "evtOngoingCall"
@@ -35,12 +34,12 @@ export class UiConversation {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUpdateContact = new VoidEvt();
-    public readonly evtVoiceCall = new VoidEvt();
-    public readonly evtSendText = new Evt<string>();
-    public readonly evtDelete = new VoidEvt();
+    public readonly evtUpdateContact = Evt.create();
+    public readonly evtVoiceCall = Evt.create();
+    public readonly evtSendText = Evt.asNonPostable(Evt.create<string>());
+    public readonly evtDelete = Evt.asNonPostable(Evt.create());
 
-    public readonly evtChecked = new VoidEvt();
+    public readonly evtChecked = Evt.asNonPostable(Evt.create());
 
     private readonly textarea = this.structure.find("textarea");
     private readonly aSend = this.structure.find("a.id_send");
@@ -54,7 +53,7 @@ export class UiConversation {
         private readonly params: {
             userSim: types.UserSim.Usable;
             userSimEvts: UserSimEvts;
-            obsIsSipRegistered: IObservable<boolean>;
+            evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
             wdChat: types.wd.Chat,
             evtUpdatedOrDeletedWdChat: Evt<"UPDATED" | "DELETED">;
             evtNewOrUpdatedMessage: Evt<types.wd.Message>;
@@ -65,7 +64,7 @@ export class UiConversation {
         const {
             userSim,
             userSimEvts,
-            obsIsSipRegistered,
+            evtIsSipRegistered,
             wdChat,
             evtUpdatedOrDeletedWdChat,
             evtNewOrUpdatedMessage,
@@ -85,7 +84,7 @@ export class UiConversation {
             Evt.useEffect(
                 () => {
 
-                    if (obsIsSipRegistered.value && isDialable) {
+                    if (evtIsSipRegistered.state && isDialable) {
 
                         this.textarea.removeAttr("disabled");
                         this.aSend.show();
@@ -98,11 +97,11 @@ export class UiConversation {
                     }
 
                 },
-                obsIsSipRegistered.evtChange
+                evtIsSipRegistered.evtChange
             );
 
             Evt.useEffect(
-                ()=>{
+                () => {
 
                     this.btnUpdateContact.prop("disabled", (
                         userSim.reachableSimState === undefined ||
@@ -122,7 +121,7 @@ export class UiConversation {
                     "disabled",
                     !(
                         isDialable &&
-                        obsIsSipRegistered.value &&
+                        evtIsSipRegistered.state &&
                         !!userSim.reachableSimState?.isGsmConnectivityOk &&
                         (
                             userSim.reachableSimState.ongoingCall === undefined ||
@@ -132,7 +131,7 @@ export class UiConversation {
                     )
                 ),
                 Evt.merge([
-                    obsIsSipRegistered.evtChange,
+                    evtIsSipRegistered.evtChange,
                     userSimEvts.evtReachabilityStatusChange,
                     userSimEvts.evtCellularConnectivityChange,
                     userSimEvts.evtOngoingCall
@@ -161,13 +160,13 @@ export class UiConversation {
 
 
         this.btnUpdateContact
-            .on("click", () => this.evtUpdateContact.post());
+            .on("click", () => Evt.asPostable(this.evtUpdateContact).post());
 
         this.btnCall
-            .on("click", () => this.evtVoiceCall.post());
+            .on("click", () => Evt.asPostable(this.evtVoiceCall).post());
 
         this.btnDelete
-            .on("click", () => this.evtDelete.post());
+            .on("click", () => Evt.asPostable(this.evtDelete).post());
 
         this.structure.find("span.id_number")
             .on("dblclick", e => {
@@ -195,7 +194,7 @@ export class UiConversation {
                 return;
             }
 
-            this.evtSendText.post(text);
+            Evt.asPostable(this.evtSendText).post(text);
 
             this.textarea.val("");
 
@@ -206,7 +205,7 @@ export class UiConversation {
         this.textarea
             .on("keypress", event => {
 
-                this.evtChecked.post();
+                Evt.asPostable(this.evtChecked).post();
 
                 if (event.key === "Enter" && !event.shiftKey) {
 
@@ -216,7 +215,7 @@ export class UiConversation {
                 }
 
             })
-            .on("focus", () => this.evtChecked.post())
+            .on("focus", () => Evt.asPostable(this.evtChecked).post())
             ;
 
         this.ul.slimScroll({
@@ -272,7 +271,7 @@ export class UiConversation {
 
                 //NOTE: So that SMS from with no number to reply to can be marked as read.
                 if (!!this.textarea.attr("disabled")) {
-                    this.evtChecked.post();
+                    Evt.asPostable(this.evtChecked).post();
                 } else {
                     this.textarea.trigger("focus");
                 }

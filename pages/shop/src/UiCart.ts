@@ -1,6 +1,6 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import { env } from "frontend-shared/dist/lib/env";
 import { solve as solveShipping } from "frontend-shared/dist/lib/shipping";
@@ -19,7 +19,7 @@ export class UiCart {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtUserClickCheckout = new VoidEvt();
+    public readonly evtUserClickCheckout =  Evt.asNonPostable(Evt.create());
 
     private readonly uiCartEntries: UiCartEntry[] = [];
 
@@ -29,7 +29,7 @@ export class UiCart {
     constructor(currency: string, shipToCountryIso: string) {
 
         this.structure.find(".id_checkout")
-            .on("click", () => this.evtUserClickCheckout.post())
+            .on("click", () => Evt.asPostable(this.evtUserClickCheckout).post())
             ;
 
         this.updateLocals({ currency, shipToCountryIso });
@@ -175,8 +175,8 @@ class UiCartEntry {
 
     public readonly structure = html.templates.find(".id_UiCartEntry").clone();
 
-    public readonly evtUserClickDelete = new VoidEvt();
-    public readonly evtQuantityChanged = new VoidEvt();
+    public readonly evtUserClickDelete = Evt.asNonPostable(Evt.create());
+    public readonly evtQuantityChanged = Evt.asNonPostable(Evt.create());
 
 
     private currency!: string;
@@ -236,7 +236,7 @@ class UiCartEntry {
 
                 this.updateDisplayedPrice();
 
-                this.evtQuantityChanged.post();
+                Evt.asPostable(this.evtQuantityChanged).post();
 
             });
 
@@ -245,7 +245,7 @@ class UiCartEntry {
 
         }
 
-        this.structure.find(".delete-btn").one("click", () => this.evtUserClickDelete.post());
+        this.structure.find(".delete-btn").one("click", () => Evt.asPostable(this.evtUserClickDelete).post());
 
         this.updateCurrency(currency);
 

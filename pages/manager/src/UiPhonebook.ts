@@ -2,20 +2,19 @@
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
 import { env } from "frontend-shared/dist/lib/env";
-import { VoidEvt } from "frontend-shared/node_modules/evt";
 import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 import { isAscendingAlphabeticalOrder } from "frontend-shared/dist/tools/isAscendingAlphabeticalOrder";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
+import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: any;
 
 type DialogApi = import("frontend-shared/dist/tools/modal/dialog").DialogApi;
 
 type UserSimEvts = Pick<
-    NonPostableEvts<import("frontend-shared/dist/lib/types/userSim").UserSim.Usable.Evts.ForSpecificSim>,
+    import("frontend-shared/dist/lib/types/userSim").UserSim.Usable.Evts.ForSpecificSim,
     "evtReachabilityStatusChange" |
     "evtNewUpdatedOrDeletedContact" |
     "evtDelete"
@@ -670,7 +669,7 @@ export function uiPhonebookDependencyInjection(
         public readonly structure = html.templates.find("li").clone();
 
         /** only forward click event, need to be selected manually from outside */
-        public evtClick = new VoidEvt();
+        public evtClick = Evt.asNonPostable(Evt.create());
 
         constructor(
             public readonly userSim: types.UserSim.Usable,
@@ -687,7 +686,7 @@ export function uiPhonebookDependencyInjection(
                         return;
                     }
 
-                    this.evtClick.post();
+                    Evt.asPostable(this.evtClick).post();
 
                 })
                 .find(".id_number")

@@ -40,12 +40,12 @@ export function uiWebphoneControllerDependencyInjection(
                 wdChats,
                 wdEvts: { evtWdChat },
                 userSimEvts,
-                obsIsSipRegistered
+                evtIsSipRegistered
             } = webphone;
 
-            this.uiHeader = new UiHeader({ userSim, userSimEvts, obsIsSipRegistered });
+            this.uiHeader = new UiHeader({ userSim, userSimEvts, evtIsSipRegistered });
 
-            this.uiQuickAction = new UiQuickAction({ userSim, userSimEvts, obsIsSipRegistered });
+            this.uiQuickAction = new UiQuickAction({ userSim, userSimEvts, evtIsSipRegistered });
 
             this.uiPhonebook = new UiPhonebook({ userSim, wdChats, evtWdChat });
 
@@ -150,7 +150,7 @@ export function uiWebphoneControllerDependencyInjection(
                 uiConversation = new UiConversation({
                     "userSim": this.webphone.userSim,
                     "userSimEvts": this.webphone.userSimEvts,
-                    "obsIsSipRegistered": this.webphone.obsIsSipRegistered,
+                    "evtIsSipRegistered": this.webphone.evtIsSipRegistered,
                     wdChat,
                     "evtUpdatedOrDeletedWdChat": this.webphone.wdEvts.evtWdChat.pipe(
                         Evt.getCtx(wdChat),

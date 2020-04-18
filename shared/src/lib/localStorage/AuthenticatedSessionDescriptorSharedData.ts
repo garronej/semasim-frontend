@@ -1,5 +1,5 @@
 
-import { Evt } from "evt";
+import { Evt, NonPostableEvt } from "evt";
 import * as localStorageApi from "./localStorageApi";
 
 const key = "authenticated-session-descriptor-shared-data";
@@ -16,7 +16,8 @@ export type AuthenticatedSessionDescriptorSharedData = {
 export namespace AuthenticatedSessionDescriptorSharedData {
 
     /** Can be used to track when the user is logged in */
-    export const evtChange = new Evt<AuthenticatedSessionDescriptorSharedData | undefined>();
+    //export const evtChange = new Evt<AuthenticatedSessionDescriptorSharedData | undefined>();
+    export const evtChange: NonPostableEvt<AuthenticatedSessionDescriptorSharedData | undefined>= new Evt();
 
     export async function isPresent(): Promise<boolean> {
 
@@ -27,7 +28,7 @@ export namespace AuthenticatedSessionDescriptorSharedData {
 
     export async function remove() {
 
-        evtChange.post(undefined);
+        Evt.asPostable(evtChange).post(undefined);
 
         if( !(await isPresent())){
             return;
@@ -65,7 +66,7 @@ export namespace AuthenticatedSessionDescriptorSharedData {
             ).toString("hex")
         );
 
-        evtChange.post(authenticatedSessionDescriptorSharedData);
+        Evt.asPostable(evtChange).post(authenticatedSessionDescriptorSharedData);
 
     }
 

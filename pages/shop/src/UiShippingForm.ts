@@ -1,6 +1,6 @@
 //NOTE: assert maps.googleapis.com/maps/api/js?libraries=places loaded ( or loading ) on the page.
 
-import { VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/shop";
 import * as modalApi from "frontend-shared/dist/tools/modal";
@@ -24,8 +24,8 @@ export class UiShippingForm {
     private readonly hideModal: () => Promise<void>;
     private readonly showModal: () => Promise<void>;
 
-    private readonly evt_id_close_click = new VoidEvt();
-    private readonly evt_button_click = new VoidEvt();
+    private readonly evt_id_close_click = Evt.asNonPostable(Evt.create());
+    private readonly evt_button_click = Evt.asNonPostable(Evt.create());
 
     /** 
      * The evt argument should post be posted whenever.
@@ -51,9 +51,9 @@ export class UiShippingForm {
         }
 
         this.structure.find(".id_close")
-            .on("click", () => this.evt_id_close_click.post());
+            .on("click", () => Evt.asPostable(this.evt_id_close_click).post());
         this.structure.find("button")
-            .on("click", () => this.evt_button_click.post());
+            .on("click", () => Evt.asPostable(this.evt_button_click).post());
 
         for (const selector of [
             ".id_firstName",

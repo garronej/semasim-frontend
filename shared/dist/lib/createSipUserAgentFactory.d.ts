@@ -1,4 +1,4 @@
-import { Evt, VoidEvt } from "evt";
+import { Evt, VoidEvt, NonPostableEvt, StatefulReadonlyEvt } from "evt";
 import type { types as gwTypes } from "../gateway/types";
 import * as types from "./types";
 import { AsyncReturnType } from "../tools/typeSafety/AsyncReturnType";
@@ -31,7 +31,7 @@ export declare function createSipUserAgentFactory(params: {
 }) => SipUserAgent;
 declare class SipUserAgent {
     private readonly params;
-    readonly evtIsRegistered: import("evt").StatefulReadonlyEvt<boolean>;
+    readonly evtIsRegistered: StatefulReadonlyEvt<boolean>;
     private readonly jsSipUa;
     private evtRingback;
     constructor(params: {
@@ -48,15 +48,15 @@ declare class SipUserAgent {
         prRegister: Promise<void>;
     });
     private register;
-    readonly evtIncomingMessage: import("evt").NonPostableEvt<{
-        fromNumber: string;
-        bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.SendReport | gwTypes.BundledData.ServerToClient.StatusReport | gwTypes.BundledData.ServerToClient.MissedCall | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.CallAnsweredBy;
+    readonly evtIncomingMessage: NonPostableEvt<{
+        fromNumber: phoneNumber;
+        bundledData: Exclude<gwTypes.BundledData.ServerToClient, gwTypes.BundledData.ServerToClient.Ringback>;
         handlerCb: () => void;
     }>;
     private onMessage;
     private postEvtIncomingMessage;
     sendMessage(number: phoneNumber, bundledData: gwTypes.BundledData.ClientToServer): Promise<void>;
-    readonly evtIncomingCall: import("evt").NonPostableEvt<{
+    readonly evtIncomingCall: NonPostableEvt<{
         fromNumber: string;
         terminate(): void;
         prTerminated: Promise<void>;

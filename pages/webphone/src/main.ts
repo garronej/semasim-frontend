@@ -6,7 +6,7 @@ import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 import * as availablePages from "frontend-shared/dist/lib/availablePages";
 //import * as overrideWebRTCImplementation from "frontend-shared/dist/tools/overrideWebRTCImplementation";
 //overrideWebRTCImplementation.testOverrideWebRTCImplementation();
-//observer.observeWebRTC();
+//evterver.evterveWebRTC();
 import { Deferred } from "frontend-shared/dist/tools/Deferred";
 
 

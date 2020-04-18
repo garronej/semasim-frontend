@@ -1,6 +1,6 @@
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/subscription";
 import * as moment from "moment";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
@@ -17,8 +17,8 @@ require("../templates/UiMySubscription.less");
 export class UiMySubscription {
 
     public readonly structure = html.structure.clone();
-    public readonly evtScheduleCancel = new VoidEvt();
-    public readonly evtReactivate = new VoidEvt();
+    public readonly evtScheduleCancel = Evt.asNonPostable(Evt.create());
+    public readonly evtReactivate = Evt.asNonPostable(Evt.create());
 
     constructor(s: types.SubscriptionInfos.Subscription, amount: number) {
 
@@ -38,7 +38,7 @@ export class UiMySubscription {
             this.structure.find(".payment-next").hide();
 
             this.structure.find("button").html("Reactivate subscription");
-            this.structure.find("button").on("click", () => this.evtReactivate.post());
+            this.structure.find("button").on("click", () => Evt.asPostable(this.evtReactivate).post());
 
         }else{
 
@@ -55,7 +55,7 @@ export class UiMySubscription {
 
             this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
             this.structure.find("button").html("Cancel subscription");
-            this.structure.find("button").on("click", () => this.evtScheduleCancel.post());
+            this.structure.find("button").on("click", () => Evt.asPostable(this.evtScheduleCancel).post());
 
         }
 

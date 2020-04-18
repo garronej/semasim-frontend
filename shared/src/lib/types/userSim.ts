@@ -1,6 +1,7 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
 
-import { Evt, VoidEvt, UnpackEvt, ToNonPostableEvt, ToPostableEvt, SwapEvtType, NonPostableEvt } from "evt";
+import type { VoidEvt, UnpackEvt, ToPostableEvt, SwapEvtType, NonPostableEvt } from "evt";
+import { Evt } from "evt";
 import { id } from "../../tools/typeSafety/id";
 import { assert } from "../../tools/typeSafety/assert";
 import { typeGuard } from "../../tools/typeSafety/typeGuard";
@@ -146,17 +147,16 @@ export namespace UserSim {
         );
     }
 
-
-    export type Evts = ToNonPostableEvt<{
-        evtNew: Evt<{
+    export type Evts = {
+        evtNew: NonPostableEvt<{
             cause: "SIM REGISTERED FROM LAN";
             userSim: UserSim.Owned;
         } | {
             cause: "SHARING REQUEST RECEIVED";
             userSim: UserSim.Shared.NotConfirmed;
         }>;
-        evtNowConfirmed: Evt<UserSim.Shared.Confirmed>;
-        evtDelete: Evt<{
+        evtNowConfirmed: NonPostableEvt<UserSim.Shared.Confirmed>;
+        evtDelete: NonPostableEvt<{
             cause: "USER UNREGISTER SIM";
             userSim: UserSim.Usable;
         } | {
@@ -166,24 +166,24 @@ export namespace UserSim {
             cause: "REJECT SHARING REQUEST";
             userSim: UserSim.Shared.NotConfirmed;
         }>;
-        evtReachabilityStatusChange: Evt<UserSim>;
-        evtSipPasswordRenewed: Evt<UserSim>;
-        evtCellularConnectivityChange: Evt<UserSim>;
-        evtCellularSignalStrengthChange: Evt<UserSim>;
-        evtOngoingCall: Evt<UserSim>;
-        evtNewUpdatedOrDeletedContact: Evt<{
+        evtReachabilityStatusChange: NonPostableEvt<UserSim>;
+        evtSipPasswordRenewed: NonPostableEvt<UserSim>;
+        evtCellularConnectivityChange: NonPostableEvt<UserSim>;
+        evtCellularSignalStrengthChange: NonPostableEvt<UserSim>;
+        evtOngoingCall: NonPostableEvt<UserSim>;
+        evtNewUpdatedOrDeletedContact: NonPostableEvt<{
             eventType: "NEW" | "UPDATED" | "DELETED"
             userSim: UserSim;
             contact: Contact;
         }>,
-        evtSharedUserSetChange: Evt<{
+        evtSharedUserSetChange: NonPostableEvt<{
             userSim: UserSim;
             action: "ADD" | "REMOVE" | "MOVE TO CONFIRMED";
             targetSet: "CONFIRMED USERS" | "NOT CONFIRMED USERS";
             email: string;
         }>;
-        evtFriendlyNameChange: Evt<UserSim.Usable>;
-    }>;
+        evtFriendlyNameChange: NonPostableEvt<UserSim.Usable>;
+    };
 
     export namespace Evts {
 

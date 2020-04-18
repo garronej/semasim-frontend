@@ -21,34 +21,7 @@ export declare function getWdApiFactory(params: {
         maxMessageCountByChat: number;
     }) => Promise<{
         wdChats: types.wd.Chat<"PLAIN">[];
-        wdEvts: {
-            evtWdChat: import("evt").NonPostableEvt<({
-                wdChat: types.wd.Chat<"PLAIN">;
-            } & {
-                eventType: "NEW" | "DELETED";
-            }) | ({
-                wdChat: types.wd.Chat<"PLAIN">;
-            } & {
-                eventType: "UPDATED";
-                changes: {
-                    unreadMessageCount: boolean;
-                    contactInfos: boolean;
-                    ordering: boolean;
-                };
-            })>;
-            evtWdMessage: import("evt").NonPostableEvt<({
-                wdChat: types.wd.Chat<"PLAIN">;
-                wdMessage: types.wd.Message<"PLAIN">;
-            } & {
-                eventType: "NEW" | "DELETED";
-            }) | ({
-                wdChat: types.wd.Chat<"PLAIN">;
-                wdMessage: types.wd.Message<"PLAIN">;
-            } & {
-                eventType: "UPDATED";
-                orderingChange: boolean;
-            })>;
-        };
+        wdEvts: types.wd.Evts;
     }>;
     /** If there is already a chat with the contact number nothing will be done */
     newChat: ({ wdChats, contactNumber, contactName, contactIndexInSim }: {

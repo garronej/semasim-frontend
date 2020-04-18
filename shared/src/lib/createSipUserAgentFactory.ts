@@ -1,6 +1,6 @@
 //NOTE: Require jssip_compat loaded on the page.
 
-import { Evt, VoidEvt, UnpackEvt } from "evt";
+import { Evt, VoidEvt, UnpackEvt, NonPostableEvt, StatefulReadonlyEvt } from "evt";
 
 import type { types as gwTypes } from "../gateway/types";
 import { extractBundledDataFromHeaders, smuggleBundledDataInHeaders, } from "../gateway/bundledData";
@@ -128,7 +128,7 @@ export function createSipUserAgentFactory(
 
 class SipUserAgent {
 
-    public readonly evtIsRegistered = Evt.asNonPostable(Evt.create(false));
+    public readonly evtIsRegistered: StatefulReadonlyEvt<boolean> = Evt.create<boolean>(false);
 
     private readonly jsSipUa: any;
     private evtRingback = new Evt<string>();
@@ -293,17 +293,14 @@ class SipUserAgent {
     */
 
 
-
-    public readonly evtIncomingMessage = Evt.asNonPostable(
-        Evt.create<{
+    public readonly evtIncomingMessage: NonPostableEvt<{
             fromNumber: phoneNumber;
             bundledData: Exclude<
                 gwTypes.BundledData.ServerToClient,
                 gwTypes.BundledData.ServerToClient.Ringback
             >;
             handlerCb: () => void;
-        }>()
-    );
+    }> = new Evt();
 
 
     private async onMessage(request): Promise<void> {

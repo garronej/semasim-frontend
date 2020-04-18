@@ -1,5 +1,5 @@
 import * as dcTypes from "chan-dongle-extended-client/dist/lib/types";
-import { Evt, UnpackEvt, ToNonPostableEvt, SwapEvtType, NonPostableEvt } from "evt";
+import type { UnpackEvt, SwapEvtType, NonPostableEvt } from "evt";
 export declare type UserSim = UserSim.Shared | UserSim.Owned;
 export declare namespace UserSim {
     type Common_ = {
@@ -88,16 +88,16 @@ export declare namespace UserSim {
         city: string | undefined;
     };
     function match(o: any): o is UserSim;
-    type Evts = ToNonPostableEvt<{
-        evtNew: Evt<{
+    type Evts = {
+        evtNew: NonPostableEvt<{
             cause: "SIM REGISTERED FROM LAN";
             userSim: UserSim.Owned;
         } | {
             cause: "SHARING REQUEST RECEIVED";
             userSim: UserSim.Shared.NotConfirmed;
         }>;
-        evtNowConfirmed: Evt<UserSim.Shared.Confirmed>;
-        evtDelete: Evt<{
+        evtNowConfirmed: NonPostableEvt<UserSim.Shared.Confirmed>;
+        evtDelete: NonPostableEvt<{
             cause: "USER UNREGISTER SIM";
             userSim: UserSim.Usable;
         } | {
@@ -107,24 +107,24 @@ export declare namespace UserSim {
             cause: "REJECT SHARING REQUEST";
             userSim: UserSim.Shared.NotConfirmed;
         }>;
-        evtReachabilityStatusChange: Evt<UserSim>;
-        evtSipPasswordRenewed: Evt<UserSim>;
-        evtCellularConnectivityChange: Evt<UserSim>;
-        evtCellularSignalStrengthChange: Evt<UserSim>;
-        evtOngoingCall: Evt<UserSim>;
-        evtNewUpdatedOrDeletedContact: Evt<{
+        evtReachabilityStatusChange: NonPostableEvt<UserSim>;
+        evtSipPasswordRenewed: NonPostableEvt<UserSim>;
+        evtCellularConnectivityChange: NonPostableEvt<UserSim>;
+        evtCellularSignalStrengthChange: NonPostableEvt<UserSim>;
+        evtOngoingCall: NonPostableEvt<UserSim>;
+        evtNewUpdatedOrDeletedContact: NonPostableEvt<{
             eventType: "NEW" | "UPDATED" | "DELETED";
             userSim: UserSim;
             contact: Contact;
         }>;
-        evtSharedUserSetChange: Evt<{
+        evtSharedUserSetChange: NonPostableEvt<{
             userSim: UserSim;
             action: "ADD" | "REMOVE" | "MOVE TO CONFIRMED";
             targetSet: "CONFIRMED USERS" | "NOT CONFIRMED USERS";
             email: string;
         }>;
-        evtFriendlyNameChange: Evt<UserSim.Usable>;
-    }>;
+        evtFriendlyNameChange: NonPostableEvt<UserSim.Usable>;
+    };
     namespace Evts {
         type ForSpecificSim = {
             [key in Exclude<keyof Evts, "evtNew">]: SwapEvtType<Evts[key], RemoveUserSim<UnpackEvt<Evts[key]>>>;

@@ -1,7 +1,6 @@
-import { Tracked, Trackable } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
-import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -14,24 +13,20 @@ export class UiButtonBar {
 
     public readonly structure = html.structure.clone();
 
-    public readonly trkAreDetailsShown: Trackable<boolean>;
+    public readonly evtAreDetailsShown= Evt.asNonPostable(Evt.create(false));
 
     constructor(
         params: {
-            obsSelectedUserSim: Trackable<types.UserSim.Usable | null>;
+            evtSelectedUserSim: StatefulReadonlyEvt<types.UserSim.Usable | null>;
             onButtonClicked(params: { userSim: types.UserSim.Usable; button: "DELETE" | "CONTACTS" | "SHARE" | "REBOOT" | "RENAME"; }): void;
         }
     ) {
 
-        const { obsSelectedUserSim } = params;
-
-        const obsAreDetailsShown = new Tracked(false);
-
-        this.trkAreDetailsShown = obsAreDetailsShown;
+        const { evtSelectedUserSim } = params;
 
         const onButtonClicked = (button: Parameters<typeof params.onButtonClicked>[0]["button"]) => {
 
-            const userSim = obsSelectedUserSim.val;
+            const userSim = evtSelectedUserSim.state;
 
             if (userSim === null) {
                 return;
@@ -51,12 +46,12 @@ export class UiButtonBar {
         const btnRename = $(buttons.get(5));
         const btnReboot = $(buttons.get(6));
 
-        btnDetail.click(() => obsAreDetailsShown.val= true);
+        btnDetail.click(() => Evt.asPostable(this.evtAreDetailsShown).state = true);
 
-        btnBack.click(() => obsAreDetailsShown.val =false);
+        btnBack.click(() => Evt.asPostable(this.evtAreDetailsShown).state = false);
 
-        obsSelectedUserSim.evt.attach(
-            () => obsAreDetailsShown.val= false
+        evtSelectedUserSim.evtChange.attach(
+            () => Evt.asPostable(this.evtAreDetailsShown).state= false
         );
 
         btnDelete.click(() => onButtonClicked("DELETE"));
@@ -79,7 +74,7 @@ export class UiButtonBar {
                 btnDetail.show();
                 btnBack.show();
 
-                if (obsSelectedUserSim.val === null) {
+                if (evtSelectedUserSim.state === null) {
 
                     buttons.each(i => {
                         $(buttons[i]).prop("disabled", true);
@@ -87,29 +82,29 @@ export class UiButtonBar {
 
                 }
 
-                if (obsAreDetailsShown.val) {
+                if ( this.evtAreDetailsShown.state) {
                     btnDetail.hide();
                 } else {
                     btnBack.hide();
                 }
 
                 if (
-                    obsSelectedUserSim.val === null ||
-                    !types.UserSim.Owned.match(obsSelectedUserSim.val)
+                    evtSelectedUserSim.state === null ||
+                    !types.UserSim.Owned.match(evtSelectedUserSim.state)
                 ) {
 
                     btnShare.prop("disabled", true);
 
                 }
 
-                if (!obsSelectedUserSim.val?.reachableSimState) {
+                if (!evtSelectedUserSim.state?.reachableSimState) {
                     btnReboot.prop("disabled", true);
                 }
 
             },
             Evt.merge([
-                obsSelectedUserSim.evt,
-                obsAreDetailsShown.evt
+                evtSelectedUserSim.evtChange,
+                this.evtAreDetailsShown.evtChange
             ])
         );
 

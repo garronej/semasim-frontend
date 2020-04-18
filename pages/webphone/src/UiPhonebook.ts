@@ -1,6 +1,6 @@
 //NOTE: Slimscroll must be loaded on the page.
 
-import { Evt, VoidEvt, NonPostable } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
@@ -25,7 +25,7 @@ export class UiPhonebook {
         private readonly params: {
             userSim: types.UserSim.Usable;
             wdChats: types.wd.Chat[];
-            evtWdChat: NonPostable<types.wd.Evts["evtWdChat"]>;
+            evtWdChat: types.wd.Evts["evtWdChat"];
         }
     ) {
 
@@ -232,7 +232,7 @@ class UiContact {
     public readonly structure = html.templates.find("li").clone();
 
     /** only forward click event, need to be selected manually from outside */
-    public evtClick = new VoidEvt();
+    public readonly evtClick = Evt.create(); 
 
     constructor(
         public readonly userSim: types.UserSim.Usable,

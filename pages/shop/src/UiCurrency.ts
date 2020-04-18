@@ -1,7 +1,7 @@
 //NOTE: Assert Select2 v4.0.6-rc.0 loaded.
 
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 import { dialogApi } from "frontend-shared/dist/tools/modal/dialog";
 
@@ -20,7 +20,7 @@ export class UiCurrency {
 
     public readonly evtChange = new Evt<string>();
 
-    private readonly evt$select_on_change= new VoidEvt();
+    private readonly evt$select_on_change = Evt.asNonPostable(Evt.create());
 
     constructor(defaultCurrency: string) {
 
@@ -49,7 +49,7 @@ export class UiCurrency {
 
             $select["select2"]();
 
-            $select.on("change", ()=> this.evt$select_on_change.post());
+            $select.on("change", ()=> Evt.asPostable(this.evt$select_on_change).post());
 
             this.evt$select_on_change.attach(() => {
 

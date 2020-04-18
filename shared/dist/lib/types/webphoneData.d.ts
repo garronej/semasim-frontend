@@ -1,6 +1,5 @@
 import type { Decryptor } from "crypto-lib";
-import type { ToNonPostableEvt } from "evt";
-declare type Evt<T> = import("evt").Evt<T>;
+import type { NonPostableEvt } from "evt";
 export declare type EncryptionState = "PLAIN" | "ENCRYPTED";
 export declare type Encryptable = {
     "string": {
@@ -131,8 +130,8 @@ export declare namespace Message {
         }
     }
 }
-export declare type Evts = ToNonPostableEvt<{
-    evtWdChat: Evt<{
+export declare type Evts = {
+    evtWdChat: NonPostableEvt<{
         wdChat: Chat;
     } & ({
         eventType: "NEW" | "DELETED";
@@ -144,7 +143,7 @@ export declare type Evts = ToNonPostableEvt<{
             ordering: boolean;
         };
     })>;
-    evtWdMessage: Evt<{
+    evtWdMessage: NonPostableEvt<{
         wdChat: Chat;
         wdMessage: Message;
     } & ({
@@ -153,5 +152,4 @@ export declare type Evts = ToNonPostableEvt<{
         eventType: "UPDATED";
         orderingChange: boolean;
     })>;
-}>;
-export {};
+};

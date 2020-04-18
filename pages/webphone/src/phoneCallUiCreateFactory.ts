@@ -267,7 +267,7 @@ export function phoneCallUiCreateFactoryDependencyInjections(
 
                 this.setState("LOADING", "Loading...");
 
-                this.evtUiOpenedForOutgoingCall.post({
+                Evt.asPostable(this.evtUiOpenedForOutgoingCall).post({
                     phoneNumberRaw,
                     "onTerminated": message => this.setState("TERMINATED", message),
                     "onRingback": () => {

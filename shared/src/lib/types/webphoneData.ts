@@ -1,9 +1,7 @@
 
 import type { Decryptor } from "crypto-lib";
-import type { ToNonPostableEvt } from "evt";
+import type { NonPostableEvt } from "evt";
 import { isAscendingAlphabeticalOrder } from "../../tools/isAscendingAlphabeticalOrder";
-
-type Evt<T> = import("evt").Evt<T>;
 
 export type EncryptionState = "PLAIN" | "ENCRYPTED";
 
@@ -435,9 +433,8 @@ export namespace Message {
 
 }
 
-
-export type Evts = ToNonPostableEvt<{
-    evtWdChat: Evt<{
+export type Evts = {
+    evtWdChat: NonPostableEvt<{
         wdChat: Chat;
     } & ({
         eventType: "NEW" | "DELETED"
@@ -451,7 +448,7 @@ export type Evts = ToNonPostableEvt<{
     })>,
     //NOTE: So far there is not action that will cause message delete 
     //it has been included in anticipation.
-    evtWdMessage: Evt<{
+    evtWdMessage: NonPostableEvt<{
         wdChat: Chat;
         wdMessage: Message;
     } & ({
@@ -461,7 +458,8 @@ export type Evts = ToNonPostableEvt<{
         orderingChange: boolean;
     })>;
 
-}>;
+};
+
 
 
 

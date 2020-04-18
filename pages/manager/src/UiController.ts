@@ -1,4 +1,3 @@
-import { Tracked, Trackable } from "frontend-shared/node_modules/evt";
 import * as types from "frontend-shared/dist/lib/types/UserSim";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { UiButtonBar } from "./UiButtonBar";
@@ -8,8 +7,7 @@ import { uiShareSimDependencyInjection } from "./UiShareSim";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
-import { NonPostableEvts } from "frontend-shared/dist/tools/NonPostableEvts";
-import { Evt } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt, StatefulEvt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;
 
@@ -29,7 +27,7 @@ type CoreApi = Pick<
 >;
 
 type UserSimEvts = Pick<
-    NonPostableEvts<types.UserSim.Usable.Evts>,
+    types.UserSim.Usable.Evts,
     "evtNew" |
     "evtDelete" |
     "evtReachabilityStatusChange" |
@@ -81,17 +79,17 @@ export function uiControllerDependencyInjection(
                 "stopSharingSim": ({ userSim, emails }) => coreApi.stopSharingSim({ userSim, emails })
             });
 
-            const trkSelectedUserSim = new Tracked<types.UserSim.Usable | null>(null);
+            const evtSelectedUserSim = Evt.create<types.UserSim.Usable | null>(null);
 
 
-            const { obsAreDetailsShown } = this.initUiButtonBar({
-                obsSelectedUserSim: trkSelectedUserSim,
+            const { evtAreDetailsShown } = this.initUiButtonBar({
+                evtSelectedUserSim,
                 uiShareSim
             });
 
             const { addUserSim } = this.addUserSimFactory({
-                obsSelectedUserSim: trkSelectedUserSim,
-                obsAreDetailsShown
+                evtSelectedUserSim,
+                evtAreDetailsShown
             });
 
             //NOTE: List first usable SIMs.
@@ -122,14 +120,14 @@ export function uiControllerDependencyInjection(
         }
 
         private initUiButtonBar(params: {
-            trkSelectedUserSim: Trackable<types.UserSim.Usable | null>;
+            evtSelectedUserSim: StatefulReadonlyEvt<types.UserSim.Usable | null>;
             uiShareSim: Pick<UiShareSim, "open">;
-        }): { trkAreDetailsShown: Trackable<boolean>; } {
+        }): { evtAreDetailsShown: StatefulReadonlyEvt<boolean>; } {
 
-            const { trkSelectedUserSim, uiShareSim } = params;
+            const { evtSelectedUserSim, uiShareSim } = params;
 
             const uiButtonBar = new UiButtonBar({
-                "obsSelectedUserSim": trkSelectedUserSim,
+                "evtSelectedUserSim": evtSelectedUserSim,
                 "onButtonClicked": async ({ userSim, button }) => {
 
                     switch (button) {
@@ -227,18 +225,18 @@ export function uiControllerDependencyInjection(
 
             this.structure.append(uiButtonBar.structure);
 
-            return { "trkAreDetailsShown": uiButtonBar.trkAreDetailsShown };
+            return { "evtAreDetailsShown": uiButtonBar.evtAreDetailsShown };
 
         }
 
         private addUserSimFactory(
             params: {
-                trkSelectedUserSim: Tracked<types.UserSim.Usable | null>;
-                trkAreDetailsShown: Trackable<boolean>;
+                evtSelectedUserSim: StatefulEvt<types.UserSim.Usable | null>;
+                evtAreDetailsShown: StatefulReadonlyEvt<boolean>;
             }
         ) {
 
-            const { trkSelectedUserSim, trkAreDetailsShown } = params;
+            const { evtSelectedUserSim, evtAreDetailsShown } = params;
 
             const addUserSim = (
                 params: {
@@ -248,26 +246,6 @@ export function uiControllerDependencyInjection(
 
                 const { userSim } = params;
 
-                const trkIsSelected = Tracked.from(trkSelectedUserSim, val => val === userSim);
-
-                trkIsSelected.evt.attach(isSelected => {
-
-                    if (isSelected) {
-
-                        trkSelectedUserSim.val =userSim;
-
-                        return;
-
-                    }
-
-                    if (obsSelectedUserSim.value !== userSim) {
-                        return;
-                    }
-
-                    obsSelectedUserSim.onPotentialChange(null);
-
-
-                });
 
                 const uiSimRow = new UiSimRow({
                     userSim,
@@ -283,51 +261,15 @@ export function uiControllerDependencyInjection(
                             "evtDelete"
                         ]
                     ),
-                    trkIsSelected,
-                    "obsAreDetailsVisible": (() => {
-
-                        const getValue = () => (
-                            trkIsSelected.val &&
-                            trkAreDetailsShown.val
-                        );
-
-                        const out = new Observable<boolean>(getValue());
-
-                        [obsIsSelected, obsAreDetailsShown].forEach(
-                            obs => obs.evtChange.attach(
-                                () => out.onPotentialChange(getValue())
-                            )
-                        );
-
-                        return out;
-
-                    })(),
-                    "obsIsVisible": (() => {
-
-                        const getValue = () => (
-                            obsIsSelected.value ||
-                            obsAreDetailsShown.value
-                        );
-
-                        const out = new Observable<boolean>(getValue());
-
-                        [obsIsSelected, obsAreDetailsShown].forEach(
-                            obs => obs.evtChange.attach(
-                                () => out.onPotentialChange(getValue())
-                            )
-                        );
-
-                        return out;
-
-
-                    })()
+                    evtSelectedUserSim,
+                    evtAreDetailsShown
                 });
 
                 this.structure.append(uiSimRow.structure);
 
                 //If no sim is selected in the list select this one by triggering a click on the row element.
-                if (obsSelectedUserSim.value === null) {
-                    obsIsSelected.onPotentialChange(true);
+                if (evtSelectedUserSim.state === null) {
+                    evtSelectedUserSim.state = userSim;
                 }
 
             };

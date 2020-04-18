@@ -19,34 +19,7 @@ export declare function factory(params: {
             maxMessageCountByChat: number;
         }) => Promise<{
             wdChats: import("../../types/webphoneData").Chat<"PLAIN">[];
-            wdEvts: {
-                evtWdChat: import("evt").NonPostableEvt<({
-                    wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
-                } & {
-                    eventType: "NEW" | "DELETED";
-                }) | ({
-                    wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
-                } & {
-                    eventType: "UPDATED";
-                    changes: {
-                        unreadMessageCount: boolean;
-                        contactInfos: boolean;
-                        ordering: boolean;
-                    };
-                })>;
-                evtWdMessage: import("evt").NonPostableEvt<({
-                    wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
-                    wdMessage: import("../../types/webphoneData").Message<"PLAIN">;
-                } & {
-                    eventType: "NEW" | "DELETED";
-                }) | ({
-                    wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
-                    wdMessage: import("../../types/webphoneData").Message<"PLAIN">;
-                } & {
-                    eventType: "UPDATED";
-                    orderingChange: boolean;
-                })>;
-            };
+            wdEvts: import("../../types/webphoneData").Evts;
         }>;
         newChat: ({ wdChats, contactNumber, contactName, contactIndexInSim }: {
             wdChats: import("../../types/webphoneData").Chat<"PLAIN">[];
@@ -110,43 +83,7 @@ export declare function factory(params: {
             includeContacts: boolean;
         }) => Promise<{
             userSims: import("../../types").UserSim[];
-            userSimEvts: {
-                evtNew: import("evt").NonPostableEvt<{
-                    cause: "SIM REGISTERED FROM LAN";
-                    userSim: import("../../types").UserSim.Owned;
-                } | {
-                    cause: "SHARING REQUEST RECEIVED";
-                    userSim: import("../../types").UserSim.Shared.NotConfirmed;
-                }>;
-                evtNowConfirmed: import("evt").NonPostableEvt<import("../../types").UserSim.Shared.Confirmed>;
-                evtDelete: import("evt").NonPostableEvt<{
-                    cause: "USER UNREGISTER SIM";
-                    userSim: import("../../types").UserSim.Usable;
-                } | {
-                    cause: "PERMISSION LOSS";
-                    userSim: import("../../types").UserSim.Shared;
-                } | {
-                    cause: "REJECT SHARING REQUEST";
-                    userSim: import("../../types").UserSim.Shared.NotConfirmed;
-                }>;
-                evtReachabilityStatusChange: import("evt").NonPostableEvt<import("../../types").UserSim>;
-                evtSipPasswordRenewed: import("evt").NonPostableEvt<import("../../types").UserSim>;
-                evtCellularConnectivityChange: import("evt").NonPostableEvt<import("../../types").UserSim>;
-                evtCellularSignalStrengthChange: import("evt").NonPostableEvt<import("../../types").UserSim>;
-                evtOngoingCall: import("evt").NonPostableEvt<import("../../types").UserSim>;
-                evtNewUpdatedOrDeletedContact: import("evt").NonPostableEvt<{
-                    eventType: "NEW" | "DELETED" | "UPDATED";
-                    userSim: import("../../types").UserSim;
-                    contact: import("../../types").UserSim.Contact;
-                }>;
-                evtSharedUserSetChange: import("evt").NonPostableEvt<{
-                    userSim: import("../../types").UserSim;
-                    action: "ADD" | "REMOVE" | "MOVE TO CONFIRMED";
-                    targetSet: "CONFIRMED USERS" | "NOT CONFIRMED USERS";
-                    email: string;
-                }>;
-                evtFriendlyNameChange: import("evt").NonPostableEvt<import("../../types").UserSim.Usable>;
-            };
+            userSimEvts: import("../../types").UserSim.Evts;
         }>;
         unlockSim: ({ lockedDongle, pin }: {
             lockedDongle: import("chan-dongle-extended-client/dist/lib/types").Dongle.Locked;

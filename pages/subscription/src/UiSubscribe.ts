@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import * as currencyLib from "frontend-shared/dist/tools/currency";
 
 declare const require: (path: string) => any;
@@ -13,7 +13,7 @@ export class UiSubscribe {
 
     public readonly structure = html.structure.clone();
 
-    public readonly evtRequestSubscribe = new VoidEvt();
+    public readonly evtRequestSubscribe = Evt.asNonPostable(Evt.create());
 
     constructor(currency: string, amount: number) {
 
@@ -22,7 +22,7 @@ export class UiSubscribe {
         );
 
         this.structure.find("button")
-            .on("click", () => this.evtRequestSubscribe.post())
+            .on("click", () => Evt.asPostable(this.evtRequestSubscribe).post())
             ;
 
     }

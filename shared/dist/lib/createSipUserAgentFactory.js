@@ -135,7 +135,7 @@ var SipUserAgent = /** @class */ (function () {
     function SipUserAgent(params) {
         var _this = this;
         this.params = params;
-        this.evtIsRegistered = evt_1.Evt.asNonPostable(evt_1.Evt.create(false));
+        this.evtIsRegistered = evt_1.Evt.create(false);
         this.evtRingback = new evt_1.Evt();
         /*
         public unregister() {
@@ -148,7 +148,7 @@ var SipUserAgent = /** @class */ (function () {
     
         }
         */
-        this.evtIncomingMessage = evt_1.Evt.asNonPostable(evt_1.Evt.create());
+        this.evtIncomingMessage = new evt_1.Evt();
         this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
             var handlerCb;
             var pr = new Promise(function (resolve) { return handlerCb = resolve; });

@@ -6,43 +6,7 @@ export declare function getCoreApi(sendRequest: ReturnType<typeof import("./getS
         includeContacts: boolean;
     }) => Promise<{
         userSims: types.UserSim[];
-        userSimEvts: {
-            evtNew: import("evt").NonPostableEvt<{
-                cause: "SIM REGISTERED FROM LAN";
-                userSim: types.UserSim.Owned;
-            } | {
-                cause: "SHARING REQUEST RECEIVED";
-                userSim: types.UserSim.Shared.NotConfirmed;
-            }>;
-            evtNowConfirmed: import("evt").NonPostableEvt<types.UserSim.Shared.Confirmed>;
-            evtDelete: import("evt").NonPostableEvt<{
-                cause: "USER UNREGISTER SIM";
-                userSim: types.UserSim.Usable;
-            } | {
-                cause: "PERMISSION LOSS";
-                userSim: types.UserSim.Shared;
-            } | {
-                cause: "REJECT SHARING REQUEST";
-                userSim: types.UserSim.Shared.NotConfirmed;
-            }>;
-            evtReachabilityStatusChange: import("evt").NonPostableEvt<types.UserSim>;
-            evtSipPasswordRenewed: import("evt").NonPostableEvt<types.UserSim>;
-            evtCellularConnectivityChange: import("evt").NonPostableEvt<types.UserSim>;
-            evtCellularSignalStrengthChange: import("evt").NonPostableEvt<types.UserSim>;
-            evtOngoingCall: import("evt").NonPostableEvt<types.UserSim>;
-            evtNewUpdatedOrDeletedContact: import("evt").NonPostableEvt<{
-                eventType: "NEW" | "DELETED" | "UPDATED";
-                userSim: types.UserSim;
-                contact: types.UserSim.Contact;
-            }>;
-            evtSharedUserSetChange: import("evt").NonPostableEvt<{
-                userSim: types.UserSim;
-                action: "ADD" | "REMOVE" | "MOVE TO CONFIRMED";
-                targetSet: "CONFIRMED USERS" | "NOT CONFIRMED USERS";
-                email: string;
-            }>;
-            evtFriendlyNameChange: import("evt").NonPostableEvt<types.UserSim.Usable>;
-        };
+        userSimEvts: types.UserSim.Evts;
     }>;
     unlockSim: ({ lockedDongle, pin }: {
         lockedDongle: dcTypes.Dongle.Locked;
