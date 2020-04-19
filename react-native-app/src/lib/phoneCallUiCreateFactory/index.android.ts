@@ -125,7 +125,7 @@ export const phoneCallUiCreateFactory: types.PhoneCallUi.CreateFactory = async p
                 //TODO: Incorporate to hotPhoneCallUi implementation.
                 evtEndCall.attach(() => hostKeepAlive.stop());
 
-                phoneCallUi.evtUiOpenedForOutgoingCall.post({
+                Evt.asPostable(phoneCallUi.evtUiOpenedForOutgoingCall).post({
                     phoneNumberRaw,
                     "onTerminated": message => {
 

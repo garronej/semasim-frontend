@@ -7,7 +7,7 @@ import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotificati
 import * as imageAssets from "./lib/imageAssets";
 import { SplashImage } from "./genericComponents/SplashImage";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
-import { getPrObsPushNotificationToken } from "./lib/trackPushNotificationToken";
+import { getPrEvtPushNotificationToken } from "./lib/trackPushNotificationToken";
 import { Evt } from "frontend-shared/node_modules/evt";
 
 import { phoneCallUiCreateFactory } from "./lib/phoneCallUiCreateFactory";
@@ -39,7 +39,7 @@ const { appLaunchOut, prAccountManagementAndWebphones } = (() => {
         notConnectedUserFeedback,
         "actionToPerformBeforeAppRestart": () => setComponentIsVisibleStateToImutableFalse(),
         dialogBaseApi,
-        "prObsPushNotificationToken": getPrObsPushNotificationToken()
+        "prEvtPushNotificationToken": getPrEvtPushNotificationToken()
     });
 
     return {

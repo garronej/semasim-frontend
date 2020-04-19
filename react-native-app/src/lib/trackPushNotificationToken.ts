@@ -2,10 +2,9 @@
 import { firebase } from '@react-native-firebase/messaging';
 import * as rn from "react-native";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";
-import { IObservable, Observable } from "frontend-shared/node_modules/evt";
 import { getApi as getNetworkStateMonitoringApi } from "frontend-shared/dist/lib/networkStateMonitoring";
 import { backOff } from 'exponential-backoff';
-import { Evt } from "frontend-shared/node_modules/evt";
+import { Evt, StatefulReadonlyEvt, StatefulEvt } from "frontend-shared/node_modules/evt";
 
 type AppLifeCycleListener = import("./appLifeCycle").AppLifeCycleListener;
 
@@ -27,12 +26,12 @@ export const testForegroundPushNotification: AppLifeCycleListener = ({ evtCompon
 
 };
 
-let obsPushNotificationToken: Observable<string> | undefined = undefined;
+let evtPushNotificationToken: StatefulEvt<string> | undefined = undefined;
 
-const dObsPushNotificationToken = new Deferred<IObservable<string>>();
+const dEvtPushNotificationToken = new Deferred<StatefulReadonlyEvt<string>>();
 
-export function getPrObsPushNotificationToken() {
-    return dObsPushNotificationToken.pr;
+export function getPrEvtPushNotificationToken() {
+    return dEvtPushNotificationToken.pr;
 }
 
 export const trackPushNotificationToken: AppLifeCycleListener = ({ evtComponentDidMount, evtComponentWillUnmount }) => {
@@ -45,17 +44,17 @@ export const trackPushNotificationToken: AppLifeCycleListener = ({ evtComponentD
 
         console.log("Got token: ", token);
 
-        if (obsPushNotificationToken === undefined) {
+        if (evtPushNotificationToken === undefined) {
 
-            dObsPushNotificationToken.resolve(
-                obsPushNotificationToken = new Observable(token)
+            dEvtPushNotificationToken.resolve(
+                evtPushNotificationToken = new StatefulEvt(token)
             );
 
             return;
 
         }
 
-        obsPushNotificationToken.onPotentialChange(token);
+        evtPushNotificationToken.state= token;
 
     };
 
@@ -65,7 +64,7 @@ export const trackPushNotificationToken: AppLifeCycleListener = ({ evtComponentD
 
         const ctxToken = Evt.newCtx<string>();
 
-        ctxToken.getPrDone().then(token => onToken(token));
+        ctxToken.waitFor().then(token => onToken(token));
 
         const getToken = () => backOff(
             () => firebaseCloudMessaging.getToken(),

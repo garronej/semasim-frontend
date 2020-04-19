@@ -1,5 +1,6 @@
 
-import { Evt, VoidEvt } from "frontend-shared/node_modules/evt";
+import { Evt, VoidEvt, NonPostableEvt } from "frontend-shared/node_modules/evt";
+import { id } from "frontend-shared/node_modules/evt/dist/tools/typeSafety/id";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/nativeModules/hostPhoneCallUi]", ...args])) :
@@ -45,14 +46,14 @@ const evtRegisterOrUpdatePhoneAccountResult = new Evt<{ callRef: number; }>();
 const evtGetIsSimPhoneAccountEnabledResult = new Evt<{ callRef: number; isSimPhoneAccountEnabled: boolean; }>();
 const evtUnregisterOtherPhoneAccountsResult = new Evt<{ callRef: number; }>();
 
-export const evtUiOpenForOutgoingCall = new Evt<{
+export const evtUiOpenForOutgoingCall =Evt.asNonPostable(Evt.create<{
     phoneCallRef: number;
     imsi: string;
     phoneNumberRaw: string;
     setContactName: (contactName: string | undefined)=> void;
-    evtDtmf: Evt<{dtmf: string; }>;
-    evtEndCall: VoidEvt;
-}>();
+    evtDtmf: NonPostableEvt<{dtmf: string; }>;
+    evtEndCall: NonPostableEvt<void>;
+}>());
 
 const evtCallAnswered = new Evt<{ phoneCallRef: number; }>();
 const evtDtmf = new Evt<{ phoneCallRef: number; dtmf: string; }>();
@@ -78,19 +79,24 @@ export const apiExposedToHost: ApiExposedToHost = {
         evtDtmf.post({ phoneCallRef, dtmf }),
     "notifyEndCall": phoneCallRef =>
         evtEndCall.post({ phoneCallRef }),
-    "notifyUiOpenForOutgoingCallAndGetContactName": (phoneCallRef, imsi, phoneNumberRaw) =>
-        evtUiOpenForOutgoingCall.postAsyncOnceHandled({
+    "notifyUiOpenForOutgoingCallAndGetContactName": (phoneCallRef, imsi, phoneNumberRaw) =>{
+
+        const ctx= Evt.newCtx();
+
+        Evt.asPostable(evtUiOpenForOutgoingCall).postAsyncOnceHandled({
             phoneCallRef,
             imsi,
             phoneNumberRaw,
             "setContactName": contactName =>
                 apiExposedByHost.onGetContactNameResponse(phoneCallRef, contactName ?? null),
-            "evtDtmf": (() => {
+            "evtDtmf": 
+            (() => {
 
                 const out = new Evt<{ dtmf: string; }>();
 
                 evtDtmf.attach(
                     ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+                    ctx,
                     ({ dtmf }) => out.postAsyncOnceHandled({ dtmf })
                 );
 
@@ -99,17 +105,22 @@ export const apiExposedToHost: ApiExposedToHost = {
             })(),
             "evtEndCall": (() => {
 
-                const out = new VoidEvt();
+                const out = Evt.create();
 
-                evtEndCall.attach(
-                    ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef,
+                evtEndCall.$attach(
+                    ({ phoneCallRef: phoneCallRef_ }) => phoneCallRef_ === phoneCallRef ?
+                        [, { "DETACH": ctx }] :
+                        null,
+                    ctx,
                     () => out.postAsyncOnceHandled()
                 );
 
                 return out;
 
-            })(),
+            })()
         })
+
+    }
 
 };
 

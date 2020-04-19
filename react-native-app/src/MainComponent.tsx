@@ -3,8 +3,9 @@ import * as React from "react";
 import * as rn from "react-native";
 import * as types from "frontend-shared/dist/lib/types";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
-import { Evt, NonPostable } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import { Webphone } from "frontend-shared/dist/lib/types/Webphone";
+import {objectKeys} from "frontend-shared/node_modules/evt/dist/tools/typeSafety";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[MainComponent]", ...args])) :
@@ -98,11 +99,8 @@ export class MainComponent extends React.Component<Props, State> {
     componentDidMount = () => {
 
         Evt.merge(
-            Object.entries(this.props.accountManagementApi.userSimEvts)
-                .map<Evt<string>>(
-                    ([key, evt]) => id<NonPostable<Evt<any>>>(evt)
-                        .pipe(this.ctx, () => [key] as const)
-                )
+            objectKeys(this.props.accountManagementApi.userSimEvts)
+                .map(key => Evt.factorize(this.props.accountManagementApi.userSimEvts[key]).pipe(this.ctx, () => [key] as const))
         ).attach(lastUserSimEvent => {
             console.log("root", { lastUserSimEvent });
             this.setState({ lastUserSimEvent });
@@ -118,14 +116,14 @@ export class MainComponent extends React.Component<Props, State> {
             }
 
             Evt.useEffect(
-                () => this.setState({ "isSipRegistered": webphone.obsIsSipRegistered.value }),
-                webphone.obsIsSipRegistered.evtChange.pipe(this.ctx)
+                () => this.setState({ "isSipRegistered": webphone.evtIsSipRegistered.state }),
+                webphone.evtIsSipRegistered.evtChange.pipe(this.ctx)
             );
 
             Evt.merge(
                 Object.entries(webphone.userSimEvts)
                     .map<Evt<string>>(
-                        ([key, evt]) => id<NonPostable<Evt<any>>>(evt)
+                        ([key, evt]) => Evt.factorize(evt)
                             .pipe(this.ctx, () => [key] as const)
                     )
             ).attach(lastUserSimEvent => console.log("delegate", { lastUserSimEvent }));

@@ -2,7 +2,7 @@
 import * as React from "react";
 import * as rn from "react-native";
 import { h } from "../lib/dimensions";
-import { Observable } from "frontend-shared/node_modules/evt";
+import { Evt } from "frontend-shared/node_modules/evt";
 import { id } from "frontend-shared/dist/tools/typeSafety/id";
 
 const log: typeof console.log = true ?
@@ -10,7 +10,7 @@ const log: typeof console.log = true ?
     (() => { });
 
 
-const obsRef = new Observable<NoBackendConnectionBanner | undefined>(undefined);
+const evtRef = Evt.create<NoBackendConnectionBanner | undefined>(undefined);
 
 
 type NotConnectedUserFeedback = import("frontend-shared/dist/lib/appLauncher/appLaunch")
@@ -30,8 +30,8 @@ export const notConnectedUserFeedback = (() => {
         }
 
         const setState = () => Promise.resolve(
-            obsRef.value ??
-            obsRef.evtChange.waitFor(ref => !ref ? null : [ref])
+            evtRef.state ??
+            evtRef.evtChange.waitFor(ref => !ref ? null : [ref])
         ).then(ref => state.isVisible ?
             ref.setState(state) :
             ref.setState(state)
@@ -63,16 +63,16 @@ export type State = {
 };
 
 
-log("[NoBackendConnectionBanner] imported");
+log("imported");
 
 
 export class NoBackendConnectionBanner extends React.Component<Props, State> {
 
     public readonly state: Readonly<State> = { "isVisible": false, "message": "" };
 
-    public componentDidMount = () => obsRef.onPotentialChange(this);
+    public componentDidMount = () => evtRef.state= this;
 
-    public componentWillUnmount = () => obsRef.onPotentialChange(undefined);
+    public componentWillUnmount = () => evtRef.state= undefined;
 
     public render = () => this.state.isVisible ? (
         <rn.View style={{

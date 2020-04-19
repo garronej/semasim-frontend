@@ -1,20 +1,19 @@
 
 import * as React from "react";
 import * as rn from "react-native";
-import { VoidEvt, Evt, Observable } from "frontend-shared/node_modules/evt";
+import { VoidEvt, Evt } from "frontend-shared/node_modules/evt";
 import { InputField } from "../genericComponents/InputField";
 import { w, h, percentageOfDiagonalDp, getOrientation } from "../lib/dimensions";
 import * as imageAssets from "../lib/imageAssets";
 import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
-//NOTE: Type only import.
-import { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
+import type { baseTypes as types } from "frontend-shared/dist/tools/modal/dialog";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[globalComponent/Dialog]", ...args])) :
     (() => { });
 
-const obsRef = new Observable<Dialog | undefined>(undefined);
-const obsAppState = new Observable<rn.AppStateStatus>(rn.AppState.currentState);
+const evtRef= Evt.create<Dialog | undefined>(undefined);
+const evtAppState = Evt.create<rn.AppStateStatus>(rn.AppState.currentState);
 
 export const api: types.Api = {
     "create": (dialogType, options) => createModal(dialogType, options),
@@ -36,7 +35,7 @@ export const setComponentIsVisibleStateToImutableFalse = async (): Promise<void>
 
     isSettingIsVisibleToTrueForbidden = true;
 
-    const ref = obsRef.value;
+    const ref = evtRef.state;
 
     if (ref === undefined) {
         return;
@@ -59,9 +58,9 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
     }
 
     const modal: types.Modal = {
-        "evtHide": new VoidEvt(),
-        "evtShown": new VoidEvt(),
-        "evtHidden": new VoidEvt(),
+        "evtHide": Evt.create(),
+        "evtShown": Evt.create(),
+        "evtHidden": Evt.create(),
         "show": () => {
 
             currentModal = modal;
@@ -69,14 +68,14 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
             const ctx = Evt.getCtx(modal);
 
             Promise.all<unknown>([
-                ...obsRef.value ? [] : [
-                    obsRef.evtChange.waitFor(
+                ...evtRef.state ? [] : [
+                    evtRef.evtChange.waitFor(
                         ref=> !!ref,
                         ctx
                     )
                 ],
-                ...obsAppState.value == "active" ? [] : [
-                    obsAppState.evtChange.waitFor(
+                ...evtAppState.state == "active" ? [] : [
+                    evtAppState.evtChange.waitFor(
                         newAppState => newAppState === "active",
                         ctx
                     )
@@ -85,7 +84,7 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
 
                 ctx.done();
 
-                obsRef.value!.setState({
+                evtRef.state!.setState({
                     "isVisible": true,
                     dialogType,
                     options
@@ -99,9 +98,9 @@ function createModal<T extends types.Type>(dialogType: T, options: types.Options
 
             Evt.getCtx(modal).done();
 
-            if (obsRef.value !== undefined) {
+            if (evtRef.state !== undefined) {
 
-                obsRef.value.setState(
+                evtRef.state.setState(
                     { "isVisible": false },
                     () => modal.evtHidden.post()
                 );
@@ -180,7 +179,7 @@ export class Dialog extends React.Component<Props, State> {
 
     public componentDidMount = () => {
 
-        obsRef.onPotentialChange(this);
+        evtRef.state= this;
 
         rn.AppState.addEventListener("change", this.handleAppStateChange);
 
@@ -188,13 +187,13 @@ export class Dialog extends React.Component<Props, State> {
 
     public componentWillUnmount = () => {
 
-        obsRef.onPotentialChange(undefined);
+        evtRef.state = undefined;
 
         rn.AppState.removeEventListener("change", this.handleAppStateChange);
 
     };
 
-    private handleAppStateChange = (nextAppState: rn.AppStateStatus) => obsAppState.onPotentialChange(nextAppState);
+    private handleAppStateChange = (nextAppState: rn.AppStateStatus) => evtAppState.state = nextAppState;
 
 
     private onRequestClose = () => {
