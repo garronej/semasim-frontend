@@ -40,7 +40,7 @@ export class UiSimRow {
 
         this.structure.click(() => evtSelectedUserSim.state = userSim);
 
-        const evtIsRowSelected = Evt.asNonPostable(evtSelectedUserSim.statefulPipe(userSim_ => [userSim_ === userSim]));
+        const evtIsRowSelected = Evt.asNonPostable(evtSelectedUserSim.pipe(userSim_ => [userSim_ === userSim]));
 
 
 
@@ -56,7 +56,7 @@ export class UiSimRow {
             evtAreDetailsShown.evtChange
         ])
             .toStateful()
-            .statefulPipe(() => [
+            .pipe(() => [
                 !evtAreDetailsShown.state || 
                 evtIsRowSelected
             ])

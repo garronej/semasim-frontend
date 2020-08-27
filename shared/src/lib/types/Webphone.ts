@@ -2,7 +2,8 @@
 import { UserSim } from "./UserSim";
 import * as wd from "./webphoneData";
 import { phoneNumber as phoneNumberLib } from "phone-number/dist/lib";
-import type { StatefulReadonlyEvt } from "evt";
+import type { StatefulReadonlyEvt, Ctx } from "evt";
+import { Evt } from "evt";
 
 export type Webphone = {
     userSim: UserSim.Usable;
@@ -66,123 +67,96 @@ export namespace Webphone {
     }
 
 
-
-    export function canCallFactory(webphone: canCallFactory.WebphoneLike) {
-
-        const{ userSim, evtIsSipRegistered } = webphone;
-
-        function canCall(number_raw: string): boolean {
-
-            const number= 
-                phoneNumberLib.build(
-                    number_raw,
-                    userSim.sim.country?.iso
-                )
-                ;
-
-            return (
-                phoneNumberLib.isDialable(number) &&
-                evtIsSipRegistered.state &&
-                !!userSim.reachableSimState?.isGsmConnectivityOk &&
-                (
-                    userSim.reachableSimState.ongoingCall === undefined ||
-                    userSim.reachableSimState.ongoingCall.number === number &&
-                    !userSim.reachableSimState.ongoingCall.isUserInCall
-                )
-            );
-
-        }
-
-        return { canCall };
-
-    }
-
-    export namespace canCallFactory {
-
-        /*
-        export type WebphoneLike = {
-            userSim: { 
-                sim: { country: Webphone["userSim"]["sim"]["country"]; };
-                reachableSimState: Webphone["userSim"]["reachableSimState"];
-            },
-            obsIsSipRegistered: Webphone["obsIsSipRegistered"];
-        };
-        */
-
-        export type WebphoneLike = Webphone;
-
-    }
-    /*
-
-    export function useEffect(
+    export function useEffectCanCall(
         canCallEffect: (canCall: boolean) => void,
-        trkWebphone: Trackable<Webphone>,
-        trkPhoneNumberRaw: Trackable<string>,
-        ctx: import("evt").Ctx<any>
+        {
+            evtWebphone,
+            evtPhoneNumberRaw,
+            ctx = Evt.newCtx()
+        }: {
+            evtWebphone: StatefulReadonlyEvt<useEffectCanCall.WebphoneLike>,
+            evtPhoneNumberRaw: StatefulReadonlyEvt<string>,
+            ctx?: Ctx<any>
+        }
     ) {
 
-        const obsPhoneNumber= Tracked.from(
-            ctx,
-            trkPhoneNumberRaw,
-            number_raw => phoneNumberLib.build(
-                number_raw,
-                trkWebphone.val.userSim.sim.country?.iso
-            )
-        );
+        const ctx_ = Evt.newCtx();
 
-        const trkIsNumberDialable = Tracked.from(
-            obsPhoneNumber,
-            number=> phoneNumberLib.isDialable(number)
-        );
-
-        trkIsNumberDialable;
-
-        
-
-
+        ctx.evtDoneOrAborted.attachOnce(() => ctx_.done());
 
         Evt.useEffect(
-            previousWebphone => {
+            () => {
 
-                if (!!previousWebphone) {
-                    Evt.getCtx(previousWebphone).done();
-                }
+                ctx_.done();
 
-                const webphone = trkWebphone.val;
+                const {
+                    userSim: { reachableSimState, sim: { country } },
+                    userSimEvts,
+                    evtIsSipRegistered
+                } = evtWebphone.state;
 
-                const { canCall } = canCallFactory(webphone);
-
-                const webphoneCtx = Evt.getCtx(webphone);
-
-                ctx.evtDoneOrAborted.attach(
-                    webphoneCtx,
-                    () => webphoneCtx.done()
-                );
-
-                Evt.useEffect(
-                    () => canCallEffect(canCall(trkPhoneNumberRaw.val)),
-                    Evt.merge(
-                        webphoneCtx,
-                        [
-                            trkPhoneNumberRaw.evt,
-                            webphone.trkIsSipRegistered.evt,
-                            webphone.userSimEvts.evtReachabilityStatusChange,
-                            webphone.userSimEvts.evtCellularConnectivityChange,
-                            webphone.userSimEvts.evtOngoingCall
+                const evtPhoneNumber = evtPhoneNumberRaw
+                    .toStateful(ctx_)
+                    .pipe(
+                        () => [
+                            phoneNumberLib.build(
+                                evtPhoneNumberRaw.state,
+                                country?.iso
+                            )
                         ]
                     )
+                    ;
+
+                const evtIsPhoneNumberDialable =
+                    evtPhoneNumber.pipe(
+                        phoneNumber => [phoneNumberLib.isDialable(phoneNumber)]
+                    )
+                    ;
+
+
+                Evt.useEffect(
+                    () => canCallEffect(
+                        evtIsPhoneNumberDialable.state &&
+                        evtIsSipRegistered.state &&
+                        !!reachableSimState?.isGsmConnectivityOk &&
+                        (
+                            reachableSimState.ongoingCall === undefined ||
+                            reachableSimState.ongoingCall.number === evtPhoneNumber.state &&
+                            !reachableSimState.ongoingCall.isUserInCall
+                        )
+                    ),
+                    Evt.merge(ctx_, [
+                        evtIsPhoneNumberDialable.evtChange,
+                        userSimEvts.evtReachabilityStatusChange,
+                        userSimEvts.evtCellularConnectivityChange,
+                        userSimEvts.evtOngoingCall,
+                        evtIsSipRegistered.evtChange
+                    ])
                 );
 
             },
-            trkWebphone.evtDiff.pipe(
-                ctx,
-                ({ prevVal }) => [prevVal]
-            )
+            evtWebphone.evtChange.pipe(ctx)
         );
 
+
     }
-    */
 
+    export namespace useEffectCanCall {
 
+        export type WebphoneLike = {
+            userSim: {
+                sim: { country?: { iso: string } }
+                reachableSimState?: UserSim.ReachableSimState;
+            };
+            userSimEvts: Pick<
+                UserSim.Usable.Evts.ForSpecificSim,
+                "evtReachabilityStatusChange" |
+                "evtOngoingCall" |
+                "evtCellularConnectivityChange"
+            >
+            evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
+        };
+
+    }
 
 }

@@ -1,6 +1,6 @@
 import { UserSim } from "./UserSim";
 import * as wd from "./webphoneData";
-import type { StatefulReadonlyEvt } from "evt";
+import type { StatefulReadonlyEvt, Ctx } from "evt";
 export declare type Webphone = {
     userSim: UserSim.Usable;
     userSimEvts: Pick<UserSim.Usable.Evts.ForSpecificSim, "evtFriendlyNameChange" | "evtReachabilityStatusChange" | "evtCellularConnectivityChange" | "evtCellularSignalStrengthChange" | "evtOngoingCall" | "evtNewUpdatedOrDeletedContact">;
@@ -33,10 +33,23 @@ export declare namespace Webphone {
     namespace sortPuttingFirstTheOneThatWasLastUsed {
         type WebphoneLike = Pick<Webphone, "userSim" | "wdChats">;
     }
-    function canCallFactory(webphone: canCallFactory.WebphoneLike): {
-        canCall: (number_raw: string) => boolean;
-    };
-    namespace canCallFactory {
-        type WebphoneLike = Webphone;
+    function useEffectCanCall(canCallEffect: (canCall: boolean) => void, { evtWebphone, evtPhoneNumberRaw, ctx }: {
+        evtWebphone: StatefulReadonlyEvt<useEffectCanCall.WebphoneLike>;
+        evtPhoneNumberRaw: StatefulReadonlyEvt<string>;
+        ctx?: Ctx<any>;
+    }): void;
+    namespace useEffectCanCall {
+        type WebphoneLike = {
+            userSim: {
+                sim: {
+                    country?: {
+                        iso: string;
+                    };
+                };
+                reachableSimState?: UserSim.ReachableSimState;
+            };
+            userSimEvts: Pick<UserSim.Usable.Evts.ForSpecificSim, "evtReachabilityStatusChange" | "evtOngoingCall" | "evtCellularConnectivityChange">;
+            evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
+        };
     }
 }

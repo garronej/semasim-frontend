@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dialog, api as dialogBaseApi, setComponentIsVisibleStateToImutableFalse } from "./globalComponents/Dialog";
 import { LoginRouter } from "./loginScreens/LoginRouter";
-import { MainComponent } from "./MainComponent";
+import { TestComponent } from "./TestComponent";
 import { NoBackendConnectionBanner, notConnectedUserFeedback } from "./globalComponents/NoBackendConnectionBanner";
 import { evtBackgroundPushNotification } from "./lib/evtBackgroundPushNotification";
 import * as imageAssets from "./lib/imageAssets";
@@ -73,7 +73,7 @@ export type State =
         type: "LOGIN";
     } & Omit<import("./loginScreens/LoginRouter").Props, "dialogApi"> | {
         type: "MAIN";
-    } & Omit<import("./MainComponent").Props, "dialogApi" | "restartApp">
+    } & Omit<import("./TestComponent").Props, "dialogApi" | "restartApp">
     ;
 
 
@@ -136,7 +136,7 @@ export class SplashScreenComponent extends React.Component<{}, State> {
                         authenticationApi={state.authenticationApi}
                     />;
                 case "MAIN":
-                    return <MainComponent
+                    return <TestComponent
                         key={2}
                         dialogApi={appLaunchOut.dialogApi}
                         restartApp={appLaunchOut.restartApp}

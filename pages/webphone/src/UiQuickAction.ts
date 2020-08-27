@@ -1,7 +1,8 @@
 import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
-import * as types from "frontend-shared/dist/lib/types/userSim";
+import * as types from "frontend-shared/dist/lib/types";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+
 
 type UserSimEvts = Pick<
     types.UserSim.Usable.Evts.ForSpecificSim,
@@ -70,7 +71,10 @@ export function uiQuickActionDependencyInjection(
 
             const { userSim, userSimEvts, evtIsSipRegistered } = params;
 
+
             const input = this.structure.find("input.id_tel-input");
+
+
 
             //TODO add if bug "utilsScript": "/intl-tel-input/build/js/utils.js",
 
@@ -108,6 +112,24 @@ export function uiQuickActionDependencyInjection(
                 input.intlTelInput(intlTelInputOptions);
 
             })();
+
+            const { evtPhoneNumber } =
+                (() => {
+
+                    const evtPhoneNumber = Evt.create<string>("");
+
+                    input.change(() =>
+                        evtPhoneNumber.state = phoneNumber.build(
+                            input.val(),
+                            input.intlTelInput("getSelectedCountryData")?.iso2
+                        )
+                    );
+
+                    return { evtPhoneNumber };
+
+
+                })()
+                ;
 
             (() => {
 
@@ -189,12 +211,7 @@ export function uiQuickActionDependencyInjection(
                     evt = this.evtNewContact;
                 }
 
-                evt!.post(
-                    phoneNumber.build(
-                        input.val(),
-                        input.intlTelInput("getSelectedCountryData").iso2
-                    )
-                );
+                evt!.post(evtPhoneNumber.state);
 
                 if (simIso) {
                     input.intlTelInput("setCountry", simIso);
@@ -216,6 +233,20 @@ export function uiQuickActionDependencyInjection(
                 evtIsSipRegistered.evtChange
             );
 
+            types.Webphone.useEffectCanCall(
+                canCall => this.structure.find(".id_call").prop("disabled", !canCall),
+                {
+                    "evtWebphone": Evt.create<types.Webphone.useEffectCanCall.WebphoneLike>({
+                        userSim,
+                        userSimEvts,
+                        evtIsSipRegistered
+                    }),
+                    "evtPhoneNumberRaw": evtPhoneNumber
+                }
+            );
+
+
+            /*
             Evt.useEffect(
                 () => this.structure.find(".id_call").prop("disabled", (
                     !evtIsSipRegistered.state ||
@@ -230,6 +261,7 @@ export function uiQuickActionDependencyInjection(
                     userSimEvts.evtOngoingCall
                 ])
             );
+            */
 
         }
     }

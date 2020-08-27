@@ -116,26 +116,16 @@ export class UiConversation {
                 userSimEvts.evtReachabilityStatusChange
             );
 
-            Evt.useEffect(
-                () => this.btnCall.prop(
-                    "disabled",
-                    !(
-                        isDialable &&
-                        evtIsSipRegistered.state &&
-                        !!userSim.reachableSimState?.isGsmConnectivityOk &&
-                        (
-                            userSim.reachableSimState.ongoingCall === undefined ||
-                            userSim.reachableSimState.ongoingCall.number === this.params.wdChat.contactNumber &&
-                            !userSim.reachableSimState.ongoingCall.isUserInCall
-                        )
-                    )
-                ),
-                Evt.merge([
-                    evtIsSipRegistered.evtChange,
-                    userSimEvts.evtReachabilityStatusChange,
-                    userSimEvts.evtCellularConnectivityChange,
-                    userSimEvts.evtOngoingCall
-                ])
+            types.Webphone.useEffectCanCall(
+                canCall => this.btnCall.prop("disabled", !canCall),
+                {
+                    "evtWebphone": Evt.create<types.Webphone.useEffectCanCall.WebphoneLike>({
+                        userSim,
+                        userSimEvts,
+                        evtIsSipRegistered
+                    }),
+                    "evtPhoneNumberRaw": Evt.create(this.params.wdChat.contactNumber)
+                }
             );
 
         }
