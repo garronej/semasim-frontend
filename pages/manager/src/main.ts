@@ -3,10 +3,10 @@ declare const require: Function;
 
 console.log("up!!!");
 
-import "minimal-polyfills/dist/lib/ArrayBuffer.isView";
-import "minimal-polyfills/dist/lib/Array.from";
-import "minimal-polyfills/dist/lib/String.prototype.startsWith";
-import "minimal-polyfills/dist/lib/Object.assign";
+import "minimal-polyfills/ArrayBuffer.isView";
+import "minimal-polyfills/Array.from";
+import "minimal-polyfills/String.prototype.startsWith";
+import "minimal-polyfills/Object.assign";
 import { uiControllerDependencyInjection } from "./UiController";
 import { managerPageLaunch } from "frontend-shared/dist/lib/appLauncher/managerPageLaunch";
 import { Deferred } from "frontend-shared/dist/tools/Deferred";

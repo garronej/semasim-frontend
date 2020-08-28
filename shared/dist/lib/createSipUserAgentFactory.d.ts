@@ -57,7 +57,7 @@ declare class SipUserAgent {
     private postEvtIncomingMessage;
     sendMessage(number: phoneNumber, bundledData: gwTypes.BundledData.ClientToServer): Promise<void>;
     readonly evtIncomingCall: NonPostableEvt<{
-        fromNumber: string;
+        fromNumber: phoneNumber;
         terminate(): void;
         prTerminated: Promise<void>;
         onAccepted(): Promise<{

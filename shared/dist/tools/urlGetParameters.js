@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseUrl = exports.buildUrl = void 0;
 function buildUrl(urlPath, params) {
     return urlPath + "?" + Object.keys(params)
         .filter(function (key) { return params[key] !== undefined; })

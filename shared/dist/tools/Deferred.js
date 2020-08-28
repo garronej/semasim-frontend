@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VoidDeferred = exports.Deferred = void 0;
 var overwriteReadonlyProp_1 = require("./overwriteReadonlyProp");
 var Deferred = /** @class */ (function () {
     function Deferred() {

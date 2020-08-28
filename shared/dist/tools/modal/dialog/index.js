@@ -67,11 +67,12 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.dialogApi = exports.startMultiDialogProcess = exports.provideCustomImplementationOfBaseApi = exports.baseTypes = void 0;
 var modalStack = require("../stack");
 var types = require("./types");
 exports.baseTypes = types;
 var getApi_1 = require("./getApi");
-exports.provideCustomImplementationOfBaseApi = getApi_1.provideCustomImplementationOfApi;
+Object.defineProperty(exports, "provideCustomImplementationOfBaseApi", { enumerable: true, get: function () { return getApi_1.provideCustomImplementationOfApi; } });
 var runExclusive = require("run-exclusive");
 var noLockDialogApi = (function () {
     var currentLoading = undefined;

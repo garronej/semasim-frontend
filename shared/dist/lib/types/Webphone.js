@@ -16,6 +16,7 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Webphone = void 0;
 var wd = require("./webphoneData");
 var lib_1 = require("phone-number/dist/lib");
 var evt_1 = require("evt");

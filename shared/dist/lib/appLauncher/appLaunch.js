@@ -78,6 +78,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.appLaunch = void 0;
 var appCryptoSetupHelper_1 = require("../crypto/appCryptoSetupHelper");
 var createSipUserAgentFactory_1 = require("../createSipUserAgentFactory");
 var createWebphoneFactory_1 = require("../createWebphoneFactory");

@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.assertRepresentsSameDataFactory = exports.RepresentsSameDataError = void 0;
 var assert_1 = require("../typeSafety/assert");
 var representsSameData_1 = require("./representsSameData");
 var RepresentsSameDataError = /** @class */ (function (_super) {

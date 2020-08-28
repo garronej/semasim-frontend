@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.remove = exports.set = exports.get = void 0;
 var localStorageApi = require("./localStorageApi");
 var key = "declaredPushNotificationToken";
 function get() {

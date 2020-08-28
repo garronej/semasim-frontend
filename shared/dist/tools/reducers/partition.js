@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.partition = exports.arrPartition = void 0;
 var typeSafety_1 = require("../typeSafety");
 var reduceify_1 = require("./reduceify");
 function arrPartitionImpl(arr, matcher) {

@@ -47,6 +47,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getWebApi = void 0;
 var apiDeclaration = require("../../web_api_declaration");
 var sendRequest_1 = require("./sendRequest");
 var env_1 = require("../env");

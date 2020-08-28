@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSendRequest = void 0;
 var sipLibrary = require("ts-sip");
 function getSendRequest(connectionApi, restartApp) {
     return function sendRequest(methodName, params) {
@@ -47,8 +48,7 @@ function getSendRequest(connectionApi, restartApp) {
                         _c.trys.push([0, 3, , 4]);
                         _b = (_a = sipLibrary.api.client).sendRequest;
                         return [4 /*yield*/, connectionApi.getSocket()];
-                    case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent(),
-                            methodName,
+                    case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent(), methodName,
                             params,
                             { "timeout": 60 * 1000 }])];
                     case 2:

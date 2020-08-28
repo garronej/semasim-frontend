@@ -6,7 +6,7 @@ import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
 import { isAscendingAlphabeticalOrder } from "frontend-shared/dist/tools/isAscendingAlphabeticalOrder";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
-import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
+import { Polyfill as WeakMap } from "minimal-polyfills/WeakMap";
 import { Evt } from "frontend-shared/node_modules/evt";
 
 declare const require: any;

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.JustRegistered = void 0;
 var localStorageApi = require("./localStorageApi");
 var TowardUserKeys_1 = require("./TowardUserKeys");
 var key = "just-registered";

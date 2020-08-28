@@ -29,7 +29,7 @@ export declare namespace Chat {
     }): (params: {
         decryptor: Decryptor;
         chat: Chat<"ENCRYPTED">;
-    }) => Promise<Chat<"PLAIN">>;
+    }) => Promise<Chat>;
     function getUnreadMessagesCount(wdChat: Chat): number;
     /**
      *
@@ -60,7 +60,7 @@ export declare namespace Message {
     }): (params: {
         decryptor: Decryptor;
         encryptedMessage: Message<"ENCRYPTED">;
-    }) => Promise<Message<"PLAIN">>;
+    }) => Promise<Message>;
     /**
      *
      * message1  < ( older than )  message2  => -1
@@ -71,7 +71,7 @@ export declare namespace Message {
      * real temporality of a conversation.
      *
      */
-    const compare: (message1: Message<"PLAIN">, message2: Message<"PLAIN">) => 0 | 1 | -1;
+    const compare: (message1: Message, message2: Message) => -1 | 0 | 1;
     type _Base<E extends EncryptionState = "PLAIN"> = {
         ref: string;
         time: number; /** Represent exact send time for outgoing messages and pdu time for incoming */

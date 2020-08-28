@@ -68,6 +68,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createSipUserAgentFactory = void 0;
 var evt_1 = require("evt");
 var bundledData_1 = require("../gateway/bundledData");
 var readImsi_1 = require("../gateway/readImsi");
@@ -286,8 +287,7 @@ var SipUserAgent = /** @class */ (function () {
                 switch (_f.label) {
                     case 0:
                         _b = (_a = this.jsSipUa).sendMessage;
-                        _c = ["sip:" + number + "@" + env_1.env.baseDomain,
-                            "| encrypted message bundled in header |"];
+                        _c = ["sip:" + number + "@" + env_1.env.baseDomain, "| encrypted message bundled in header |"];
                         _d = {
                             "contentType": "text/plain; charset=UTF-8"
                         };

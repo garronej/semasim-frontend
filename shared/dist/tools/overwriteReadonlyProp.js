@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.overwriteReadonlyProp = void 0;
 exports.overwriteReadonlyProp = function (obj, propertyName, value) {
     try {
         obj[propertyName] = value;

@@ -11,6 +11,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserSim = void 0;
 var evt_1 = require("evt");
 var id_1 = require("../../tools/typeSafety/id");
 var assert_1 = require("../../tools/typeSafety/assert");

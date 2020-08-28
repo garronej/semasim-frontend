@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.factory = void 0;
 var keyGeneration = require("../crypto/keysGeneration");
 var cryptoLib = require("../crypto/cryptoLibProxy");
 function factory(params) {

@@ -1,5 +1,5 @@
 import { typeGuard } from "../typeSafety/typeGuard";
-import { Polyfill as Set } from "minimal-polyfills/dist/lib/Set";
+import { Polyfill as Set } from "minimal-polyfills/Set";
 
 type SetLike<T> = {
     values: () => Iterable<T>;

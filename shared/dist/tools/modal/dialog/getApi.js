@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getApi = exports.provideCustomImplementationOfApi = void 0;
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
 var customImplementationOfApi = undefined;
 function provideCustomImplementationOfApi(api) {

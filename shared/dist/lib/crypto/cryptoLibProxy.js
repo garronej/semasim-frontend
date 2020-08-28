@@ -20,17 +20,18 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rsa = exports.aes = void 0;
 var cryptoLib = require("crypto-lib");
 var hostCrypto = require("../nativeModules/hostCryptoLib");
 var env_1 = require("../env");
 var crypto_lib_1 = require("crypto-lib");
-exports.WorkerThreadId = crypto_lib_1.WorkerThreadId;
-exports.RsaKey = crypto_lib_1.RsaKey;
-exports.scrypt = crypto_lib_1.scrypt;
-exports.toBuffer = crypto_lib_1.toBuffer;
-exports.workerThreadPool = crypto_lib_1.workerThreadPool;
-exports.stringifyThenEncryptFactory = crypto_lib_1.stringifyThenEncryptFactory;
-exports.decryptThenParseFactory = crypto_lib_1.decryptThenParseFactory;
+Object.defineProperty(exports, "WorkerThreadId", { enumerable: true, get: function () { return crypto_lib_1.WorkerThreadId; } });
+Object.defineProperty(exports, "RsaKey", { enumerable: true, get: function () { return crypto_lib_1.RsaKey; } });
+Object.defineProperty(exports, "scrypt", { enumerable: true, get: function () { return crypto_lib_1.scrypt; } });
+Object.defineProperty(exports, "toBuffer", { enumerable: true, get: function () { return crypto_lib_1.toBuffer; } });
+Object.defineProperty(exports, "workerThreadPool", { enumerable: true, get: function () { return crypto_lib_1.workerThreadPool; } });
+Object.defineProperty(exports, "stringifyThenEncryptFactory", { enumerable: true, get: function () { return crypto_lib_1.stringifyThenEncryptFactory; } });
+Object.defineProperty(exports, "decryptThenParseFactory", { enumerable: true, get: function () { return crypto_lib_1.decryptThenParseFactory; } });
 if (env_1.env.jsRuntimeEnv === "react-native") {
     cryptoLib.disableMultithreading();
 }

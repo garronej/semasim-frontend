@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.overwriteReadonlyProp = void 0;
 /**
  * Assign a value to a property even if the object is freezed or if the property is not writable
  * Throw if the assignation fail ( for example if the property is non configurable write: false )

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.appCryptoSetupHelper = void 0;
 var cryptoLib = require("./cryptoLibProxy");
 var crypto = require("./keysGeneration");
 /** When creating a new Ua instance an encryptor must be provided

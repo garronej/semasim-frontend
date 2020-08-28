@@ -51,6 +51,6 @@ export declare function getCoreApi(sendRequest: ReturnType<typeof import("./getS
         userSim: types.UserSim.Usable;
         contact: types.UserSim.Contact;
     }) => Promise<void>;
-    shouldAppendPromotionalMessage: () => boolean | Promise<boolean>;
+    shouldAppendPromotionalMessage: () => Promise<boolean> | boolean;
 };
 export declare type CoreApi = ReturnType<typeof getCoreApi>;

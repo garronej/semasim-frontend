@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.matchVoid = void 0;
 /**
  *
  * Unlike undefined or null, testing o !== void

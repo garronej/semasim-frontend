@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defineAccessors = void 0;
 exports.defineAccessors = function (obj, propertyName, propertyDescriptor) {
     var _a;
     var get = propertyDescriptor.get, set = propertyDescriptor.set;

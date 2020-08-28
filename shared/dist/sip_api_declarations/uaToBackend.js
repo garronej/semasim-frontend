@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.wd_notifyActionFromOtherUa = exports.notifyIceServer = exports.notifyLoggedFromOtherTab = exports.notifyDongleOnLan = exports.notifyUserSimChange = void 0;
 var notifyUserSimChange;
 (function (notifyUserSimChange) {
     notifyUserSimChange.methodName = "evtUserSimChange";

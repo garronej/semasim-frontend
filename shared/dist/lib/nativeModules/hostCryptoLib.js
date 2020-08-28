@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rsaGenerateKeys = exports.rsaEncryptOrDecrypt = exports.aesEncryptOrDecrypt = exports.apiExposedToHost = void 0;
 var evt_1 = require("evt");
 var evtAesEncryptOrDecryptResult = new evt_1.Evt().setMaxHandlers(Infinity);
 var evtRsaEncryptOrDecryptResult = new evt_1.Evt();

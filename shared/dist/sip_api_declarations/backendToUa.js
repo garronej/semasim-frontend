@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.wd_notifyStatusReportReceived = exports.wd_notifySendReportReceived = exports.wd_newMessage = exports.wd_destroyChat = exports.wd_updateChatContactInfos = exports.wd_updateChatLastMessageSeen = exports.wd_fetchOlderMessages = exports.wd_newChat = exports.wd_getUserSimChats = exports.shouldAppendPromotionalMessage = exports.deleteContact = exports.updateContactName = exports.createContact = exports.rejectSharingRequest = exports.acceptSharingRequest = exports.changeSimFriendlyName = exports.stopSharingSim = exports.shareSim = exports.rebootDongle = exports.unregisterSim = exports.registerSim = exports.unlockSim = exports.getUserSims = void 0;
 var getUserSims;
 (function (getUserSims) {
     getUserSims.methodName = "getUserSims";

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getHandlers = void 0;
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var evt_1 = require("evt");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");

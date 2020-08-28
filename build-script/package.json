@@ -7,7 +7,7 @@
   "dependencies": {
     "commander": "^2.19.0",
     "frontend-build-tools": "github:garronej/frontend-build-tools",
-    "scripting-tools": "github:garronej/scripting-tools"
+    "scripting-tools": "^0.19.13"
   },
   "devDependencies": {
     "@types/node": "^8.9.1",

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.registerInteractiveRemoteNotifyEvtHandlers = void 0;
 var env_1 = require("./env");
 function registerInteractiveRemoteNotifyEvtHandlers(params) {
     var _this = this;

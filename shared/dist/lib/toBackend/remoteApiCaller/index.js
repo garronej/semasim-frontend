@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.factory = void 0;
 var core = require("./core");
 var webphoneData = require("./webphoneData");
 var getSendRequest_1 = require("./getSendRequest");

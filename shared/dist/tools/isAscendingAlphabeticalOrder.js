@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isForWeb = exports.isAscendingAlphabeticalOrder = void 0;
 function isAscendingAlphabeticalOrder(a, b) {
     if (!a || !b) {
         return a.length < b.length;

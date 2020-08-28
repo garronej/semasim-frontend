@@ -6,7 +6,7 @@ import { UiSimRow } from "./UiSimRow";
 import { uiShareSimDependencyInjection } from "./UiShareSim";
 import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { assert } from "frontend-shared/dist/tools/typeSafety/assert";
-import { Polyfill as WeakMap } from "minimal-polyfills/dist/lib/WeakMap";
+import { Polyfill as WeakMap } from "minimal-polyfills/WeakMap";
 import { Evt, StatefulReadonlyEvt, StatefulEvt } from "frontend-shared/node_modules/evt";
 
 declare const require: (path: string) => any;

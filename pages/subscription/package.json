@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "moment": "^2.20.1",
-    "minimal-polyfills": "^1.0.4",
+    "minimal-polyfills": "^2.1.5",
     "frontend-shared": "file:../../shared"
   },
   "devDependencies": {

@@ -11,10 +11,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createModal = void 0;
 var getApi_1 = require("./getApi");
 var stack = require("./stack");
 var getApi_2 = require("./getApi");
-exports.provideCustomImplementationOfApi = getApi_2.provideCustomImplementationOfApi;
+Object.defineProperty(exports, "provideCustomImplementationOfApi", { enumerable: true, get: function () { return getApi_2.provideCustomImplementationOfApi; } });
 function createModal(structure, options) {
     var modal = getApi_1.getApi().create(structure, __assign(__assign({}, options), { "show": false }));
     return stack.add(modal);

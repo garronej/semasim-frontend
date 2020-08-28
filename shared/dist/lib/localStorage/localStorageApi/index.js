@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.removeItem = exports.setItem = exports.getItem = void 0;
 var asyncOrSyncLocalStorage_1 = require("./asyncOrSyncLocalStorage");
 function getItem(key) {
     return __awaiter(this, void 0, void 0, function () {

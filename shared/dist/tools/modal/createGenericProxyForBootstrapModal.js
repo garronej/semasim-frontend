@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createGenericProxyForBootstrapModal = void 0;
 var evt_1 = require("evt");
 /**
  * Assert bootstrap modal initialized on jQuery element.

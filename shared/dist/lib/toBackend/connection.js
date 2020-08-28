@@ -56,6 +56,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.connectAndGetApi = void 0;
 var sip = require("ts-sip");
 var evt_1 = require("evt");
 var localApiHandlers = require("./localApiHandlers");

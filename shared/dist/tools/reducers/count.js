@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.count = exports.arrCount = void 0;
 var reduceify_1 = require("./reduceify");
 function arrCount(arr, matcher) {
     return arr

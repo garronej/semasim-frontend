@@ -52,6 +52,7 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TowardUserKeys = void 0;
 var localStorageApi = require("./localStorageApi");
 var types_1 = require("crypto-lib/dist/sync/types");
 var key = "toward-user-keys";

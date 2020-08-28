@@ -15,11 +15,11 @@
     "@types/jquery": "2.0.48",
     "crypto-lib": "file:../local_modules/crypto-lib",
     "phone-number": "file:../local_modules/phone-number",
-    "run-exclusive": "^2.1.6",
+    "run-exclusive": "^2.2.13",
     "transfer-tools": "garronej/transfer-tools",
-    "evt": "^1.6.8",
+    "evt": "^1.8.7",
     "ts-sip": "file:../local_modules/ts-sip",
     "typescript": "^3.8.0",
-    "minimal-polyfills": "^1.0.8"
+    "minimal-polyfills": "^2.1.4"
   }
 }

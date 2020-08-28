@@ -58,6 +58,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.managerPageLaunch = void 0;
 var restartApp_1 = require("../restartApp");
 var dialog_1 = require("../../tools/modal/dialog");
 var networkStateMonitoring = require("../networkStateMonitoring");

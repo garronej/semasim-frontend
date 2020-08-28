@@ -14,5 +14,6 @@ export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "r
     ;
     */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.env = void 0;
 var impl_1 = require("./impl");
 exports.env = impl_1.default;

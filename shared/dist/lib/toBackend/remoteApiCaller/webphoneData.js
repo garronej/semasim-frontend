@@ -74,6 +74,7 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getWdApiFactory = void 0;
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
 var md5 = require("md5");
 var cryptoLib = require("../../crypto/cryptoLibProxy");

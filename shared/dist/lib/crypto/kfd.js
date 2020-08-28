@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.kfd = void 0;
 var env_1 = require("../env");
 var hostKfd = require("../nativeModules/hostKfd");
 var cryptoLibProxy_1 = require("./cryptoLibProxy");
@@ -57,8 +58,7 @@ exports.kfd = env_1.env.jsRuntimeEnv === "browser" ?
                     return [4 /*yield*/, window.crypto.subtle.importKey("raw", (function Uint8ArrayToArrayBuffer(uint8Array) {
                             return uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteLength + uint8Array.byteOffset);
                         })(Buffer.from(password, "utf8")), { "name": "PBKDF2" }, false, ["deriveBits"])];
-                case 1: return [4 /*yield*/, _c.apply(_b, _d.concat([_e.sent(),
-                        256]))];
+                case 1: return [4 /*yield*/, _c.apply(_b, _d.concat([_e.sent(), 256]))];
                 case 2: return [2 /*return*/, new (_a.apply(Uint8Array, [void 0, _e.sent()]))()];
             }
         });

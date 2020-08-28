@@ -67,6 +67,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.restartApp = exports.registerActionToPerformBeforeAppRestart = void 0;
 var impl = require("./impl");
 var beforeRestartActions = [];
 function registerActionToPerformBeforeAppRestart(action) {

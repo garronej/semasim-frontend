@@ -27,17 +27,13 @@ export declare function getWebApi(params: {
         declaredPushNotificationToken: typeof import("../localStorage/declaredPushNotificationToken");
     }) => {
         /** uaInstanceId should be provided on android/ios and undefined on the web */
-        loginUser: (params_: ({
+        loginUser: (params_: {
             email: string;
             secret: string;
-            shouldThrowOnError?: boolean | undefined;
-        } & {
+            shouldThrowOnError?: boolean;
+        } & ({
             assertJsRuntimeEnv: "browser";
-        }) | ({
-            email: string;
-            secret: string;
-            shouldThrowOnError?: boolean | undefined;
-        } & {
+        } | {
             assertJsRuntimeEnv: "react-native";
             uaInstanceId: string;
         })) => Promise<{

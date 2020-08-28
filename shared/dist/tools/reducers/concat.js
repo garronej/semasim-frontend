@@ -20,6 +20,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.concat = exports.arrConcat = void 0;
 var reduceify_1 = require("./reduceify");
 function arrConcat(arr, elementsToAdd) {
     return __spread(arr, elementsToAdd);

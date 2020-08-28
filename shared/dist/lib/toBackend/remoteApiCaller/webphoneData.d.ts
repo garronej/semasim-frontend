@@ -1,4 +1,5 @@
 import { types as gwTypes } from "../../../gateway/types";
+import { phoneNumber } from "phone-number/dist/lib";
 import * as cryptoLib from "../../crypto/cryptoLibProxy";
 import { Evt, UnpackEvt } from "evt";
 import * as types from "../../types";
@@ -20,20 +21,20 @@ export declare function getWdApiFactory(params: {
     getUserSimChats: ({ maxMessageCountByChat }: {
         maxMessageCountByChat: number;
     }) => Promise<{
-        wdChats: types.wd.Chat<"PLAIN">[];
+        wdChats: types.wd.Chat[];
         wdEvts: types.wd.Evts;
     }>;
     /** If there is already a chat with the contact number nothing will be done */
     newChat: ({ wdChats, contactNumber, contactName, contactIndexInSim }: {
-        wdChats: types.wd.Chat<"PLAIN">[];
-        contactNumber: string;
+        wdChats: types.wd.Chat[];
+        contactNumber: phoneNumber;
         contactName: string;
         contactIndexInSim: number | null;
     }) => Promise<void>;
     fetchOlderMessages: ({ wdChat, maxMessageCount }: {
-        wdChat: types.wd.Chat<"PLAIN">;
+        wdChat: types.wd.Chat;
         maxMessageCount: number;
-    }) => Promise<types.wd.Message<"PLAIN">[]>;
+    }) => Promise<types.wd.Message[]>;
     /**
      *
      * Assert wdChat.message sorted by ordering time.
@@ -49,19 +50,19 @@ export declare function getWdApiFactory(params: {
      * the one pointed by wdChat.refOfLastMessageSeen. ( request not sent )
      *
      * */
-    updateChatLastMessageSeen: (wdChat: types.wd.Chat<"PLAIN">) => Promise<void>;
+    updateChatLastMessageSeen: (wdChat: types.wd.Chat) => Promise<void>;
     /**
      *
      * If same as before the request won't be sent
      *
      * */
     updateChatContactInfos: ({ wdChat, contactName, contactIndexInSim }: {
-        wdChat: types.wd.Chat<"PLAIN">;
+        wdChat: types.wd.Chat;
         contactName: string;
         contactIndexInSim: number | null;
     }) => Promise<void>;
     destroyWdChat: ({ wdChats, refOfTheChatToDelete }: {
-        wdChats: types.wd.Chat<"PLAIN">[];
+        wdChats: types.wd.Chat[];
         refOfTheChatToDelete: string;
     }) => Promise<void>;
     /**
@@ -70,13 +71,13 @@ export declare function getWdApiFactory(params: {
      * */
     newMessage: {
         (args: {
-            wdChat: types.wd.Chat<"PLAIN">;
+            wdChat: types.wd.Chat;
         } & {
             type: "SERVER TO CLIENT";
             bundledData: gwTypes.BundledData.ServerToClient.Message | gwTypes.BundledData.ServerToClient.MmsNotification | gwTypes.BundledData.ServerToClient.CallAnsweredBy | gwTypes.BundledData.ServerToClient.FromSipCallSummary | gwTypes.BundledData.ServerToClient.MissedCall;
         }): Promise<void>;
         (args: {
-            wdChat: types.wd.Chat<"PLAIN">;
+            wdChat: types.wd.Chat;
         } & {
             type: "CLIENT TO SERVER";
             bundledData: {
@@ -89,7 +90,7 @@ export declare function getWdApiFactory(params: {
     };
     /**gwTypes.BundledData.ServerToClient.SendReport is assignable to bundledData*/
     notifySendReportReceived: ({ wdChat, bundledData }: {
-        wdChat: types.wd.Chat<"PLAIN">;
+        wdChat: types.wd.Chat;
         bundledData: {
             messageTowardGsm: {
                 dateTime: number;
@@ -99,11 +100,11 @@ export declare function getWdApiFactory(params: {
         };
     }) => Promise<void>;
     notifyStatusReportReceived: ({ wdChat, bundledData }: {
-        wdChat: types.wd.Chat<"PLAIN">;
+        wdChat: types.wd.Chat;
         bundledData: gwTypes.BundledData.ServerToClient.StatusReport;
     }) => Promise<void>;
     /** Hack so we don't have to handle special case when UA can't send message */
-    notifyUaFailedToSendMessage: (wdChat: types.wd.Chat<"PLAIN">, wdMessage: types.wd.Message.Outgoing.Pending<"PLAIN">) => Promise<void>;
+    notifyUaFailedToSendMessage: (wdChat: types.wd.Chat, wdMessage: types.wd.Message.Outgoing.Pending) => Promise<void>;
 };
 export declare type WdApi = ReturnType<ReturnType<typeof getWdApiFactory>>;
 export {};

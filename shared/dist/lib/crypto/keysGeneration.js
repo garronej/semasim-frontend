@@ -52,6 +52,7 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.symmetricKey = exports.computeLoginSecretAndTowardUserKeys = exports.preSpawnIfNotAlreadyDone = void 0;
 //import * as cryptoLib from "crypto-lib";
 var cryptoLib = require("./cryptoLibProxy");
 var dialog_1 = require("../../tools/modal/dialog");

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.add = void 0;
 var stack = [];
 var onHideKey = " __hide_handler__ ";
 //NOTE: Assert provided modal is not shown.

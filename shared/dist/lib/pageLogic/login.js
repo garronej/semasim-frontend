@@ -47,6 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.factory = void 0;
 var cryptoLib = require("../crypto/cryptoLibProxy");
 var keyGeneration = require("../crypto/keysGeneration");
 var assert_1 = require("../../tools/typeSafety/assert");
