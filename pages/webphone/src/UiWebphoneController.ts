@@ -4,7 +4,7 @@ import { UiPhonebook } from "./UiPhonebook";
 import { UiConversation } from "./UiConversation";
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
 import * as types from "frontend-shared/dist/lib/types";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { Webphone } from "frontend-shared/dist/lib/types/Webphone";
 import { Evt } from "frontend-shared/node_modules/evt";
 

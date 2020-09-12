@@ -431,31 +431,267 @@
         "signature": "a21b3306c076599fdc94458f631a0a2c0f3506d94eff42d55e600144f10c0b22",
         "affectsGlobalScope": false
       },
+      "../node_modules/evt/lib/types/operator.d.ts": {
+        "version": "41592f59d3ac992a7e70619d4242faeaf7bdf46cf2774b39b3ee0758b270421d",
+        "signature": "41592f59d3ac992a7e70619d4242faeaf7bdf46cf2774b39b3ee0758b270421d",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/unpackevt.d.ts": {
+        "version": "1e5749801493b1d367d055cca3bd6676f37fe7daf7a9a95494b0e81ac163445c",
+        "signature": "1e5749801493b1d367d055cca3bd6676f37fe7daf7a9a95494b0e81ac163445c",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/handler.d.ts": {
+        "version": "df37ba21572ce6e1ee349e243c916185ac1fcb20a9027f8608cead7f23c35b01",
+        "signature": "df37ba21572ce6e1ee349e243c916185ac1fcb20a9027f8608cead7f23c35b01",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/postable.d.ts": {
+        "version": "a0204048e26eabf2db7373967ce5623b190033509334f0b1b70a47d2fe28f34a",
+        "signature": "a0204048e26eabf2db7373967ce5623b190033509334f0b1b70a47d2fe28f34a",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts": {
+        "version": "56040fac2784c73bdb749cad83d380b1fa0f5e545f10a3a264e0fedf38d0f8cc",
+        "signature": "56040fac2784c73bdb749cad83d380b1fa0f5e545f10a3a264e0fedf38d0f8cc",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts": {
+        "version": "8720ac5270e1a37039e80361a9e54dc894a9c29cd21eb16740d1387fe31580ef",
+        "signature": "8720ac5270e1a37039e80361a9e54dc894a9c29cd21eb16740d1387fe31580ef",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts": {
+        "version": "216be374240e95ecb99e0762d15c386e1ae9fbf39b7ab98540511dcdd11cf680",
+        "signature": "216be374240e95ecb99e0762d15c386e1ae9fbf39b7ab98540511dcdd11cf680",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts": {
+        "version": "c80793d022dc68024183044e2ee51e469734ca3305cd9f27cb77eb89907cbb35",
+        "signature": "c80793d022dc68024183044e2ee51e469734ca3305cd9f27cb77eb89907cbb35",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts": {
+        "version": "a6697ff8c027a20589fd5d3ab4fdffbb957310c308192dc10ae175c5637a94df",
+        "signature": "a6697ff8c027a20589fd5d3ab4fdffbb957310c308192dc10ae175c5637a94df",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/evt.d.ts": {
+        "version": "7249dbb02e974e1378799b333465b1e8e23c367cee3d418f51ca9c1006ab213f",
+        "signature": "7249dbb02e974e1378799b333465b1e8e23c367cee3d418f51ca9c1006ab213f",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/ctx.d.ts": {
+        "version": "3639c4da28942839545665cdc88587ba745914a0403bc3d0c4d7870e3c3da028",
+        "signature": "3639c4da28942839545665cdc88587ba745914a0403bc3d0c4d7870e3c3da028",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/voidctx.d.ts": {
+        "version": "0a0019e594a8bf4080ae3762c85d4455257b26345b258f6e3fae93e24bbddb91",
+        "signature": "0a0019e594a8bf4080ae3762c85d4455257b26345b258f6e3fae93e24bbddb91",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/voidevt.d.ts": {
+        "version": "a5ab2e15e909deebeba94fa8cbfd6625bd1285e96cc50f03a7977334e7117c47",
+        "signature": "a5ab2e15e909deebeba94fa8cbfd6625bd1285e96cc50f03a7977334e7117c47",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/interfaces/index.d.ts": {
+        "version": "4f2c4ff8251930a018df4750c78f3609aead660a81f58fae9381cf4039748939",
+        "signature": "4f2c4ff8251930a018df4750c78f3609aead660a81f58fae9381cf4039748939",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/swapevttype.d.ts": {
+        "version": "0bb5168f142918c69238c17b2375c830c32ef69548a02a16564416b36fd506b3",
+        "signature": "0bb5168f142918c69238c17b2375c830c32ef69548a02a16564416b36fd506b3",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/factorizeevt.d.ts": {
+        "version": "23a770f959450e2743dd0b819b49b6755beef132e9c1ce79eafa06bf03d70736",
+        "signature": "23a770f959450e2743dd0b819b49b6755beef132e9c1ce79eafa06bf03d70736",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/topostableevt.d.ts": {
+        "version": "f2eaa5f14df99ecda1aad8a67bd03f62985688e62b0648f49a08124297d55a74",
+        "signature": "f2eaa5f14df99ecda1aad8a67bd03f62985688e62b0648f49a08124297d55a74",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts": {
+        "version": "2b9c5384eaee39d38f046732a2ad95aa629d0e81393bcef5632d92ce9e429c31",
+        "signature": "2b9c5384eaee39d38f046732a2ad95aa629d0e81393bcef5632d92ce9e429c31",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/unpackctx.d.ts": {
+        "version": "44640af941c5f16fe081099c5c5beb7f7e2cfb8a76ce01f990a262f2a63be102",
+        "signature": "44640af941c5f16fe081099c5c5beb7f7e2cfb8a76ce01f990a262f2a63be102",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/helper/index.d.ts": {
+        "version": "4048d87f0ad689f5ccba8ee7cc212f0d36f831560bb6472aa6cb3f933ad81cc7",
+        "signature": "4048d87f0ad689f5ccba8ee7cc212f0d36f831560bb6472aa6cb3f933ad81cc7",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/eventtargetlike.d.ts": {
+        "version": "69504253f6463fdd258c42c87228741d8f18a992181470398ff53d224da02bb8",
+        "signature": "69504253f6463fdd258c42c87228741d8f18a992181470398ff53d224da02bb8",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/evterror.d.ts": {
+        "version": "6a04e04da5aee2dc954d1eea83dd2b86ebb78a73685ad299b1f8fba54c423a10",
+        "signature": "6a04e04da5aee2dc954d1eea83dd2b86ebb78a73685ad299b1f8fba54c423a10",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/lib.dom.d.ts": {
+        "version": "9fcc9211d83abda8568637968319e1b4482a08120508f4c19786e83effe5e9d8",
+        "signature": "9fcc9211d83abda8568637968319e1b4482a08120508f4c19786e83effe5e9d8",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/types/index.d.ts": {
+        "version": "8b00524306b8430aff26f1876f0cd522547675ed879772cbd8dad2ecb9eca565",
+        "signature": "8b00524306b8430aff26f1876f0cd522547675ed879772cbd8dad2ecb9eca565",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts": {
+        "version": "0072eeba252eab988da79ad35311573f29ec4cdce3b9564e2146ed84812de591",
+        "signature": "0072eeba252eab988da79ad35311573f29ec4cdce3b9564e2146ed84812de591",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/genericoperators/to.d.ts": {
+        "version": "7595d59599c282270e2064a9abce83376bf0ce3f866f94c16fb89dcd18249713",
+        "signature": "7595d59599c282270e2064a9abce83376bf0ce3f866f94c16fb89dcd18249713",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/genericoperators/index.d.ts": {
+        "version": "927713feee41da9ade18a24d573dd4302fcf6ec64cd93b46ab0742f739eb5176",
+        "signature": "927713feee41da9ade18a24d573dd4302fcf6ec64cd93b46ab0742f739eb5176",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/compose.d.ts": {
+        "version": "25ac18e7de11fd6dc0e12594cc18df1bbe8af31e10c29baaf223a6d1165e537e",
+        "signature": "25ac18e7de11fd6dc0e12594cc18df1bbe8af31e10c29baaf223a6d1165e537e",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/invokeoperator.d.ts": {
+        "version": "7b5c0f0fcb6dc24eb0237446168dbd4422bf786ee9870f46f7df30f7aeddffbd",
+        "signature": "7b5c0f0fcb6dc24eb0237446168dbd4422bf786ee9870f46f7df30f7aeddffbd",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/util/index.d.ts": {
+        "version": "3647bfc1c81919b7df91890e04d1526c6d0400f1b481d393b6886c529250dcb0",
+        "signature": "3647bfc1c81919b7df91890e04d1526c6d0400f1b481d393b6886c529250dcb0",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/ctx.d.ts": {
+        "version": "4f9e2269f1f73e8c9a4413c713c6f7a98e49926c8ccc52d69677d4057bb575fd",
+        "signature": "4f9e2269f1f73e8c9a4413c713c6f7a98e49926c8ccc52d69677d4057bb575fd",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/minimal-polyfills/array.prototype.find.d.ts": {
+        "version": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.create.d.ts": {
+        "version": "cc3e5882a5d2895acce5494e2fc8ee9a40641164b328c08036accc0d93028357",
+        "signature": "cc3e5882a5d2895acce5494e2fc8ee9a40641164b328c08036accc0d93028357",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.getctx.d.ts": {
+        "version": "7061f80b6a70361912e7cf089d45e79b674b26de9b0cce85d202106d3e1b8f4c",
+        "signature": "7061f80b6a70361912e7cf089d45e79b674b26de9b0cce85d202106d3e1b8f4c",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.factorize.d.ts": {
+        "version": "bef9489111014df94a93410fb62109d64614fdbaca680e1998acd24e59c3b601",
+        "signature": "bef9489111014df94a93410fb62109d64614fdbaca680e1998acd24e59c3b601",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.merge.d.ts": {
+        "version": "d2b6ee34a5938d74a61b166c6938750c8a485b228d180c87b2499a3aa0ee4744",
+        "signature": "d2b6ee34a5938d74a61b166c6938750c8a485b228d180c87b2499a3aa0ee4744",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.from.d.ts": {
+        "version": "d7303bd0c9188fed53d36af3b9b3771cab6625823dba88e7c43fe7c58c554b28",
+        "signature": "d7303bd0c9188fed53d36af3b9b3771cab6625823dba88e7c43fe7c58c554b28",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.useeffect.d.ts": {
+        "version": "f00ec55c4a72b2e9a77bc015bffdba69b53f0153c5d99a929e8a5722567c8b40",
+        "signature": "f00ec55c4a72b2e9a77bc015bffdba69b53f0153c5d99a929e8a5722567c8b40",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.aspostable.d.ts": {
+        "version": "91bdef0183012fef0a3d5e67084cbe4573c21a0e3e22e63f6644c8aa041fc1b8",
+        "signature": "91bdef0183012fef0a3d5e67084cbe4573c21a0e3e22e63f6644c8aa041fc1b8",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.asyncpipe.d.ts": {
+        "version": "c1d81437fde3d7b9d33008c13a3de70df39414e162d13515bd6c97f1274ff42f",
+        "signature": "c1d81437fde3d7b9d33008c13a3de70df39414e162d13515bd6c97f1274ff42f",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.asnonpostable.d.ts": {
+        "version": "f0cc971ff5cbeafced229f72a3fbc5d69ab3bb3c18fab73db92774cc99a4237d",
+        "signature": "f0cc971ff5cbeafced229f72a3fbc5d69ab3bb3c18fab73db92774cc99a4237d",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.newctx.d.ts": {
+        "version": "1d714d9a00fcab06be2b09dd1a3d38e8ea105ef44f33f6d73aa79b0231dc410a",
+        "signature": "1d714d9a00fcab06be2b09dd1a3d38e8ea105ef44f33f6d73aa79b0231dc410a",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.loosentype.d.ts": {
+        "version": "d10272ae6e4470c769450a5414326fac1b473bdb07a09e9372fda9f172ec5ab3",
+        "signature": "d10272ae6e4470c769450a5414326fac1b473bdb07a09e9372fda9f172ec5ab3",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/evt.d.ts": {
+        "version": "305903f5d1d6e21b3ee9665a6a13a9241ced81c3b24bbba2f51548a8f3cda28f",
+        "signature": "305903f5d1d6e21b3ee9665a6a13a9241ced81c3b24bbba2f51548a8f3cda28f",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/minimal-polyfills/object.is.d.ts": {
+        "version": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/lib/statefulevt.d.ts": {
+        "version": "23b9d1e5645e981d55197e659c5b206817f84c534cd974a0cdd329b2893d88d9",
+        "signature": "23b9d1e5645e981d55197e659c5b206817f84c534cd974a0cdd329b2893d88d9",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/evt/tools/typesafety/matchvoid.d.ts": {
+        "version": "549f3bd8b575c5345ecafc490b17e3d356ce0b50fae87ffb795f9732920012b6",
+        "signature": "549f3bd8b575c5345ecafc490b17e3d356ce0b50fae87ffb795f9732920012b6",
+        "affectsGlobalScope": false
+      },
       "../node_modules/evt/lib/index.d.ts": {
         "version": "65968b137efb216789699104f52727bed7b9ac0f5d4b79a558732018094b6a35",
         "signature": "65968b137efb216789699104f52727bed7b9ac0f5d4b79a558732018094b6a35",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/node_modules/minimal-polyfills/array.from.ts": {
-        "version": "c654dae5dbb90a40e15a401a866d017b31aabacece4cfd1b9a569f92a3fb44d8",
+      "../node_modules/minimal-polyfills/array.from.d.ts": {
+        "version": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/dist/sync/types.d.ts": {
+      "../node_modules/crypto-lib/dist/sync/types.d.ts": {
         "version": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de",
         "signature": "ece2ed9e7494bdd3ed91165738857e5c391089ad5584823582efb5b563ee94de",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": {
+      "../node_modules/crypto-lib/dist/async/serializer.d.ts": {
         "version": "ab92620bc1dcc144ef6766893d84da02dfd9fd9e3f40991d11ed18d780b2ecc1",
         "signature": "ab92620bc1dcc144ef6766893d84da02dfd9fd9e3f40991d11ed18d780b2ecc1",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts": {
+      "../node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts": {
         "version": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4",
         "signature": "63abf3b8b4871cf1e30f7c01cbf173452b6df2c47fd4693bba039846caac69b4",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/dist/async/index.d.ts": {
+      "../node_modules/crypto-lib/dist/async/index.d.ts": {
         "version": "da03ec709ce24517086e211bf54f1f6ec9725800ce104442f370b3a20d218114",
         "signature": "da03ec709ce24517086e211bf54f1f6ec9725800ce104442f370b3a20d218114",
         "affectsGlobalScope": false
@@ -505,7 +741,7 @@
         "signature": "2bf6622a5fe21d2a3d73704371b22633c60af8afdc8fc633f643c45ce6a60f57",
         "affectsGlobalScope": false
       },
-      "../../local_modules/phone-number/dist/lib/index.d.ts": {
+      "../node_modules/phone-number/dist/lib/index.d.ts": {
         "version": "563c5fe46028f83f620688408662ba45d669cb1fec288a7f2969911b58dd5bae",
         "signature": "563c5fe46028f83f620688408662ba45d669cb1fec288a7f2969911b58dd5bae",
         "affectsGlobalScope": false
@@ -518,11 +754,6 @@
       "../node_modules/trackable-map/dist/lib/mapextended.d.ts": {
         "version": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958",
         "signature": "d60c8d9d8062343ae38270d4c7ef5e498d4c678d7aa82712d4d4d09276870958",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/evt/lib/types/index.d.ts": {
-        "version": "8b00524306b8430aff26f1876f0cd522547675ed879772cbd8dad2ecb9eca565",
-        "signature": "8b00524306b8430aff26f1876f0cd522547675ed879772cbd8dad2ecb9eca565",
         "affectsGlobalScope": false
       },
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": {
@@ -675,7 +906,7 @@
         "signature": "0d257a1abc0fe64fc8d9c97e70fad4ce5ca44ea1d307da6d30c66452ca883630",
         "affectsGlobalScope": false
       },
-      "../../local_modules/ts-sip/dist/lib/index.d.ts": {
+      "../node_modules/ts-sip/dist/lib/index.d.ts": {
         "version": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
         "signature": "c6f8105cd244b29f56e4f07e9cf203b8d2a3aa49d1f41b2c906185282336b4fd",
         "affectsGlobalScope": false
@@ -880,7 +1111,7 @@
         "signature": "4ecf8d0f5fb132f6dabd324bbe77109d09c9201f258b67c78be169725bddae01",
         "affectsGlobalScope": false
       },
-      "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts": {
+      "../node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts": {
         "version": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516",
         "signature": "e2454beb4257cdb474b3b4bf14defef531a761d03959f98936395566d0a4f516",
         "affectsGlobalScope": false
@@ -1153,22 +1384,6 @@
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
-      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
-        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
-        "../../local_modules/crypto-lib/node_modules/minimal-polyfills/array.from.ts"
-      ],
-      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
-      ],
-      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
-      ],
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": [
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts"
@@ -1180,40 +1395,226 @@
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
         "../node_modules/trackable-map/dist/lib/index.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
+      "../node_modules/crypto-lib/dist/async/index.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+        "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
+        "../node_modules/minimal-polyfills/array.from.d.ts"
+      ],
+      "../node_modules/crypto-lib/dist/async/serializer.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../node_modules/evt/lib/ctx.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.asnonpostable.d.ts": [
+        "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.aspostable.d.ts": [
+        "../node_modules/evt/lib/types/helper/topostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.asyncpipe.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.create.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.d.ts": [
+        "../../../gateway/node_modules/minimal-polyfills/array.prototype.find.d.ts",
+        "../node_modules/evt/lib/evt.asnonpostable.d.ts",
+        "../node_modules/evt/lib/evt.aspostable.d.ts",
+        "../node_modules/evt/lib/evt.asyncpipe.d.ts",
+        "../node_modules/evt/lib/evt.create.d.ts",
+        "../node_modules/evt/lib/evt.factorize.d.ts",
+        "../node_modules/evt/lib/evt.from.d.ts",
+        "../node_modules/evt/lib/evt.getctx.d.ts",
+        "../node_modules/evt/lib/evt.loosentype.d.ts",
+        "../node_modules/evt/lib/evt.merge.d.ts",
+        "../node_modules/evt/lib/evt.newctx.d.ts",
+        "../node_modules/evt/lib/evt.useeffect.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.factorize.d.ts": [
+        "../node_modules/evt/lib/types/helper/factorizeevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.from.d.ts": [
+        "../node_modules/evt/lib/types/eventtargetlike.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/lib.dom.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.getctx.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.loosentype.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.merge.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.newctx.d.ts": [
+        "../node_modules/evt/lib/ctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
       "../node_modules/evt/lib/index.d.ts": [
-        "../../../gateway/node_modules/evt/lib/ctx.d.ts",
-        "../../../gateway/node_modules/evt/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/lib/statefulevt.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/util/index.d.ts",
-        "../../../gateway/node_modules/evt/tools/typesafety/matchvoid.d.ts"
+        "../node_modules/evt/lib/ctx.d.ts",
+        "../node_modules/evt/lib/evt.d.ts",
+        "../node_modules/evt/lib/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
+        "../node_modules/evt/lib/util/index.d.ts",
+        "../node_modules/evt/tools/typesafety/matchvoid.d.ts"
+      ],
+      "../node_modules/evt/lib/statefulevt.d.ts": [
+        "../../../gateway/node_modules/minimal-polyfills/object.is.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/handler.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/factorizeevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/index.d.ts": [
+        "../node_modules/evt/lib/types/helper/factorizeevt.d.ts",
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/topostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackctx.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/swapevttype.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/topostableevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
       ],
       "../node_modules/evt/lib/types/index.d.ts": [
-        "../../../gateway/node_modules/evt/lib/types/eventtargetlike.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/evterror.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/handler.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/helper/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/interfaces/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/lib.dom.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/operator.d.ts"
+        "../node_modules/evt/lib/types/eventtargetlike.d.ts",
+        "../node_modules/evt/lib/types/evterror.d.ts",
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/index.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/lib.dom.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/ctx.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/evt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/index.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/ctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/voidctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/voidevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/voidctx.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctx.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/voidevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/operator.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/util/compose.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/index.d.ts": [
+        "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts",
+        "../node_modules/evt/lib/util/genericoperators/to.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts": [
+        "../node_modules/evt/lib/index.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/to.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/index.d.ts": [
+        "../node_modules/evt/lib/util/compose.d.ts",
+        "../node_modules/evt/lib/util/genericoperators/index.d.ts",
+        "../node_modules/evt/lib/util/invokeoperator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/invokeoperator.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/index.d.ts": [
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
         "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
+      ],
+      "../node_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
       "../src/gateway/bundleddata.ts": [
         "../../../gateway/dist/lib/misc/bundleddata.d.ts"
@@ -1231,8 +1632,8 @@
         "../../../gateway/dist/web_api_declaration.d.ts"
       ],
       "../src/lib/applauncher/applaunch.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/applauncher/minimallaunch.ts",
         "../src/lib/createsipuseragentfactory.ts",
         "../src/lib/createwebphonefactory.ts",
@@ -1304,9 +1705,9 @@
         "../src/tools/modal/dialog/index.ts"
       ],
       "../src/lib/createsipuseragentfactory.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../node_modules/run-exclusive/lib/runexclusive.d.ts",
         "../src/gateway/bundleddata.ts",
         "../src/gateway/readimsi.ts",
@@ -1320,7 +1721,7 @@
         "../src/tools/typesafety/asyncreturntype.ts"
       ],
       "../src/lib/createwebphonefactory.ts": [
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/lib/createsipuseragentfactory.ts",
         "../src/lib/env/index.ts",
@@ -1334,12 +1735,12 @@
         "../src/lib/localstorage/towarduserkeys.ts"
       ],
       "../src/lib/crypto/cryptolibproxy.ts": [
-        "../../local_modules/crypto-lib/dist/async/index.d.ts",
+        "../node_modules/crypto-lib/dist/async/index.d.ts",
         "../src/lib/env/index.ts",
         "../src/lib/nativemodules/hostcryptolib.ts"
       ],
       "../src/lib/crypto/keysgeneration.ts": [
-        "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
+        "../node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
         "../src/lib/crypto/kfd.ts",
         "../src/lib/localstorage/towarduserkeys.ts",
@@ -1360,7 +1761,7 @@
         "../src/lib/env/impl.ts"
       ],
       "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/localstorage/localstorageapi/index.ts"
       ],
       "../src/lib/localstorage/credentials.ts": [
@@ -1381,25 +1782,25 @@
         "../src/lib/localstorage/localstorageapi/asyncorsynclocalstorage.ts"
       ],
       "../src/lib/localstorage/towarduserkeys.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
         "../src/lib/localstorage/localstorageapi/index.ts"
       ],
       "../src/lib/nativemodules/hostcryptolib.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/nativemodules/hostkfd.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/nativemodules/hostwebrtc.ts": [
         "../src/tools/overridewebrtcimplementation.ts"
       ],
       "../src/lib/networkstatemonitoring/impl.native.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/networkstatemonitoring/types.ts"
       ],
       "../src/lib/networkstatemonitoring/impl.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/networkstatemonitoring/types.ts"
       ],
       "../src/lib/networkstatemonitoring/index.ts": [
@@ -1407,7 +1808,7 @@
         "../src/lib/networkstatemonitoring/types.ts"
       ],
       "../src/lib/networkstatemonitoring/types.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/pagelogic/login.ts": [
         "../src/lib/crypto/cryptolibproxy.ts",
@@ -1452,8 +1853,8 @@
         "../src/lib/types/shop.ts"
       ],
       "../src/lib/tobackend/connection.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/env/index.ts",
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
         "../src/lib/networkstatemonitoring/index.ts",
@@ -1466,16 +1867,16 @@
         "../src/tools/urlgetparameters.ts"
       ],
       "../src/lib/tobackend/localapihandlers.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/types/remotenotifyevts.ts",
         "../src/sip_api_declarations/uatobackend.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/core.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/restartapp/index.ts",
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
         "../src/lib/types/index.ts",
@@ -1499,9 +1900,9 @@
         "../src/lib/tobackend/remoteapicaller/webphonedata.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
@@ -1532,19 +1933,19 @@
         "../src/lib/types/websocketconnectionparams.ts"
       ],
       "../src/lib/types/phonecallui.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/types/remotenotifyevts.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/sip_api_declarations/uatobackend.ts"
       ],
       "../src/lib/types/shop.ts": [
         "../src/tools/currency.ts"
       ],
       "../src/lib/types/usersim.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/tools/typesafety/assert.ts",
         "../src/tools/typesafety/exclude.ts",
         "../src/tools/typesafety/id.ts",
@@ -1552,19 +1953,19 @@
         "../src/tools/typesafety/typeguard.ts"
       ],
       "../src/lib/types/webphone.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/lib/types/usersim.ts",
         "../src/lib/types/webphonedata.ts"
       ],
       "../src/lib/types/webphonedata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/crypto-lib/dist/async/index.d.ts",
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/crypto-lib/dist/async/index.d.ts",
+        "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/tools/isascendingalphabeticalorder.ts"
       ],
       "../src/lib/webapicaller/index.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/env/index.ts",
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
         "../src/lib/localstorage/credentials.ts",
@@ -1614,7 +2015,7 @@
         "../src/tools/typesafety/assert.ts"
       ],
       "../src/tools/modal/creategenericproxyforbootstrapmodal.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/tools/modal/types.ts"
       ],
       "../src/tools/modal/dialog/getapi.ts": [
@@ -1643,11 +2044,11 @@
         "../src/tools/modal/types.ts"
       ],
       "../src/tools/modal/types.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/tools/modal/types.structure.ts"
       ],
       "../src/tools/overridewebrtcimplementation.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/tools/reducers/allequals.ts": [
         "../src/tools/reducers/allequalsto.ts",
@@ -1978,22 +2379,6 @@
       ]
     },
     "exportedModulesMap": {
-      "../../local_modules/crypto-lib/dist/async/index.d.ts": [
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts",
-        "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
-        "../../local_modules/crypto-lib/node_modules/minimal-polyfills/array.from.ts"
-      ],
-      "../../local_modules/crypto-lib/dist/async/serializer.d.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
-      ],
-      "../../local_modules/ts-sip/dist/lib/index.d.ts": [
-        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
-        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
-      ],
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts": [
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
         "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts"
@@ -2005,40 +2390,226 @@
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/apideclaration.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
         "../node_modules/trackable-map/dist/lib/index.d.ts"
       ],
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts": [
         "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
       ],
+      "../node_modules/crypto-lib/dist/async/index.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts",
+        "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
+        "../node_modules/minimal-polyfills/array.from.d.ts"
+      ],
+      "../node_modules/crypto-lib/dist/async/serializer.d.ts": [
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts"
+      ],
+      "../node_modules/evt/lib/ctx.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.asnonpostable.d.ts": [
+        "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.aspostable.d.ts": [
+        "../node_modules/evt/lib/types/helper/topostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.asyncpipe.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.create.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.d.ts": [
+        "../../../gateway/node_modules/minimal-polyfills/array.prototype.find.d.ts",
+        "../node_modules/evt/lib/evt.asnonpostable.d.ts",
+        "../node_modules/evt/lib/evt.aspostable.d.ts",
+        "../node_modules/evt/lib/evt.asyncpipe.d.ts",
+        "../node_modules/evt/lib/evt.create.d.ts",
+        "../node_modules/evt/lib/evt.factorize.d.ts",
+        "../node_modules/evt/lib/evt.from.d.ts",
+        "../node_modules/evt/lib/evt.getctx.d.ts",
+        "../node_modules/evt/lib/evt.loosentype.d.ts",
+        "../node_modules/evt/lib/evt.merge.d.ts",
+        "../node_modules/evt/lib/evt.newctx.d.ts",
+        "../node_modules/evt/lib/evt.useeffect.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.factorize.d.ts": [
+        "../node_modules/evt/lib/types/helper/factorizeevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.from.d.ts": [
+        "../node_modules/evt/lib/types/eventtargetlike.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/lib.dom.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.getctx.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.loosentype.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.merge.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/evt.newctx.d.ts": [
+        "../node_modules/evt/lib/ctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
       "../node_modules/evt/lib/index.d.ts": [
-        "../../../gateway/node_modules/evt/lib/ctx.d.ts",
-        "../../../gateway/node_modules/evt/lib/evt.d.ts",
-        "../../../gateway/node_modules/evt/lib/statefulevt.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/util/index.d.ts",
-        "../../../gateway/node_modules/evt/tools/typesafety/matchvoid.d.ts"
+        "../node_modules/evt/lib/ctx.d.ts",
+        "../node_modules/evt/lib/evt.d.ts",
+        "../node_modules/evt/lib/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
+        "../node_modules/evt/lib/util/index.d.ts",
+        "../node_modules/evt/tools/typesafety/matchvoid.d.ts"
+      ],
+      "../node_modules/evt/lib/statefulevt.d.ts": [
+        "../../../gateway/node_modules/minimal-polyfills/object.is.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/handler.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/factorizeevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/index.d.ts": [
+        "../node_modules/evt/lib/types/helper/factorizeevt.d.ts",
+        "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+        "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/topostableevt.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackctx.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/swapevttype.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/types/helper/topostableevt.d.ts": [
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
       ],
       "../node_modules/evt/lib/types/index.d.ts": [
-        "../../../gateway/node_modules/evt/lib/types/eventtargetlike.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/evterror.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/handler.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/helper/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/interfaces/index.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/lib.dom.d.ts",
-        "../../../gateway/node_modules/evt/lib/types/operator.d.ts"
+        "../node_modules/evt/lib/types/eventtargetlike.d.ts",
+        "../node_modules/evt/lib/types/evterror.d.ts",
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/index.d.ts",
+        "../node_modules/evt/lib/types/interfaces/index.d.ts",
+        "../node_modules/evt/lib/types/lib.dom.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/ctx.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/helper/unpackevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/evt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/index.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/ctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/voidctx.d.ts",
+        "../node_modules/evt/lib/types/interfaces/voidevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/postable.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+        "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/voidctx.d.ts": [
+        "../node_modules/evt/lib/types/handler.d.ts",
+        "../node_modules/evt/lib/types/interfaces/ctx.d.ts"
+      ],
+      "../node_modules/evt/lib/types/interfaces/voidevt.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/evt.d.ts"
+      ],
+      "../node_modules/evt/lib/types/operator.d.ts": [
+        "../node_modules/evt/lib/types/interfaces/index.d.ts"
+      ],
+      "../node_modules/evt/lib/util/compose.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/index.d.ts": [
+        "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts",
+        "../node_modules/evt/lib/util/genericoperators/to.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts": [
+        "../node_modules/evt/lib/index.d.ts"
+      ],
+      "../node_modules/evt/lib/util/genericoperators/to.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/index.d.ts": [
+        "../node_modules/evt/lib/util/compose.d.ts",
+        "../node_modules/evt/lib/util/genericoperators/index.d.ts",
+        "../node_modules/evt/lib/util/invokeoperator.d.ts"
+      ],
+      "../node_modules/evt/lib/util/invokeoperator.d.ts": [
+        "../node_modules/evt/lib/types/operator.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/index.d.ts": [
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
         "../node_modules/trackable-map/dist/lib/trackablemap.d.ts"
       ],
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts": [
-        "../../../gateway/node_modules/evt/lib/types/index.d.ts",
+        "../node_modules/evt/lib/types/index.d.ts",
         "../node_modules/trackable-map/dist/lib/mapextended.d.ts"
+      ],
+      "../node_modules/ts-sip/dist/lib/index.d.ts": [
+        "../../../gateway/node_modules/ts-sip/dist/lib/api/index.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/core.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/misc.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/socket.d.ts",
+        "../../../gateway/node_modules/ts-sip/dist/lib/types.d.ts"
       ],
       "../src/gateway/bundleddata.ts": [
         "../../../gateway/dist/lib/misc/bundleddata.d.ts"
@@ -2056,7 +2627,7 @@
         "../../../gateway/dist/web_api_declaration.d.ts"
       ],
       "../src/lib/applauncher/applaunch.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/pagelogic/login.ts",
         "../src/lib/pagelogic/register.ts",
         "../src/lib/restartapp/index.ts",
@@ -2089,9 +2660,9 @@
         "../src/lib/pagelogic/register.ts"
       ],
       "../src/lib/createsipuseragentfactory.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/lib/crypto/appcryptosetuphelper.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
@@ -2109,7 +2680,7 @@
         "../src/lib/localstorage/towarduserkeys.ts"
       ],
       "../src/lib/crypto/cryptolibproxy.ts": [
-        "../../local_modules/crypto-lib/dist/async/index.d.ts"
+        "../node_modules/crypto-lib/dist/async/index.d.ts"
       ],
       "../src/lib/crypto/keysgeneration.ts": [
         "../src/lib/crypto/cryptolibproxy.ts",
@@ -2125,7 +2696,7 @@
         "../src/lib/env/impl.ts"
       ],
       "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/localstorage/credentials.ts": [
         "../src/web_api_declaration.ts"
@@ -2137,7 +2708,7 @@
         "../res/@types/@react-native-community/async-storage/index.d.ts"
       ],
       "../src/lib/localstorage/towarduserkeys.ts": [
-        "../../local_modules/crypto-lib/dist/sync/types.d.ts"
+        "../../../gateway/node_modules/crypto-lib/dist/sync/types.d.ts"
       ],
       "../src/lib/nativemodules/hostwebrtc.ts": [
         "../src/tools/overridewebrtcimplementation.ts"
@@ -2153,7 +2724,7 @@
         "../src/lib/networkstatemonitoring/types.ts"
       ],
       "../src/lib/networkstatemonitoring/types.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/pagelogic/login.ts": [
         "../src/lib/localstorage/justregistered.ts",
@@ -2184,8 +2755,8 @@
         "../src/lib/types/shop.ts"
       ],
       "../src/lib/tobackend/connection.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../../../gateway/node_modules/ts-sip/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
         "../src/lib/networkstatemonitoring/index.ts",
         "../src/lib/restartapp/index.ts",
@@ -2218,8 +2789,8 @@
         "../src/lib/types/webphonedata.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/phone-number/dist/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
+        "../node_modules/phone-number/dist/lib/index.d.ts",
         "../src/gateway/types.ts",
         "../src/lib/crypto/cryptolibproxy.ts",
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
@@ -2244,26 +2815,26 @@
         "../src/lib/types/websocketconnectionparams.ts"
       ],
       "../src/lib/types/phonecallui.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts"
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/types/remotenotifyevts.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/sip_api_declarations/uatobackend.ts"
       ],
       "../src/lib/types/usersim.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts"
+        "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/types/webphone.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/lib/types/usersim.ts",
         "../src/lib/types/webphonedata.ts"
       ],
       "../src/lib/types/webphonedata.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
-        "../../local_modules/crypto-lib/dist/async/index.d.ts",
-        "../../local_modules/crypto-lib/dist/async/serializer.d.ts"
+        "../node_modules/crypto-lib/dist/async/index.d.ts",
+        "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+        "../node_modules/evt/lib/index.d.ts"
       ],
       "../src/lib/webapicaller/index.ts": [
         "../src/lib/localstorage/authenticatedsessiondescriptorshareddata.ts",
@@ -2316,7 +2887,7 @@
         "../src/tools/modal/types.ts"
       ],
       "../src/tools/modal/types.ts": [
-        "../../../gateway/node_modules/evt/lib/index.d.ts",
+        "../node_modules/evt/lib/index.d.ts",
         "../src/tools/modal/types.structure.ts"
       ],
       "../src/tools/reducers/allequals.ts": [
@@ -2628,14 +3199,6 @@
       ]
     },
     "semanticDiagnosticsPerFile": [
-      "../../local_modules/crypto-lib/dist/async/index.d.ts",
-      "../../local_modules/crypto-lib/dist/async/serializer.d.ts",
-      "../../local_modules/crypto-lib/dist/sync/types.d.ts",
-      "../../local_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
-      "../../local_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
-      "../../local_modules/crypto-lib/node_modules/minimal-polyfills/array.from.ts",
-      "../../local_modules/phone-number/dist/lib/index.d.ts",
-      "../../local_modules/ts-sip/dist/lib/index.d.ts",
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/index.d.ts",
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/deprecatedtypes.d.ts",
       "../../react-native-app/node_modules/@react-native-community/netinfo/lib/typescript/src/internal/types.d.ts",
@@ -2646,15 +3209,69 @@
       "../node_modules/chan-dongle-extended-client/dist/lib/donglecontroller.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/index.d.ts",
       "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
+      "../node_modules/crypto-lib/dist/async/index.d.ts",
+      "../node_modules/crypto-lib/dist/async/serializer.d.ts",
+      "../node_modules/crypto-lib/dist/sync/types.d.ts",
+      "../node_modules/crypto-lib/dist/sync/utils/binarydatamanipulations.d.ts",
+      "../node_modules/crypto-lib/dist/sync/utils/tobuffer.d.ts",
+      "../node_modules/evt/lib/ctx.d.ts",
+      "../node_modules/evt/lib/evt.asnonpostable.d.ts",
+      "../node_modules/evt/lib/evt.aspostable.d.ts",
+      "../node_modules/evt/lib/evt.asyncpipe.d.ts",
+      "../node_modules/evt/lib/evt.create.d.ts",
+      "../node_modules/evt/lib/evt.d.ts",
+      "../node_modules/evt/lib/evt.factorize.d.ts",
+      "../node_modules/evt/lib/evt.from.d.ts",
+      "../node_modules/evt/lib/evt.getctx.d.ts",
+      "../node_modules/evt/lib/evt.loosentype.d.ts",
+      "../node_modules/evt/lib/evt.merge.d.ts",
+      "../node_modules/evt/lib/evt.newctx.d.ts",
+      "../node_modules/evt/lib/evt.useeffect.d.ts",
       "../node_modules/evt/lib/index.d.ts",
+      "../node_modules/evt/lib/statefulevt.d.ts",
+      "../node_modules/evt/lib/types/eventtargetlike.d.ts",
+      "../node_modules/evt/lib/types/evterror.d.ts",
+      "../node_modules/evt/lib/types/handler.d.ts",
+      "../node_modules/evt/lib/types/helper/factorizeevt.d.ts",
+      "../node_modules/evt/lib/types/helper/index.d.ts",
+      "../node_modules/evt/lib/types/helper/swapevttype.d.ts",
+      "../node_modules/evt/lib/types/helper/tononpostableevt.d.ts",
+      "../node_modules/evt/lib/types/helper/topostableevt.d.ts",
+      "../node_modules/evt/lib/types/helper/unpackctx.d.ts",
+      "../node_modules/evt/lib/types/helper/unpackevt.d.ts",
       "../node_modules/evt/lib/types/index.d.ts",
+      "../node_modules/evt/lib/types/interfaces/ctx.d.ts",
+      "../node_modules/evt/lib/types/interfaces/ctxlike.d.ts",
+      "../node_modules/evt/lib/types/interfaces/evt.d.ts",
+      "../node_modules/evt/lib/types/interfaces/index.d.ts",
+      "../node_modules/evt/lib/types/interfaces/nonpostableevt.d.ts",
+      "../node_modules/evt/lib/types/interfaces/postable.d.ts",
+      "../node_modules/evt/lib/types/interfaces/statefulevt.d.ts",
+      "../node_modules/evt/lib/types/interfaces/statefulpostable.d.ts",
+      "../node_modules/evt/lib/types/interfaces/statefulreadonlyevt.d.ts",
+      "../node_modules/evt/lib/types/interfaces/voidctx.d.ts",
+      "../node_modules/evt/lib/types/interfaces/voidevt.d.ts",
+      "../node_modules/evt/lib/types/lib.dom.d.ts",
+      "../node_modules/evt/lib/types/operator.d.ts",
+      "../node_modules/evt/lib/util/compose.d.ts",
+      "../node_modules/evt/lib/util/genericoperators/index.d.ts",
+      "../node_modules/evt/lib/util/genericoperators/throttletime.d.ts",
+      "../node_modules/evt/lib/util/genericoperators/to.d.ts",
+      "../node_modules/evt/lib/util/index.d.ts",
+      "../node_modules/evt/lib/util/invokeoperator.d.ts",
+      "../node_modules/evt/tools/typesafety/matchvoid.d.ts",
+      "../node_modules/minimal-polyfills/array.from.d.ts",
+      "../node_modules/minimal-polyfills/array.prototype.find.d.ts",
       "../node_modules/minimal-polyfills/object.assign.d.ts",
+      "../node_modules/minimal-polyfills/object.is.d.ts",
       "../node_modules/minimal-polyfills/set.d.ts",
+      "../node_modules/phone-number/dist/lib/index.d.ts",
       "../node_modules/run-exclusive/lib/runexclusive.d.ts",
       "../node_modules/trackable-map/dist/lib/index.d.ts",
       "../node_modules/trackable-map/dist/lib/mapextended.d.ts",
       "../node_modules/trackable-map/dist/lib/trackablemap.d.ts",
       "../node_modules/transfer-tools/dist/lib/json_custom.d.ts",
+      "../node_modules/ts-sip/dist/lib/index.d.ts",
       "../node_modules/typescript/lib/lib.dom.d.ts",
       "../node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "../node_modules/typescript/lib/lib.es2015.core.d.ts",

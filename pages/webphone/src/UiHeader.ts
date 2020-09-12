@@ -1,5 +1,5 @@
 import { loadUiClassHtml } from "frontend-shared/dist/lib/loadUiClassHtml";
-import { phoneNumber } from "../../../local_modules/phone-number/dist/lib";
+import { phoneNumber } from "frontend-shared/node_modules/phone-number";
 import { Evt, StatefulReadonlyEvt } from "frontend-shared/node_modules/evt";
 
 import * as types from "frontend-shared/dist/lib/types/userSim";
