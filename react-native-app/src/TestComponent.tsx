@@ -26,12 +26,14 @@ const log: typeof console.log = true ?
 
 log("imported");
 
-export const TestComponent: React.FunctionComponent<{
+export type Props = {
     dialogApi: DialogApi
     restartApp: typeof restartApp,
     webphones: types.Webphone[];
     accountManagementApi: types.AccountManagementApi;
-}> = props => {
+};
+
+export const TestComponent: React.FunctionComponent<Props> = props => {
 
     const { dialogApi, restartApp, webphones, accountManagementApi } = props;
 
