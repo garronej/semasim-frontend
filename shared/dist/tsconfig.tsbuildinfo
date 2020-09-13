@@ -1382,7 +1382,6 @@
         "jquery"
       ],
       "project": "../tsconfig.json",
-      "watch": true,
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
