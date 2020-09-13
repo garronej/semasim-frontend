@@ -1,6 +1,7 @@
 import { UserSim } from "./UserSim";
 import * as wd from "./webphoneData";
-import type { StatefulReadonlyEvt, Ctx } from "evt";
+import type { StatefulReadonlyEvt } from "evt";
+import type { NonPostableEvt } from "evt";
 export declare type Webphone = {
     userSim: UserSim.Usable;
     userSimEvts: Pick<UserSim.Usable.Evts.ForSpecificSim, "evtFriendlyNameChange" | "evtReachabilityStatusChange" | "evtCellularConnectivityChange" | "evtCellularSignalStrengthChange" | "evtOngoingCall" | "evtNewUpdatedOrDeletedContact">;
@@ -33,23 +34,29 @@ export declare namespace Webphone {
     namespace sortPuttingFirstTheOneThatWasLastUsed {
         type WebphoneLike = Pick<Webphone, "userSim" | "wdChats">;
     }
-    function useEffectCanCall(canCallEffect: (canCall: boolean) => void, { evtWebphone, evtPhoneNumberRaw, ctx }: {
-        evtWebphone: StatefulReadonlyEvt<useEffectCanCall.WebphoneLike>;
-        evtPhoneNumberRaw: StatefulReadonlyEvt<string>;
-        ctx?: Ctx<any>;
-    }): void;
-    namespace useEffectCanCall {
-        type WebphoneLike = {
-            userSim: {
-                sim: {
-                    country?: {
-                        iso: string;
-                    };
+    namespace canCall {
+        function getValue(params: {
+            webphone: getValue.WebphoneLike;
+            phoneNumber: string;
+        }): boolean;
+        namespace getValue {
+            type WebphoneLike = {
+                userSim: {
+                    reachableSimState?: UserSim.ReachableSimState;
                 };
-                reachableSimState?: UserSim.ReachableSimState;
+                evtIsSipRegistered: {
+                    state: boolean;
+                };
             };
-            userSimEvts: Pick<UserSim.Usable.Evts.ForSpecificSim, "evtReachabilityStatusChange" | "evtOngoingCall" | "evtCellularConnectivityChange">;
-            evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
-        };
+        }
+        function getAffectedByEvts(params: {
+            webphone: getAffectedByEvts.WebphoneLike;
+        }): NonPostableEvt<any>[];
+        namespace getAffectedByEvts {
+            type WebphoneLike = {
+                userSimEvts: Pick<UserSim.Usable.Evts.ForSpecificSim, "evtReachabilityStatusChange" | "evtOngoingCall" | "evtCellularConnectivityChange">;
+                evtIsSipRegistered: StatefulReadonlyEvt<boolean>;
+            };
+        }
     }
 }

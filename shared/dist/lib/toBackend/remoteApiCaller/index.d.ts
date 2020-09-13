@@ -46,7 +46,7 @@ export declare function factory(params: {
                 wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
             } & {
                 type: "SERVER TO CLIENT";
-                bundledData: import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.Message | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.MmsNotification | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.MissedCall | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.FromSipCallSummary | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.CallAnsweredBy;
+                bundledData: import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.Message | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.MmsNotification | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.CallAnsweredBy | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.FromSipCallSummary | import("semasim-gateway/dist/lib/types").BundledData.ServerToClient.MissedCall;
             }): Promise<void>;
             (args: {
                 wdChat: import("../../types/webphoneData").Chat<"PLAIN">;
@@ -88,7 +88,7 @@ export declare function factory(params: {
         unlockSim: ({ lockedDongle, pin }: {
             lockedDongle: import("chan-dongle-extended-client/dist/lib/types").Dongle.Locked;
             pin: string;
-        }) => Promise<import("chan-dongle-extended-client/dist/lib/types").UnlockResult.Success | import("chan-dongle-extended-client/dist/lib/types").UnlockResult.Failed | undefined>;
+        }) => Promise<import("../../../sip_api_declarations/backendToUa").unlockSim.Response>;
         registerSim: ({ dongle, friendlyName }: {
             dongle: import("chan-dongle-extended-client/dist/lib/types").Dongle.Usable;
             friendlyName: string;

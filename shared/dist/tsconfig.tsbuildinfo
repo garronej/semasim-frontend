@@ -747,8 +747,8 @@
         "affectsGlobalScope": false
       },
       "../src/lib/types/webphone.ts": {
-        "version": "cb032fca5e8676ec782b4395b7bcf812c68ef50f406837a26950fbbab1871a1c",
-        "signature": "350355b5372960d0c3433c98cdcc3da521d69faaeb4052db1fe53c8d28047d74",
+        "version": "e15da2e2aca8492feac3cc502bbbd5cf2da18ccdcb7067940392bf3b9782eabd",
+        "signature": "149e6818c4608262f69239c6a203f2eb70e39a72ee1067153d0547bf7a6647ea",
         "affectsGlobalScope": false
       },
       "../node_modules/trackable-map/dist/lib/mapextended.d.ts": {
@@ -1028,7 +1028,7 @@
       },
       "../src/lib/tobackend/remoteapicaller/core.ts": {
         "version": "17ee4bec5144e2c3c883e045a9c35c40c398dd42fa0977f10e302df8a1238640",
-        "signature": "0aa41def2ab0ad3776a180ad6b221c042e06e54965de0a49e784a2cfb1ef2bc0",
+        "signature": "97cd8f064dddf6a2e5ab06848e93c682695c9b964109b380049b34e2d795ff4c",
         "affectsGlobalScope": false
       },
       "../src/lib/nativemodules/hostcryptolib.ts": {
@@ -1048,7 +1048,7 @@
       },
       "../src/lib/tobackend/remoteapicaller/index.ts": {
         "version": "d1851a21538ad5f989e4f9aaa7bc1e23119aa29318efa8f53bcc9ccb4ce74070",
-        "signature": "3b694fc179cc744f06099652de6fa1933e8ccbd79df90327a21f7dd6bbceaf06",
+        "signature": "8723c6bcc3109ca76b973ec279be62ce4235f228aa2216c0e615d58e62038e9a",
         "affectsGlobalScope": false
       },
       "../src/lib/types/accountmanagementapi.ts": {
@@ -2771,7 +2771,8 @@
         "../node_modules/chan-dongle-extended-client/dist/lib/types.d.ts",
         "../src/lib/restartapp/index.ts",
         "../src/lib/tobackend/remoteapicaller/getsendrequest.ts",
-        "../src/lib/types/index.ts"
+        "../src/lib/types/index.ts",
+        "../src/sip_api_declarations/backendtoua.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/getsendrequest.ts": [
         "../src/lib/restartapp/index.ts",
@@ -2786,7 +2787,8 @@
         "../src/lib/tobackend/remoteapicaller/core.ts",
         "../src/lib/tobackend/remoteapicaller/webphonedata.ts",
         "../src/lib/types/index.ts",
-        "../src/lib/types/webphonedata.ts"
+        "../src/lib/types/webphonedata.ts",
+        "../src/sip_api_declarations/backendtoua.ts"
       ],
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": [
         "../node_modules/evt/lib/index.d.ts",

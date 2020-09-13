@@ -233,35 +233,21 @@ export function uiQuickActionDependencyInjection(
                 evtIsSipRegistered.evtChange
             );
 
-            types.Webphone.useEffectCanCall(
-                canCall => this.structure.find(".id_call").prop("disabled", !canCall),
-                {
-                    "evtWebphone": Evt.create<types.Webphone.useEffectCanCall.WebphoneLike>({
-                        userSim,
-                        userSimEvts,
-                        evtIsSipRegistered
-                    }),
-                    "evtPhoneNumberRaw": evtPhoneNumber
-                }
-            );
-
-
-            /*
             Evt.useEffect(
-                () => this.structure.find(".id_call").prop("disabled", (
-                    !evtIsSipRegistered.state ||
-                    !userSim.reachableSimState ||
-                    !userSim.reachableSimState.isGsmConnectivityOk ||
-                    !!userSim.reachableSimState.ongoingCall
-                )),
+                () => this.structure.find(".id_call").prop(
+                    "disabled",
+                    !types.Webphone.canCall.getValue({
+                        "webphone": { userSim, evtIsSipRegistered },
+                        "phoneNumber": evtPhoneNumber.state
+                    })
+                ),
                 Evt.merge([
-                    evtIsSipRegistered.evtChange,
-                    userSimEvts.evtReachabilityStatusChange,
-                    userSimEvts.evtCellularConnectivityChange,
-                    userSimEvts.evtOngoingCall
+                    ...types.Webphone.canCall.getAffectedByEvts({
+                        "webphone": { evtIsSipRegistered, userSimEvts }
+                    }),
+                    evtPhoneNumber.evtChange
                 ])
             );
-            */
 
         }
     }

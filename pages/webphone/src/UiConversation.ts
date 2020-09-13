@@ -116,16 +116,19 @@ export class UiConversation {
                 userSimEvts.evtReachabilityStatusChange
             );
 
-            types.Webphone.useEffectCanCall(
-                canCall => this.btnCall.prop("disabled", !canCall),
-                {
-                    "evtWebphone": Evt.create<types.Webphone.useEffectCanCall.WebphoneLike>({
-                        userSim,
-                        userSimEvts,
-                        evtIsSipRegistered
-                    }),
-                    "evtPhoneNumberRaw": Evt.create(this.params.wdChat.contactNumber)
-                }
+            Evt.useEffect(
+                () => this.btnCall.prop(
+                    "disabled",
+                    !types.Webphone.canCall.getValue({
+                        "webphone": { userSim, evtIsSipRegistered },
+                        "phoneNumber": this.params.wdChat.contactNumber
+                    })
+                ),
+                Evt.merge(
+                    types.Webphone.canCall.getAffectedByEvts({
+                        "webphone": { evtIsSipRegistered, userSimEvts }
+                    })
+                )
             );
 
         }
