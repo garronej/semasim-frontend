@@ -1,6 +1,6 @@
 
 import { Evt, VoidEvt, NonPostableEvt } from "frontend-shared/node_modules/evt";
-import { id } from "frontend-shared/node_modules/evt/dist/tools/typeSafety/id";
+import { id } from "frontend-shared/node_modules/evt/tools/typeSafety/id";
 
 const log: typeof console.log = true ?
     ((...args: any[]) => console.log(...["[lib/nativeModules/hostPhoneCallUi]", ...args])) :

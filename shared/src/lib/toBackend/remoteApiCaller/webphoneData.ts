@@ -13,7 +13,6 @@ import * as types from "../../types";
 
 const hash: (str: string) => string = md5;
 
-
 type RequestProcessedByBackend = UnpackEvt<types.RemoteNotifyEvts["evtWdActionFromOtherUa"]>;
 
 //NOTE: Understand Pick<import("../../types/AppEvts").AppEvts, "evtWdActionFromOtherUa">, modified for tests.

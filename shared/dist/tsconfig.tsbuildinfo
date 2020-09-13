@@ -1042,7 +1042,7 @@
         "affectsGlobalScope": false
       },
       "../src/lib/tobackend/remoteapicaller/webphonedata.ts": {
-        "version": "7e0d79d2f3da3e22ef2b7817941fee68d3416073e909ab25bcd6cd5ac8fd749f",
+        "version": "8dcc4e4a086c6d65dc9012a6d1fc679fedb3bcdcc8ee505ad7c2b186ddd089db",
         "signature": "b88df5937d16b8194ef5f893f35e9242b19ecfab425fcce3117c757467a70416",
         "affectsGlobalScope": false
       },
@@ -1381,6 +1381,8 @@
         "bootstrap",
         "jquery"
       ],
+      "project": "../tsconfig.json",
+      "watch": true,
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
